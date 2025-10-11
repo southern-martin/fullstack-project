@@ -152,3 +152,4 @@ docker-compose logs auth-redis
 
 
 
+

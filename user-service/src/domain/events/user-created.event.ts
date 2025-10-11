@@ -11,3 +11,4 @@ export class UserCreatedEvent extends DomainEvent {
 
 
 
+

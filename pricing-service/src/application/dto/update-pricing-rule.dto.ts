@@ -8,3 +8,4 @@ export class UpdatePricingRuleDto extends PartialType(CreatePricingRuleDto) {
 
 
 
+
