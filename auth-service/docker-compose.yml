@@ -1,0 +1,83 @@
+name: southern-martin-auth
+
+services:
+  # MySQL Database
+  auth-db:
+    build:
+      context: ./docker/mysql
+      dockerfile: Dockerfile
+    container_name: southern-martin-auth-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: auth_root_password
+      MYSQL_DATABASE: auth_service_db
+      MYSQL_USER: auth_user
+      MYSQL_PASSWORD: auth_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - southern-martin_auth_db_data:/var/lib/mysql
+    networks:
+      - southern-martin-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pauth_root_password"]
+      timeout: 20s
+      retries: 10
+
+  # Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: southern-martin-auth-app
+    restart: unless-stopped
+    environment:
+      # Database Configuration
+      DB_HOST: auth-db
+      DB_PORT: 3306
+      DB_USERNAME: auth_user
+      DB_PASSWORD: auth_password
+      DB_NAME: auth_service_db
+      
+      # JWT Configuration
+      JWT_SECRET: your-super-secret-jwt-key-for-auth-service-change-this-in-production
+      JWT_EXPIRES_IN: 24h
+      
+      # Service Configuration
+      PORT: 3001
+      NODE_ENV: development
+      FRONTEND_URL: http://localhost:3000
+      
+      # Shared Redis Configuration
+      REDIS_HOST: shared-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: shared_redis_password_2024
+      REDIS_KEY_PREFIX: auth
+    ports:
+      - "3001:3001"
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    networks:
+      - southern-martin-network
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/v1/auth/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Note: Using shared Redis service instead of individual Redis
+  # See ../shared-redis/ for the shared Redis configuration
+
+volumes:
+  southern-martin_auth_db_data:
+    driver: local
+
+networks:
+  southern-martin-network:
+    driver: bridge
+  shared-services-network:
+    external: true
+    name: southern-martin-shared-services-network

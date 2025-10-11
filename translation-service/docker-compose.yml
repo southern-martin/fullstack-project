@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # Translation Service Database
+  translation-service-db:
+    image: mysql:8.0
+    container_name: southern-martin-translation-service-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-translation_root_password}
+      MYSQL_DATABASE: ${DB_NAME:-translation_service_db}
+      MYSQL_USER: ${DB_USERNAME:-translation_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-translation_password}
+    ports:
+      - "${DB_PORT:-3312}:3306"
+    volumes:
+      - translation_service_db_data:/var/lib/mysql
+    networks:
+      - translation-service-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-translation_root_password}"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
+
+  # Translation Service Application
+  translation-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: southern-martin-translation-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${PORT:-3007}
+      DB_HOST: translation-service-db
+      DB_PORT: 3306
+      DB_USERNAME: ${DB_USERNAME:-translation_user}
+      DB_PASSWORD: ${DB_PASSWORD:-translation_password}
+      DB_NAME: ${DB_NAME:-translation_service_db}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      
+      # Shared Redis Configuration
+      REDIS_HOST: shared-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: shared_redis_password_2024
+      REDIS_KEY_PREFIX: translation
+      
+      # Translation Service Configuration
+      DEFAULT_LANGUAGE: ${DEFAULT_LANGUAGE:-en}
+      FALLBACK_LANGUAGE: ${FALLBACK_LANGUAGE:-en}
+    ports:
+      - "${PORT:-3007}:3007"
+    depends_on:
+      translation-service-db:
+        condition: service_healthy
+    networks:
+      - translation-service-network
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3007/api/v1/health"]
+      timeout: 10s
+      retries: 3
+      interval: 30s
+      start_period: 40s
+
+  # Note: Using shared Redis service instead of individual Redis
+  # See ../shared-redis/ for the shared Redis configuration
+
+volumes:
+  translation_service_db_data:
+    driver: local
+
+networks:
+  translation-service-network:
+    driver: bridge
+    name: southern-martin-translation-service-network
+  shared-services-network:
+    external: true
+    name: southern-martin-shared-services-network
+

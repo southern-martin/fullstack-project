@@ -1,0 +1,36 @@
+version: '3.8'
+
+name: shared-user-database
+
+services:
+  # Shared MySQL Database for Auth and User Services
+  shared-user-db:
+    image: mysql:8.0
+    container_name: shared-user-database
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: shared_root_password_2024
+      MYSQL_DATABASE: shared_user_db
+      MYSQL_USER: shared_user
+      MYSQL_PASSWORD: shared_password_2024
+    ports:
+      - "3306:3306"  # Standard MySQL port
+    volumes:
+      - shared_user_db_data:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d  # For initialization scripts
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pshared_root_password_2024"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
+
+volumes:
+  shared_user_db_data:
+    driver: local
+
+networks:
+  shared-services-network:
+    driver: bridge

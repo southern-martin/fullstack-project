@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # Shared Redis Service
+  shared-redis:
+    image: redis:7-alpine
+    container_name: southern-martin-shared-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - shared_redis_data:/data
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 3s
+      retries: 5
+      interval: 10s
+      start_period: 30s
+    command: redis-server --requirepass shared_redis_password_2024
+
+  # Redis Commander removed due to ARM64 compatibility issues
+  # Use Redis CLI for monitoring: docker exec -it southern-martin-shared-redis redis-cli -a shared_redis_password_2024
+
+volumes:
+  shared_redis_data:
+    driver: local
+
+networks:
+  shared-services-network:
+    driver: bridge
+    name: southern-martin-shared-services-network

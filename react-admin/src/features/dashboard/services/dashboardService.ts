@@ -1,0 +1,135 @@
+import { User } from "../../../shared/types";
+import { carrierApiService } from "../../carriers/services/carrierApiService";
+import { customerApiService } from "../../customers/services/customerApiService";
+import { userApiService } from "../../users/services/userApiService";
+
+export interface DashboardStats {
+  totalUsers: number;
+  totalCustomers: number;
+  totalCarriers: number;
+  activeUsers: number;
+  recentUsers: User[];
+  systemHealth: {
+    status: "healthy" | "warning" | "error";
+    uptime: string;
+    lastCheck: string;
+  };
+}
+
+class DashboardService {
+  async getDashboardStats(): Promise<DashboardStats> {
+    try {
+      console.log("DashboardService: Starting to fetch dashboard stats...");
+
+      // Fetch data from multiple services in parallel with error handling
+      const [
+        usersResponse,
+        customersResponse,
+        carriersResponse,
+        activeUsersResponse,
+      ] = await Promise.allSettled([
+        userApiService.getUsers({ page: 1, limit: 1 }),
+        customerApiService.getCustomers({ page: 1, limit: 1 }),
+        carrierApiService.getCarriers({ page: 1, limit: 1 }),
+        userApiService.getActiveUsers(),
+      ]);
+
+      console.log("DashboardService: API responses received:", {
+        users: usersResponse,
+        customers: customersResponse,
+        carriers: carriersResponse,
+        activeUsers: activeUsersResponse,
+      });
+
+      // Extract data from settled promises
+      const usersData =
+        usersResponse.status === "fulfilled"
+          ? usersResponse.value
+          : { total: 0 };
+      const customersData =
+        customersResponse.status === "fulfilled"
+          ? customersResponse.value
+          : { total: 0 };
+      const carriersData =
+        carriersResponse.status === "fulfilled"
+          ? carriersResponse.value
+          : { total: 0 };
+      const activeUsersData =
+        activeUsersResponse.status === "fulfilled"
+          ? activeUsersResponse.value
+          : [];
+
+      // Get recent users with error handling
+      let recentUsersData: User[] = [];
+      try {
+        const recentUsersResponse = await userApiService.getUsers({
+          page: 1,
+          limit: 5,
+          sortBy: "createdAt",
+          sortOrder: "desc",
+        });
+        recentUsersData = recentUsersResponse.data || [];
+      } catch (error) {
+        console.warn("Failed to fetch recent users:", error);
+        recentUsersData = [];
+      }
+
+      return {
+        totalUsers: usersData.total || 0,
+        totalCustomers: customersData.total || 0,
+        totalCarriers: carriersData.total || 0,
+        activeUsers: Array.isArray(activeUsersData)
+          ? activeUsersData.length
+          : 0,
+        recentUsers: recentUsersData,
+        systemHealth: {
+          status: "healthy",
+          uptime: this.calculateUptime(),
+          lastCheck: new Date().toISOString(),
+        },
+      };
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+      // Return default stats in case of error
+      return {
+        totalUsers: 0,
+        totalCustomers: 0,
+        totalCarriers: 0,
+        activeUsers: 0,
+        recentUsers: [],
+        systemHealth: {
+          status: "error",
+          uptime: "0h 0m",
+          lastCheck: new Date().toISOString(),
+        },
+      };
+    }
+  }
+
+  private calculateUptime(): string {
+    // This is a mock calculation - in a real app, you'd track actual uptime
+    const startTime = new Date("2024-01-01T00:00:00Z");
+    const now = new Date();
+    const diffMs = now.getTime() - startTime.getTime();
+
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const hours = Math.floor(
+      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    );
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (days > 0) {
+      return `${days}d ${hours}h ${minutes}m`;
+    } else if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    } else {
+      return `${minutes}m`;
+    }
+  }
+}
+
+export const dashboardService = new DashboardService();
+
+
+
+
