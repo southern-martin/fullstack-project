@@ -9,3 +9,6 @@ echo "📋 Viewing Auth Service logs..."
 docker-compose logs -f
 
 
+
+
+

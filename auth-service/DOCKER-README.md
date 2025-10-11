@@ -304,3 +304,6 @@ npm run docker:start
 **The Auth Service is now fully containerized and ready for production deployment!** 🚀
 
 
+
+
+

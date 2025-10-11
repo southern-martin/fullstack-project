@@ -34,3 +34,6 @@ volumes:
 networks:
   shared-services-network:
     driver: bridge
+
+
+

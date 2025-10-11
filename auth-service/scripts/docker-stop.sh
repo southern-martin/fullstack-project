@@ -17,3 +17,6 @@ echo "🧹 To remove images:"
 echo "   docker-compose down --rmi all"
 
 
+
+
+

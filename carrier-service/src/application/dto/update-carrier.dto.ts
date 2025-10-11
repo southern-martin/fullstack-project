@@ -5,3 +5,6 @@ export class UpdateCarrierDto extends PartialType(CreateCarrierDto) {
   // All properties from CreateCarrierDto are now optional
 }
 
+
+
+

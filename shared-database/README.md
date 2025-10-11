@@ -103,3 +103,6 @@ DB_DATABASE=shared_user_db
 1. Make sure the database is fully started (wait for health check)
 2. Check if port 3306 is available
 3. Restart the services after database is ready
+
+
+

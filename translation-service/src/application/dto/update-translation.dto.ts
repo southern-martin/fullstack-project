@@ -5,3 +5,6 @@ export class UpdateTranslationDto extends PartialType(CreateTranslationDto) {
   // All properties from CreateTranslationDto are now optional
 }
 
+
+
+

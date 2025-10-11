@@ -21,3 +21,6 @@ echo "🛑 To stop the service:"
 echo "   docker-compose down"
 
 
+
+
+

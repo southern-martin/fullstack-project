@@ -5,3 +5,6 @@ export class UpdatePricingRuleDto extends PartialType(CreatePricingRuleDto) {
   // All properties from CreatePricingRuleDto are now optional
 }
 
+
+
+

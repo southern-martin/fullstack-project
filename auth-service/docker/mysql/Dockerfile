@@ -7,3 +7,6 @@ COPY init/01-init-database.sql /docker-entrypoint-initdb.d/
 COPY conf/mysql.cnf /etc/mysql/conf.d/
 
 
+
+
+
