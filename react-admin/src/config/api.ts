@@ -11,7 +11,7 @@ export const AUTH_API_CONFIG = {
 
 export const USER_API_CONFIG = {
   BASE_URL:
-    (process.env.REACT_APP_USER_API_URL || 'http://localhost:3003') + '/api/v1',
+    (process.env.REACT_APP_USER_API_URL || 'http://localhost:3001') + '/api/v1',
   HEADERS: {
     'Content-Type': 'application/json',
     'Accept-Language': 'en',
@@ -21,7 +21,7 @@ export const USER_API_CONFIG = {
 
 export const CUSTOMER_API_CONFIG = {
   BASE_URL:
-    (process.env.REACT_APP_CUSTOMER_API_URL || 'http://localhost:3004') +
+    (process.env.REACT_APP_CUSTOMER_API_URL || 'http://localhost:3001') +
     '/api/v1',
   HEADERS: {
     'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ export const CUSTOMER_API_CONFIG = {
 
 export const CARRIER_API_CONFIG = {
   BASE_URL:
-    (process.env.REACT_APP_CARRIER_API_URL || 'http://localhost:3005') +
+    (process.env.REACT_APP_CARRIER_API_URL || 'http://localhost:3001') +
     '/api/v1',
   HEADERS: {
     'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ export const CARRIER_API_CONFIG = {
 
 export const PRICING_API_CONFIG = {
   BASE_URL:
-    (process.env.REACT_APP_PRICING_API_URL || 'http://localhost:3006') +
+    (process.env.REACT_APP_PRICING_API_URL || 'http://localhost:3001') +
     '/api/v1',
   HEADERS: {
     'Content-Type': 'application/json',
@@ -54,7 +54,7 @@ export const PRICING_API_CONFIG = {
 
 export const TRANSLATION_API_CONFIG = {
   BASE_URL:
-    (process.env.REACT_APP_TRANSLATION_API_URL || 'http://localhost:3007') +
+    (process.env.REACT_APP_TRANSLATION_API_URL || 'http://localhost:3001') +
     '/api/v1',
   HEADERS: {
     'Content-Type': 'application/json',
