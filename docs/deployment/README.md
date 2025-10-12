@@ -1,377 +1,536 @@
-# Deployment Documentation
+# 🚀 Deployment Guide
 
-## 🚀 Deployment and Build Instructions
+This guide covers deployment strategies for the fullstack microservices application, from development to production environments.
 
-This directory contains documentation for building, deploying, and managing the fullstack ecommerce project in various environments.
+## 🎯 **Deployment Overview**
 
-## 📋 Documents
+### **Deployment Environments**
+- **Development** - Local development with Docker Compose
+- **Staging** - Pre-production testing environment
+- **Production** - Live production environment
 
-### Build and Deployment
-- **[Build README](BUILD-README.md)** - Comprehensive build and deployment guide
-- **[Build Instructions](README-BUILD.md)** - Step-by-step build instructions
+### **Deployment Architecture**
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Development   │    │     Staging     │    │   Production    │
+│   Docker Compose│    │   Docker Swarm  │    │   Kubernetes    │
+│   Local DB      │    │   Shared DB     │    │   Managed DB    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
 
-## 🎯 Deployment Overview
+## 🛠️ **Development Deployment**
 
-### Project Structure
-- **NestJS API**: Backend API server
-- **React Admin**: Frontend admin application
-- **Go API**: Secondary backend service (if applicable)
-- **MySQL Database**: Primary data storage
-- **Translation System**: Multi-language support
+### **Prerequisites**
+- Docker Desktop
+- Node.js 18+
+- npm or yarn
+- Git
 
-### Deployment Environments
-- **Development**: Local development environment
-- **Staging**: Pre-production testing environment
-- **Production**: Live production environment
-- **Docker**: Containerized deployment option
-
-## 🏗️ Build Process
-
-### Backend Build (NestJS)
+### **Quick Start**
 ```bash
-# Install dependencies
+# 1. Clone repository
+git clone <repository-url>
+cd fullstack-project
+
+# 2. Start shared database
+cd shared-database
+docker-compose up -d
+
+# 3. Configure services
+cp auth-service/.env.shared.example auth-service/.env
+cp user-service/.env.shared.example user-service/.env
+
+# 4. Start all services
+docker-compose -f docker-compose.services.yml up -d
+```
+
+### **Individual Service Setup**
+```bash
+# Auth Service
+cd auth-service
 npm install
+npm run start:dev
 
-# Build TypeScript
-npm run build
-
-# Run database migrations
-npm run migration:run
-
-# Start production server
-npm run start:prod
-```
-
-### Frontend Build (React)
-```bash
-# Install dependencies
+# User Service
+cd user-service
 npm install
+npm run start:dev
 
-# Build for production
-npm run build
-
-# Serve static files
-npm run serve
+# React Admin
+cd react-admin
+npm install
+npm start
 ```
 
-### Go API Build (if applicable)
-```bash
-# Build Go application
-go build -o main
+### **Development URLs**
+- **React Admin**: http://localhost:3000
+- **Auth Service**: http://localhost:3001
+- **User Service**: http://localhost:3003
+- **Database**: localhost:3306
 
-# Run application
-./main
-```
+## 🐳 **Docker Deployment**
 
-## 🐳 Docker Deployment
-
-### Docker Compose Setup
+### **Docker Compose Services**
 ```yaml
+# shared-database/docker-compose.services.yml
 version: '3.8'
 services:
-  mysql:
+  shared-user-db:
     image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: ecommerce
     ports:
       - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: shared_root_password_2024
+      MYSQL_DATABASE: shared_user_db
+      MYSQL_USER: shared_user
+      MYSQL_PASSWORD: shared_password_2024
 
-  nestjs-api:
-    build: ./nestjs-app-api
+  auth-service:
+    build: ../auth-service
     ports:
       - "3001:3001"
+    depends_on:
+      - shared-user-db
     environment:
-      - DATABASE_HOST=mysql
-      - DATABASE_PORT=3306
-    depends_on:
-      - mysql
+      DB_HOST: shared-user-db
+      DB_PORT: 3306
+      DB_USERNAME: shared_user
+      DB_PASSWORD: shared_password_2024
+      DB_NAME: shared_user_db
 
-  react-admin:
-    build: ./react-admin
+  user-service:
+    build: ../user-service
     ports:
-      - "3000:3000"
+      - "3003:3003"
     depends_on:
-      - nestjs-api
+      - shared-user-db
+    environment:
+      DB_HOST: shared-user-db
+      DB_PORT: 3306
+      DB_USERNAME: shared_user
+      DB_PASSWORD: shared_password_2024
+      DB_DATABASE: shared_user_db
+```
+
+### **Build and Deploy**
+```bash
+# Build all services
+docker-compose -f shared-database/docker-compose.services.yml build
+
+# Start all services
+docker-compose -f shared-database/docker-compose.services.yml up -d
+
+# View logs
+docker-compose -f shared-database/docker-compose.services.yml logs -f
+
+# Stop services
+docker-compose -f shared-database/docker-compose.services.yml down
+```
+
+### **Docker Commands**
+```bash
+# Build specific service
+docker build -t auth-service ./auth-service
+
+# Run specific service
+docker run -p 3001:3001 auth-service
+
+# View running containers
+docker ps
+
+# View container logs
+docker logs <container-id>
+
+# Execute commands in container
+docker exec -it <container-id> /bin/bash
+```
+
+## 🌐 **Production Deployment**
+
+### **Production Architecture**
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Load Balancer │    │   API Gateway   │    │   Microservices │
+│   Nginx         │    │   Kong/Traefik  │    │   Docker Swarm  │
+│   SSL/TLS       │    │   Rate Limiting │    │   Health Checks │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │
+                                ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Database      │    │   Cache         │    │   Monitoring    │
+│   MySQL Cluster │    │   Redis Cluster │    │   Prometheus    │
+│   Master/Slave  │    │   Session Store │    │   Grafana       │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+### **Production Environment Setup**
+
+#### **1. Server Requirements**
+- **CPU**: 4+ cores
+- **RAM**: 8GB+ 
+- **Storage**: 100GB+ SSD
+- **OS**: Ubuntu 20.04+ or CentOS 8+
+
+#### **2. Install Dependencies**
+```bash
+# Update system
+sudo apt update && sudo apt upgrade -y
+
+# Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
+
+# Install Docker Compose
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+# Install Nginx
+sudo apt install nginx -y
+```
+
+#### **3. Configure Nginx**
+```nginx
+# /etc/nginx/sites-available/fullstack-app
+upstream auth_service {
+    server localhost:3001;
+}
+
+upstream user_service {
+    server localhost:3003;
+}
+
+upstream react_admin {
+    server localhost:3000;
+}
+
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    # React Admin
+    location / {
+        proxy_pass http://react_admin;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Auth Service
+    location /api/v1/auth/ {
+        proxy_pass http://auth_service;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # User Service
+    location /api/v1/users/ {
+        proxy_pass http://user_service;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+#### **4. SSL Configuration**
+```bash
+# Install Certbot
+sudo apt install certbot python3-certbot-nginx -y
+
+# Get SSL certificate
+sudo certbot --nginx -d your-domain.com
+
+# Auto-renewal
+sudo crontab -e
+# Add: 0 12 * * * /usr/bin/certbot renew --quiet
+```
+
+#### **5. Environment Configuration**
+```bash
+# Create production environment files
+cp auth-service/.env.shared.example auth-service/.env.production
+cp user-service/.env.shared.example user-service/.env.production
+
+# Update production values
+nano auth-service/.env.production
+nano user-service/.env.production
+```
+
+#### **6. Production Docker Compose**
+```yaml
+# docker-compose.prod.yml
+version: '3.8'
+services:
+  shared-user-db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  auth-service:
+    build: ./auth-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DB_HOST: shared-user-db
+      DB_PORT: 3306
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      - shared-user-db
+    networks:
+      - app-network
+
+  user-service:
+    build: ./user-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DB_HOST: shared-user-db
+      DB_PORT: 3306
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_NAME}
+    depends_on:
+      - shared-user-db
+    networks:
+      - app-network
 
 volumes:
   mysql_data:
+
+networks:
+  app-network:
+    driver: bridge
 ```
 
-### Docker Commands
+#### **7. Deploy to Production**
 ```bash
-# Build and start all services
-docker-compose up --build
+# Set environment variables
+export DB_ROOT_PASSWORD="your-secure-password"
+export DB_NAME="shared_user_db"
+export DB_USERNAME="shared_user"
+export DB_PASSWORD="your-secure-password"
+export JWT_SECRET="your-jwt-secret"
 
-# Start in background
-docker-compose up -d
+# Deploy
+docker-compose -f docker-compose.prod.yml up -d
 
-# Stop all services
-docker-compose down
+# Check status
+docker-compose -f docker-compose.prod.yml ps
 
 # View logs
-docker-compose logs -f
+docker-compose -f docker-compose.prod.yml logs -f
 ```
 
-## 🌐 Environment Configuration
+## 🔄 **CI/CD Pipeline**
 
-### Environment Variables
+### **GitHub Actions Workflow**
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy to Production
 
-#### NestJS API (.env)
-```env
-# Database Configuration
-DATABASE_HOST=localhost
-DATABASE_PORT=3306
-DATABASE_USERNAME=root
-DATABASE_PASSWORD=password
-DATABASE_NAME=ecommerce
+on:
+  push:
+    branches: [main]
 
-# JWT Configuration
-JWT_SECRET=your-secret-key
-JWT_EXPIRES_IN=24h
-
-# Server Configuration
-PORT=3001
-NODE_ENV=production
-
-# CORS Configuration
-FRONTEND_URL=http://localhost:3000
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    
+    - name: Build and push images
+      run: |
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/auth-service:latest ./auth-service
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/user-service:latest ./user-service
+        docker push ${{ secrets.DOCKER_USERNAME }}/auth-service:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/user-service:latest
+    
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          cd /opt/fullstack-project
+          docker-compose -f docker-compose.prod.yml pull
+          docker-compose -f docker-compose.prod.yml up -d
 ```
 
-#### React Admin (.env)
-```env
-# API Configuration
-REACT_APP_API_URL=http://localhost:3001
-REACT_APP_API_VERSION=v1
+## 📊 **Monitoring and Health Checks**
 
-# Environment
-NODE_ENV=production
-```
-
-### Environment-Specific Configurations
-
-#### Development
-- **Database**: Local MySQL instance
-- **API URL**: http://localhost:3001
-- **Frontend URL**: http://localhost:3000
-- **Debug Mode**: Enabled
-- **Hot Reload**: Enabled
-
-#### Staging
-- **Database**: Staging MySQL instance
-- **API URL**: https://api-staging.example.com
-- **Frontend URL**: https://admin-staging.example.com
-- **Debug Mode**: Limited
-- **Monitoring**: Enabled
-
-#### Production
-- **Database**: Production MySQL cluster
-- **API URL**: https://api.example.com
-- **Frontend URL**: https://admin.example.com
-- **Debug Mode**: Disabled
-- **Monitoring**: Full monitoring
-- **SSL**: Required
-
-## 🗄️ Database Deployment
-
-### Migration Strategy
+### **Health Check Endpoints**
 ```bash
-# Run migrations
-npm run migration:run
+# Check service health
+curl http://localhost:3001/api/v1/auth/health
+curl http://localhost:3003/health
 
-# Rollback migrations
-npm run migration:revert
-
-# Generate new migration
-npm run migration:generate -- -n MigrationName
-
-# Check migration status
-npm run migration:show
-```
-
-### Database Setup
-```sql
--- Create database
-CREATE DATABASE ecommerce CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- Create user
-CREATE USER 'ecommerce_user'@'%' IDENTIFIED BY 'secure_password';
-GRANT ALL PRIVILEGES ON ecommerce.* TO 'ecommerce_user'@'%';
-FLUSH PRIVILEGES;
-```
-
-### Seed Data
-```bash
-# Run seed data
-npm run seed
-
-# Run seed for development
-npm run seed:dev
-```
-
-## 🔧 Build Scripts
-
-### Package.json Scripts
-
-#### Backend (NestJS)
-```json
-{
-  "scripts": {
-    "build": "nest build",
-    "start": "nest start",
-    "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
-    "migration:run": "typeorm migration:run",
-    "migration:revert": "typeorm migration:revert",
-    "migration:generate": "typeorm migration:generate",
-    "seed": "ts-node src/seed-data.ts"
-  }
-}
-```
-
-#### Frontend (React)
-```json
-{
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "serve": "serve -s build -l 3000"
-  }
-}
-```
-
-## 🚀 Deployment Strategies
-
-### Manual Deployment
-1. **Build Applications**: Build both frontend and backend
-2. **Database Setup**: Run migrations and seed data
-3. **File Upload**: Upload built files to server
-4. **Service Start**: Start application services
-5. **Health Check**: Verify deployment success
-
-### Automated Deployment
-1. **CI/CD Pipeline**: Automated build and test
-2. **Artifact Creation**: Create deployment artifacts
-3. **Environment Deployment**: Deploy to target environment
-4. **Health Monitoring**: Monitor deployment health
-5. **Rollback Capability**: Automatic rollback on failure
-
-### Blue-Green Deployment
-1. **Green Environment**: Current production environment
-2. **Blue Environment**: New deployment environment
-3. **Traffic Switch**: Switch traffic to blue environment
-4. **Verification**: Verify new deployment
-5. **Cleanup**: Clean up old green environment
-
-## 📊 Monitoring and Health Checks
-
-### Health Check Endpoints
-```typescript
-// Backend health check
-GET /api/health
-
-// Response
+# Expected response
 {
   "status": "ok",
   "timestamp": "2024-01-01T00:00:00.000Z",
   "uptime": 3600,
-  "database": "connected",
-  "version": "1.0.0"
+  "database": "connected"
 }
 ```
 
-### Monitoring Metrics
-- **Response Time**: API response times
-- **Error Rate**: Error percentage
-- **Throughput**: Requests per second
-- **Resource Usage**: CPU, memory, disk usage
-- **Database Performance**: Query performance
+### **Monitoring Setup**
+```yaml
+# docker-compose.monitoring.yml
+version: '3.8'
+services:
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
 
-### Logging
-- **Application Logs**: Application-level logging
-- **Access Logs**: HTTP request logging
-- **Error Logs**: Error and exception logging
-- **Performance Logs**: Performance metrics logging
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
 
-## 🔒 Security Considerations
-
-### Production Security
-- **HTTPS**: SSL/TLS encryption
-- **Firewall**: Network security
-- **Authentication**: Secure authentication
-- **Authorization**: Role-based access control
-- **Input Validation**: Input sanitization
-
-### Environment Security
-- **Environment Variables**: Secure configuration
-- **Database Security**: Database access control
-- **API Security**: API endpoint protection
-- **CORS Configuration**: Cross-origin security
-
-## 📈 Performance Optimization
-
-### Backend Optimization
-- **Database Indexing**: Optimize database queries
-- **Caching**: Implement Redis caching
-- **Connection Pooling**: Database connection optimization
-- **Compression**: Response compression
-
-### Frontend Optimization
-- **Bundle Optimization**: Minimize bundle size
-- **CDN**: Content delivery network
-- **Caching**: Browser caching strategies
-- **Image Optimization**: Optimize images and assets
-
-## 🔄 Backup and Recovery
-
-### Database Backup
-```bash
-# Create backup
-mysqldump -u username -p ecommerce > backup.sql
-
-# Restore backup
-mysql -u username -p ecommerce < backup.sql
+volumes:
+  grafana_data:
 ```
 
-### Application Backup
-- **Code Repository**: Git repository backup
-- **Configuration**: Environment configuration backup
-- **Assets**: Static asset backup
-- **Logs**: Log file backup
+## 🔧 **Troubleshooting**
 
-### Recovery Procedures
-1. **Database Recovery**: Restore from backup
-2. **Application Recovery**: Redeploy application
-3. **Data Recovery**: Restore user data
-4. **Service Recovery**: Restart services
+### **Common Issues**
 
-## 📞 Support and Troubleshooting
+#### **Database Connection Issues**
+```bash
+# Check database status
+docker-compose logs shared-user-db
 
-### Common Issues
-- **Build Failures**: Check dependencies and configuration
-- **Database Connection**: Verify database credentials
-- **Port Conflicts**: Check port availability
-- **Memory Issues**: Monitor memory usage
+# Test database connection
+docker exec -it <db-container> mysql -u shared_user -p shared_user_db
 
-### Debugging
-- **Log Analysis**: Analyze application logs
-- **Performance Profiling**: Profile application performance
-- **Database Queries**: Monitor database performance
-- **Network Issues**: Check network connectivity
+# Reset database
+docker-compose down -v
+docker-compose up -d
+```
 
-### Support Resources
-- **Documentation**: Comprehensive documentation
-- **Logs**: Application and system logs
-- **Monitoring**: Real-time monitoring dashboards
-- **Health Checks**: Automated health monitoring
+#### **Service Not Starting**
+```bash
+# Check service logs
+docker-compose logs auth-service
+docker-compose logs user-service
+
+# Check service status
+docker-compose ps
+
+# Restart specific service
+docker-compose restart auth-service
+```
+
+#### **Port Conflicts**
+```bash
+# Check port usage
+netstat -tulpn | grep :3001
+netstat -tulpn | grep :3306
+
+# Kill process using port
+sudo kill -9 <PID>
+```
+
+### **Performance Issues**
+```bash
+# Check resource usage
+docker stats
+
+# Check database performance
+docker exec -it <db-container> mysql -u root -p -e "SHOW PROCESSLIST;"
+
+# Monitor logs
+docker-compose logs -f --tail=100
+```
+
+## 🔒 **Security Considerations**
+
+### **Production Security Checklist**
+- [ ] Change default passwords
+- [ ] Enable SSL/TLS certificates
+- [ ] Configure firewall rules
+- [ ] Set up log monitoring
+- [ ] Enable database encryption
+- [ ] Configure backup strategy
+- [ ] Set up intrusion detection
+- [ ] Regular security updates
+
+### **Environment Variables Security**
+```bash
+# Use secrets management
+docker secret create db_password ./secrets/db_password.txt
+docker secret create jwt_secret ./secrets/jwt_secret.txt
+
+# Reference in docker-compose
+services:
+  auth-service:
+    secrets:
+      - db_password
+      - jwt_secret
+    environment:
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      JWT_SECRET_FILE: /run/secrets/jwt_secret
+```
+
+## 📋 **Deployment Checklist**
+
+### **Pre-Deployment**
+- [ ] Code review completed
+- [ ] Tests passing
+- [ ] Environment variables configured
+- [ ] Database migrations ready
+- [ ] SSL certificates obtained
+- [ ] Backup strategy in place
+
+### **Deployment**
+- [ ] Deploy to staging first
+- [ ] Run smoke tests
+- [ ] Deploy to production
+- [ ] Verify all services running
+- [ ] Check health endpoints
+- [ ] Monitor logs for errors
+
+### **Post-Deployment**
+- [ ] Verify application functionality
+- [ ] Check performance metrics
+- [ ] Monitor error rates
+- [ ] Update documentation
+- [ ] Notify stakeholders
 
 ---
 
-**Last Updated**: $(date)
-**Version**: 1.0.0
-
+**This deployment guide ensures a smooth transition from development to production with proper monitoring and security measures.**

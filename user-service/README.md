@@ -1,188 +1,459 @@
 # 👥 User Service
 
-A microservice for user and role management built with NestJS following Clean Architecture principles.
+User management microservice built with NestJS, featuring comprehensive user CRUD operations and shared database architecture.
 
-## 🏗️ Architecture
+## 🎯 **Overview**
 
-This service follows Clean Architecture with clear separation of concerns:
+The User Service handles user management, role assignments, and user profile operations. It shares the database with the Auth Service to ensure data consistency and eliminate sync issues.
 
+## 🏗️ **Architecture**
+
+### **Shared Database Integration**
+- **Database**: Shared MySQL database (`shared_user_db`)
+- **Port**: 3306 (shared with Auth Service)
+- **Tables**: `users`, `roles`, `user_roles`
+
+### **Service Configuration**
+- **Port**: 3003
+- **Framework**: NestJS with TypeScript
+- **Database**: TypeORM with MySQL
+- **Authentication**: JWT-based (from Auth Service)
+
+## 🚀 **Quick Start**
+
+### **Prerequisites**
+- Node.js 18+
+- MySQL database (shared)
+- Auth Service running (for JWT validation)
+
+### **Installation**
+```bash
+# Install dependencies
+npm install
+
+# Copy environment file
+cp .env.shared.example .env
+
+# Start in development mode
+npm run start:dev
+```
+
+### **Environment Configuration**
+```env
+# Application Configuration
+NODE_ENV=development
+PORT=3003
+
+# Database Configuration (Shared Database)
+DB_HOST=localhost
+DB_PORT=3306
+DB_USERNAME=shared_user
+DB_PASSWORD=shared_password_2024
+DB_DATABASE=shared_user_db
+DB_ROOT_PASSWORD=shared_root_password_2024
+
+# Frontend Configuration
+FRONTEND_URL=http://localhost:3000
+
+# JWT Configuration (for inter-service communication)
+JWT_SECRET=your-super-secret-jwt-key-here
+JWT_EXPIRES_IN=24h
+
+# Service Discovery
+SERVICE_REGISTRY_URL=http://localhost:3001/api/v1/services
+SERVICE_NAME=user-service
+SERVICE_VERSION=1.0.0
+```
+
+## 📡 **API Endpoints**
+
+### **User Management**
+- `GET /api/v1/users` - List users with pagination and filtering
+- `POST /api/v1/users` - Create new user
+- `GET /api/v1/users/:id` - Get user by ID
+- `PUT /api/v1/users/:id` - Update user
+- `DELETE /api/v1/users/:id` - Delete user
+
+### **Role Management**
+- `GET /api/v1/users/roles` - Get all available roles
+- `POST /api/v1/users/:id/roles` - Assign roles to user
+- `DELETE /api/v1/users/:id/roles/:roleId` - Remove role from user
+
+### **Health Check**
+- `GET /health` - Service health status
+
+### **Example Usage**
+```bash
+# Get users list
+curl -X GET http://localhost:3003/api/v1/users \
+  -H "Authorization: Bearer <jwt_token>"
+
+# Create new user
+curl -X POST http://localhost:3003/api/v1/users \
+  -H "Authorization: Bearer <jwt_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "newuser@example.com",
+    "password": "password123",
+    "firstName": "John",
+    "lastName": "Doe",
+    "roleIds": [2]
+  }'
+
+# Update user
+curl -X PUT http://localhost:3003/api/v1/users/1 \
+  -H "Authorization: Bearer <jwt_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "Updated",
+    "lastName": "Name",
+    "isActive": true
+  }'
+```
+
+## 🗄️ **Database Schema**
+
+### **Shared Database Tables**
+The User Service shares the same database schema with the Auth Service:
+
+```sql
+-- Users table (shared between Auth and User services)
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    phone VARCHAR(20),
+    is_active BOOLEAN DEFAULT TRUE,
+    is_email_verified BOOLEAN DEFAULT FALSE,
+    last_login_at TIMESTAMP NULL,
+    password_changed_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Roles table (shared between services)
+CREATE TABLE roles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL,
+    description TEXT,
+    permissions JSON,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- User-Roles junction table
+CREATE TABLE user_roles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    role_id INT NOT NULL,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    assigned_by INT,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_role (user_id, role_id)
+);
+```
+
+## 🔧 **Development**
+
+### **Available Scripts**
+```bash
+npm run start          # Start in production mode
+npm run start:dev      # Start in development mode with hot reload
+npm run build          # Build for production
+npm run test           # Run tests
+npm run test:watch     # Run tests in watch mode
+npm run lint           # Lint code
+npm run format         # Format code
+```
+
+### **Project Structure**
 ```
 src/
-├── domain/                 # Domain Layer
-│   ├── entities/          # Domain Entities (User, Role)
-│   ├── repositories/      # Repository Interfaces
-│   └── events/           # Domain Events
-├── application/           # Application Layer
-│   ├── controllers/      # REST Controllers
-│   ├── services/         # Application Services
-│   └── dto/             # Data Transfer Objects
-├── infrastructure/        # Infrastructure Layer
-│   └── repositories/     # TypeORM Repository Implementations
-└── shared/               # Shared Kernel
-    └── kernel/           # Base Classes and Utilities
+├── application/               # Application layer
+│   ├── controllers/          # API controllers
+│   │   ├── user.controller.ts
+│   │   └── role.controller.ts
+│   ├── dto/                  # Data transfer objects
+│   │   ├── create-user.dto.ts
+│   │   ├── update-user.dto.ts
+│   │   └── user-response.dto.ts
+│   └── services/             # Application services
+│       ├── user.service.ts
+│       └── role.service.ts
+├── domain/                   # Domain layer
+│   ├── entities/             # Domain entities
+│   │   ├── user.entity.ts
+│   │   └── role.entity.ts
+│   ├── events/               # Domain events
+│   │   ├── user-created.event.ts
+│   │   ├── user-updated.event.ts
+│   │   └── user-deleted.event.ts
+│   └── repositories/         # Repository interfaces
+│       ├── user.repository.interface.ts
+│       └── role.repository.interface.ts
+├── infrastructure/           # Infrastructure layer
+│   └── repositories/         # Repository implementations
+│       ├── user.repository.ts
+│       └── role.repository.ts
+├── shared/                   # Shared components
+│   └── kernel/               # Domain kernel
+│       ├── base.entity.ts
+│       ├── domain-event.ts
+│       └── result.ts
+└── main.ts                   # Application entry point
 ```
 
-## 🚀 Quick Start
+## 🔐 **Security & Authorization**
 
-### Prerequisites
+### **JWT Authentication**
+- **Token Validation**: Validates JWT tokens from Auth Service
+- **Role-Based Access**: Implements role-based access control
+- **Permission Checks**: Validates user permissions for operations
 
-- Node.js 18+
-- Docker & Docker Compose
-- MySQL 8.0+
+### **Data Validation**
+- **Input Validation**: Comprehensive input validation using class-validator
+- **SQL Injection Protection**: TypeORM provides built-in protection
+- **XSS Protection**: Input sanitization and validation
 
-### Development Setup
+### **Role-Based Operations**
+- **Admin**: Full access to all user operations
+- **User**: Limited access to own profile
+- **Editor**: Can manage users but not delete
+- **Viewer**: Read-only access
 
-1. **Clone and Install Dependencies**
-   ```bash
-   cd user-service
-   npm install
-   ```
+## 🧪 **Testing**
 
-2. **Environment Configuration**
-   ```bash
-   cp env.example .env
-   # Edit .env with your configuration
-   ```
-
-3. **Start with Docker**
-   ```bash
-   docker-compose up -d
-   ```
-
-4. **Seed Test Data**
-   ```bash
-   npm run seed:dev
-   ```
-
-### Manual Setup
-
-1. **Database Setup**
-   ```bash
-   # Create MySQL database
-   mysql -u root -p
-   CREATE DATABASE user_service_db;
-   ```
-
-2. **Start Application**
-   ```bash
-   npm run start:dev
-   ```
-
-## 📊 API Endpoints
-
-### Users
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/v1/users` | Create a new user |
-| `GET` | `/api/v1/users` | List users (paginated) |
-| `GET` | `/api/v1/users/active` | List active users |
-| `GET` | `/api/v1/users/count` | Get user count |
-| `GET` | `/api/v1/users/email/:email` | Get user by email |
-| `GET` | `/api/v1/users/role/:roleName` | Get users by role |
-| `GET` | `/api/v1/users/exists/:email` | Check if email exists |
-| `GET` | `/api/v1/users/:id` | Get user by ID |
-| `PATCH` | `/api/v1/users/:id` | Update user |
-| `PATCH` | `/api/v1/users/:id/roles` | Assign roles to user |
-| `DELETE` | `/api/v1/users/:id` | Delete user |
-
-### Roles
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/v1/roles` | Create a new role |
-| `GET` | `/api/v1/roles` | List roles (paginated) |
-| `GET` | `/api/v1/roles/active` | List active roles |
-| `GET` | `/api/v1/roles/count` | Get role count |
-| `GET` | `/api/v1/roles/permission/:permission` | Get roles by permission |
-| `GET` | `/api/v1/roles/name/:name` | Get role by name |
-| `GET` | `/api/v1/roles/exists/:name` | Check if role name exists |
-| `GET` | `/api/v1/roles/:id` | Get role by ID |
-| `PATCH` | `/api/v1/roles/:id` | Update role |
-| `DELETE` | `/api/v1/roles/:id` | Delete role |
-
-## 🧪 Testing
-
-### Test Users
-
-After seeding, you can use these test accounts:
-
-- **Admin**: `admin@example.com` / `Admin123`
-- **User**: `user@example.com` / `User123`
-- **Moderator**: `moderator@example.com` / `Moderator123`
-
-### API Testing
-
+### **Unit Tests**
 ```bash
-# Health check
-curl http://localhost:3003/api/v1/health
+# Run all tests
+npm run test
 
-# Get all users
-curl http://localhost:3003/api/v1/users
+# Run tests in watch mode
+npm run test:watch
 
-# Get user by email
-curl http://localhost:3003/api/v1/users/email/admin@example.com
+# Run tests with coverage
+npm run test:cov
 ```
 
-## 🐳 Docker Commands
-
+### **Integration Tests**
 ```bash
-# Start services
-docker-compose up -d
-
-# View logs
-docker-compose logs -f user-service
-
-# Stop services
-docker-compose down
-
-# Clean up (remove volumes)
-docker-compose down -v
+# Run e2e tests
+npm run test:e2e
 ```
 
-## 🔧 Configuration
+### **Test Data**
+Tests use a separate test database with seeded data:
+- Test users with different roles
+- Sample role configurations
+- Mock JWT tokens for testing
 
-### Environment Variables
+## 🐳 **Docker Support**
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `NODE_ENV` | `development` | Application environment |
-| `PORT` | `3003` | Application port |
-| `DB_HOST` | `localhost` | Database host |
-| `DB_PORT` | `3307` | Database port |
-| `DB_USERNAME` | `user_service_user` | Database username |
-| `DB_PASSWORD` | `user_service_password` | Database password |
-| `DB_DATABASE` | `user_service_db` | Database name |
-| `FRONTEND_URL` | `http://localhost:3000` | Frontend URL for CORS |
+### **Dockerfile**
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+EXPOSE 3003
+CMD ["npm", "run", "start:prod"]
+```
 
-## 📈 Features
+### **Docker Compose Integration**
+```yaml
+user-service:
+  build: .
+  ports:
+    - "3003:3003"
+  environment:
+    DB_HOST: shared-user-db
+    DB_PORT: 3306
+    DB_USERNAME: shared_user
+    DB_PASSWORD: shared_password_2024
+    DB_DATABASE: shared_user_db
+  depends_on:
+    - shared-user-db
+    - auth-service
+```
 
-- ✅ **Clean Architecture**: Domain-driven design with clear separation
-- ✅ **User Management**: CRUD operations with validation
-- ✅ **Role Management**: Flexible role-based access control
-- ✅ **Password Security**: Bcrypt hashing
-- ✅ **Data Validation**: Class-validator DTOs
-- ✅ **Database**: TypeORM with MySQL
-- ✅ **Docker Support**: Complete containerization
-- ✅ **Health Checks**: Built-in health monitoring
-- ✅ **CORS**: Configurable cross-origin support
+## 📊 **Monitoring & Health Checks**
 
-## 🔗 Integration
+### **Health Check Endpoint**
+```bash
+curl http://localhost:3003/health
+```
 
-This service is designed to work with:
+**Response:**
+```json
+{
+  "status": "ok",
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "uptime": 3600,
+  "database": "connected",
+  "version": "1.0.0"
+}
+```
 
-- **Auth Service**: For authentication and authorization
-- **Main API Gateway**: For routing and load balancing
-- **Frontend Applications**: React admin panel
-- **Other Microservices**: Via HTTP API calls
+### **Metrics & Logging**
+- **Request Logging**: All API requests logged with timing
+- **Error Tracking**: Comprehensive error logging and tracking
+- **Performance Metrics**: Response time and throughput monitoring
+- **Database Metrics**: Connection pool and query performance
 
-## 📝 License
+## 🔄 **Shared Database Benefits**
 
-MIT License - see LICENSE file for details.
+### **Data Consistency**
+- **Single Source of Truth**: User data exists in one place
+- **Immediate Updates**: Changes reflected instantly across services
+- **Transaction Support**: Database transactions ensure data integrity
+- **No Sync Issues**: Eliminates data synchronization problems
 
+### **Performance Benefits**
+- **No Cross-Service Calls**: Direct database access for user data
+- **Reduced Latency**: Faster response times for user operations
+- **Simplified Caching**: Single cache layer for user data
+- **Better Scalability**: Database can be optimized for user operations
 
+## 🚀 **Deployment**
 
+### **Production Configuration**
+```bash
+# Set production environment variables
+export NODE_ENV=production
+export DB_HOST=your-production-db-host
+export DB_PASSWORD=your-secure-password
+export JWT_SECRET=your-production-jwt-secret
 
+# Build and start
+npm run build
+npm run start:prod
+```
 
+### **Environment Variables**
+Ensure all production environment variables are configured:
+- Database connection details
+- JWT secret (must match Auth Service)
+- Service discovery URLs
+- External service endpoints
 
+### **Health Monitoring**
+- Monitor health check endpoint
+- Set up alerts for service downtime
+- Monitor database connection health
+- Track API response times
 
+## 🔧 **Configuration**
+
+### **Database Configuration**
+```typescript
+// TypeORM configuration
+{
+  type: 'mysql',
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT),
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
+  entities: [User, Role],
+  synchronize: process.env.NODE_ENV === 'development',
+  logging: process.env.NODE_ENV === 'development',
+  poolSize: 10,
+  acquireTimeout: 60000,
+  timeout: 60000
+}
+```
+
+### **CORS Configuration**
+```typescript
+// CORS setup for frontend integration
+{
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}
+```
+
+## 📚 **API Documentation**
+
+### **Query Parameters**
+- **Pagination**: `page`, `limit`
+- **Filtering**: `search`, `role`, `isActive`
+- **Sorting**: `sortBy`, `sortOrder`
+
+### **Response Format**
+```json
+{
+  "success": true,
+  "data": {
+    "users": [...],
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "total": 100,
+      "totalPages": 10
+    }
+  },
+  "message": "Users retrieved successfully"
+}
+```
+
+## 🆘 **Troubleshooting**
+
+### **Common Issues**
+
+#### **Database Connection Issues**
+```bash
+# Check database connectivity
+mysql -h localhost -P 3306 -u shared_user -p shared_user_db
+
+# Verify environment variables
+cat .env | grep DB_
+```
+
+#### **JWT Token Validation Issues**
+- Ensure JWT_SECRET matches Auth Service
+- Check token expiration
+- Verify token format in Authorization header
+
+#### **Service Dependencies**
+```bash
+# Check Auth Service is running
+curl http://localhost:3001/api/v1/auth/health
+
+# Verify service discovery
+curl http://localhost:3001/api/v1/services
+```
+
+#### **Performance Issues**
+```bash
+# Check database performance
+mysql -u root -p -e "SHOW PROCESSLIST;"
+
+# Monitor service metrics
+curl http://localhost:3003/health
+```
+
+## 🔄 **Integration with Auth Service**
+
+### **Shared Database Operations**
+- **User Creation**: Auth Service creates user, User Service can immediately access
+- **Role Assignment**: Changes reflected in both services instantly
+- **Profile Updates**: Single update affects both services
+- **User Deactivation**: Consistent across all services
+
+### **JWT Token Flow**
+1. User authenticates with Auth Service
+2. Auth Service generates JWT token
+3. User Service validates JWT for user operations
+4. Both services share same user data from database
+
+---
+
+**The User Service provides comprehensive user management with shared database integration for optimal performance and data consistency.**

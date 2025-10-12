@@ -1,181 +1,51 @@
-# 🏗️ Auth Service - Clean Architecture Microservice
+# 🔐 Auth Service
 
-## 📋 Overview
+Authentication and authorization microservice built with NestJS, featuring JWT-based authentication and shared database architecture.
 
-This is a **standalone authentication microservice** built with **Clean Architecture** principles, designed for **reusability**, **extensibility**, and **maintainability**.
+## 🎯 **Overview**
 
-## 🎯 Architecture Principles
+The Auth Service handles user authentication, JWT token generation, and user profile management. It shares the database with the User Service to eliminate data duplication and sync issues.
 
-### **Clean Architecture Layers**
+## 🏗️ **Architecture**
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Clean Architecture                       │
-├─────────────────────────────────────────────────────────────┤
-│ Interface Layer (Controllers)                              │
-│ ├── Controllers handle HTTP requests                       │
-│ ├── Input validation and transformation                    │
-│ └── Response formatting                                    │
-├─────────────────────────────────────────────────────────────┤
-│ Application Layer (Use Cases)                              │
-│ ├── Business use cases orchestration                       │
-│ ├── Application-specific business rules                    │
-│ └── DTOs for data transfer                                 │
-├─────────────────────────────────────────────────────────────┤
-│ Domain Layer (Business Logic)                              │
-│ ├── Entities with business rules                           │
-│ ├── Value Objects for data integrity                       │
-│ ├── Repository interfaces                                  │
-│ └── Domain services                                        │
-├─────────────────────────────────────────────────────────────┤
-│ Infrastructure Layer (External Concerns)                   │
-│ ├── Database repositories                                  │
-│ ├── External service integrations                          │
-│ └── Framework-specific implementations                     │
-└─────────────────────────────────────────────────────────────┘
-```
+### **Shared Database Integration**
+- **Database**: Shared MySQL database (`shared_user_db`)
+- **Port**: 3306 (shared with User Service)
+- **Tables**: `users`, `roles`, `user_roles`
 
-## 📁 Project Structure
+### **Service Configuration**
+- **Port**: 3001
+- **Framework**: NestJS with TypeScript
+- **Authentication**: JWT tokens
+- **Database**: TypeORM with MySQL
 
-```
-auth-service/
-├── src/
-│   ├── domain/                    # 🎯 Domain Layer (Business Logic)
-│   │   ├── entities/              # Business entities
-│   │   │   ├── user.entity.ts
-│   │   │   ├── role.entity.ts
-│   │   │   └── base.entity.ts
-│   │   ├── value-objects/         # Value objects for data integrity
-│   │   │   ├── email.vo.ts
-│   │   │   └── password.vo.ts
-│   │   ├── repositories/          # Repository interfaces
-│   │   │   ├── user.repository.interface.ts
-│   │   │   └── role.repository.interface.ts
-│   │   ├── services/              # Domain services
-│   │   │   └── auth.domain.service.ts
-│   │   ├── tokens/                # Dependency injection tokens
-│   │   │   └── repository.tokens.ts
-│   │   └── index.ts               # Domain exports
-│   │
-│   ├── application/               # 🔧 Application Layer (Use Cases)
-│   │   ├── use-cases/             # Business use cases
-│   │   │   ├── login.use-case.ts
-│   │   │   ├── register.use-case.ts
-│   │   │   └── validate-token.use-case.ts
-│   │   ├── dtos/                  # Data Transfer Objects
-│   │   │   ├── login-request.dto.ts
-│   │   │   ├── register-request.dto.ts
-│   │   │   ├── user-response.dto.ts
-│   │   │   └── auth-response.dto.ts
-│   │   ├── application.module.ts  # Application module
-│   │   └── index.ts               # Application exports
-│   │
-│   ├── infrastructure/            # 🔌 Infrastructure Layer
-│   │   ├── repositories/          # Repository implementations
-│   │   │   ├── user.repository.ts
-│   │   │   └── role.repository.ts
-│   │   ├── database/              # Database configuration
-│   │   │   └── database.module.ts
-│   │   ├── strategies/            # Authentication strategies
-│   │   │   └── jwt.strategy.ts
-│   │   └── index.ts               # Infrastructure exports
-│   │
-│   ├── interfaces/                # 🌐 Interface Layer
-│   │   ├── controllers/           # HTTP controllers
-│   │   │   └── auth.controller.ts
-│   │   └── index.ts               # Interface exports
-│   │
-│   ├── app.module.ts              # Main application module
-│   └── main.ts                    # Application entry point
-│
-├── package.json                   # Dependencies and scripts
-├── tsconfig.json                  # TypeScript configuration
-├── nest-cli.json                  # NestJS CLI configuration
-└── env.example                    # Environment variables template
-```
+## 🚀 **Quick Start**
 
-## 🎯 Key Features
+### **Prerequisites**
+- Node.js 18+
+- MySQL database (shared)
+- Docker (optional)
 
-### **✅ Clean Architecture Benefits**
-- **Separation of Concerns**: Each layer has a single responsibility
-- **Dependency Inversion**: High-level modules don't depend on low-level modules
-- **Testability**: Easy to unit test each layer independently
-- **Extensibility**: Easy to add new features without affecting existing code
-- **Maintainability**: Clear structure makes code easy to understand and modify
-
-### **✅ Domain-Driven Design**
-- **Entities**: Rich domain models with business logic
-- **Value Objects**: Immutable objects for data integrity
-- **Repository Pattern**: Abstract data access layer
-- **Domain Services**: Business logic that doesn't belong to entities
-
-### **✅ Microservice Best Practices**
-- **Single Responsibility**: Only handles authentication concerns
-- **Independent Deployment**: Can be deployed separately
-- **Database per Service**: Own database for data isolation
-- **API-First Design**: RESTful API for service communication
-- **Health Checks**: Monitoring and observability endpoints
-
-## 🚀 API Endpoints
-
-### **Authentication Endpoints**
-```
-POST /api/v1/auth/login           # User login
-POST /api/v1/auth/register        # User registration
-POST /api/v1/auth/validate-token  # Token validation (for other services)
-POST /api/v1/auth/refresh         # Token refresh
-GET  /api/v1/auth/profile         # Get user profile
-POST /api/v1/auth/logout          # User logout
-GET  /api/v1/auth/health          # Health check
-```
-
-### **Request/Response Examples**
-
-#### **Login Request**
-```json
-POST /api/v1/auth/login
-{
-  "email": "user@example.com",
-  "password": "Password123"
-}
-```
-
-#### **Login Response**
-```json
-{
-  "user": {
-    "id": 1,
-    "email": "user@example.com",
-    "firstName": "John",
-    "lastName": "Doe",
-    "isActive": true,
-    "isEmailVerified": true,
-    "roles": [
-      {
-        "id": 1,
-        "name": "user",
-        "description": "Regular user",
-        "permissions": ["read:own"]
-      }
-    ],
-    "createdAt": "2024-01-01T00:00:00.000Z",
-    "updatedAt": "2024-01-01T00:00:00.000Z"
-  },
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "expiresIn": "24h"
-}
-```
-
-## 🔧 Configuration
-
-### **Environment Variables**
+### **Installation**
 ```bash
-# Database Configuration
-DB_HOST=localhost
+# Install dependencies
+npm install
+
+# Copy environment file
+cp .env.shared.example .env
+
+# Start in development mode
+npm run start:dev
+```
+
+### **Environment Configuration**
+```env
+# Database Configuration (Shared Database)
+DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_USERNAME=root
-DB_PASSWORD=password
-DB_NAME=auth_service_db
+DB_USERNAME=shared_user
+DB_PASSWORD=shared_password_2024
+DB_NAME=shared_user_db
 
 # JWT Configuration
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
@@ -187,210 +57,310 @@ NODE_ENV=development
 FRONTEND_URL=http://localhost:3000
 ```
 
-## 🏃‍♂️ Getting Started
+## 📡 **API Endpoints**
 
-### **1. Install Dependencies**
+### **Authentication**
+- `POST /api/v1/auth/login` - User login
+- `POST /api/v1/auth/register` - User registration
+- `GET /api/v1/auth/profile` - Get user profile
+- `POST /api/v1/auth/refresh` - Refresh JWT token
+
+### **Health Check**
+- `GET /api/v1/auth/health` - Service health status
+
+### **Example Usage**
 ```bash
-npm install
+# Login
+curl -X POST http://localhost:3001/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@example.com","password":"admin123"}'
+
+# Get profile (with JWT token)
+curl -X GET http://localhost:3001/api/v1/auth/profile \
+  -H "Authorization: Bearer <jwt_token>"
 ```
 
-### **2. Setup Database**
-```bash
-# Create database
-mysql -u root -p
-CREATE DATABASE auth_service_db;
+## 🗄️ **Database Schema**
+
+### **Users Table**
+```sql
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    phone VARCHAR(20),
+    is_active BOOLEAN DEFAULT TRUE,
+    is_email_verified BOOLEAN DEFAULT FALSE,
+    last_login_at TIMESTAMP NULL,
+    password_changed_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 ```
 
-### **3. Configure Environment**
-```bash
-cp env.example .env
-# Edit .env with your database credentials
+### **Roles Table**
+```sql
+CREATE TABLE roles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL,
+    description TEXT,
+    permissions JSON,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 ```
 
-### **4. Start Development Server**
-```bash
-npm run start:dev
+### **User Roles Junction Table**
+```sql
+CREATE TABLE user_roles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    role_id INT NOT NULL,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    assigned_by INT,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_role (user_id, role_id)
+);
 ```
 
-### **5. Build for Production**
+## 🔧 **Development**
+
+### **Available Scripts**
 ```bash
-npm run build
-npm run start:prod
+npm run start          # Start in production mode
+npm run start:dev      # Start in development mode with hot reload
+npm run build          # Build for production
+npm run test           # Run tests
+npm run test:watch     # Run tests in watch mode
+npm run lint           # Lint code
+npm run format         # Format code
 ```
 
-## 🧪 Testing
+### **Project Structure**
+```
+src/
+├── auth/                    # Authentication module
+│   ├── auth.controller.ts   # Auth endpoints
+│   ├── auth.service.ts      # Auth business logic
+│   ├── auth.module.ts       # Auth module
+│   ├── dto/                 # Data transfer objects
+│   └── strategies/          # JWT strategy
+├── user/                    # User module (shared with User Service)
+│   ├── user.entity.ts       # User entity
+│   ├── user.service.ts      # User service
+│   └── user.module.ts       # User module
+├── domain/                  # Domain layer
+│   ├── entities/            # Domain entities
+│   ├── repositories/        # Repository interfaces
+│   └── services/            # Domain services
+├── infrastructure/          # Infrastructure layer
+│   ├── database/            # Database configuration
+│   └── repositories/        # Repository implementations
+└── main.ts                  # Application entry point
+```
+
+## 🔐 **Security Features**
+
+### **JWT Authentication**
+- **Token Type**: JSON Web Tokens
+- **Expiration**: Configurable (default: 24h)
+- **Algorithm**: HS256
+- **Claims**: User ID, email, roles, timestamps
+
+### **Password Security**
+- **Hashing**: bcrypt with salt rounds
+- **Validation**: Strong password requirements
+- **Reset**: Password reset functionality
+
+### **Role-Based Access Control**
+- **Roles**: admin, user, editor, viewer
+- **Permissions**: Granular permission system
+- **Authorization**: JWT-based role verification
+
+## 🧪 **Testing**
 
 ### **Unit Tests**
 ```bash
+# Run all tests
 npm run test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:cov
 ```
 
 ### **Integration Tests**
 ```bash
+# Run e2e tests
 npm run test:e2e
 ```
 
-### **Test Coverage**
-```bash
-npm run test:cov
+### **Test Database**
+Tests use a separate test database to avoid conflicts with development data.
+
+## 🐳 **Docker Support**
+
+### **Dockerfile**
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+EXPOSE 3001
+CMD ["npm", "run", "start:prod"]
 ```
 
-## 📊 Monitoring & Observability
+### **Docker Compose**
+```yaml
+auth-service:
+  build: .
+  ports:
+    - "3001:3001"
+  environment:
+    DB_HOST: shared-user-db
+    DB_PORT: 3306
+    DB_USERNAME: shared_user
+    DB_PASSWORD: shared_password_2024
+    DB_NAME: shared_user_db
+  depends_on:
+    - shared-user-db
+```
+
+## 📊 **Monitoring**
 
 ### **Health Check**
 ```bash
 curl http://localhost:3001/api/v1/auth/health
 ```
 
-### **Response**
+**Response:**
 ```json
 {
   "status": "ok",
-  "timestamp": "2024-01-01T00:00:00.000Z"
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "uptime": 3600,
+  "database": "connected",
+  "version": "1.0.0"
 }
 ```
 
-## 🔒 Security Features
+### **Logging**
+- **Level**: Configurable (default: info)
+- **Format**: JSON structured logging
+- **Output**: Console and file logging
 
-### **Password Security**
-- **Bcrypt Hashing**: Passwords are hashed with bcrypt
-- **Password Validation**: Strong password requirements
-- **Password History**: Track password changes
+## 🔄 **Shared Database Benefits**
 
-### **JWT Security**
-- **Configurable Secrets**: Environment-based JWT secrets
-- **Token Expiration**: Configurable token lifetime
-- **Token Validation**: Secure token verification
+### **Why Shared Database?**
+1. **Single Source of Truth** - No duplicate user data
+2. **No Sync Issues** - Changes immediately available to both services
+3. **Better Performance** - No cross-service API calls for user data
+4. **Simpler Architecture** - Easier to maintain and debug
+5. **ACID Compliance** - Database transactions ensure data integrity
 
-### **Input Validation**
-- **Class Validator**: Request validation with decorators
-- **Email Validation**: Proper email format validation
-- **SQL Injection Protection**: TypeORM parameterized queries
+### **Data Consistency**
+- **User Creation** - Auth Service creates user, User Service can immediately access
+- **Role Assignment** - Changes reflected in both services instantly
+- **Profile Updates** - Single update affects both services
 
-## 🔄 Integration with Other Services
+## 🚀 **Deployment**
 
-### **Token Validation for Other Services**
+### **Production Build**
 ```bash
-POST /api/v1/auth/validate-token
+# Build for production
+npm run build
+
+# Start production server
+npm run start:prod
+```
+
+### **Environment Variables**
+Ensure all production environment variables are set:
+- Database credentials
+- JWT secret (use strong, unique secret)
+- Service ports
+- External service URLs
+
+### **Health Monitoring**
+- Monitor health check endpoint
+- Set up alerts for service downtime
+- Monitor database connections
+- Track JWT token generation rates
+
+## 🔧 **Configuration**
+
+### **Database Configuration**
+```typescript
+// TypeORM configuration
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  type: 'mysql',
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT),
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  entities: [User, Role],
+  synchronize: process.env.NODE_ENV === 'development',
+  logging: process.env.NODE_ENV === 'development'
 }
 ```
 
-### **Response**
-```json
+### **JWT Configuration**
+```typescript
+// JWT module configuration
 {
-  "id": 1,
-  "email": "user@example.com",
-  "firstName": "John",
-  "lastName": "Doe",
-  "isActive": true,
-  "roles": [...]
+  secret: process.env.JWT_SECRET,
+  signOptions: {
+    expiresIn: process.env.JWT_EXPIRES_IN || '24h'
+  }
 }
 ```
 
-## 🎯 Extensibility
+## 📚 **API Documentation**
 
-### **Adding New Use Cases**
-1. Create use case in `src/application/use-cases/`
-2. Add DTOs in `src/application/dtos/`
-3. Update controller in `src/interfaces/controllers/`
-4. Add tests
+For complete API documentation, see:
+- **Swagger UI**: http://localhost:3001/api/docs (when enabled)
+- **API Reference**: `docs/api/README.md`
+- **Postman Collection**: `docs/api/postman-collection.json`
 
-### **Adding New Entities**
-1. Create entity in `src/domain/entities/`
-2. Create repository interface in `src/domain/repositories/`
-3. Implement repository in `src/infrastructure/repositories/`
-4. Update database module
+## 🆘 **Troubleshooting**
 
-### **Adding External Services**
-1. Create service interface in `src/domain/services/`
-2. Implement service in `src/infrastructure/external-services/`
-3. Add to application module
+### **Common Issues**
 
-## 📈 Performance Considerations
+#### **Database Connection Failed**
+```bash
+# Check database status
+docker-compose logs shared-user-db
 
-### **Database Optimization**
-- **Indexes**: Proper database indexes for queries
-- **Connection Pooling**: TypeORM connection pooling
-- **Query Optimization**: Efficient repository queries
-
-### **Caching Strategy**
-- **JWT Caching**: Token validation caching
-- **User Caching**: Frequently accessed user data
-- **Role Caching**: Role and permission caching
-
-### **Scalability**
-- **Horizontal Scaling**: Stateless service design
-- **Load Balancing**: Multiple service instances
-- **Database Sharding**: User data partitioning
-
-## 🚀 Deployment
-
-### **Docker Deployment**
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY dist ./dist
-EXPOSE 3001
-CMD ["node", "dist/main"]
+# Verify connection
+mysql -h localhost -P 3306 -u shared_user -p shared_user_db
 ```
 
-### **Kubernetes Deployment**
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: auth-service
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: auth-service
-  template:
-    metadata:
-      labels:
-        app: auth-service
-    spec:
-      containers:
-      - name: auth-service
-        image: auth-service:latest
-        ports:
-        - containerPort: 3001
-        env:
-        - name: DB_HOST
-          value: "mysql-service"
-        - name: JWT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: auth-secrets
-              key: jwt-secret
+#### **JWT Token Issues**
+- Verify JWT_SECRET is set
+- Check token expiration
+- Ensure proper token format in Authorization header
+
+#### **Service Not Starting**
+```bash
+# Check logs
+npm run start:dev
+
+# Verify environment variables
+cat .env
+
+# Check port availability
+lsof -i :3001
 ```
-
-## 📚 Learning Resources
-
-### **Clean Architecture**
-- [Clean Architecture by Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-- [Domain-Driven Design](https://martinfowler.com/bliki/DomainDrivenDesign.html)
-
-### **Microservices**
-- [Microservices Patterns](https://microservices.io/)
-- [Building Microservices by Sam Newman](https://samnewman.io/books/building_microservices/)
-
-### **NestJS**
-- [NestJS Documentation](https://docs.nestjs.com/)
-- [NestJS Best Practices](https://docs.nestjs.com/fundamentals/testing)
 
 ---
 
-**This Auth Service demonstrates production-ready Clean Architecture implementation for microservices!** 🚀
-
-
-
-
-
-
-
-
+**The Auth Service provides secure, scalable authentication for the microservices architecture with shared database integration.**

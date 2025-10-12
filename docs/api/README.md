@@ -1,223 +1,625 @@
-# API Documentation
+# 📡 API Documentation
 
-## 🔌 API Documentation and Testing
+Comprehensive API documentation for all microservices in the fullstack application.
 
-This directory contains all API-related documentation, including Postman collections, testing guides, and API specifications.
+## 🎯 **API Overview**
 
-## 📋 Documents
+### **Base URLs**
+- **Auth Service**: `http://localhost:3001/api/v1`
+- **User Service**: `http://localhost:3003/api/v1`
+- **Carrier Service**: `http://localhost:3004/api/v1`
+- **Customer Service**: `http://localhost:3005/api/v1`
+- **Pricing Service**: `http://localhost:3006/api/v1`
+- **Translation Service**: `http://localhost:3007/api/v1`
 
-### Postman Collections
-- **[Postman README](postman-readme.md)** - Postman collection setup and usage
-- **[Postman Scripts README](postman-scripts-readme.md)** - Postman script documentation
-- **[Translation Testing README](translation-testing-readme.md)** - Translation API testing guide
-- **[Postman Upload README](postman-upload-readme.md)** - Postman collection upload instructions
+### **Authentication**
+All API endpoints (except login/register) require JWT authentication:
+```http
+Authorization: Bearer <jwt_token>
+```
 
-## 🎯 API Overview
-
-### Backend APIs
-- **NestJS API**: Main application API with full CRUD operations
-- **Go API**: Secondary service API (if applicable)
-- **Authentication API**: JWT-based authentication endpoints
-- **Translation API**: Multi-language translation endpoints
-
-### API Features
-- **RESTful Design**: Standard REST API patterns
-- **JWT Authentication**: Secure token-based authentication
-- **Input Validation**: Comprehensive input validation
-- **Error Handling**: Standardized error responses
-- **Multi-language Support**: Translation endpoints
-
-## 🔐 Authentication
-
-### JWT Token System
-- **Login Endpoint**: `/api/v1/auth/login`
-- **Register Endpoint**: `/api/v1/auth/register`
-- **Token Refresh**: Automatic token refresh
-- **Role-Based Access**: Granular permission system
-
-### API Security
-- **Bearer Token**: Include in Authorization header
-- **CORS Configuration**: Cross-origin resource sharing
-- **Rate Limiting**: API rate limiting protection
-- **Input Sanitization**: XSS and injection prevention
-
-## 📊 API Endpoints
-
-### User Management
-- `GET /api/v1/users` - List users
-- `POST /api/v1/users` - Create user
-- `GET /api/v1/users/:id` - Get user by ID
-- `PATCH /api/v1/users/:id` - Update user
-- `DELETE /api/v1/users/:id` - Delete user
-
-### Customer Management
-- `GET /api/v1/customers` - List customers
-- `POST /api/v1/customers` - Create customer
-- `GET /api/v1/customers/:id` - Get customer by ID
-- `PATCH /api/v1/customers/:id` - Update customer
-- `DELETE /api/v1/customers/:id` - Delete customer
-
-### Carrier Management
-- `GET /api/v1/carriers` - List carriers
-- `POST /api/v1/carriers` - Create carrier
-- `GET /api/v1/carriers/:id` - Get carrier by ID
-- `PATCH /api/v1/carriers/:id` - Update carrier
-- `DELETE /api/v1/carriers/:id` - Delete carrier
-
-### Translation System
-- `GET /api/v1/languages` - List supported languages
-- `GET /api/v1/translations` - Get translations
-- `POST /api/v1/translations` - Create translation
-- `PATCH /api/v1/translations/:key` - Update translation
-
-## 🧪 Testing with Postman
-
-### Collection Setup
-1. **Import Collection**: Import the provided Postman collection
-2. **Environment Variables**: Set up environment variables
-3. **Authentication**: Configure JWT token authentication
-4. **Base URL**: Set the API base URL
-
-### Testing Workflow
-1. **Authentication**: Login to get JWT token
-2. **API Calls**: Test various endpoints
-3. **Validation**: Verify response formats
-4. **Error Handling**: Test error scenarios
-
-### Environment Variables
-- `baseUrl`: API base URL (e.g., http://localhost:3001)
-- `token`: JWT authentication token
-- `userId`: Current user ID for testing
-- `customerId`: Customer ID for testing
-
-## 📝 API Response Formats
-
-### Success Response
+### **Response Format**
+All APIs return JSON responses with consistent format:
 ```json
 {
-  "data": {
-    "id": 1,
-    "name": "Example",
-    "createdAt": "2024-01-01T00:00:00.000Z",
-    "updatedAt": "2024-01-01T00:00:00.000Z"
-  },
+  "success": true,
+  "data": {},
   "message": "Success",
-  "statusCode": 200
+  "timestamp": "2024-01-01T00:00:00.000Z"
 }
 ```
 
-### Error Response
+## 🔐 **Auth Service API**
+
+### **Base URL**: `http://localhost:3001/api/v1/auth`
+
+#### **POST /login**
+User login endpoint.
+
+**Request:**
 ```json
 {
-  "message": "Validation failed",
-  "error": "Bad Request",
-  "statusCode": 400,
-  "validationErrors": {
-    "email": "Email is required",
-    "password": "Password must be at least 8 characters"
+  "email": "admin@example.com",
+  "password": "admin123"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": 1,
+      "email": "admin@example.com",
+      "firstName": "Admin",
+      "lastName": "User",
+      "roles": ["admin"]
+    },
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "expiresIn": "24h"
+  },
+  "message": "Login successful"
+}
+```
+
+#### **POST /register**
+User registration endpoint.
+
+**Request:**
+```json
+{
+  "email": "user@example.com",
+  "password": "password123",
+  "firstName": "John",
+  "lastName": "Doe"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": 2,
+      "email": "user@example.com",
+      "firstName": "John",
+      "lastName": "Doe",
+      "roles": ["user"]
+    },
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "expiresIn": "24h"
+  },
+  "message": "Registration successful"
+}
+```
+
+#### **GET /profile**
+Get current user profile.
+
+**Headers:**
+```http
+Authorization: Bearer <jwt_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "email": "admin@example.com",
+    "firstName": "Admin",
+    "lastName": "User",
+    "phone": null,
+    "isActive": true,
+    "isEmailVerified": true,
+    "roles": [
+      {
+        "id": 1,
+        "name": "admin",
+        "description": "Administrator with full access"
+      }
+    ],
+    "lastLoginAt": "2024-01-01T00:00:00.000Z",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
   }
 }
 ```
 
-### Pagination Response
+#### **POST /refresh**
+Refresh JWT token.
+
+**Headers:**
+```http
+Authorization: Bearer <jwt_token>
+```
+
+**Response:**
 ```json
 {
-  "data": [...],
-  "pagination": {
-    "page": 1,
-    "limit": 10,
-    "total": 100,
-    "totalPages": 10
-  },
-  "message": "Success",
-  "statusCode": 200
+  "success": true,
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "expiresIn": "24h"
+  }
 }
 ```
 
-## 🔍 API Testing Best Practices
+#### **GET /health**
+Health check endpoint.
 
-### Test Coverage
-- **Happy Path**: Test successful operations
-- **Error Cases**: Test error scenarios
-- **Edge Cases**: Test boundary conditions
-- **Security**: Test authentication and authorization
+**Response:**
+```json
+{
+  "status": "ok",
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "uptime": 3600,
+  "database": "connected",
+  "version": "1.0.0"
+}
+```
 
-### Test Data
-- **Valid Data**: Use valid test data
-- **Invalid Data**: Test with invalid inputs
-- **Boundary Values**: Test min/max values
-- **Special Characters**: Test with special characters
+## 👥 **User Service API**
 
-### Performance Testing
-- **Response Time**: Monitor API response times
-- **Load Testing**: Test under load conditions
-- **Concurrent Users**: Test multiple concurrent users
-- **Resource Usage**: Monitor server resources
+### **Base URL**: `http://localhost:3003/api/v1/users`
 
-## 🚀 API Development Guidelines
+#### **GET /users**
+Get list of users with pagination and filtering.
 
-### Endpoint Design
-- **RESTful URLs**: Use standard REST patterns
-- **HTTP Methods**: Use appropriate HTTP methods
-- **Status Codes**: Return correct HTTP status codes
-- **Consistent Naming**: Use consistent naming conventions
+**Query Parameters:**
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Items per page (default: 10)
+- `search` (optional): Search term
+- `role` (optional): Filter by role
+- `isActive` (optional): Filter by active status
 
-### Request/Response
-- **JSON Format**: Use JSON for data exchange
-- **Validation**: Validate all inputs
-- **Error Messages**: Provide clear error messages
-- **Documentation**: Document all endpoints
+**Example:**
+```http
+GET /users?page=1&limit=10&search=admin&role=admin&isActive=true
+```
 
-### Security
-- **Authentication**: Require authentication for protected endpoints
-- **Authorization**: Check user permissions
-- **Input Validation**: Validate and sanitize inputs
-- **Rate Limiting**: Implement rate limiting
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "users": [
+      {
+        "id": 1,
+        "email": "admin@example.com",
+        "firstName": "Admin",
+        "lastName": "User",
+        "phone": null,
+        "isActive": true,
+        "isEmailVerified": true,
+        "roles": ["admin"],
+        "lastLoginAt": "2024-01-01T00:00:00.000Z",
+        "createdAt": "2024-01-01T00:00:00.000Z",
+        "updatedAt": "2024-01-01T00:00:00.000Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "total": 1,
+      "totalPages": 1
+    }
+  }
+}
+```
 
-## 📊 API Monitoring
+#### **POST /users**
+Create a new user.
 
-### Metrics to Track
-- **Response Time**: Average response time
-- **Error Rate**: Percentage of failed requests
-- **Throughput**: Requests per second
-- **Availability**: API uptime percentage
+**Request:**
+```json
+{
+  "email": "newuser@example.com",
+  "password": "password123",
+  "firstName": "Jane",
+  "lastName": "Smith",
+  "phone": "+1234567890",
+  "roleIds": [2]
+}
+```
 
-### Logging
-- **Request Logging**: Log all API requests
-- **Error Logging**: Log all errors and exceptions
-- **Performance Logging**: Log performance metrics
-- **Security Logging**: Log security-related events
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": 3,
+    "email": "newuser@example.com",
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "phone": "+1234567890",
+    "isActive": true,
+    "isEmailVerified": false,
+    "roles": [
+      {
+        "id": 2,
+        "name": "user",
+        "description": "Regular user with basic access"
+      }
+    ],
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  "message": "User created successfully"
+}
+```
 
-## 🔧 API Tools and Resources
+#### **GET /users/:id**
+Get user by ID.
 
-### Development Tools
-- **Postman**: API testing and documentation
-- **Insomnia**: Alternative API client
-- **Swagger**: API documentation generation
-- **Newman**: Command-line Postman runner
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "email": "admin@example.com",
+    "firstName": "Admin",
+    "lastName": "User",
+    "phone": null,
+    "isActive": true,
+    "isEmailVerified": true,
+    "roles": [
+      {
+        "id": 1,
+        "name": "admin",
+        "description": "Administrator with full access"
+      }
+    ],
+    "lastLoginAt": "2024-01-01T00:00:00.000Z",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+}
+```
 
-### Monitoring Tools
-- **Application Insights**: Application monitoring
-- **New Relic**: Performance monitoring
-- **DataDog**: Infrastructure monitoring
-- **Grafana**: Metrics visualization
+#### **PUT /users/:id**
+Update user by ID.
 
-## 📞 Support and Resources
+**Request:**
+```json
+{
+  "firstName": "Updated",
+  "lastName": "Name",
+  "phone": "+1234567890",
+  "isActive": true,
+  "roleIds": [1, 2]
+}
+```
 
-### Documentation
-- **API Reference**: Complete API documentation
-- **Postman Collection**: Ready-to-use API collection
-- **Testing Guide**: Step-by-step testing instructions
-- **Error Codes**: Complete error code reference
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "email": "admin@example.com",
+    "firstName": "Updated",
+    "lastName": "Name",
+    "phone": "+1234567890",
+    "isActive": true,
+    "isEmailVerified": true,
+    "roles": [
+      {
+        "id": 1,
+        "name": "admin",
+        "description": "Administrator with full access"
+      },
+      {
+        "id": 2,
+        "name": "user",
+        "description": "Regular user with basic access"
+      }
+    ],
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  "message": "User updated successfully"
+}
+```
 
-### External Resources
-- **REST API Design**: https://restfulapi.net/
-- **HTTP Status Codes**: https://httpstatuses.com/
-- **JWT Documentation**: https://jwt.io/
-- **Postman Learning**: https://learning.postman.com/
+#### **DELETE /users/:id**
+Delete user by ID.
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "User deleted successfully"
+}
+```
+
+#### **GET /users/roles**
+Get all available roles.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "admin",
+      "description": "Administrator with full access",
+      "permissions": ["*"],
+      "isActive": true,
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "name": "user",
+      "description": "Regular user with basic access",
+      "permissions": ["read:own", "update:own"],
+      "isActive": true,
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+## 🚚 **Carrier Service API**
+
+### **Base URL**: `http://localhost:3004/api/v1/carriers`
+
+#### **GET /carriers**
+Get list of carriers.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "FedEx",
+      "code": "FEDEX",
+      "contactEmail": "contact@fedex.com",
+      "contactPhone": "+1-800-463-3339",
+      "isActive": true,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+#### **POST /carriers**
+Create a new carrier.
+
+**Request:**
+```json
+{
+  "name": "UPS",
+  "code": "UPS",
+  "contactEmail": "contact@ups.com",
+  "contactPhone": "+1-800-742-5877"
+}
+```
+
+#### **GET /carriers/:id**
+Get carrier by ID.
+
+#### **PUT /carriers/:id**
+Update carrier by ID.
+
+#### **DELETE /carriers/:id**
+Delete carrier by ID.
+
+## 🏢 **Customer Service API**
+
+### **Base URL**: `http://localhost:3005/api/v1/customers`
+
+#### **GET /customers**
+Get list of customers.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "Acme Corporation",
+      "email": "contact@acme.com",
+      "phone": "+1-555-0123",
+      "address": "123 Business St, City, State 12345",
+      "isActive": true,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+#### **POST /customers**
+Create a new customer.
+
+#### **GET /customers/:id**
+Get customer by ID.
+
+#### **PUT /customers/:id**
+Update customer by ID.
+
+#### **DELETE /customers/:id**
+Delete customer by ID.
+
+## 💰 **Pricing Service API**
+
+### **Base URL**: `http://localhost:3006/api/v1/pricing`
+
+#### **POST /calculate**
+Calculate pricing for a shipment.
+
+**Request:**
+```json
+{
+  "origin": "New York, NY",
+  "destination": "Los Angeles, CA",
+  "weight": 10.5,
+  "dimensions": {
+    "length": 12,
+    "width": 8,
+    "height": 6
+  },
+  "carrierId": 1
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "carrier": "FedEx",
+    "service": "Ground",
+    "estimatedCost": 25.50,
+    "estimatedDays": 3,
+    "currency": "USD"
+  }
+}
+```
+
+## 🌐 **Translation Service API**
+
+### **Base URL**: `http://localhost:3007/api/v1/translations`
+
+#### **GET /languages**
+Get available languages.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "code": "en",
+      "name": "English",
+      "isActive": true
+    },
+    {
+      "id": 2,
+      "code": "fr",
+      "name": "French",
+      "isActive": true
+    }
+  ]
+}
+```
+
+#### **GET /translations**
+Get translations for a specific language.
+
+**Query Parameters:**
+- `language`: Language code (e.g., 'en', 'fr')
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "language": "en",
+    "translations": {
+      "nav.dashboard": "Dashboard",
+      "nav.users": "Users",
+      "nav.carriers": "Carriers",
+      "user.first_name": "First Name",
+      "user.last_name": "Last Name"
+    }
+  }
+}
+```
+
+#### **POST /translations**
+Create or update translations.
+
+**Request:**
+```json
+{
+  "language": "fr",
+  "key": "nav.dashboard",
+  "value": "Tableau de bord"
+}
+```
+
+## 📊 **Error Handling**
+
+### **Error Response Format**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Validation failed",
+    "details": [
+      {
+        "field": "email",
+        "message": "Email is required"
+      }
+    ]
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+### **Common Error Codes**
+- `400` - Bad Request
+- `401` - Unauthorized
+- `403` - Forbidden
+- `404` - Not Found
+- `409` - Conflict
+- `422` - Validation Error
+- `500` - Internal Server Error
+
+## 🔧 **Testing APIs**
+
+### **Using cURL**
+```bash
+# Login
+curl -X POST http://localhost:3001/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@example.com","password":"admin123"}'
+
+# Get users (with token)
+curl -X GET http://localhost:3003/api/v1/users \
+  -H "Authorization: Bearer <jwt_token>"
+```
+
+### **Using Postman**
+Import the Postman collection from `docs/api/postman-collection.json` for comprehensive API testing.
+
+### **Health Checks**
+```bash
+# Check all services
+curl http://localhost:3001/api/v1/auth/health
+curl http://localhost:3003/health
+curl http://localhost:3004/health
+curl http://localhost:3005/health
+curl http://localhost:3006/health
+curl http://localhost:3007/health
+```
+
+## 📋 **Rate Limiting**
+
+All APIs implement rate limiting:
+- **Auth endpoints**: 5 requests per minute
+- **User endpoints**: 100 requests per minute
+- **Other endpoints**: 1000 requests per minute
+
+Rate limit headers:
+```http
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 99
+X-RateLimit-Reset: 1640995200
+```
 
 ---
 
-**Last Updated**: $(date)
-**Version**: 1.0.0
-
+**This API documentation provides comprehensive coverage of all microservice endpoints with examples and error handling information.**
