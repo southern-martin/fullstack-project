@@ -7,9 +7,9 @@ import * as bcrypt from "bcrypt";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
 import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
 import { UserDomainService } from "../../domain/services/user.domain.service";
-import { UpdateUserDto } from "../dtos/update-user.dto";
-import { UserResponseDto } from "../dtos/user-response.dto";
-import { ValidationException } from "../../../shared/exceptions";
+import { UpdateUserDto } from "../dto/update-user.dto";
+import { UserResponseDto } from "../dto/user-response.dto";
+import { ValidationException } from "../../../shared/exceptions/validation.exception";
 
 /**
  * Update User Use Case

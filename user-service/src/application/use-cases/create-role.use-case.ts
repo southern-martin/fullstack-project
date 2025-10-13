@@ -5,8 +5,8 @@ import {
   Injectable,
 } from "@nestjs/common";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
-import { CreateRoleDto } from "../dtos/create-role.dto";
-import { RoleResponseDto } from "../dtos/role-response.dto";
+import { CreateRoleDto } from "../dto/create-role.dto";
+import { RoleResponseDto } from "../dto/role-response.dto";
 
 /**
  * Create Role Use Case

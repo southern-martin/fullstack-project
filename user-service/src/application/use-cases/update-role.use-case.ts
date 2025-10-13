@@ -5,8 +5,8 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
-import { RoleResponseDto } from "../dtos/role-response.dto";
-import { UpdateRoleDto } from "../dtos/update-role.dto";
+import { RoleResponseDto } from "../dto/role-response.dto";
+import { UpdateRoleDto } from "../dto/update-role.dto";
 
 /**
  * Update Role Use Case

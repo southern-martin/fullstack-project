@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
-import { UserResponseDto } from "../dtos/user-response.dto";
+import { UserResponseDto } from "../dto/user-response.dto";
 import { PaginationDto } from "../../../shared/dto";
 
 /**

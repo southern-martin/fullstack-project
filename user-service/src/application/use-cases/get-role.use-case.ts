@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
-import { RoleResponseDto } from "../dtos/role-response.dto";
+import { RoleResponseDto } from "../dto/role-response.dto";
 
 /**
  * Get Role Use Case

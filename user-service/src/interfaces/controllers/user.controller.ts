@@ -11,10 +11,10 @@ import {
   Post,
   Query,
 } from "@nestjs/common";
-import { AssignRolesDto } from "../../application/dtos/assign-roles.dto";
-import { CreateUserDto } from "../../application/dtos/create-user.dto";
-import { UpdateUserDto } from "../../application/dtos/update-user.dto";
-import { UserResponseDto } from "../../application/dtos/user-response.dto";
+import { AssignRolesDto } from "../../application/dto/assign-roles.dto";
+import { CreateUserDto } from "../../application/dto/create-user.dto";
+import { UpdateUserDto } from "../../application/dto/update-user.dto";
+import { UserResponseDto } from "../../application/dto/user-response.dto";
 import { CreateUserUseCase } from "../../application/use-cases/create-user.use-case";
 import { DeleteUserUseCase } from "../../application/use-cases/delete-user.use-case";
 import { GetUserUseCase } from "../../application/use-cases/get-user.use-case";

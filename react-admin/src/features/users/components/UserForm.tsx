@@ -168,8 +168,19 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
         // Get current form data from ref
         const currentFormData = formDataRef.current;
 
-        // No client-side validation - all validation is handled by the server
-        setIsSubmitting(true);
+    // Basic client-side validation to prevent submission of completely empty forms
+    // Server-side validation will handle all business rules
+    const hasRequiredFields = currentFormData.firstName.trim() || 
+                             currentFormData.lastName.trim() || 
+                             currentFormData.email.trim() || 
+                             (user ? true : currentFormData.password.trim());
+    
+    if (!hasRequiredFields) {
+        setErrors({ general: 'Please fill in at least one field before submitting' });
+        return;
+    }
+
+    setIsSubmitting(true);
 
         const dataToSubmit = createSubmissionData(currentFormData, user);
 
