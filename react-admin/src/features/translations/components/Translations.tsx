@@ -39,6 +39,12 @@ const Translations: React.FC = () => {
     const [showLanguageModal, setShowLanguageModal] = useState(false);
     const [selectedTranslation, setSelectedTranslation] = useState<Translation | null>(null);
     const [modalTitle, setModalTitle] = useState('');
+    const [modalFooter, setModalFooter] = useState<React.ReactNode>(null);
+
+    // Handle footer from TranslationForm
+    const handleFooterReady = useCallback((footer: React.ReactNode) => {
+        setModalFooter(footer);
+    }, []);
 
     // Load translations
     const loadTranslations = useCallback(async () => {
@@ -80,6 +86,7 @@ const Translations: React.FC = () => {
             toast.success('Translation created successfully');
             loadTranslations();
             setShowCreateModal(false);
+            setModalFooter(null);
         } catch (error) {
             toast.error('Failed to create translation: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
@@ -92,6 +99,7 @@ const Translations: React.FC = () => {
             toast.success('Translation updated successfully');
             loadTranslations();
             setShowEditModal(false);
+            setModalFooter(null);
         } catch (error) {
             toast.error('Failed to update translation: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
@@ -169,8 +177,8 @@ const Translations: React.FC = () => {
                 sortable: true,
                 render: (isApproved: boolean) => (
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isApproved
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-yellow-100 text-yellow-800'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-yellow-100 text-yellow-800'
                         }`}>
                         {isApproved ? 'Approved' : 'Pending'}
                     </span>
@@ -226,6 +234,7 @@ const Translations: React.FC = () => {
                     const translation = Array.isArray(data) ? data[0] : data;
                     setSelectedTranslation(translation);
                     setModalTitle('Edit Translation');
+                    setModalFooter(null);
                     setShowEditModal(true);
                 },
             },
@@ -325,6 +334,7 @@ const Translations: React.FC = () => {
                     <Button
                         onClick={() => {
                             setModalTitle('Create New Translation');
+                            setModalFooter(null);
                             setShowCreateModal(true);
                         }}
                         className="flex items-center space-x-2"
@@ -362,14 +372,22 @@ const Translations: React.FC = () => {
             {showCreateModal && (
                 <Modal
                     isOpen={true}
-                    onClose={() => setShowCreateModal(false)}
+                    onClose={() => {
+                        setShowCreateModal(false);
+                        setModalFooter(null);
+                    }}
                     title={modalTitle}
                     size="lg"
+                    footer={modalFooter}
                 >
                     <TranslationForm
                         languages={languages}
                         onSubmit={createTranslation}
-                        onCancel={() => setShowCreateModal(false)}
+                        onCancel={() => {
+                            setShowCreateModal(false);
+                            setModalFooter(null);
+                        }}
+                        onFooterReady={handleFooterReady}
                     />
                 </Modal>
             )}
@@ -377,15 +395,23 @@ const Translations: React.FC = () => {
             {showEditModal && selectedTranslation && (
                 <Modal
                     isOpen={true}
-                    onClose={() => setShowEditModal(false)}
+                    onClose={() => {
+                        setShowEditModal(false);
+                        setModalFooter(null);
+                    }}
                     title={modalTitle}
                     size="lg"
+                    footer={modalFooter}
                 >
                     <TranslationForm
                         languages={languages}
                         translation={selectedTranslation}
                         onSubmit={(translationData) => updateTranslation(selectedTranslation.id, translationData)}
-                        onCancel={() => setShowEditModal(false)}
+                        onCancel={() => {
+                            setShowEditModal(false);
+                            setModalFooter(null);
+                        }}
+                        onFooterReady={handleFooterReady}
                     />
                 </Modal>
             )}

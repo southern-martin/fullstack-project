@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import Button from '../../../shared/components/ui/Button';
 import { Language, Translation } from '../services/translationService';
@@ -8,6 +8,7 @@ interface TranslationFormProps {
     languages: Language[];
     onSubmit: (data: any) => void;
     onCancel: () => void;
+    onFooterReady?: (footer: React.ReactNode) => void;
 }
 
 const TranslationForm: React.FC<TranslationFormProps> = ({
@@ -15,6 +16,7 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
     languages,
     onSubmit,
     onCancel,
+    onFooterReady,
 }) => {
     const [formData, setFormData] = useState({
         key: translation?.key || '',
@@ -26,10 +28,20 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    // Use ref to access current form data without causing re-renders
+    const formDataRef = useRef(formData);
+    formDataRef.current = formData;
 
-        if (!formData.key.trim() || !formData.originalText.trim() || !formData.translatedText.trim() || !formData.languageId) {
+    // Use ref to track if footer has been passed to parent
+    const footerPassedRef = useRef(false);
+
+    const handleSubmit = useCallback(async (e?: React.FormEvent) => {
+        if (e) {
+            e.preventDefault();
+        }
+
+        const currentFormData = formDataRef.current;
+        if (!currentFormData.key.trim() || !currentFormData.originalText.trim() || !currentFormData.translatedText.trim() || !currentFormData.languageId) {
             toast.error('Please fill in all required fields');
             return;
         }
@@ -37,15 +49,15 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
         try {
             setIsSubmitting(true);
             await onSubmit({
-                ...formData,
-                languageId: parseInt(formData.languageId),
+                ...currentFormData,
+                languageId: parseInt(currentFormData.languageId),
             });
         } catch (error) {
             // Error handling is done in parent component
         } finally {
             setIsSubmitting(false);
         }
-    };
+    }, [onSubmit]);
 
     const handleChange = (field: string, value: string) => {
         setFormData(prev => ({
@@ -53,6 +65,43 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
             [field]: value,
         }));
     };
+
+    // Memoize footer to prevent infinite re-renders
+    const footer = useMemo(() => (
+        <div className="flex justify-end space-x-3">
+            <Button
+                type="button"
+                variant="secondary"
+                onClick={onCancel}
+                disabled={isSubmitting}
+            >
+                Cancel
+            </Button>
+            <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex items-center space-x-2"
+                onClick={handleSubmit}
+            >
+                {isSubmitting ? (
+                    <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span>Saving...</span>
+                    </>
+                ) : (
+                    <span>{translation ? 'Update Translation' : 'Create Translation'}</span>
+                )}
+            </Button>
+        </div>
+    ), [onCancel, isSubmitting, handleSubmit, translation]);
+
+    // Pass footer to parent component only once when component mounts
+    useEffect(() => {
+        if (onFooterReady && !footerPassedRef.current) {
+            onFooterReady(footer);
+            footerPassedRef.current = true;
+        }
+    }, [onFooterReady, footer]);
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6 p-6">
@@ -142,31 +191,7 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
                 </div>
             </div>
 
-            {/* Form Actions */}
-            <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={onCancel}
-                    disabled={isSubmitting}
-                >
-                    Cancel
-                </Button>
-                <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="flex items-center space-x-2"
-                >
-                    {isSubmitting ? (
-                        <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                            <span>Saving...</span>
-                        </>
-                    ) : (
-                        <span>{translation ? 'Update Translation' : 'Create Translation'}</span>
-                    )}
-                </Button>
-            </div>
+            {/* Form Actions - Footer will be rendered in Modal footer */}
         </form>
     );
 };
