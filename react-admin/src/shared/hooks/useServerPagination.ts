@@ -78,13 +78,13 @@ export function useServerPagination<T = any>({
       setLoading(true);
       setError(null);
 
-        const params: PaginationParams = {
-          page: currentPage,
-          limit: pageSize,
-          search: searchTerm || undefined,
-          sortBy: sortBy || undefined,
-          sortOrder,
-        };
+      const params: PaginationParams = {
+        page: currentPage,
+        limit: pageSize,
+        search: searchTerm || undefined,
+        sortBy: sortBy || undefined,
+        sortOrder,
+      };
 
       const response = await fetchFunction(params);
 

@@ -1,5 +1,5 @@
+import { PaginatedResponse } from '../../../shared/types';
 import { customerApiClient } from '../../../shared/utils/customerApi';
-import { PaginatedResponse, Customer as SharedCustomer } from '../../../shared/types';
 
 export interface Customer {
   id: number;
@@ -219,10 +219,3 @@ class CustomerService {
 
 export const customerService = new CustomerService();
 export default customerService;
-
-
-
-
-
-
-

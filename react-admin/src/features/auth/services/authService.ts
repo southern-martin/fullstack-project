@@ -4,44 +4,81 @@ import { AuthResponse, LoginCredentials, RegisterData, User } from '../types';
 
 class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await authApiClient.post<AuthResponse>(
-      AUTH_API_CONFIG.ENDPOINTS.LOGIN,
-      credentials
-    );
+    const response = await authApiClient.post<{
+      success: boolean;
+      data: {
+        user: any;
+        accessToken: string;
+        expiresIn: string;
+      };
+      message: string;
+    }>(AUTH_API_CONFIG.ENDPOINTS.LOGIN, credentials);
+
+    // Transform the response to match the expected AuthResponse format
+    const authResponse: AuthResponse = {
+      user: response.data.user,
+      token: response.data.accessToken,
+      expiresIn: response.data.expiresIn,
+    };
 
     // Store token in localStorage
-    if (response.token) {
-      localStorage.setItem('authToken', response.token);
+    if (authResponse.token) {
+      localStorage.setItem('authToken', authResponse.token);
     }
 
-    return response;
+    return authResponse;
   }
 
   async register(data: RegisterData): Promise<AuthResponse> {
-    const response = await authApiClient.post<AuthResponse>(
-      AUTH_API_CONFIG.ENDPOINTS.REGISTER,
-      data
-    );
+    const response = await authApiClient.post<{
+      success: boolean;
+      data: {
+        user: any;
+        accessToken: string;
+        expiresIn: string;
+      };
+      message: string;
+    }>(AUTH_API_CONFIG.ENDPOINTS.REGISTER, data);
+
+    // Transform the response to match the expected AuthResponse format
+    const authResponse: AuthResponse = {
+      user: response.data.user,
+      token: response.data.accessToken,
+      expiresIn: response.data.expiresIn,
+    };
 
     // Store token in localStorage
-    if (response.token) {
-      localStorage.setItem('authToken', response.token);
+    if (authResponse.token) {
+      localStorage.setItem('authToken', authResponse.token);
     }
 
-    return response;
+    return authResponse;
   }
 
   async refreshToken(): Promise<AuthResponse> {
-    const response = await authApiClient.post<AuthResponse>(
-      AUTH_API_CONFIG.ENDPOINTS.REFRESH
-    );
+    const response = await authApiClient.post<{
+      success: boolean;
+      data: {
+        user: any;
+        accessToken: string;
+        expiresIn: string;
+      };
+      message: string;
+    }>(AUTH_API_CONFIG.ENDPOINTS.REFRESH);
+
+    // Transform the response to match the expected AuthResponse format
+    const authResponse: AuthResponse = {
+      user: response.data.user,
+      token: response.data.accessToken,
+      expiresIn: response.data.expiresIn,
+    };
 
     // Update token in localStorage
-    if (response.token) {
-      localStorage.setItem('authToken', response.token);
+    if (authResponse.token) {
+      localStorage.setItem('authToken', authResponse.token);
     }
 
-    return response;
+    return authResponse;
   }
 
   async logout(): Promise<void> {
