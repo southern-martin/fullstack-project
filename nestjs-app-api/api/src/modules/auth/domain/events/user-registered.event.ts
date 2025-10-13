@@ -1,4 +1,4 @@
-import { DomainEvent } from '../../../../shared/kernel/domain-event';
+import { DomainEvent } from "../../../../shared/kernel/domain-event";
 
 export class UserRegisteredEvent extends DomainEvent {
   constructor(
@@ -6,7 +6,7 @@ export class UserRegisteredEvent extends DomainEvent {
     public readonly email: string,
     public readonly firstName: string,
     public readonly lastName: string,
-    public readonly registeredAt: Date,
+    public readonly registeredAt: Date
   ) {
     super();
   }

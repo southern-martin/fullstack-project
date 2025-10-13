@@ -1,18 +1,16 @@
-import { Injectable } from '@nestjs/common';
-import { UserLogoutEvent } from '../../domain/events/user-logout.event';
-import { EventBusService } from '../../../../shared/services/event-bus.service';
+import { Injectable } from "@nestjs/common";
+import { EventBusService } from "../../../../shared/services/event-bus.service";
+import { UserLogoutEvent } from "../../domain/events/user-logout.event";
 
 /**
  * LogoutUseCase
- * 
+ *
  * This use case handles user logout.
  * It orchestrates the domain logic and publishes logout events.
  */
 @Injectable()
 export class LogoutUseCase {
-  constructor(
-    private readonly eventBusService: EventBusService,
-  ) {}
+  constructor(private readonly eventBusService: EventBusService) {}
 
   /**
    * Executes the logout use case.
@@ -23,13 +21,15 @@ export class LogoutUseCase {
   async execute(
     userId: number,
     email: string,
-    sessionStartTime?: Date,
+    sessionStartTime?: Date
   ): Promise<void> {
     // 1. Calculate session duration if start time is provided
     let sessionDuration: number | undefined;
     if (sessionStartTime) {
       const now = new Date();
-      sessionDuration = Math.round((now.getTime() - sessionStartTime.getTime()) / (1000 * 60)); // in minutes
+      sessionDuration = Math.round(
+        (now.getTime() - sessionStartTime.getTime()) / (1000 * 60)
+      ); // in minutes
     }
 
     // 2. Publish domain event
@@ -37,7 +37,7 @@ export class LogoutUseCase {
       userId,
       email,
       new Date(),
-      sessionDuration,
+      sessionDuration
     );
     await this.eventBusService.publish(logoutEvent);
 

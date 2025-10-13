@@ -1,19 +1,19 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Carrier } from '../../domain/entities/carrier.entity';
-import { CarrierRepositoryInterface } from '../../domain/repositories/carrier.repository.interface';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Carrier } from "../../domain/entities/carrier.entity";
+import { CarrierRepositoryInterface } from "../../domain/repositories/carrier.repository.interface";
 
 @Injectable()
 export class CarrierTypeOrmRepository implements CarrierRepositoryInterface {
   constructor(
     @InjectRepository(Carrier)
-    private readonly carrierRepository: Repository<Carrier>,
+    private readonly carrierRepository: Repository<Carrier>
   ) {}
 
   async findAll(): Promise<Carrier[]> {
     return this.carrierRepository.find({
-      order: { name: 'ASC' },
+      order: { name: "ASC" },
     });
   }
 
@@ -46,7 +46,7 @@ export class CarrierTypeOrmRepository implements CarrierRepositoryInterface {
   async findActive(): Promise<Carrier[]> {
     return this.carrierRepository.find({
       where: { isActive: true },
-      order: { name: 'ASC' },
+      order: { name: "ASC" },
     });
   }
 
@@ -57,19 +57,19 @@ export class CarrierTypeOrmRepository implements CarrierRepositoryInterface {
   async findPaginated(
     page: number,
     limit: number,
-    search?: string,
+    search?: string
   ): Promise<{ carriers: Carrier[]; total: number }> {
-    const queryBuilder = this.carrierRepository.createQueryBuilder('carrier');
+    const queryBuilder = this.carrierRepository.createQueryBuilder("carrier");
 
     if (search) {
       queryBuilder.where(
-        'carrier.name ILIKE :search OR carrier.description ILIKE :search OR carrier.contactEmail ILIKE :search',
+        "carrier.name ILIKE :search OR carrier.description ILIKE :search OR carrier.contactEmail ILIKE :search",
         { search: `%${search}%` }
       );
     }
 
     const [carriers, total] = await queryBuilder
-      .orderBy('carrier.name', 'ASC')
+      .orderBy("carrier.name", "ASC")
       .skip((page - 1) * limit)
       .take(limit)
       .getManyAndCount();

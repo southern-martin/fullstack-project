@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { Carrier } from '../entities/carrier.entity';
+import { Injectable } from "@nestjs/common";
+import { Carrier } from "../entities/carrier.entity";
 
 /**
  * CarrierDomainService
- * 
+ *
  * This service encapsulates the core business logic and rules related to carriers.
  * It operates on Carrier entities and ensures that business rules are enforced
  * independently of application-specific concerns (like data storage or UI).
@@ -23,31 +23,42 @@ export class CarrierDomainService {
 
     // Name validation
     if (!carrierData.name || carrierData.name.trim().length < 2) {
-      errors.push('Carrier name must be at least 2 characters');
+      errors.push("Carrier name must be at least 2 characters");
     }
 
     if (carrierData.name && carrierData.name.length > 100) {
-      errors.push('Carrier name must not exceed 100 characters');
+      errors.push("Carrier name must not exceed 100 characters");
     }
 
     // Code validation (if provided)
-    if (carrierData.metadata?.code && !this.isValidCarrierCode(carrierData.metadata.code)) {
-      errors.push('Carrier code must contain only uppercase letters, numbers, hyphens, and underscores');
+    if (
+      carrierData.metadata?.code &&
+      !this.isValidCarrierCode(carrierData.metadata.code)
+    ) {
+      errors.push(
+        "Carrier code must contain only uppercase letters, numbers, hyphens, and underscores"
+      );
     }
 
     // Contact email validation (if provided)
-    if (carrierData.contactEmail && !this.isValidEmail(carrierData.contactEmail)) {
-      errors.push('Contact email must be a valid email address');
+    if (
+      carrierData.contactEmail &&
+      !this.isValidEmail(carrierData.contactEmail)
+    ) {
+      errors.push("Contact email must be a valid email address");
     }
 
     // Contact phone validation (if provided)
-    if (carrierData.contactPhone && !this.isValidPhone(carrierData.contactPhone)) {
-      errors.push('Contact phone must be in valid format');
+    if (
+      carrierData.contactPhone &&
+      !this.isValidPhone(carrierData.contactPhone)
+    ) {
+      errors.push("Contact phone must be in valid format");
     }
 
     // Description validation (if provided)
     if (carrierData.description && carrierData.description.length > 500) {
-      errors.push('Description must not exceed 500 characters');
+      errors.push("Description must not exceed 500 characters");
     }
 
     return {
@@ -70,31 +81,48 @@ export class CarrierDomainService {
     // Name validation (if being updated)
     if (updateData.name !== undefined) {
       if (!updateData.name || updateData.name.trim().length < 2) {
-        errors.push('Carrier name must be at least 2 characters');
+        errors.push("Carrier name must be at least 2 characters");
       }
       if (updateData.name.length > 100) {
-        errors.push('Carrier name must not exceed 100 characters');
+        errors.push("Carrier name must not exceed 100 characters");
       }
     }
 
     // Code validation (if being updated)
-    if (updateData.metadata?.code && !this.isValidCarrierCode(updateData.metadata.code)) {
-      errors.push('Carrier code must contain only uppercase letters, numbers, hyphens, and underscores');
+    if (
+      updateData.metadata?.code &&
+      !this.isValidCarrierCode(updateData.metadata.code)
+    ) {
+      errors.push(
+        "Carrier code must contain only uppercase letters, numbers, hyphens, and underscores"
+      );
     }
 
     // Contact email validation (if being updated)
-    if (updateData.contactEmail !== undefined && updateData.contactEmail && !this.isValidEmail(updateData.contactEmail)) {
-      errors.push('Contact email must be a valid email address');
+    if (
+      updateData.contactEmail !== undefined &&
+      updateData.contactEmail &&
+      !this.isValidEmail(updateData.contactEmail)
+    ) {
+      errors.push("Contact email must be a valid email address");
     }
 
     // Contact phone validation (if being updated)
-    if (updateData.contactPhone !== undefined && updateData.contactPhone && !this.isValidPhone(updateData.contactPhone)) {
-      errors.push('Contact phone must be in valid format');
+    if (
+      updateData.contactPhone !== undefined &&
+      updateData.contactPhone &&
+      !this.isValidPhone(updateData.contactPhone)
+    ) {
+      errors.push("Contact phone must be in valid format");
     }
 
     // Description validation (if being updated)
-    if (updateData.description !== undefined && updateData.description && updateData.description.length > 500) {
-      errors.push('Description must not exceed 500 characters');
+    if (
+      updateData.description !== undefined &&
+      updateData.description &&
+      updateData.description.length > 500
+    ) {
+      errors.push("Description must not exceed 500 characters");
     }
 
     return {
@@ -204,18 +232,19 @@ export class CarrierDomainService {
       onTimeDeliveries: number;
       totalDeliveries: number;
       customerRating: number;
-    },
+    }
   ): number {
     let score = 0;
 
     // On-time delivery rate (40% of score)
     if (metrics.totalDeliveries > 0) {
-      const onTimeRate = (metrics.onTimeDeliveries / metrics.totalDeliveries) * 100;
-      score += (onTimeRate * 0.4);
+      const onTimeRate =
+        (metrics.onTimeDeliveries / metrics.totalDeliveries) * 100;
+      score += onTimeRate * 0.4;
     }
 
     // Customer rating (60% of score)
-    score += (metrics.customerRating * 0.6);
+    score += metrics.customerRating * 0.6;
 
     return Math.min(100, Math.max(0, score));
   }
@@ -233,7 +262,7 @@ export class CarrierDomainService {
       dimensions: { length: number; width: number; height: number };
       destination: string;
       serviceType: string;
-    },
+    }
   ): boolean {
     // Business rule: Carrier must be active
     if (!carrier.isActive) {
@@ -241,19 +270,28 @@ export class CarrierDomainService {
     }
 
     // Business rule: Check weight capacity (if defined in metadata)
-    if (carrier.metadata?.maxWeight && shipmentRequirements.weight > carrier.metadata.maxWeight) {
+    if (
+      carrier.metadata?.maxWeight &&
+      shipmentRequirements.weight > carrier.metadata.maxWeight
+    ) {
       return false;
     }
 
     // Business rule: Check service type compatibility (if defined in metadata)
-    if (carrier.metadata?.supportedServices && 
-        !carrier.metadata.supportedServices.includes(shipmentRequirements.serviceType)) {
+    if (
+      carrier.metadata?.supportedServices &&
+      !carrier.metadata.supportedServices.includes(
+        shipmentRequirements.serviceType
+      )
+    ) {
       return false;
     }
 
     // Business rule: Check destination coverage (if defined in metadata)
-    if (carrier.metadata?.serviceAreas && 
-        !carrier.metadata.serviceAreas.includes(shipmentRequirements.destination)) {
+    if (
+      carrier.metadata?.serviceAreas &&
+      !carrier.metadata.serviceAreas.includes(shipmentRequirements.destination)
+    ) {
       return false;
     }
 
@@ -276,6 +314,6 @@ export class CarrierDomainService {
   private isValidPhone(phone: string): boolean {
     // Basic phone validation - can be enhanced based on requirements
     const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
+    return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ""));
   }
 }

@@ -2,21 +2,21 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-} from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { UserRepositoryInterface } from '../../domain/repositories/user.repository.interface';
-import { RoleRepositoryInterface } from '../../domain/repositories/role.repository.interface';
-import { AuthDomainService } from '../../domain/services/auth.domain.service';
-import { UserDomainService } from '../../domain/services/user.domain.service';
-import { UserRegisteredEvent } from '../../domain/events/user-registered.event';
-import { RegisterDto } from '../dto/register.dto';
-import { AuthResponseDto } from '../dto/auth-response.dto';
-import { EventBusService } from '../../../../shared/services/event-bus.service';
-import { User } from '../../domain/entities/user.entity';
+} from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { EventBusService } from "../../../../shared/services/event-bus.service";
+import { User } from "../../domain/entities/user.entity";
+import { UserRegisteredEvent } from "../../domain/events/user-registered.event";
+import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
+import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
+import { AuthDomainService } from "../../domain/services/auth.domain.service";
+import { UserDomainService } from "../../domain/services/user.domain.service";
+import { AuthResponseDto } from "../dto/auth-response.dto";
+import { RegisterDto } from "../dto/register.dto";
 
 /**
  * RegisterUseCase
- * 
+ *
  * This use case handles user registration.
  * It orchestrates the domain logic (validation) and persistence (repository).
  */
@@ -28,7 +28,7 @@ export class RegisterUseCase {
     private readonly authDomainService: AuthDomainService,
     private readonly userDomainService: UserDomainService,
     private readonly jwtService: JwtService,
-    private readonly eventBusService: EventBusService,
+    private readonly eventBusService: EventBusService
   ) {}
 
   /**
@@ -38,25 +38,31 @@ export class RegisterUseCase {
    */
   async execute(registerDto: RegisterDto): Promise<AuthResponseDto> {
     // 1. Validate input using domain service
-    const validation = this.authDomainService.validateUserRegistrationData(registerDto);
+    const validation =
+      this.authDomainService.validateUserRegistrationData(registerDto);
     if (!validation.isValid) {
-      throw new BadRequestException(validation.errors.join(', '));
+      throw new BadRequestException(validation.errors.join(", "));
     }
 
     // 2. Check if user already exists
-    const existingUser = await this.userRepository.findByEmail(registerDto.email);
+    const existingUser = await this.userRepository.findByEmail(
+      registerDto.email
+    );
     if (existingUser) {
-      throw new ConflictException('User with this email already exists');
+      throw new ConflictException("User with this email already exists");
     }
 
     // 3. Normalize user data
-    const normalizedData = this.userDomainService.normalizeUserData(registerDto);
+    const normalizedData =
+      this.userDomainService.normalizeUserData(registerDto);
 
     // 4. Hash password
-    const hashedPassword = this.authDomainService.generatePasswordHash(registerDto.password);
+    const hashedPassword = this.authDomainService.generatePasswordHash(
+      registerDto.password
+    );
 
     // 5. Get default roles (if any)
-    const defaultRoles = await this.roleRepository.findByName('user');
+    const defaultRoles = await this.roleRepository.findByName("user");
     const roles = defaultRoles ? [defaultRoles] : [];
 
     // 6. Create user entity
@@ -83,7 +89,7 @@ export class RegisterUseCase {
       savedUser.email,
       savedUser.firstName,
       savedUser.lastName,
-      new Date(),
+      new Date()
     );
     await this.eventBusService.publish(registerEvent);
 
@@ -97,12 +103,13 @@ export class RegisterUseCase {
         lastName: savedUser.lastName,
         isActive: savedUser.isActive,
         isEmailVerified: savedUser.isEmailVerified,
-        roles: savedUser.roles?.map(role => ({
-          id: role.id,
-          name: role.name,
-          description: role.description,
-          permissions: role.permissions || [],
-        })) || [],
+        roles:
+          savedUser.roles?.map((role) => ({
+            id: role.id,
+            name: role.name,
+            description: role.description,
+            permissions: role.permissions || [],
+          })) || [],
       },
     };
   }

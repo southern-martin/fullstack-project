@@ -1,21 +1,16 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { CarrierRepositoryInterface } from '../../domain/repositories/carrier.repository.interface';
-import { CarrierResponseDto } from '../dto/carrier-response.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { CarrierRepositoryInterface } from "../../domain/repositories/carrier.repository.interface";
+import { CarrierResponseDto } from "../dto/carrier-response.dto";
 
 /**
  * GetCarrierUseCase
- * 
+ *
  * This use case handles retrieving carrier information.
  * It orchestrates the domain logic and persistence (repository).
  */
 @Injectable()
 export class GetCarrierUseCase {
-  constructor(
-    private readonly carrierRepository: CarrierRepositoryInterface,
-  ) {}
+  constructor(private readonly carrierRepository: CarrierRepositoryInterface) {}
 
   /**
    * Retrieves a carrier by its ID.
@@ -26,7 +21,7 @@ export class GetCarrierUseCase {
   async getById(id: number): Promise<CarrierResponseDto> {
     const carrier = await this.carrierRepository.findById(id);
     if (!carrier) {
-      throw new NotFoundException('Carrier not found');
+      throw new NotFoundException("Carrier not found");
     }
     return CarrierResponseDto.fromDomain(carrier);
   }
@@ -40,7 +35,7 @@ export class GetCarrierUseCase {
   async getByCode(code: string): Promise<CarrierResponseDto> {
     const carrier = await this.carrierRepository.findByCode(code);
     if (!carrier) {
-      throw new NotFoundException('Carrier not found');
+      throw new NotFoundException("Carrier not found");
     }
     return CarrierResponseDto.fromDomain(carrier);
   }
@@ -51,7 +46,7 @@ export class GetCarrierUseCase {
    */
   async getAll(): Promise<CarrierResponseDto[]> {
     const carriers = await this.carrierRepository.findAll();
-    return carriers.map(carrier => CarrierResponseDto.fromDomain(carrier));
+    return carriers.map((carrier) => CarrierResponseDto.fromDomain(carrier));
   }
 
   /**
@@ -60,7 +55,7 @@ export class GetCarrierUseCase {
    */
   async getActive(): Promise<CarrierResponseDto[]> {
     const carriers = await this.carrierRepository.findActive();
-    return carriers.map(carrier => CarrierResponseDto.fromDomain(carrier));
+    return carriers.map((carrier) => CarrierResponseDto.fromDomain(carrier));
   }
 
   /**
@@ -73,12 +68,23 @@ export class GetCarrierUseCase {
   async getPaginated(
     page: number,
     limit: number,
-    search?: string,
-  ): Promise<{ carriers: CarrierResponseDto[]; total: number; page: number; limit: number }> {
-    const result = await this.carrierRepository.findPaginated(page, limit, search);
-    
+    search?: string
+  ): Promise<{
+    carriers: CarrierResponseDto[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const result = await this.carrierRepository.findPaginated(
+      page,
+      limit,
+      search
+    );
+
     return {
-      carriers: result.carriers.map(carrier => CarrierResponseDto.fromDomain(carrier)),
+      carriers: result.carriers.map((carrier) =>
+        CarrierResponseDto.fromDomain(carrier)
+      ),
       total: result.total,
       page,
       limit,

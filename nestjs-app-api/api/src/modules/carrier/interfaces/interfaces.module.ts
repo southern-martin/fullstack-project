@@ -1,11 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Module } from "@nestjs/common";
 
 // Controllers
-import { CarrierController } from './controllers/carrier.controller';
+import { CarrierController } from "./controllers/carrier.controller";
 
 @Module({
-  controllers: [
-    CarrierController,
-  ],
+  controllers: [CarrierController],
 })
 export class CarrierInterfacesModule {}

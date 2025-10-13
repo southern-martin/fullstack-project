@@ -1,27 +1,25 @@
-import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Module } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { JwtModule } from "@nestjs/jwt";
 
 // Use Cases
-import { LoginUseCase } from './use-cases/login.use-case';
-import { RegisterUseCase } from './use-cases/register.use-case';
-import { RefreshTokenUseCase } from './use-cases/refresh-token.use-case';
-import { LogoutUseCase } from './use-cases/logout.use-case';
+import { LoginUseCase } from "./use-cases/login.use-case";
+import { LogoutUseCase } from "./use-cases/logout.use-case";
+import { RefreshTokenUseCase } from "./use-cases/refresh-token.use-case";
+import { RegisterUseCase } from "./use-cases/register.use-case";
 
 // Domain Services
-import { AuthDomainService } from '../domain/services/auth.domain.service';
-import { UserDomainService } from '../domain/services/user.domain.service';
+import { AuthDomainService } from "../domain/services/auth.domain.service";
+import { UserDomainService } from "../domain/services/user.domain.service";
 
 // Repository Interfaces
-import { UserRepositoryInterface } from '../domain/repositories/user.repository.interface';
-import { RoleRepositoryInterface } from '../domain/repositories/role.repository.interface';
 
 // Infrastructure
-import { UserTypeOrmRepository } from '../infrastructure/repositories/user.typeorm.repository';
-import { RoleTypeOrmRepository } from '../infrastructure/repositories/role.typeorm.repository';
+import { RoleTypeOrmRepository } from "../infrastructure/repositories/role.typeorm.repository";
+import { UserTypeOrmRepository } from "../infrastructure/repositories/user.typeorm.repository";
 
 // Shared Services
-import { EventBusService } from '../../../shared/services/event-bus.service';
+import { EventBusService } from "../../../shared/services/event-bus.service";
 
 @Module({
   imports: [
@@ -29,9 +27,9 @@ import { EventBusService } from '../../../shared/services/event-bus.service';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('jwt.secret', 'your-secret-key'),
+        secret: configService.get<string>("jwt.secret", "your-secret-key"),
         signOptions: {
-          expiresIn: configService.get<string>('jwt.expiresIn', '24h'),
+          expiresIn: configService.get<string>("jwt.expiresIn", "24h"),
         },
       }),
       inject: [ConfigService],
@@ -50,11 +48,11 @@ import { EventBusService } from '../../../shared/services/event-bus.service';
 
     // Repository Implementations
     {
-      provide: 'UserRepositoryInterface',
+      provide: "UserRepositoryInterface",
       useClass: UserTypeOrmRepository,
     },
     {
-      provide: 'RoleRepositoryInterface',
+      provide: "RoleRepositoryInterface",
       useClass: RoleTypeOrmRepository,
     },
 

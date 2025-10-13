@@ -73,21 +73,34 @@ check_dependencies() {
 get_project_name() {
     local project_name=""
     
-    # Try to get project name from package.json
-    for package_file in "package.json" "../../package.json" "$PROJECT_ROOT/package.json"; do
-        if [ -f "$package_file" ]; then
-            project_name=$(jq -r '.name // empty' "$package_file" 2>/dev/null)
-            [ -n "$project_name" ] && break
-        fi
-    done
+    # First, try to get project name from the workspace directory name
+    local workspace_name
+    workspace_name=$(basename "$PROJECT_ROOT")
+    
+    # Clean up workspace name (remove special characters except hyphens, convert to title case)
+    if [ -n "$workspace_name" ] && [ "$workspace_name" != "null" ]; then
+        project_name=$(echo "$workspace_name" | sed 's/[^a-zA-Z0-9-]//g' | sed 's/-/ /g' | sed 's/\b\w/\U&/g' | sed 's/ /-/g')
+    fi
+    
+    # Try to get project name from package.json files in subdirectories
+    if [ -z "$project_name" ] || [ "$project_name" = "null" ]; then
+        for package_file in "react-admin/package.json" "nestjs-app-api/api/package.json" "auth-service/package.json"; do
+            if [ -f "$PROJECT_ROOT/$package_file" ]; then
+                project_name=$(jq -r '.name // empty' "$PROJECT_ROOT/$package_file" 2>/dev/null)
+                if [ -n "$project_name" ] && [ "$project_name" != "null" ]; then
+                    # Clean up the package name
+                    project_name=$(echo "$project_name" | sed 's/[^a-zA-Z0-9-]//g' | sed 's/-/ /g' | sed 's/\b\w/\U&/g' | sed 's/ /-/g')
+                    break
+                fi
+            fi
+        done
+    fi
     
     # Fallback to directory name
     if [ -z "$project_name" ] || [ "$project_name" = "null" ]; then
-        project_name=$(basename "$(pwd)")
+        project_name=$(basename "$PROJECT_ROOT")
+        project_name=$(echo "$project_name" | sed 's/[^a-zA-Z0-9-]//g' | sed 's/-/ /g' | sed 's/\b\w/\U&/g' | sed 's/ /-/g')
     fi
-    
-    # Clean up project name (remove special characters except hyphens, convert to title case)
-    project_name=$(echo "$project_name" | sed 's/[^a-zA-Z0-9-]//g' | sed 's/-/ /g' | sed 's/\b\w/\U&/g' | sed 's/ /-/g')
     
     # Default fallback
     if [ -z "$project_name" ]; then
@@ -370,7 +383,7 @@ process_collection() {
     # Get project name and create collection name
     local project_name collection_name
     project_name=$(get_project_name)
-    collection_name="Development-$project_name"
+    collection_name="$project_name-API"
     
     print_info "Collection will be named: $collection_name"
     
@@ -540,7 +553,7 @@ process_environment() {
     # Get project name and create environment name
     local project_name environment_name
     project_name=$(get_project_name)
-    environment_name="Development-$project_name"
+    environment_name="$project_name-Environment"
     
     print_info "Environment will be named: $environment_name"
     

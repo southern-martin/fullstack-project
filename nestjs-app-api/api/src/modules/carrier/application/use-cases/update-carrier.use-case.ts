@@ -3,17 +3,17 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
-} from '@nestjs/common';
-import { CarrierRepositoryInterface } from '../../domain/repositories/carrier.repository.interface';
-import { CarrierDomainService } from '../../domain/services/carrier.domain.service';
-import { CarrierUpdatedEvent } from '../../domain/events/carrier-updated.event';
-import { UpdateCarrierDto } from '../dto/update-carrier.dto';
-import { CarrierResponseDto } from '../dto/carrier-response.dto';
-import { EventBusService } from '../../../../shared/services/event-bus.service';
+} from "@nestjs/common";
+import { EventBusService } from "../../../../shared/services/event-bus.service";
+import { CarrierUpdatedEvent } from "../../domain/events/carrier-updated.event";
+import { CarrierRepositoryInterface } from "../../domain/repositories/carrier.repository.interface";
+import { CarrierDomainService } from "../../domain/services/carrier.domain.service";
+import { CarrierResponseDto } from "../dto/carrier-response.dto";
+import { UpdateCarrierDto } from "../dto/update-carrier.dto";
 
 /**
  * UpdateCarrierUseCase
- * 
+ *
  * This use case handles updating existing carriers.
  * It orchestrates the domain logic (validation) and persistence (repository).
  */
@@ -22,7 +22,7 @@ export class UpdateCarrierUseCase {
   constructor(
     private readonly carrierRepository: CarrierRepositoryInterface,
     private readonly carrierDomainService: CarrierDomainService,
-    private readonly eventBusService: EventBusService,
+    private readonly eventBusService: EventBusService
   ) {}
 
   /**
@@ -31,40 +31,52 @@ export class UpdateCarrierUseCase {
    * @param updateCarrierDto The data for updating the carrier.
    * @returns Updated carrier response.
    */
-  async execute(id: number, updateCarrierDto: UpdateCarrierDto): Promise<CarrierResponseDto> {
+  async execute(
+    id: number,
+    updateCarrierDto: UpdateCarrierDto
+  ): Promise<CarrierResponseDto> {
     // 1. Find existing carrier
     const existingCarrier = await this.carrierRepository.findById(id);
     if (!existingCarrier) {
-      throw new NotFoundException('Carrier not found');
+      throw new NotFoundException("Carrier not found");
     }
 
     // 2. Validate update data using domain service
-    const validation = this.carrierDomainService.validateCarrierUpdateData(updateCarrierDto);
+    const validation =
+      this.carrierDomainService.validateCarrierUpdateData(updateCarrierDto);
     if (!validation.isValid) {
-      throw new BadRequestException(validation.errors.join(', '));
+      throw new BadRequestException(validation.errors.join(", "));
     }
 
     // 3. If code is being changed, check for conflict
-    if (updateCarrierDto.metadata?.code && 
-        updateCarrierDto.metadata.code !== existingCarrier.metadata?.code) {
-      const carrierWithSameCode = await this.carrierRepository.findByCode(updateCarrierDto.metadata.code);
+    if (
+      updateCarrierDto.metadata?.code &&
+      updateCarrierDto.metadata.code !== existingCarrier.metadata?.code
+    ) {
+      const carrierWithSameCode = await this.carrierRepository.findByCode(
+        updateCarrierDto.metadata.code
+      );
       if (carrierWithSameCode) {
-        throw new ConflictException('Carrier code already exists');
+        throw new ConflictException("Carrier code already exists");
       }
     }
 
     // 4. Normalize update data
-    const normalizedData = this.carrierDomainService.normalizeCarrierData(updateCarrierDto);
+    const normalizedData =
+      this.carrierDomainService.normalizeCarrierData(updateCarrierDto);
 
     // 5. Update carrier in repository
-    const updatedCarrier = await this.carrierRepository.update(id, normalizedData);
+    const updatedCarrier = await this.carrierRepository.update(
+      id,
+      normalizedData
+    );
 
     // 6. Publish domain event
     const carrierUpdatedEvent = new CarrierUpdatedEvent(
       updatedCarrier.id,
       updatedCarrier.name,
       updatedCarrier.metadata?.code,
-      new Date(),
+      new Date()
     );
     await this.eventBusService.publish(carrierUpdatedEvent);
 

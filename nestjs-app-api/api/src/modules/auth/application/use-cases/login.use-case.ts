@@ -3,18 +3,18 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
-} from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { UserRepositoryInterface } from '../../domain/repositories/user.repository.interface';
-import { AuthDomainService } from '../../domain/services/auth.domain.service';
-import { UserLoggedInEvent } from '../../domain/events/user-logged-in.event';
-import { LoginDto } from '../dto/login.dto';
-import { AuthResponseDto } from '../dto/auth-response.dto';
-import { EventBusService } from '../../../../shared/services/event-bus.service';
+} from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { EventBusService } from "../../../../shared/services/event-bus.service";
+import { UserLoggedInEvent } from "../../domain/events/user-logged-in.event";
+import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
+import { AuthDomainService } from "../../domain/services/auth.domain.service";
+import { AuthResponseDto } from "../dto/auth-response.dto";
+import { LoginDto } from "../dto/login.dto";
 
 /**
  * LoginUseCase
- * 
+ *
  * This use case handles user authentication and login.
  * It orchestrates the domain logic (validation) and persistence (repository).
  */
@@ -24,7 +24,7 @@ export class LoginUseCase {
     private readonly userRepository: UserRepositoryInterface,
     private readonly authDomainService: AuthDomainService,
     private readonly jwtService: JwtService,
-    private readonly eventBusService: EventBusService,
+    private readonly eventBusService: EventBusService
   ) {}
 
   /**
@@ -37,36 +37,37 @@ export class LoginUseCase {
   async execute(
     loginDto: LoginDto,
     ipAddress?: string,
-    userAgent?: string,
+    userAgent?: string
   ): Promise<AuthResponseDto> {
     // 1. Validate input using domain service
     const validation = this.authDomainService.validateLoginCredentials(
       loginDto.email,
-      loginDto.password,
+      loginDto.password
     );
     if (!validation.isValid) {
-      throw new BadRequestException(validation.errors.join(', '));
+      throw new BadRequestException(validation.errors.join(", "));
     }
 
     // 2. Find user by email
     const user = await this.userRepository.findByEmail(loginDto.email);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException("User not found");
     }
 
     // 3. Validate user authentication status
-    const userValidation = this.authDomainService.validateUserAuthentication(user);
+    const userValidation =
+      this.authDomainService.validateUserAuthentication(user);
     if (!userValidation.isValid) {
-      throw new UnauthorizedException(userValidation.errors.join(', '));
+      throw new UnauthorizedException(userValidation.errors.join(", "));
     }
 
     // 4. Verify password
     const isPasswordValid = this.authDomainService.verifyPassword(
       loginDto.password,
-      user.password,
+      user.password
     );
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException("Invalid credentials");
     }
 
     // 5. Generate JWT token
@@ -84,7 +85,7 @@ export class LoginUseCase {
       user.email,
       new Date(),
       ipAddress,
-      userAgent,
+      userAgent
     );
     await this.eventBusService.publish(loginEvent);
 
@@ -98,12 +99,13 @@ export class LoginUseCase {
         lastName: user.lastName,
         isActive: user.isActive,
         isEmailVerified: user.isEmailVerified,
-        roles: user.roles?.map(role => ({
-          id: role.id,
-          name: role.name,
-          description: role.description,
-          permissions: role.permissions || [],
-        })) || [],
+        roles:
+          user.roles?.map((role) => ({
+            id: role.id,
+            name: role.name,
+            description: role.description,
+            permissions: role.permissions || [],
+          })) || [],
       },
     };
   }

@@ -2,15 +2,15 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
-} from '@nestjs/common';
-import { CarrierRepositoryInterface } from '../../domain/repositories/carrier.repository.interface';
-import { CarrierDomainService } from '../../domain/services/carrier.domain.service';
-import { CarrierDeletedEvent } from '../../domain/events/carrier-deleted.event';
-import { EventBusService } from '../../../../shared/services/event-bus.service';
+} from "@nestjs/common";
+import { EventBusService } from "../../../../shared/services/event-bus.service";
+import { CarrierDeletedEvent } from "../../domain/events/carrier-deleted.event";
+import { CarrierRepositoryInterface } from "../../domain/repositories/carrier.repository.interface";
+import { CarrierDomainService } from "../../domain/services/carrier.domain.service";
 
 /**
  * DeleteCarrierUseCase
- * 
+ *
  * This use case handles deleting carriers.
  * It orchestrates the domain logic (validation) and persistence (repository).
  */
@@ -19,7 +19,7 @@ export class DeleteCarrierUseCase {
   constructor(
     private readonly carrierRepository: CarrierRepositoryInterface,
     private readonly carrierDomainService: CarrierDomainService,
-    private readonly eventBusService: EventBusService,
+    private readonly eventBusService: EventBusService
   ) {}
 
   /**
@@ -32,16 +32,21 @@ export class DeleteCarrierUseCase {
     // 1. Find existing carrier
     const existingCarrier = await this.carrierRepository.findById(id);
     if (!existingCarrier) {
-      throw new NotFoundException('Carrier not found');
+      throw new NotFoundException("Carrier not found");
     }
 
     // 2. Check for active shipments (placeholder - would need actual shipment service)
     const hasActiveShipments = false; // TODO: Implement actual check with shipment service
 
     // 3. Apply business rules for deletion
-    if (!this.carrierDomainService.canDeleteCarrier(existingCarrier, hasActiveShipments)) {
+    if (
+      !this.carrierDomainService.canDeleteCarrier(
+        existingCarrier,
+        hasActiveShipments
+      )
+    ) {
       throw new BadRequestException(
-        'Cannot delete carrier with active shipments or default status'
+        "Cannot delete carrier with active shipments or default status"
       );
     }
 
@@ -53,7 +58,7 @@ export class DeleteCarrierUseCase {
       existingCarrier.id,
       existingCarrier.name,
       existingCarrier.metadata?.code,
-      new Date(),
+      new Date()
     );
     await this.eventBusService.publish(carrierDeletedEvent);
   }

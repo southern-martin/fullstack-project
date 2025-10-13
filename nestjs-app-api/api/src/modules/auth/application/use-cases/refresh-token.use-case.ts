@@ -1,17 +1,16 @@
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
-} from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { UserRepositoryInterface } from '../../domain/repositories/user.repository.interface';
-import { AuthDomainService } from '../../domain/services/auth.domain.service';
-import { AuthResponseDto } from '../dto/auth-response.dto';
+} from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
+import { AuthDomainService } from "../../domain/services/auth.domain.service";
+import { AuthResponseDto } from "../dto/auth-response.dto";
 
 /**
  * RefreshTokenUseCase
- * 
+ *
  * This use case handles JWT token refresh.
  * It orchestrates the domain logic (validation) and persistence (repository).
  */
@@ -20,7 +19,7 @@ export class RefreshTokenUseCase {
   constructor(
     private readonly userRepository: UserRepositoryInterface,
     private readonly authDomainService: AuthDomainService,
-    private readonly jwtService: JwtService,
+    private readonly jwtService: JwtService
   ) {}
 
   /**
@@ -32,21 +31,22 @@ export class RefreshTokenUseCase {
     try {
       // 1. Verify and decode the current token
       const decoded = this.jwtService.verify(token);
-      
+
       if (!decoded.sub) {
-        throw new UnauthorizedException('Invalid token');
+        throw new UnauthorizedException("Invalid token");
       }
 
       // 2. Find user by ID
       const user = await this.userRepository.findById(decoded.sub);
       if (!user) {
-        throw new NotFoundException('User not found');
+        throw new NotFoundException("User not found");
       }
 
       // 3. Validate user authentication status
-      const userValidation = this.authDomainService.validateUserAuthentication(user);
+      const userValidation =
+        this.authDomainService.validateUserAuthentication(user);
       if (!userValidation.isValid) {
-        throw new UnauthorizedException(userValidation.errors.join(', '));
+        throw new UnauthorizedException(userValidation.errors.join(", "));
       }
 
       // 4. Generate new JWT token
@@ -63,19 +63,23 @@ export class RefreshTokenUseCase {
           lastName: user.lastName,
           isActive: user.isActive,
           isEmailVerified: user.isEmailVerified,
-          roles: user.roles?.map(role => ({
-            id: role.id,
-            name: role.name,
-            description: role.description,
-            permissions: role.permissions || [],
-          })) || [],
+          roles:
+            user.roles?.map((role) => ({
+              id: role.id,
+              name: role.name,
+              description: role.description,
+              permissions: role.permissions || [],
+            })) || [],
         },
       };
     } catch (error) {
-      if (error instanceof UnauthorizedException || error instanceof NotFoundException) {
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof NotFoundException
+      ) {
         throw error;
       }
-      throw new UnauthorizedException('Invalid or expired token');
+      throw new UnauthorizedException("Invalid or expired token");
     }
   }
 }

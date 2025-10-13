@@ -1,10 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { User } from '../entities/user.entity';
-import { Role } from '../entities/role.entity';
+import { Injectable } from "@nestjs/common";
+import { User } from "../entities/user.entity";
 
 /**
  * UserDomainService
- * 
+ *
  * This service encapsulates the core business logic and rules related to user management.
  * It operates on User and Role entities and ensures that business rules are enforced
  * independently of application-specific concerns (like data storage or UI).
@@ -24,26 +23,31 @@ export class UserDomainService {
 
     // Email validation
     if (!userData.email || !this.isValidEmail(userData.email)) {
-      errors.push('Valid email address is required');
+      errors.push("Valid email address is required");
     }
 
     // Name validation
     if (!userData.firstName || userData.firstName.trim().length < 2) {
-      errors.push('First name must be at least 2 characters');
+      errors.push("First name must be at least 2 characters");
     }
 
     if (!userData.lastName || userData.lastName.trim().length < 2) {
-      errors.push('Last name must be at least 2 characters');
+      errors.push("Last name must be at least 2 characters");
     }
 
     // Phone validation (optional but if provided, must be valid)
     if (userData.phone && !this.isValidPhone(userData.phone)) {
-      errors.push('Phone number must be in valid format');
+      errors.push("Phone number must be in valid format");
     }
 
     // Date of birth validation (optional but if provided, must be valid)
-    if (userData.dateOfBirth && !this.isValidDateOfBirth(userData.dateOfBirth)) {
-      errors.push('Date of birth must be a valid date and user must be at least 13 years old');
+    if (
+      userData.dateOfBirth &&
+      !this.isValidDateOfBirth(userData.dateOfBirth)
+    ) {
+      errors.push(
+        "Date of birth must be a valid date and user must be at least 13 years old"
+      );
     }
 
     return {
@@ -64,31 +68,44 @@ export class UserDomainService {
     const errors: string[] = [];
 
     // Email validation (if being updated)
-    if (updateData.email !== undefined && !this.isValidEmail(updateData.email)) {
-      errors.push('Valid email address is required');
+    if (
+      updateData.email !== undefined &&
+      !this.isValidEmail(updateData.email)
+    ) {
+      errors.push("Valid email address is required");
     }
 
     // Name validation (if being updated)
     if (updateData.firstName !== undefined) {
       if (!updateData.firstName || updateData.firstName.trim().length < 2) {
-        errors.push('First name must be at least 2 characters');
+        errors.push("First name must be at least 2 characters");
       }
     }
 
     if (updateData.lastName !== undefined) {
       if (!updateData.lastName || updateData.lastName.trim().length < 2) {
-        errors.push('Last name must be at least 2 characters');
+        errors.push("Last name must be at least 2 characters");
       }
     }
 
     // Phone validation (if being updated)
-    if (updateData.phone !== undefined && updateData.phone && !this.isValidPhone(updateData.phone)) {
-      errors.push('Phone number must be in valid format');
+    if (
+      updateData.phone !== undefined &&
+      updateData.phone &&
+      !this.isValidPhone(updateData.phone)
+    ) {
+      errors.push("Phone number must be in valid format");
     }
 
     // Date of birth validation (if being updated)
-    if (updateData.dateOfBirth !== undefined && updateData.dateOfBirth && !this.isValidDateOfBirth(updateData.dateOfBirth)) {
-      errors.push('Date of birth must be a valid date and user must be at least 13 years old');
+    if (
+      updateData.dateOfBirth !== undefined &&
+      updateData.dateOfBirth &&
+      !this.isValidDateOfBirth(updateData.dateOfBirth)
+    ) {
+      errors.push(
+        "Date of birth must be a valid date and user must be at least 13 years old"
+      );
     }
 
     return {
@@ -150,7 +167,7 @@ export class UserDomainService {
     // Business rule: Cannot delete users with recent activity (last 30 days)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
+
     if (user.lastLoginAt && user.lastLoginAt > thirtyDaysAgo) {
       return false;
     }
@@ -189,7 +206,7 @@ export class UserDomainService {
    * @returns True if user has the role, false otherwise.
    */
   hasRole(user: User, roleName: string): boolean {
-    return user.roles?.some(role => role.name === roleName) || false;
+    return user.roles?.some((role) => role.name === roleName) || false;
   }
 
   /**
@@ -199,9 +216,10 @@ export class UserDomainService {
    * @returns True if user has the permission, false otherwise.
    */
   hasPermission(user: User, permission: string): boolean {
-    return user.roles?.some(role => 
-      role.permissions?.includes(permission)
-    ) || false;
+    return (
+      user.roles?.some((role) => role.permissions?.includes(permission)) ||
+      false
+    );
   }
 
   /**
@@ -210,7 +228,7 @@ export class UserDomainService {
    * @returns True if user is admin, false otherwise.
    */
   isAdmin(user: User): boolean {
-    return this.hasRole(user, 'admin') || this.hasRole(user, 'super_admin');
+    return this.hasRole(user, "admin") || this.hasRole(user, "super_admin");
   }
 
   /**
@@ -219,7 +237,7 @@ export class UserDomainService {
    * @returns True if user can manage users, false otherwise.
    */
   canManageUsers(user: User): boolean {
-    return this.hasPermission(user, 'users.manage') || this.isAdmin(user);
+    return this.hasPermission(user, "users.manage") || this.isAdmin(user);
   }
 
   /**
@@ -228,7 +246,7 @@ export class UserDomainService {
    * @returns True if user can view users, false otherwise.
    */
   canViewUsers(user: User): boolean {
-    return this.hasPermission(user, 'users.view') || this.isAdmin(user);
+    return this.hasPermission(user, "users.view") || this.isAdmin(user);
   }
 
   /**
@@ -249,7 +267,10 @@ export class UserDomainService {
     }
 
     // Users with manage permission can edit non-admin users
-    if (this.hasPermission(currentUser, 'users.manage') && !this.isAdmin(targetUser)) {
+    if (
+      this.hasPermission(currentUser, "users.manage") &&
+      !this.isAdmin(targetUser)
+    ) {
       return true;
     }
 
@@ -266,18 +287,20 @@ export class UserDomainService {
   private isValidPhone(phone: string): boolean {
     // Basic phone validation - can be enhanced based on requirements
     const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
+    return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ""));
   }
 
   private isValidDateOfBirth(dateOfBirth: Date): boolean {
     const now = new Date();
     const age = now.getFullYear() - dateOfBirth.getFullYear();
     const monthDiff = now.getMonth() - dateOfBirth.getMonth();
-    
+
     // Adjust age if birthday hasn't occurred this year
-    const actualAge = monthDiff < 0 || (monthDiff === 0 && now.getDate() < dateOfBirth.getDate()) 
-      ? age - 1 
-      : age;
+    const actualAge =
+      monthDiff < 0 ||
+      (monthDiff === 0 && now.getDate() < dateOfBirth.getDate())
+        ? age - 1
+        : age;
 
     // Must be at least 13 years old
     return actualAge >= 13;

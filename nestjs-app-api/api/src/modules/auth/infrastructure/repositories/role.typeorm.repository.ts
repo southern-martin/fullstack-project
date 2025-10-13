@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
-import { Role } from '../../domain/entities/role.entity';
-import { RoleRepositoryInterface } from '../../domain/repositories/role.repository.interface';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { In, Repository } from "typeorm";
+import { Role } from "../../domain/entities/role.entity";
+import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
 
 @Injectable()
 export class RoleTypeOrmRepository implements RoleRepositoryInterface {
   constructor(
     @InjectRepository(Role)
-    private readonly repository: Repository<Role>,
+    private readonly repository: Repository<Role>
   ) {}
 
   async findAll(): Promise<Role[]> {
@@ -47,14 +47,16 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
   async findActive(): Promise<Role[]> {
     return this.repository.find({
       where: { isActive: true },
-      order: { name: 'ASC' },
+      order: { name: "ASC" },
     });
   }
 
   async findByPermission(permission: string): Promise<Role[]> {
     return this.repository
-      .createQueryBuilder('role')
-      .where('JSON_CONTAINS(role.permissions, :permission)', { permission: `"${permission}"` })
+      .createQueryBuilder("role")
+      .where("JSON_CONTAINS(role.permissions, :permission)", {
+        permission: `"${permission}"`,
+      })
       .getMany();
   }
 
