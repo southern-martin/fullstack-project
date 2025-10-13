@@ -71,7 +71,17 @@ export interface UpdateCustomerRequest {
 }
 
 class CustomerApiService {
-  private readonly basePath = CUSTOMERS_API_CONFIG.ENDPOINTS.LIST;
+  private readonly basePath: string;
+
+  constructor() {
+    try {
+      this.basePath = CUSTOMERS_API_CONFIG?.ENDPOINTS?.LIST || '/customers';
+      console.log('CustomerApiService initialized with basePath:', this.basePath);
+    } catch (error) {
+      console.error('Error initializing CustomerApiService:', error);
+      this.basePath = '/customers'; // Fallback
+    }
+  }
 
   async getCustomers(
     params?: PaginationParams

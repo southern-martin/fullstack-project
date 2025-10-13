@@ -41,7 +41,17 @@ export interface UpdateCarrierRequest {
 }
 
 class CarrierApiService {
-  private readonly basePath = CARRIERS_API_CONFIG.ENDPOINTS.LIST;
+  private readonly basePath: string;
+
+  constructor() {
+    try {
+      this.basePath = CARRIERS_API_CONFIG?.ENDPOINTS?.LIST || '/carriers';
+      console.log('CarrierApiService initialized with basePath:', this.basePath);
+    } catch (error) {
+      console.error('Error initializing CarrierApiService:', error);
+      this.basePath = '/carriers'; // Fallback
+    }
+  }
 
   async getCarriers(
     params?: PaginationParams
