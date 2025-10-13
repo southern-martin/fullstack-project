@@ -100,7 +100,7 @@ const LoginForm: React.FC = () => {
                             variant="primary"
                             size="lg"
                             isLoading={isLoading}
-                            className="w-full"
+                            fullWidth
                         >
                             {isLoading ? 'Signing in...' : 'Sign in'}
                         </Button>

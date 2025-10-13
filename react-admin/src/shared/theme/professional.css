@@ -167,7 +167,6 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 44px; /* Ensure minimum touch target size */
-  width: 100%;
 }
 
 .professional-btn::before {
@@ -219,6 +218,11 @@ body {
 .professional-btn-secondary:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3), var(--shadow-md);
+}
+
+/* Full-width button variant for forms and modals */
+.professional-btn-full {
+  width: 100%;
 }
 
 /* Professional Input Styles */
