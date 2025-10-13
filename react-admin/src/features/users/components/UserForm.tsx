@@ -121,27 +121,10 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
             setFormData(prev => ({ ...prev, [name]: value }));
         }
 
-        // Clear field error when user starts typing
+        // Clear field error when user starts typing (but no client-side validation)
         if (errors[name]) {
             setErrors(prev => clearFieldError(prev, name));
         }
-
-        // Real-time validation for specific fields
-        const newErrors = { ...errors };
-        delete newErrors[name]; // Clear existing error for this field
-
-        // Validate specific fields in real-time
-        if (name === 'email' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-            newErrors.email = 'Please enter a valid email address';
-        } else if (name === 'firstName' && value && value.length < 2) {
-            newErrors.firstName = 'First name must be at least 2 characters long';
-        } else if (name === 'lastName' && value && value.length < 2) {
-            newErrors.lastName = 'Last name must be at least 2 characters long';
-        } else if (name === 'password' && value && value.length < 8) {
-            newErrors.password = 'Password must be at least 8 characters long';
-        }
-
-        setErrors(newErrors);
     };
 
     const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
