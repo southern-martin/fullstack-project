@@ -1,6 +1,6 @@
 import { User } from "../../../shared/types";
-import { carrierApiService } from "../../carriers/services/carrierApiService";
-import { customerApiService } from "../../customers/services/customerApiService";
+import { carrierApiClient } from "../../../shared/utils/carrierApi";
+import { customerApiClient } from "../../../shared/utils/customerApi";
 import { userApiService } from "../../users/services/userApiService";
 
 export interface DashboardStats {
@@ -26,19 +26,16 @@ class DashboardService {
         usersResponse,
         customersResponse,
         carriersResponse,
-        activeUsersResponse,
       ] = await Promise.allSettled([
         userApiService.getUsers({ page: 1, limit: 1 }),
-        customerApiService.getCustomers({ page: 1, limit: 1 }),
-        carrierApiService.getCarriers({ page: 1, limit: 1 }),
-        userApiService.getActiveUsers(),
+        customerApiClient.getCustomers({ page: 1, limit: 1 }),
+        carrierApiClient.getCarriers({ page: 1, limit: 1 }),
       ]);
 
       console.log("DashboardService: API responses received:", {
         users: usersResponse,
         customers: customersResponse,
         carriers: carriersResponse,
-        activeUsers: activeUsersResponse,
       });
 
       // Extract data from settled promises
@@ -48,16 +45,12 @@ class DashboardService {
           : { total: 0 };
       const customersData =
         customersResponse.status === "fulfilled"
-          ? customersResponse.value
+          ? customersResponse.value.data
           : { total: 0 };
       const carriersData =
         carriersResponse.status === "fulfilled"
-          ? carriersResponse.value
+          ? carriersResponse.value.data
           : { total: 0 };
-      const activeUsersData =
-        activeUsersResponse.status === "fulfilled"
-          ? activeUsersResponse.value
-          : [];
 
       // Get recent users with error handling
       let recentUsersData: User[] = [];
@@ -78,9 +71,7 @@ class DashboardService {
         totalUsers: usersData.total || 0,
         totalCustomers: customersData.total || 0,
         totalCarriers: carriersData.total || 0,
-        activeUsers: Array.isArray(activeUsersData)
-          ? activeUsersData.length
-          : 0,
+        activeUsers: usersData.total || 0, // Use total users as active users for now
         recentUsers: recentUsersData,
         systemHealth: {
           status: "healthy",
