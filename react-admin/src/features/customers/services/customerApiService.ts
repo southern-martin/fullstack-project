@@ -1,4 +1,4 @@
-import { PaginatedResponse, PaginationParams } from '../../../shared/types';
+import { PaginationParams } from '../../../shared/types';
 import { apiClient } from '../../../shared/utils/api';
 import { CUSTOMERS_API_CONFIG } from '../config/customersApi';
 
@@ -75,7 +75,7 @@ class CustomerApiService {
 
   async getCustomers(
     params?: PaginationParams
-  ): Promise<PaginatedResponse<Customer>> {
+  ): Promise<{ customers: Customer[]; total: number; page: number; limit: number; totalPages: number }> {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
@@ -86,7 +86,7 @@ class CustomerApiService {
     const url = queryParams.toString()
       ? `${this.basePath}?${queryParams}`
       : this.basePath;
-    return apiClient.get<PaginatedResponse<Customer>>(url);
+    return apiClient.get<{ customers: Customer[]; total: number; page: number; limit: number; totalPages: number }>(url);
   }
 
   async getCustomerById(id: number): Promise<Customer> {

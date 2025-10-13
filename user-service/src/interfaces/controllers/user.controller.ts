@@ -53,21 +53,21 @@ export class UserController {
     @Query("page") page: string = "1",
     @Query("limit") limit: string = "10",
     @Query("search") search?: string
-  ): Promise<{ 
-    users: UserResponseDto[]; 
-    total: number; 
-    page: number; 
-    limit: number; 
-    totalPages: number; 
+  ): Promise<{
+    users: UserResponseDto[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
   }> {
     const pageNum = parseInt(page, 10) || 1;
     const limitNum = parseInt(limit, 10) || 10;
-    
+
     const paginationDto = { page: pageNum, limit: limitNum };
     const result = await this.getUserUseCase.executeAll(paginationDto, search);
-    
+
     const totalPages = Math.ceil(result.total / limitNum);
-    
+
     return {
       ...result,
       page: pageNum,

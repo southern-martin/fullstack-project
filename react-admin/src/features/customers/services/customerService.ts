@@ -1,4 +1,5 @@
 import { customerApiClient } from '../../../shared/utils/customerApi';
+import { PaginatedResponse, Customer as SharedCustomer } from '../../../shared/types';
 
 export interface Customer {
   id: number;
@@ -65,13 +66,7 @@ export interface UpdateAddressDto {
   isDefault?: boolean;
 }
 
-export interface PaginatedResponse<T> {
-  customers: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
+// Using shared PaginatedResponse interface
 
 class CustomerService {
   async getCustomers(params?: {
@@ -81,7 +76,14 @@ class CustomerService {
   }): Promise<PaginatedResponse<Customer>> {
     try {
       const response = await customerApiClient.getCustomers(params);
-      return response.data;
+      // Transform the API response to match shared PaginatedResponse format
+      return {
+        data: response.data.customers,
+        total: response.data.total,
+        page: response.data.page,
+        limit: response.data.limit,
+        totalPages: response.data.totalPages,
+      };
     } catch (error) {
       console.error('Error fetching customers:', error);
       throw error;
