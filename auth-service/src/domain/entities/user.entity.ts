@@ -6,7 +6,7 @@ import {
   JoinTable,
   ManyToMany,
 } from "typeorm";
-import { BaseEntity } from "./base.entity";
+import { BaseEntity } from "../shared/interfaces/base.entity";
 import { Role } from "./role.entity";
 
 @Entity("users")
@@ -90,19 +90,6 @@ export class User extends BaseEntity {
 
   canManageUsers(): boolean {
     return this.hasPermission("users.manage") || this.isAdmin();
-  }
-
-  // Domain methods for business logic
-  canLogin(): boolean {
-    return this.isActive && this.isEmailVerified;
-  }
-
-  updateLastLogin(): void {
-    this.lastLoginAt = new Date();
-  }
-
-  updatePasswordChange(): void {
-    this.passwordChangedAt = new Date();
   }
 }
 
