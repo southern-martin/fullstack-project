@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, Between } from 'typeorm';
-import { UserTypeOrmEntity } from '../entities/user.typeorm.entity';
-import { User } from '../../../domain/entities/user.entity';
-import { UserRepositoryInterface } from '../../../domain/repositories/user.repository.interface';
-import { PaginationDto } from '../../../../shared/dto';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { PaginationDto } from "@shared/infrastructure";
+import { Between, Repository } from "typeorm";
+import { User } from "@/domain/entities/user.entity";
+import { UserRepositoryInterface } from "@/domain/repositories/user.repository.interface";
+import { UserTypeOrmEntity } from "../entities/user.typeorm.entity";
 
 /**
  * UserTypeOrmRepository
- * 
+ *
  * This class provides the concrete TypeORM implementation for the UserRepositoryInterface.
  * It handles all database operations for user entities.
  */
@@ -26,31 +26,33 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
   }
 
   async findById(id: number): Promise<User | null> {
-    const entity = await this.userRepository.findOne({ 
+    const entity = await this.userRepository.findOne({
       where: { id },
-      relations: ['userRoles', 'userRoles.role']
+      relations: ["userRoles", "userRoles.role"],
     });
     return entity ? this.toDomainEntity(entity) : null;
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const entity = await this.userRepository.findOne({ 
+    const entity = await this.userRepository.findOne({
       where: { email: email.toLowerCase() },
-      relations: ['userRoles', 'userRoles.role']
+      relations: ["userRoles", "userRoles.role"],
     });
     return entity ? this.toDomainEntity(entity) : null;
   }
 
-  async findAll(paginationDto: PaginationDto): Promise<{ users: User[]; total: number }> {
+  async findAll(
+    paginationDto: PaginationDto
+  ): Promise<{ users: User[]; total: number }> {
     const [entities, total] = await this.userRepository.findAndCount({
       skip: (paginationDto.page - 1) * paginationDto.limit,
       take: paginationDto.limit,
-      relations: ['userRoles', 'userRoles.role'],
-      order: { createdAt: 'DESC' },
+      relations: ["userRoles", "userRoles.role"],
+      order: { createdAt: "DESC" },
     });
 
     return {
-      users: entities.map(entity => this.toDomainEntity(entity)),
+      users: entities.map((entity) => this.toDomainEntity(entity)),
       total,
     };
   }
@@ -58,32 +60,35 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
   async findActive(): Promise<User[]> {
     const entities = await this.userRepository.find({
       where: { isActive: true },
-      relations: ['userRoles', 'userRoles.role'],
-      order: { createdAt: 'DESC' },
+      relations: ["userRoles", "userRoles.role"],
+      order: { createdAt: "DESC" },
     });
 
-    return entities.map(entity => this.toDomainEntity(entity));
+    return entities.map((entity) => this.toDomainEntity(entity));
   }
 
-  async search(searchTerm: string, paginationDto: PaginationDto): Promise<{ users: User[]; total: number }> {
-    const queryBuilder = this.userRepository.createQueryBuilder('user');
-    
+  async search(
+    searchTerm: string,
+    paginationDto: PaginationDto
+  ): Promise<{ users: User[]; total: number }> {
+    const queryBuilder = this.userRepository.createQueryBuilder("user");
+
     queryBuilder
-      .leftJoinAndSelect('user.userRoles', 'userRoles')
-      .leftJoinAndSelect('userRoles.role', 'role')
+      .leftJoinAndSelect("user.userRoles", "userRoles")
+      .leftJoinAndSelect("userRoles.role", "role")
       .where(
-        '(user.firstName LIKE :searchTerm OR user.lastName LIKE :searchTerm OR user.email LIKE :searchTerm)',
+        "(user.firstName LIKE :searchTerm OR user.lastName LIKE :searchTerm OR user.email LIKE :searchTerm)",
         { searchTerm: `%${searchTerm}%` }
       );
 
     const [entities, total] = await queryBuilder
       .skip((paginationDto.page - 1) * paginationDto.limit)
       .take(paginationDto.limit)
-      .orderBy('user.createdAt', 'DESC')
+      .orderBy("user.createdAt", "DESC")
       .getManyAndCount();
 
     return {
-      users: entities.map(entity => this.toDomainEntity(entity)),
+      users: entities.map((entity) => this.toDomainEntity(entity)),
       total,
     };
   }
@@ -92,7 +97,7 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
     await this.userRepository.update(id, this.toTypeOrmEntity(user as User));
     const updatedEntity = await this.userRepository.findOne({
       where: { id },
-      relations: ['userRoles', 'userRoles.role']
+      relations: ["userRoles", "userRoles.role"],
     });
     return this.toDomainEntity(updatedEntity);
   }
@@ -103,7 +108,7 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
 
   async existsByEmail(email: string): Promise<boolean> {
     const count = await this.userRepository.count({
-      where: { email: email.toLowerCase() }
+      where: { email: email.toLowerCase() },
     });
     return count > 0;
   }
@@ -114,32 +119,32 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
 
   async countActive(): Promise<number> {
     return await this.userRepository.count({
-      where: { isActive: true }
+      where: { isActive: true },
     });
   }
 
   async findByDateRange(startDate: Date, endDate: Date): Promise<User[]> {
     const entities = await this.userRepository.find({
       where: {
-        createdAt: Between(startDate, endDate)
+        createdAt: Between(startDate, endDate),
       },
-      relations: ['userRoles', 'userRoles.role'],
-      order: { createdAt: 'DESC' },
+      relations: ["userRoles", "userRoles.role"],
+      order: { createdAt: "DESC" },
     });
 
-    return entities.map(entity => this.toDomainEntity(entity));
+    return entities.map((entity) => this.toDomainEntity(entity));
   }
 
   async findByRole(roleName: string): Promise<User[]> {
-    const queryBuilder = this.userRepository.createQueryBuilder('user');
-    
+    const queryBuilder = this.userRepository.createQueryBuilder("user");
+
     queryBuilder
-      .leftJoinAndSelect('user.userRoles', 'userRoles')
-      .leftJoinAndSelect('userRoles.role', 'role')
-      .where('role.name = :roleName', { roleName });
+      .leftJoinAndSelect("user.userRoles", "userRoles")
+      .leftJoinAndSelect("userRoles.role", "role")
+      .where("role.name = :roleName", { roleName });
 
     const entities = await queryBuilder.getMany();
-    return entities.map(entity => this.toDomainEntity(entity));
+    return entities.map((entity) => this.toDomainEntity(entity));
   }
 
   // Helper methods for entity conversion
@@ -183,9 +188,32 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
 
     // Map roles if they exist
     if (entity.userRoles) {
-      user.roles = entity.userRoles.map(userRole => userRole.role);
+      user.roles = entity.userRoles.map((userRole) => userRole.role);
     }
 
     return user;
+  }
+
+  async findPaginated(page: number, limit: number, search?: string): Promise<{ users: User[]; total: number }> {
+    const queryBuilder = this.userRepository
+      .createQueryBuilder("user")
+      .leftJoinAndSelect("user.userRoles", "userRole")
+      .leftJoinAndSelect("userRole.role", "role");
+
+    if (search) {
+      queryBuilder.where(
+        "user.firstName ILIKE :search OR user.lastName ILIKE :search OR user.email ILIKE :search",
+        { search: `%${search}%` }
+      );
+    }
+
+    const [entities, total] = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    const users = entities.map((entity) => this.toDomainEntity(entity));
+
+    return { users, total };
   }
 }

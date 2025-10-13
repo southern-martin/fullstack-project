@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { PaginationDto } from "@shared/infrastructure";
 import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
 import { UserResponseDto } from "../dto/user-response.dto";
-import { PaginationDto } from "../../../shared/dto";
 
 /**
  * Get User Use Case
@@ -11,7 +11,7 @@ import { PaginationDto } from "../../../shared/dto";
 @Injectable()
 export class GetUserUseCase {
   constructor(
-    @Inject('UserRepositoryInterface')
+    @Inject("UserRepositoryInterface")
     private readonly userRepository: UserRepositoryInterface
   ) {}
 
@@ -53,7 +53,7 @@ export class GetUserUseCase {
     paginationDto: PaginationDto,
     search?: string
   ): Promise<{ users: UserResponseDto[]; total: number }> {
-    const { users, total } = search 
+    const { users, total } = search
       ? await this.userRepository.search(search, paginationDto)
       : await this.userRepository.findAll(paginationDto);
 
@@ -97,8 +97,8 @@ export class GetUserUseCase {
    * @returns Users with the specified role
    */
   async executeByRole(roleName: string): Promise<UserResponseDto[]> {
-    const users = await this.userRepository.findAll();
-    const usersWithRole = users.filter((user) => user.hasRole(roleName));
+    const usersResult = await this.userRepository.findAll();
+    const usersWithRole = usersResult.users.filter((user) => user.hasRole(roleName));
     return usersWithRole.map((user) => this.mapToResponseDto(user));
   }
 
@@ -111,6 +111,7 @@ export class GetUserUseCase {
     return {
       id: user.id,
       email: user.email,
+      password: user.password,
       firstName: user.firstName,
       lastName: user.lastName,
       phone: user.phone,
@@ -119,6 +120,8 @@ export class GetUserUseCase {
       dateOfBirth: user.dateOfBirth,
       address: user.address,
       preferences: user.preferences,
+      lastLoginAt: user.lastLoginAt,
+      passwordChangedAt: user.passwordChangedAt,
       roles: user.roles.map((role) => ({
         id: role.id,
         name: role.name,
@@ -128,6 +131,9 @@ export class GetUserUseCase {
       })),
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
+      get fullName() {
+        return `${user.firstName} ${user.lastName}`.trim();
+      },
     };
   }
 }

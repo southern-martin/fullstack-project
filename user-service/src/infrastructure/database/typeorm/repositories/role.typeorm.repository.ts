@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, Between } from 'typeorm';
-import { RoleTypeOrmEntity } from '../entities/role.typeorm.entity';
-import { Role } from '../../../domain/entities/role.entity';
-import { RoleRepositoryInterface } from '../../../domain/repositories/role.repository.interface';
-import { PaginationDto } from '../../../../shared/dto';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { PaginationDto } from "@shared/infrastructure";
+import { Between, Repository } from "typeorm";
+import { Role } from "@/domain/entities/role.entity";
+import { RoleRepositoryInterface } from "@/domain/repositories/role.repository.interface";
+import { RoleTypeOrmEntity } from "../entities/role.typeorm.entity";
 
 /**
  * RoleTypeOrmRepository
- * 
+ *
  * This class provides the concrete TypeORM implementation for the RoleRepositoryInterface.
  * It handles all database operations for role entities.
  */
@@ -26,31 +26,33 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
   }
 
   async findById(id: number): Promise<Role | null> {
-    const entity = await this.roleRepository.findOne({ 
+    const entity = await this.roleRepository.findOne({
       where: { id },
-      relations: ['userRoles', 'userRoles.user']
+      relations: ["userRoles", "userRoles.user"],
     });
     return entity ? this.toDomainEntity(entity) : null;
   }
 
   async findByName(name: string): Promise<Role | null> {
-    const entity = await this.roleRepository.findOne({ 
+    const entity = await this.roleRepository.findOne({
       where: { name },
-      relations: ['userRoles', 'userRoles.user']
+      relations: ["userRoles", "userRoles.user"],
     });
     return entity ? this.toDomainEntity(entity) : null;
   }
 
-  async findAll(paginationDto: PaginationDto): Promise<{ roles: Role[]; total: number }> {
+  async findAll(
+    paginationDto: PaginationDto
+  ): Promise<{ roles: Role[]; total: number }> {
     const [entities, total] = await this.roleRepository.findAndCount({
       skip: (paginationDto.page - 1) * paginationDto.limit,
       take: paginationDto.limit,
-      relations: ['userRoles', 'userRoles.user'],
-      order: { priority: 'DESC', createdAt: 'DESC' },
+      relations: ["userRoles", "userRoles.user"],
+      order: { priority: "DESC", createdAt: "DESC" },
     });
 
     return {
-      roles: entities.map(entity => this.toDomainEntity(entity)),
+      roles: entities.map((entity) => this.toDomainEntity(entity)),
       total,
     };
   }
@@ -58,33 +60,36 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
   async findActive(): Promise<Role[]> {
     const entities = await this.roleRepository.find({
       where: { isActive: true },
-      relations: ['userRoles', 'userRoles.user'],
-      order: { priority: 'DESC', createdAt: 'DESC' },
+      relations: ["userRoles", "userRoles.user"],
+      order: { priority: "DESC", createdAt: "DESC" },
     });
 
-    return entities.map(entity => this.toDomainEntity(entity));
+    return entities.map((entity) => this.toDomainEntity(entity));
   }
 
-  async search(searchTerm: string, paginationDto: PaginationDto): Promise<{ roles: Role[]; total: number }> {
-    const queryBuilder = this.roleRepository.createQueryBuilder('role');
-    
+  async search(
+    searchTerm: string,
+    paginationDto: PaginationDto
+  ): Promise<{ roles: Role[]; total: number }> {
+    const queryBuilder = this.roleRepository.createQueryBuilder("role");
+
     queryBuilder
-      .leftJoinAndSelect('role.userRoles', 'userRoles')
-      .leftJoinAndSelect('userRoles.user', 'user')
+      .leftJoinAndSelect("role.userRoles", "userRoles")
+      .leftJoinAndSelect("userRoles.user", "user")
       .where(
-        '(role.name LIKE :searchTerm OR role.description LIKE :searchTerm)',
+        "(role.name LIKE :searchTerm OR role.description LIKE :searchTerm)",
         { searchTerm: `%${searchTerm}%` }
       );
 
     const [entities, total] = await queryBuilder
       .skip((paginationDto.page - 1) * paginationDto.limit)
       .take(paginationDto.limit)
-      .orderBy('role.priority', 'DESC')
-      .addOrderBy('role.createdAt', 'DESC')
+      .orderBy("role.priority", "DESC")
+      .addOrderBy("role.createdAt", "DESC")
       .getManyAndCount();
 
     return {
-      roles: entities.map(entity => this.toDomainEntity(entity)),
+      roles: entities.map((entity) => this.toDomainEntity(entity)),
       total,
     };
   }
@@ -93,7 +98,7 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
     await this.roleRepository.update(id, this.toTypeOrmEntity(role as Role));
     const updatedEntity = await this.roleRepository.findOne({
       where: { id },
-      relations: ['userRoles', 'userRoles.user']
+      relations: ["userRoles", "userRoles.user"],
     });
     return this.toDomainEntity(updatedEntity);
   }
@@ -104,7 +109,7 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
 
   async existsByName(name: string): Promise<boolean> {
     const count = await this.roleRepository.count({
-      where: { name }
+      where: { name },
     });
     return count > 0;
   }
@@ -115,33 +120,36 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
 
   async countActive(): Promise<number> {
     return await this.roleRepository.count({
-      where: { isActive: true }
+      where: { isActive: true },
     });
   }
 
   async findByDateRange(startDate: Date, endDate: Date): Promise<Role[]> {
     const entities = await this.roleRepository.find({
       where: {
-        createdAt: Between(startDate, endDate)
+        createdAt: Between(startDate, endDate),
       },
-      relations: ['userRoles', 'userRoles.user'],
-      order: { priority: 'DESC', createdAt: 'DESC' },
+      relations: ["userRoles", "userRoles.user"],
+      order: { priority: "DESC", createdAt: "DESC" },
     });
 
-    return entities.map(entity => this.toDomainEntity(entity));
+    return entities.map((entity) => this.toDomainEntity(entity));
   }
 
-  async findByPriorityRange(minPriority: number, maxPriority: number): Promise<Role[]> {
+  async findByPriorityRange(
+    minPriority: number,
+    maxPriority: number
+  ): Promise<Role[]> {
     const entities = await this.roleRepository.find({
       where: {
         priority: Between(minPriority, maxPriority),
         isActive: true,
       },
-      relations: ['userRoles', 'userRoles.user'],
-      order: { priority: 'DESC', createdAt: 'DESC' },
+      relations: ["userRoles", "userRoles.user"],
+      order: { priority: "DESC", createdAt: "DESC" },
     });
 
-    return entities.map(entity => this.toDomainEntity(entity));
+    return entities.map((entity) => this.toDomainEntity(entity));
   }
 
   // Helper methods for entity conversion
@@ -171,9 +179,38 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
 
     // Map users if they exist
     if (entity.userRoles) {
-      role.users = entity.userRoles.map(userRole => userRole.user);
+      role.users = entity.userRoles.map((userRole) => userRole.user);
     }
 
     return role;
+  }
+
+  async findByPermission(permission: string): Promise<Role[]> {
+    const entities = await this.roleRepository
+      .createQueryBuilder("role")
+      .where("role.permissions::jsonb ? :permission", { permission })
+      .getMany();
+
+    return entities.map((entity) => this.toDomainEntity(entity));
+  }
+
+  async findPaginated(page: number, limit: number, search?: string): Promise<{ roles: Role[]; total: number }> {
+    const queryBuilder = this.roleRepository.createQueryBuilder("role");
+
+    if (search) {
+      queryBuilder.where(
+        "role.name ILIKE :search OR role.description ILIKE :search",
+        { search: `%${search}%` }
+      );
+    }
+
+    const [entities, total] = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    const roles = entities.map((entity) => this.toDomainEntity(entity));
+
+    return { roles, total };
   }
 }
