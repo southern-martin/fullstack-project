@@ -52,9 +52,7 @@ class ApiClient {
 
         // Handle custom rule errors (400 Bad Request)
         if (response.status === 400 && errorData.customRuleErrors) {
-          const customRuleError = new Error(
-            'Custom rule validation failed'
-          );
+          const customRuleError = new Error('Custom rule validation failed');
           (customRuleError as any).customRuleErrors =
             errorData.customRuleErrors;
           (customRuleError as any).status = response.status;

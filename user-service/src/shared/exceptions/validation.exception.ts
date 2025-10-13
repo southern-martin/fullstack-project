@@ -39,6 +39,16 @@ export class ValidationException extends HttpException {
   }
 
   /**
+   * Creates a ValidationException from custom rule errors
+   */
+  static fromCustomRuleErrors(customRuleErrors: string[]): ValidationException {
+    return new ValidationException(
+      { customRuleErrors },
+      "Custom rule validation failed"
+    );
+  }
+
+  /**
    * Creates a ValidationException from domain service validation result
    */
   static fromDomainValidation(

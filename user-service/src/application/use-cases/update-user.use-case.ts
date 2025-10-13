@@ -1,15 +1,11 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
 import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
 import { UserDomainService } from "../../domain/services/user.domain.service";
+import { ValidationException } from "../../shared/exceptions/validation.exception";
 import { UpdateUserDto } from "../dto/update-user.dto";
 import { UserResponseDto } from "../dto/user-response.dto";
-import { ValidationException } from "../../../shared/exceptions/validation.exception";
 
 /**
  * Update User Use Case
@@ -53,21 +49,52 @@ export class UpdateUserUseCase {
         updateUserDto.email
       );
       if (userWithSameEmail) {
-        throw ValidationException.fromFieldError('email', 'This email address is already registered');
+        throw ValidationException.fromFieldError(
+          "email",
+          "This email address is already registered"
+        );
       }
     }
 
-    // 4. Validate preferences if provided
+    // 4. Custom rule validation
+    const customRuleErrors = [];
+
+    // Custom rule: Check if email is being changed to a restricted domain
+    if (updateUserDto.email && updateUserDto.email !== existingUser.email) {
+      const restrictedDomains = ['temp-mail.org', '10minutemail.com', 'guerrillamail.com'];
+      const emailDomain = updateUserDto.email.split('@')[1];
+      if (restrictedDomains.includes(emailDomain)) {
+        customRuleErrors.push('Temporary email addresses are not allowed. Please use a permanent email address.');
+      }
+    }
+
+    // Custom rule: Check if password is in common passwords list
+    if (updateUserDto.password) {
+      const commonPasswords = ['password', '123456', 'admin', 'qwerty', 'letmein'];
+      if (commonPasswords.includes(updateUserDto.password.toLowerCase())) {
+        customRuleErrors.push('This password is too common. Please choose a more secure password.');
+      }
+    }
+
+    // If there are custom rule errors, throw them
+    if (customRuleErrors.length > 0) {
+      throw ValidationException.fromCustomRuleErrors(customRuleErrors);
+    }
+
+    // 5. Validate preferences if provided
     if (updateUserDto.preferences !== undefined) {
       const preferencesValidation = this.userDomainService.validatePreferences(
         updateUserDto.preferences
       );
       if (!preferencesValidation.isValid) {
-        throw ValidationException.fromFieldError('preferences', preferencesValidation.errors.join(", "));
+        throw ValidationException.fromFieldError(
+          "preferences",
+          preferencesValidation.errors.join(", ")
+        );
       }
     }
 
-    // 5. Prepare update data
+    // 6. Prepare update data
     const updateData: Partial<any> = {};
 
     if (updateUserDto.email !== undefined)
@@ -106,10 +133,10 @@ export class UpdateUserUseCase {
       updateData.roles = userRoles;
     }
 
-    // 6. Update user in repository
+    // 7. Update user in repository
     const updatedUser = await this.userRepository.update(id, updateData);
 
-    // 7. Return response
+    // 8. Return response
     return this.mapToResponseDto(updatedUser);
   }
 
@@ -131,7 +158,10 @@ export class UpdateUserUseCase {
     const userRoles = allRoles.filter((role) => roleIds.includes(role.id));
 
     if (userRoles.length !== roleIds.length) {
-      throw ValidationException.fromFieldError('roleIds', 'One or more role IDs are invalid');
+      throw ValidationException.fromFieldError(
+        "roleIds",
+        "One or more role IDs are invalid"
+      );
     }
 
     // 3. Validate role assignment using domain service
@@ -140,7 +170,10 @@ export class UpdateUserUseCase {
       userRoles
     );
     if (!validation.isValid) {
-      throw ValidationException.fromFieldError('roleIds', validation.errors.join(", "));
+      throw ValidationException.fromFieldError(
+        "roleIds",
+        validation.errors.join(", ")
+      );
     }
 
     // 4. Update user roles in repository

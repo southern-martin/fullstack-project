@@ -1,15 +1,11 @@
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-} from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
 import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
 import { UserDomainService } from "../../domain/services/user.domain.service";
+import { ValidationException } from "../../shared/exceptions/validation.exception";
 import { CreateUserDto } from "../dto/create-user.dto";
 import { UserResponseDto } from "../dto/user-response.dto";
-import { ValidationException } from "../../../shared/exceptions/validation.exception";
 
 /**
  * Create User Use Case
@@ -19,9 +15,9 @@ import { ValidationException } from "../../../shared/exceptions/validation.excep
 @Injectable()
 export class CreateUserUseCase {
   constructor(
-    @Inject('UserRepositoryInterface')
+    @Inject("UserRepositoryInterface")
     private readonly userRepository: UserRepositoryInterface,
-    @Inject('RoleRepositoryInterface')
+    @Inject("RoleRepositoryInterface")
     private readonly roleRepository: RoleRepositoryInterface,
     private readonly userDomainService: UserDomainService
   ) {}
@@ -44,23 +40,50 @@ export class CreateUserUseCase {
       createUserDto.email
     );
     if (existingUser) {
-      throw ValidationException.fromFieldError('email', 'This email address is already registered');
+      throw ValidationException.fromFieldError(
+        "email",
+        "This email address is already registered"
+      );
     }
 
-    // 3. Validate preferences if provided
+    // 3. Custom rule validation
+    const customRuleErrors = [];
+
+    // Custom rule: Check if user is trying to use a restricted email domain
+    const restrictedDomains = ['temp-mail.org', '10minutemail.com', 'guerrillamail.com'];
+    const emailDomain = createUserDto.email.split('@')[1];
+    if (restrictedDomains.includes(emailDomain)) {
+      customRuleErrors.push('Temporary email addresses are not allowed. Please use a permanent email address.');
+    }
+
+    // Custom rule: Check if password is in common passwords list
+    const commonPasswords = ['password', '123456', 'admin', 'qwerty', 'letmein'];
+    if (commonPasswords.includes(createUserDto.password.toLowerCase())) {
+      customRuleErrors.push('This password is too common. Please choose a more secure password.');
+    }
+
+    // If there are custom rule errors, throw them
+    if (customRuleErrors.length > 0) {
+      throw ValidationException.fromCustomRuleErrors(customRuleErrors);
+    }
+
+    // 4. Validate preferences if provided
     if (createUserDto.preferences) {
       const preferencesValidation = this.userDomainService.validatePreferences(
         createUserDto.preferences
       );
       if (!preferencesValidation.isValid) {
-        throw ValidationException.fromFieldError('preferences', preferencesValidation.errors.join(", "));
+        throw ValidationException.fromFieldError(
+          "preferences",
+          preferencesValidation.errors.join(", ")
+        );
       }
     }
 
-    // 4. Hash password
+    // 5. Hash password
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    // 5. Get roles if provided
+    // 6. Get roles if provided
     let roles = [];
     if (createUserDto.roleIds && createUserDto.roleIds.length > 0) {
       const allRoles = await this.roleRepository.findAll();
@@ -69,7 +92,7 @@ export class CreateUserUseCase {
       );
     }
 
-    // 6. Create user entity
+    // 7. Create user entity
     const user = {
       email: createUserDto.email.toLowerCase(),
       password: hashedPassword,
@@ -86,10 +109,10 @@ export class CreateUserUseCase {
       roles,
     };
 
-    // 7. Save user in repository
+    // 8. Save user in repository
     const savedUser = await this.userRepository.create(user);
 
-    // 8. Return response
+    // 9. Return response
     return this.mapToResponseDto(savedUser);
   }
 
