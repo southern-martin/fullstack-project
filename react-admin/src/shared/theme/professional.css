@@ -456,10 +456,8 @@ body {
     margin: var(--spacing-sm);
   }
   
-  .professional-btn {
-    padding: var(--spacing-sm) var(--spacing-md);
-    font-size: 0.875rem;
-  }
+  /* Remove responsive button padding to prevent alignment issues */
+  /* Button padding is now handled by size classes in Button component */
 }
 
 /* Professional Dark Mode Support */
