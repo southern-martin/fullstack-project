@@ -1,13 +1,25 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { CustomerController } from './api/customer.controller';
-import { CustomerService } from './application/services/customer.service';
-import { Customer } from './domain/entities/customer.entity';
+import { CustomerApplicationModule } from './application/application.module';
+import { CustomerInfrastructureModule } from './infrastructure/infrastructure.module';
+import { CustomerInterfacesModule } from './interfaces/interfaces.module';
 
+/**
+ * CustomerModule
+ * 
+ * This module integrates all layers of the Customer module following Clean Architecture principles:
+ * - Application Layer: Use cases and domain services
+ * - Infrastructure Layer: Repository implementations and external services
+ * - Interfaces Layer: HTTP controllers and external interfaces
+ */
 @Module({
-  imports: [TypeOrmModule.forFeature([Customer])],
-  controllers: [CustomerController],
-  providers: [CustomerService],
-  exports: [CustomerService],
+  imports: [
+    CustomerApplicationModule,
+    CustomerInfrastructureModule,
+    CustomerInterfacesModule,
+  ],
+  exports: [
+    CustomerApplicationModule,
+    CustomerInfrastructureModule,
+  ],
 })
 export class CustomerModule {}
