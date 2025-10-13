@@ -11,14 +11,14 @@ import {
   Post,
   Query,
 } from "@nestjs/common";
-import { CalculatePriceUseCase } from "../../application/use-cases/calculate-price.use-case";
-import { ManagePricingRuleUseCase } from "../../application/use-cases/manage-pricing-rule.use-case";
-import { GetPriceCalculationHistoryUseCase } from "../../application/use-cases/get-price-calculation-history.use-case";
 import { CalculatePriceDto } from "../../application/dtos/calculate-price.dto";
 import { CreatePricingRuleDto } from "../../application/dtos/create-pricing-rule.dto";
-import { UpdatePricingRuleDto } from "../../application/dtos/update-pricing-rule.dto";
 import { PriceCalculationResponseDto } from "../../application/dtos/price-calculation-response.dto";
 import { PricingRuleResponseDto } from "../../application/dtos/pricing-rule-response.dto";
+import { UpdatePricingRuleDto } from "../../application/dtos/update-pricing-rule.dto";
+import { CalculatePriceUseCase } from "../../application/use-cases/calculate-price.use-case";
+import { GetPriceCalculationHistoryUseCase } from "../../application/use-cases/get-price-calculation-history.use-case";
+import { ManagePricingRuleUseCase } from "../../application/use-cases/manage-pricing-rule.use-case";
 
 /**
  * Pricing Controller
@@ -133,7 +133,11 @@ export class PricingController {
   }> {
     const pageNum = parseInt(page, 10) || 1;
     const limitNum = parseInt(limit, 10) || 10;
-    return this.getPriceCalculationHistoryUseCase.execute(pageNum, limitNum, search);
+    return this.getPriceCalculationHistoryUseCase.execute(
+      pageNum,
+      limitNum,
+      search
+    );
   }
 
   /**

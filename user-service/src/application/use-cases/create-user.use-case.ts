@@ -1,10 +1,14 @@
-import { Injectable, ConflictException, BadRequestException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import { UserRepositoryInterface } from '../../domain/repositories/user.repository.interface';
-import { RoleRepositoryInterface } from '../../domain/repositories/role.repository.interface';
-import { UserDomainService } from '../../domain/services/user.domain.service';
-import { CreateUserDto } from '../dtos/create-user.dto';
-import { UserResponseDto } from '../dtos/user-response.dto';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from "@nestjs/common";
+import * as bcrypt from "bcrypt";
+import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
+import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
+import { UserDomainService } from "../../domain/services/user.domain.service";
+import { CreateUserDto } from "../dtos/create-user.dto";
+import { UserResponseDto } from "../dtos/user-response.dto";
 
 /**
  * Create User Use Case
@@ -16,7 +20,7 @@ export class CreateUserUseCase {
   constructor(
     private readonly userRepository: UserRepositoryInterface,
     private readonly roleRepository: RoleRepositoryInterface,
-    private readonly userDomainService: UserDomainService,
+    private readonly userDomainService: UserDomainService
   ) {}
 
   /**
@@ -26,22 +30,27 @@ export class CreateUserUseCase {
    */
   async execute(createUserDto: CreateUserDto): Promise<UserResponseDto> {
     // 1. Validate input using domain service
-    const validation = this.userDomainService.validateUserCreationData(createUserDto);
+    const validation =
+      this.userDomainService.validateUserCreationData(createUserDto);
     if (!validation.isValid) {
-      throw new BadRequestException(validation.errors.join(', '));
+      throw new BadRequestException(validation.errors.join(", "));
     }
 
     // 2. Check if user email already exists
-    const existingUser = await this.userRepository.findByEmail(createUserDto.email);
+    const existingUser = await this.userRepository.findByEmail(
+      createUserDto.email
+    );
     if (existingUser) {
-      throw new ConflictException('Email already exists');
+      throw new ConflictException("Email already exists");
     }
 
     // 3. Validate preferences if provided
     if (createUserDto.preferences) {
-      const preferencesValidation = this.userDomainService.validatePreferences(createUserDto.preferences);
+      const preferencesValidation = this.userDomainService.validatePreferences(
+        createUserDto.preferences
+      );
       if (!preferencesValidation.isValid) {
-        throw new BadRequestException(preferencesValidation.errors.join(', '));
+        throw new BadRequestException(preferencesValidation.errors.join(", "));
       }
     }
 
@@ -52,7 +61,9 @@ export class CreateUserUseCase {
     let roles = [];
     if (createUserDto.roleIds && createUserDto.roleIds.length > 0) {
       const allRoles = await this.roleRepository.findAll();
-      roles = allRoles.filter(role => createUserDto.roleIds.includes(role.id));
+      roles = allRoles.filter((role) =>
+        createUserDto.roleIds.includes(role.id)
+      );
     }
 
     // 6. Create user entity
@@ -64,7 +75,9 @@ export class CreateUserUseCase {
       phone: createUserDto.phone,
       isActive: createUserDto.isActive ?? true,
       isEmailVerified: createUserDto.isEmailVerified ?? false,
-      dateOfBirth: createUserDto.dateOfBirth ? new Date(createUserDto.dateOfBirth) : null,
+      dateOfBirth: createUserDto.dateOfBirth
+        ? new Date(createUserDto.dateOfBirth)
+        : null,
       address: createUserDto.address,
       preferences: createUserDto.preferences,
       roles,
@@ -94,7 +107,7 @@ export class CreateUserUseCase {
       dateOfBirth: user.dateOfBirth,
       address: user.address,
       preferences: user.preferences,
-      roles: user.roles.map(role => ({
+      roles: user.roles.map((role) => ({
         id: role.id,
         name: role.name,
         description: role.description,

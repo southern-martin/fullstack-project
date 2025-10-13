@@ -1,13 +1,13 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+import { TypeOrmModule } from "@nestjs/typeorm";
 
 // Clean Architecture Modules
-import { ApplicationModule } from './application/application.module';
-import { InterfacesModule } from './interfaces/interfaces.module';
+import { ApplicationModule } from "./application/application.module";
+import { InterfacesModule } from "./interfaces/interfaces.module";
 
 // TypeORM Entities
-import { Customer } from './domain/entities/customer.entity';
+import { Customer } from "./domain/entities/customer.entity";
 
 /**
  * Main Application Module
@@ -19,20 +19,20 @@ import { Customer } from './domain/entities/customer.entity';
     // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env.local', '.env'],
+      envFilePath: [".env.local", ".env"],
     }),
 
     // Database
     TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
+      type: "postgres",
+      host: process.env.DB_HOST || "localhost",
       port: parseInt(process.env.DB_PORT) || 5432,
-      username: process.env.DB_USERNAME || 'postgres',
-      password: process.env.DB_PASSWORD || 'password',
-      database: process.env.DB_DATABASE || 'customer_service_db',
+      username: process.env.DB_USERNAME || "postgres",
+      password: process.env.DB_PASSWORD || "password",
+      database: process.env.DB_DATABASE || "customer_service_db",
       entities: [Customer],
-      synchronize: process.env.NODE_ENV !== 'production',
-      logging: process.env.NODE_ENV === 'development',
+      synchronize: process.env.NODE_ENV !== "production",
+      logging: process.env.NODE_ENV === "development",
     }),
 
     // Clean Architecture Layers

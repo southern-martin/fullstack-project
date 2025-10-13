@@ -11,13 +11,13 @@ import {
   Post,
   Query,
 } from "@nestjs/common";
+import { CreateCustomerDto } from "../../application/dtos/create-customer.dto";
+import { CustomerResponseDto } from "../../application/dtos/customer-response.dto";
+import { UpdateCustomerDto } from "../../application/dtos/update-customer.dto";
 import { CreateCustomerUseCase } from "../../application/use-cases/create-customer.use-case";
+import { DeleteCustomerUseCase } from "../../application/use-cases/delete-customer.use-case";
 import { GetCustomerUseCase } from "../../application/use-cases/get-customer.use-case";
 import { UpdateCustomerUseCase } from "../../application/use-cases/update-customer.use-case";
-import { DeleteCustomerUseCase } from "../../application/use-cases/delete-customer.use-case";
-import { CreateCustomerDto } from "../../application/dtos/create-customer.dto";
-import { UpdateCustomerDto } from "../../application/dtos/update-customer.dto";
-import { CustomerResponseDto } from "../../application/dtos/customer-response.dto";
 
 /**
  * Customer Controller

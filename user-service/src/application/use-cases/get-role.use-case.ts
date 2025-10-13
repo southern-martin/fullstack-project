@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { RoleRepositoryInterface } from '../../domain/repositories/role.repository.interface';
-import { RoleResponseDto } from '../dtos/role-response.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
+import { RoleResponseDto } from "../dtos/role-response.dto";
 
 /**
  * Get Role Use Case
@@ -9,9 +9,7 @@ import { RoleResponseDto } from '../dtos/role-response.dto';
  */
 @Injectable()
 export class GetRoleUseCase {
-  constructor(
-    private readonly roleRepository: RoleRepositoryInterface,
-  ) {}
+  constructor(private readonly roleRepository: RoleRepositoryInterface) {}
 
   /**
    * Executes the get role by ID use case
@@ -21,7 +19,7 @@ export class GetRoleUseCase {
   async executeById(id: number): Promise<RoleResponseDto> {
     const role = await this.roleRepository.findById(id);
     if (!role) {
-      throw new NotFoundException('Role not found');
+      throw new NotFoundException("Role not found");
     }
 
     return this.mapToResponseDto(role);
@@ -33,7 +31,7 @@ export class GetRoleUseCase {
    */
   async executeAll(): Promise<RoleResponseDto[]> {
     const roles = await this.roleRepository.findAll();
-    return roles.map(role => this.mapToResponseDto(role));
+    return roles.map((role) => this.mapToResponseDto(role));
   }
 
   /**

@@ -1,8 +1,13 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
-import { CustomerRepositoryInterface } from '../../domain/repositories/customer.repository.interface';
-import { CustomerDomainService } from '../../domain/services/customer.domain.service';
-import { UpdateCustomerDto } from '../dtos/update-customer.dto';
-import { CustomerResponseDto } from '../dtos/customer-response.dto';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { CustomerRepositoryInterface } from "../../domain/repositories/customer.repository.interface";
+import { CustomerDomainService } from "../../domain/services/customer.domain.service";
+import { CustomerResponseDto } from "../dtos/customer-response.dto";
+import { UpdateCustomerDto } from "../dtos/update-customer.dto";
 
 /**
  * Update Customer Use Case
@@ -13,7 +18,7 @@ import { CustomerResponseDto } from '../dtos/customer-response.dto';
 export class UpdateCustomerUseCase {
   constructor(
     private readonly customerRepository: CustomerRepositoryInterface,
-    private readonly customerDomainService: CustomerDomainService,
+    private readonly customerDomainService: CustomerDomainService
   ) {}
 
   /**
@@ -22,45 +27,64 @@ export class UpdateCustomerUseCase {
    * @param updateCustomerDto - Update data
    * @returns Updated customer response
    */
-  async execute(id: number, updateCustomerDto: UpdateCustomerDto): Promise<CustomerResponseDto> {
+  async execute(
+    id: number,
+    updateCustomerDto: UpdateCustomerDto
+  ): Promise<CustomerResponseDto> {
     // 1. Find existing customer
     const existingCustomer = await this.customerRepository.findById(id);
     if (!existingCustomer) {
-      throw new NotFoundException('Customer not found');
+      throw new NotFoundException("Customer not found");
     }
 
     // 2. Validate update data using domain service
-    const validation = this.customerDomainService.validateCustomerUpdateData(updateCustomerDto);
+    const validation =
+      this.customerDomainService.validateCustomerUpdateData(updateCustomerDto);
     if (!validation.isValid) {
-      throw new BadRequestException(validation.errors.join(', '));
+      throw new BadRequestException(validation.errors.join(", "));
     }
 
     // 3. Check if email is being changed and if it already exists
-    if (updateCustomerDto.email && updateCustomerDto.email !== existingCustomer.email) {
-      const customerWithSameEmail = await this.customerRepository.findByEmail(updateCustomerDto.email);
+    if (
+      updateCustomerDto.email &&
+      updateCustomerDto.email !== existingCustomer.email
+    ) {
+      const customerWithSameEmail = await this.customerRepository.findByEmail(
+        updateCustomerDto.email
+      );
       if (customerWithSameEmail) {
-        throw new ConflictException('Email already exists');
+        throw new ConflictException("Email already exists");
       }
     }
 
     // 4. Validate preferences if provided
     if (updateCustomerDto.preferences !== undefined) {
-      const preferencesValidation = this.customerDomainService.validatePreferences(updateCustomerDto.preferences);
+      const preferencesValidation =
+        this.customerDomainService.validatePreferences(
+          updateCustomerDto.preferences
+        );
       if (!preferencesValidation.isValid) {
-        throw new BadRequestException(preferencesValidation.errors.join(', '));
+        throw new BadRequestException(preferencesValidation.errors.join(", "));
       }
     }
 
     // 5. Prepare update data
     const updateData: Partial<any> = {};
-    
-    if (updateCustomerDto.email !== undefined) updateData.email = updateCustomerDto.email;
-    if (updateCustomerDto.firstName !== undefined) updateData.firstName = updateCustomerDto.firstName;
-    if (updateCustomerDto.lastName !== undefined) updateData.lastName = updateCustomerDto.lastName;
-    if (updateCustomerDto.phone !== undefined) updateData.phone = updateCustomerDto.phone;
-    if (updateCustomerDto.isActive !== undefined) updateData.isActive = updateCustomerDto.isActive;
-    if (updateCustomerDto.address !== undefined) updateData.address = updateCustomerDto.address;
-    if (updateCustomerDto.preferences !== undefined) updateData.preferences = updateCustomerDto.preferences;
+
+    if (updateCustomerDto.email !== undefined)
+      updateData.email = updateCustomerDto.email;
+    if (updateCustomerDto.firstName !== undefined)
+      updateData.firstName = updateCustomerDto.firstName;
+    if (updateCustomerDto.lastName !== undefined)
+      updateData.lastName = updateCustomerDto.lastName;
+    if (updateCustomerDto.phone !== undefined)
+      updateData.phone = updateCustomerDto.phone;
+    if (updateCustomerDto.isActive !== undefined)
+      updateData.isActive = updateCustomerDto.isActive;
+    if (updateCustomerDto.address !== undefined)
+      updateData.address = updateCustomerDto.address;
+    if (updateCustomerDto.preferences !== undefined)
+      updateData.preferences = updateCustomerDto.preferences;
 
     // Convert dateOfBirth string to Date if provided
     if (updateCustomerDto.dateOfBirth) {
@@ -68,7 +92,10 @@ export class UpdateCustomerUseCase {
     }
 
     // 6. Update customer in repository
-    const updatedCustomer = await this.customerRepository.update(id, updateData);
+    const updatedCustomer = await this.customerRepository.update(
+      id,
+      updateData
+    );
 
     // 7. Return response
     return this.mapToResponseDto(updatedCustomer);

@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { CustomerRepositoryInterface } from '../../domain/repositories/customer.repository.interface';
-import { CustomerResponseDto } from '../dtos/customer-response.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { CustomerRepositoryInterface } from "../../domain/repositories/customer.repository.interface";
+import { CustomerResponseDto } from "../dtos/customer-response.dto";
 
 /**
  * Get Customer Use Case
@@ -10,7 +10,7 @@ import { CustomerResponseDto } from '../dtos/customer-response.dto';
 @Injectable()
 export class GetCustomerUseCase {
   constructor(
-    private readonly customerRepository: CustomerRepositoryInterface,
+    private readonly customerRepository: CustomerRepositoryInterface
   ) {}
 
   /**
@@ -21,7 +21,7 @@ export class GetCustomerUseCase {
   async executeById(id: number): Promise<CustomerResponseDto> {
     const customer = await this.customerRepository.findById(id);
     if (!customer) {
-      throw new NotFoundException('Customer not found');
+      throw new NotFoundException("Customer not found");
     }
 
     return this.mapToResponseDto(customer);
@@ -35,7 +35,7 @@ export class GetCustomerUseCase {
   async executeByEmail(email: string): Promise<CustomerResponseDto> {
     const customer = await this.customerRepository.findByEmail(email);
     if (!customer) {
-      throw new NotFoundException('Customer not found');
+      throw new NotFoundException("Customer not found");
     }
 
     return this.mapToResponseDto(customer);
@@ -53,10 +53,14 @@ export class GetCustomerUseCase {
     limit: number = 10,
     search?: string
   ): Promise<{ customers: CustomerResponseDto[]; total: number }> {
-    const { customers, total } = await this.customerRepository.findAll(page, limit, search);
-    
+    const { customers, total } = await this.customerRepository.findAll(
+      page,
+      limit,
+      search
+    );
+
     return {
-      customers: customers.map(customer => this.mapToResponseDto(customer)),
+      customers: customers.map((customer) => this.mapToResponseDto(customer)),
       total,
     };
   }
@@ -67,7 +71,7 @@ export class GetCustomerUseCase {
    */
   async executeActive(): Promise<CustomerResponseDto[]> {
     const customers = await this.customerRepository.findActive();
-    return customers.map(customer => this.mapToResponseDto(customer));
+    return customers.map((customer) => this.mapToResponseDto(customer));
   }
 
   /**

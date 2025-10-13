@@ -1,19 +1,18 @@
-import { Module } from '@nestjs/common';
+import { Module } from "@nestjs/common";
 
 // Use Cases
-import { CreateCustomerUseCase } from './use-cases/create-customer.use-case';
-import { GetCustomerUseCase } from './use-cases/get-customer.use-case';
-import { UpdateCustomerUseCase } from './use-cases/update-customer.use-case';
-import { DeleteCustomerUseCase } from './use-cases/delete-customer.use-case';
+import { CreateCustomerUseCase } from "./use-cases/create-customer.use-case";
+import { DeleteCustomerUseCase } from "./use-cases/delete-customer.use-case";
+import { GetCustomerUseCase } from "./use-cases/get-customer.use-case";
+import { UpdateCustomerUseCase } from "./use-cases/update-customer.use-case";
 
 // Domain Services
-import { CustomerDomainService } from '../domain/services/customer.domain.service';
+import { CustomerDomainService } from "../domain/services/customer.domain.service";
 
 // Repository Interfaces (will be implemented in infrastructure)
-import { CustomerRepositoryInterface } from '../domain/repositories/customer.repository.interface';
 
 // Infrastructure Implementations
-import { CustomerRepository } from '../infrastructure/repositories/customer.repository';
+import { CustomerRepository } from "../infrastructure/repositories/customer.repository";
 
 /**
  * Application Module
@@ -33,7 +32,7 @@ import { CustomerRepository } from '../infrastructure/repositories/customer.repo
 
     // Repository Implementations
     {
-      provide: 'CustomerRepositoryInterface',
+      provide: "CustomerRepositoryInterface",
       useClass: CustomerRepository,
     },
   ],
@@ -43,7 +42,7 @@ import { CustomerRepository } from '../infrastructure/repositories/customer.repo
     GetCustomerUseCase,
     UpdateCustomerUseCase,
     DeleteCustomerUseCase,
-    
+
     // Export domain services
     CustomerDomainService,
   ],

@@ -9,15 +9,14 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  Query,
 } from "@nestjs/common";
+import { CreateRoleDto } from "../../application/dtos/create-role.dto";
+import { RoleResponseDto } from "../../application/dtos/role-response.dto";
+import { UpdateRoleDto } from "../../application/dtos/update-role.dto";
 import { CreateRoleUseCase } from "../../application/use-cases/create-role.use-case";
+import { DeleteRoleUseCase } from "../../application/use-cases/delete-role.use-case";
 import { GetRoleUseCase } from "../../application/use-cases/get-role.use-case";
 import { UpdateRoleUseCase } from "../../application/use-cases/update-role.use-case";
-import { DeleteRoleUseCase } from "../../application/use-cases/delete-role.use-case";
-import { CreateRoleDto } from "../../application/dtos/create-role.dto";
-import { UpdateRoleDto } from "../../application/dtos/update-role.dto";
-import { RoleResponseDto } from "../../application/dtos/role-response.dto";
 
 /**
  * Role Controller

@@ -1,10 +1,10 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
-import { randomUUID } from 'crypto';
-import { PricingRuleRepositoryInterface } from '../../domain/repositories/pricing-rule.repository.interface';
-import { PriceCalculationRepositoryInterface } from '../../domain/repositories/price-calculation.repository.interface';
-import { PricingDomainService } from '../../domain/services/pricing.domain.service';
-import { CalculatePriceDto } from '../dtos/calculate-price.dto';
-import { PriceCalculationResponseDto } from '../dtos/price-calculation-response.dto';
+import { BadRequestException, Injectable } from "@nestjs/common";
+import { randomUUID } from "crypto";
+import { PriceCalculationRepositoryInterface } from "../../domain/repositories/price-calculation.repository.interface";
+import { PricingRuleRepositoryInterface } from "../../domain/repositories/pricing-rule.repository.interface";
+import { PricingDomainService } from "../../domain/services/pricing.domain.service";
+import { CalculatePriceDto } from "../dtos/calculate-price.dto";
+import { PriceCalculationResponseDto } from "../dtos/price-calculation-response.dto";
 
 /**
  * Calculate Price Use Case
@@ -16,7 +16,7 @@ export class CalculatePriceUseCase {
   constructor(
     private readonly pricingRuleRepository: PricingRuleRepositoryInterface,
     private readonly priceCalculationRepository: PriceCalculationRepositoryInterface,
-    private readonly pricingDomainService: PricingDomainService,
+    private readonly pricingDomainService: PricingDomainService
   ) {}
 
   /**
@@ -24,11 +24,16 @@ export class CalculatePriceUseCase {
    * @param calculatePriceDto - Price calculation request
    * @returns Price calculation response
    */
-  async execute(calculatePriceDto: CalculatePriceDto): Promise<PriceCalculationResponseDto> {
+  async execute(
+    calculatePriceDto: CalculatePriceDto
+  ): Promise<PriceCalculationResponseDto> {
     // 1. Validate input using domain service
-    const validation = this.pricingDomainService.validatePriceCalculationRequest(calculatePriceDto);
+    const validation =
+      this.pricingDomainService.validatePriceCalculationRequest(
+        calculatePriceDto
+      );
     if (!validation.isValid) {
-      throw new BadRequestException(validation.errors.join(', '));
+      throw new BadRequestException(validation.errors.join(", "));
     }
 
     // 2. Prepare conditions for rule matching
@@ -43,13 +48,18 @@ export class CalculatePriceUseCase {
     };
 
     // 3. Find applicable pricing rules
-    const applicableRules = await this.pricingRuleRepository.findByConditions(conditions);
-    
+    const applicableRules =
+      await this.pricingRuleRepository.findByConditions(conditions);
+
     // 4. Sort rules by priority
-    const sortedRules = this.pricingDomainService.sortRulesByPriority(applicableRules);
+    const sortedRules =
+      this.pricingDomainService.sortRulesByPriority(applicableRules);
 
     // 5. Calculate price using domain service
-    const calculation = this.calculatePriceFromRules(sortedRules, calculatePriceDto);
+    const calculation = this.calculatePriceFromRules(
+      sortedRules,
+      calculatePriceDto
+    );
 
     // 6. Create price calculation record
     const requestId = randomUUID();
@@ -70,7 +80,8 @@ export class CalculatePriceUseCase {
     };
 
     // 7. Save calculation in repository
-    const savedCalculation = await this.priceCalculationRepository.create(priceCalculation);
+    const savedCalculation =
+      await this.priceCalculationRepository.create(priceCalculation);
 
     // 8. Return response
     return this.mapToResponseDto(savedCalculation);
@@ -82,7 +93,10 @@ export class CalculatePriceUseCase {
    * @param request - Price calculation request
    * @returns Price calculation result
    */
-  private calculatePriceFromRules(rules: any[], request: CalculatePriceDto): {
+  private calculatePriceFromRules(
+    rules: any[],
+    request: CalculatePriceDto
+  ): {
     calculation: any;
     appliedRules: any[];
   } {
@@ -96,7 +110,7 @@ export class CalculatePriceUseCase {
     const appliedRules: any[] = [];
 
     // Find the base pricing rule (highest priority with baseRate > 0)
-    const baseRule = rules.find(rule => rule.pricing.baseRate > 0);
+    const baseRule = rules.find((rule) => rule.pricing.baseRate > 0);
 
     if (baseRule) {
       const basePrice = this.pricingDomainService.calculateBasePrice(
@@ -123,11 +137,17 @@ export class CalculatePriceUseCase {
 
     for (const rule of rules) {
       // Apply surcharges
-      const ruleSurcharges = this.pricingDomainService.calculateSurcharges(rule.pricing, subtotal);
+      const ruleSurcharges = this.pricingDomainService.calculateSurcharges(
+        rule.pricing,
+        subtotal
+      );
       surcharges.push(...ruleSurcharges);
 
       // Apply discounts
-      const ruleDiscounts = this.pricingDomainService.calculateDiscounts(rule.pricing, subtotal);
+      const ruleDiscounts = this.pricingDomainService.calculateDiscounts(
+        rule.pricing,
+        subtotal
+      );
       discounts.push(...ruleDiscounts);
 
       // Track applied rules
@@ -146,7 +166,11 @@ export class CalculatePriceUseCase {
     let total = subtotal + surchargeTotal - discountTotal;
 
     // Apply minimum and maximum charges
-    total = this.pricingDomainService.applyMinMaxCharges(total, minimumCharge, maximumCharge);
+    total = this.pricingDomainService.applyMinMaxCharges(
+      total,
+      minimumCharge,
+      maximumCharge
+    );
 
     return {
       calculation: {
@@ -157,7 +181,7 @@ export class CalculatePriceUseCase {
         discounts,
         subtotal,
         total,
-        currency: baseRule ? baseRule.pricing.currency : 'USD',
+        currency: baseRule ? baseRule.pricing.currency : "USD",
       },
       appliedRules,
     };

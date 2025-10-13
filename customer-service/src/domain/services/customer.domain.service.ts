@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { Customer } from '../entities/customer.entity';
+import { Injectable } from "@nestjs/common";
+import { Customer } from "../entities/customer.entity";
 
 /**
  * Domain service for customer business logic
@@ -7,7 +7,6 @@ import { Customer } from '../entities/customer.entity';
  */
 @Injectable()
 export class CustomerDomainService {
-
   /**
    * Validates customer creation data
    * Business rule: All required fields must be present and valid
@@ -24,36 +23,41 @@ export class CustomerDomainService {
 
     // Email validation
     if (!customerData.email || !this.isValidEmail(customerData.email)) {
-      errors.push('Valid email is required');
+      errors.push("Valid email is required");
     }
 
     // Name validation
     if (!customerData.firstName || customerData.firstName.trim().length < 2) {
-      errors.push('First name must be at least 2 characters');
+      errors.push("First name must be at least 2 characters");
     }
 
     if (!customerData.lastName || customerData.lastName.trim().length < 2) {
-      errors.push('Last name must be at least 2 characters');
+      errors.push("Last name must be at least 2 characters");
     }
 
     // Phone validation (optional)
     if (customerData.phone && !this.isValidPhone(customerData.phone)) {
-      errors.push('Phone number format is invalid');
+      errors.push("Phone number format is invalid");
     }
 
     // Date of birth validation (optional)
-    if (customerData.dateOfBirth && !this.isValidDateOfBirth(customerData.dateOfBirth)) {
-      errors.push('Date of birth must be a valid date and customer must be at least 13 years old');
+    if (
+      customerData.dateOfBirth &&
+      !this.isValidDateOfBirth(customerData.dateOfBirth)
+    ) {
+      errors.push(
+        "Date of birth must be a valid date and customer must be at least 13 years old"
+      );
     }
 
     // Address validation (optional)
     if (customerData.address && !this.isValidAddress(customerData.address)) {
-      errors.push('Address format is invalid');
+      errors.push("Address format is invalid");
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -61,41 +65,61 @@ export class CustomerDomainService {
    * Validates customer update data
    * Business rule: Cannot update certain fields after creation
    */
-  validateCustomerUpdateData(updateData: Partial<Customer>): { isValid: boolean; errors: string[] } {
+  validateCustomerUpdateData(updateData: Partial<Customer>): {
+    isValid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     // Email validation
-    if (updateData.email !== undefined && !this.isValidEmail(updateData.email)) {
-      errors.push('Email format is invalid');
+    if (
+      updateData.email !== undefined &&
+      !this.isValidEmail(updateData.email)
+    ) {
+      errors.push("Email format is invalid");
     }
 
     // Name validation
-    if (updateData.firstName !== undefined && updateData.firstName.trim().length < 2) {
-      errors.push('First name must be at least 2 characters');
+    if (
+      updateData.firstName !== undefined &&
+      updateData.firstName.trim().length < 2
+    ) {
+      errors.push("First name must be at least 2 characters");
     }
 
-    if (updateData.lastName !== undefined && updateData.lastName.trim().length < 2) {
-      errors.push('Last name must be at least 2 characters');
+    if (
+      updateData.lastName !== undefined &&
+      updateData.lastName.trim().length < 2
+    ) {
+      errors.push("Last name must be at least 2 characters");
     }
 
     // Phone validation
-    if (updateData.phone !== undefined && !this.isValidPhone(updateData.phone)) {
-      errors.push('Phone number format is invalid');
+    if (
+      updateData.phone !== undefined &&
+      !this.isValidPhone(updateData.phone)
+    ) {
+      errors.push("Phone number format is invalid");
     }
 
     // Date of birth validation
-    if (updateData.dateOfBirth && !this.isValidDateOfBirth(updateData.dateOfBirth.toString())) {
-      errors.push('Date of birth must be a valid date and customer must be at least 13 years old');
+    if (
+      updateData.dateOfBirth &&
+      !this.isValidDateOfBirth(updateData.dateOfBirth.toString())
+    ) {
+      errors.push(
+        "Date of birth must be a valid date and customer must be at least 13 years old"
+      );
     }
 
     // Address validation
     if (updateData.address && !this.isValidAddress(updateData.address)) {
-      errors.push('Address format is invalid');
+      errors.push("Address format is invalid");
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -134,11 +158,14 @@ export class CustomerDomainService {
     const birthDate = new Date(dateOfBirth);
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
       age--;
     }
-    
+
     return age;
   }
 
@@ -147,8 +174,10 @@ export class CustomerDomainService {
    * Business rule: Premium status based on age and activity
    */
   isEligibleForPremiumStatus(customer: Customer, totalOrders: number): boolean {
-    const age = customer.dateOfBirth ? this.calculateAge(customer.dateOfBirth) : 0;
-    
+    const age = customer.dateOfBirth
+      ? this.calculateAge(customer.dateOfBirth)
+      : 0;
+
     // Business rule: Premium status requires age >= 18 and >= 10 orders
     return age >= 18 && totalOrders >= 10;
   }
@@ -157,7 +186,10 @@ export class CustomerDomainService {
    * Validates customer preferences
    * Business rule: Preferences must be valid JSON and within size limits
    */
-  validatePreferences(preferences: any): { isValid: boolean; errors: string[] } {
+  validatePreferences(preferences: any): {
+    isValid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     if (preferences === null || preferences === undefined) {
@@ -167,15 +199,15 @@ export class CustomerDomainService {
     try {
       const preferencesString = JSON.stringify(preferences);
       if (preferencesString.length > 2000) {
-        errors.push('Preferences must not exceed 2000 characters');
+        errors.push("Preferences must not exceed 2000 characters");
       }
     } catch (error) {
-      errors.push('Preferences must be valid JSON');
+      errors.push("Preferences must be valid JSON");
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -204,37 +236,40 @@ export class CustomerDomainService {
 
   private isValidPhone(phone: string): boolean {
     const phoneRegex = /^\+?[\d\s\-\(\)]+$/;
-    return phoneRegex.test(phone) && phone.replace(/\D/g, '').length >= 10;
+    return phoneRegex.test(phone) && phone.replace(/\D/g, "").length >= 10;
   }
 
   private isValidDateOfBirth(dateOfBirth: string): boolean {
     const birthDate = new Date(dateOfBirth);
     const today = new Date();
-    
+
     // Check if date is valid
     if (isNaN(birthDate.getTime())) {
       return false;
     }
-    
+
     // Check if date is not in the future
     if (birthDate > today) {
       return false;
     }
-    
+
     // Check if customer is at least 13 years old
     const age = this.calculateAge(birthDate);
     return age >= 13;
   }
 
   private isValidAddress(address: any): boolean {
-    if (!address || typeof address !== 'object') {
+    if (!address || typeof address !== "object") {
       return false;
     }
 
     // Basic address validation
-    const requiredFields = ['street', 'city', 'country'];
-    return requiredFields.every(field => 
-      address[field] && typeof address[field] === 'string' && address[field].trim().length > 0
+    const requiredFields = ["street", "city", "country"];
+    return requiredFields.every(
+      (field) =>
+        address[field] &&
+        typeof address[field] === "string" &&
+        address[field].trim().length > 0
     );
   }
 }

@@ -130,6 +130,18 @@ export class LanguageValueRepository
     return await this.languageValueRepository.count();
   }
 
+  async countByLanguage(languageId: number): Promise<number> {
+    return await this.languageValueRepository.count({
+      where: { languageId },
+    });
+  }
+
+  async countApprovedByLanguage(languageId: number): Promise<number> {
+    return await this.languageValueRepository.count({
+      where: { languageId, isApproved: true },
+    });
+  }
+
   async incrementUsageCount(id: number): Promise<void> {
     await this.languageValueRepository
       .createQueryBuilder()
@@ -142,10 +154,3 @@ export class LanguageValueRepository
       .execute();
   }
 }
-
-
-
-
-
-
-

@@ -1,22 +1,26 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get } from "@nestjs/common";
 
 /**
  * Health Controller
  * Interface adapter for health check requests
  * Follows Clean Architecture principles
  */
-@Controller('health')
+@Controller("health")
 export class HealthController {
   /**
    * Health check endpoint
    * GET /health
    */
   @Get()
-  async healthCheck(): Promise<{ status: string; timestamp: string; service: string }> {
+  async healthCheck(): Promise<{
+    status: string;
+    timestamp: string;
+    service: string;
+  }> {
     return {
-      status: 'ok',
+      status: "ok",
       timestamp: new Date().toISOString(),
-      service: 'customer-service',
+      service: "customer-service",
     };
   }
 }

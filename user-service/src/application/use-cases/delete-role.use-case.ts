@@ -1,5 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { RoleRepositoryInterface } from '../../domain/repositories/role.repository.interface';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
 
 /**
  * Delete Role Use Case
@@ -8,9 +12,7 @@ import { RoleRepositoryInterface } from '../../domain/repositories/role.reposito
  */
 @Injectable()
 export class DeleteRoleUseCase {
-  constructor(
-    private readonly roleRepository: RoleRepositoryInterface,
-  ) {}
+  constructor(private readonly roleRepository: RoleRepositoryInterface) {}
 
   /**
    * Executes the delete role use case
@@ -20,16 +22,18 @@ export class DeleteRoleUseCase {
     // 1. Find existing role
     const existingRole = await this.roleRepository.findById(id);
     if (!existingRole) {
-      throw new NotFoundException('Role not found');
+      throw new NotFoundException("Role not found");
     }
 
     // 2. Check if role can be deleted (business rule)
     // Note: In a real application, you would check if role is assigned to users
     // For now, we'll assume we can delete if not assigned to users
     const isAssignedToUsers = false; // This would come from user repository
-    
+
     if (isAssignedToUsers) {
-      throw new BadRequestException('Cannot delete role that is assigned to users');
+      throw new BadRequestException(
+        "Cannot delete role that is assigned to users"
+      );
     }
 
     // 3. Delete role from repository

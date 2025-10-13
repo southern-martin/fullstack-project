@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { CustomerRepositoryInterface } from '../../domain/repositories/customer.repository.interface';
-import { CustomerDomainService } from '../../domain/services/customer.domain.service';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { CustomerRepositoryInterface } from "../../domain/repositories/customer.repository.interface";
+import { CustomerDomainService } from "../../domain/services/customer.domain.service";
 
 /**
  * Delete Customer Use Case
@@ -11,7 +15,7 @@ import { CustomerDomainService } from '../../domain/services/customer.domain.ser
 export class DeleteCustomerUseCase {
   constructor(
     private readonly customerRepository: CustomerRepositoryInterface,
-    private readonly customerDomainService: CustomerDomainService,
+    private readonly customerDomainService: CustomerDomainService
   ) {}
 
   /**
@@ -22,16 +26,23 @@ export class DeleteCustomerUseCase {
     // 1. Find existing customer
     const existingCustomer = await this.customerRepository.findById(id);
     if (!existingCustomer) {
-      throw new NotFoundException('Customer not found');
+      throw new NotFoundException("Customer not found");
     }
 
     // 2. Check if customer can be deleted (business rule)
     // Note: In a real application, you would check for related orders
     // For now, we'll assume we can delete if no active orders
     const hasAnyOrders = false; // This would come from an order service
-    
-    if (!this.customerDomainService.canDeleteCustomer(existingCustomer, hasAnyOrders)) {
-      throw new BadRequestException('Cannot delete customer with existing orders');
+
+    if (
+      !this.customerDomainService.canDeleteCustomer(
+        existingCustomer,
+        hasAnyOrders
+      )
+    ) {
+      throw new BadRequestException(
+        "Cannot delete customer with existing orders"
+      );
     }
 
     // 3. Delete customer from repository

@@ -1,20 +1,18 @@
-import { Module } from '@nestjs/common';
+import { Module } from "@nestjs/common";
 
 // Use Cases
-import { CalculatePriceUseCase } from './use-cases/calculate-price.use-case';
-import { ManagePricingRuleUseCase } from './use-cases/manage-pricing-rule.use-case';
-import { GetPriceCalculationHistoryUseCase } from './use-cases/get-price-calculation-history.use-case';
+import { CalculatePriceUseCase } from "./use-cases/calculate-price.use-case";
+import { GetPriceCalculationHistoryUseCase } from "./use-cases/get-price-calculation-history.use-case";
+import { ManagePricingRuleUseCase } from "./use-cases/manage-pricing-rule.use-case";
 
 // Domain Services
-import { PricingDomainService } from '../domain/services/pricing.domain.service';
+import { PricingDomainService } from "../domain/services/pricing.domain.service";
 
 // Repository Interfaces (will be implemented in infrastructure)
-import { PricingRuleRepositoryInterface } from '../domain/repositories/pricing-rule.repository.interface';
-import { PriceCalculationRepositoryInterface } from '../domain/repositories/price-calculation.repository.interface';
 
 // Infrastructure Implementations
-import { PricingRuleRepository } from '../infrastructure/repositories/pricing-rule.repository';
-import { PriceCalculationRepository } from '../infrastructure/repositories/price-calculation.repository';
+import { PriceCalculationRepository } from "../infrastructure/repositories/price-calculation.repository";
+import { PricingRuleRepository } from "../infrastructure/repositories/pricing-rule.repository";
 
 /**
  * Application Module
@@ -33,11 +31,11 @@ import { PriceCalculationRepository } from '../infrastructure/repositories/price
 
     // Repository Implementations
     {
-      provide: 'PricingRuleRepositoryInterface',
+      provide: "PricingRuleRepositoryInterface",
       useClass: PricingRuleRepository,
     },
     {
-      provide: 'PriceCalculationRepositoryInterface',
+      provide: "PriceCalculationRepositoryInterface",
       useClass: PriceCalculationRepository,
     },
   ],
@@ -46,7 +44,7 @@ import { PriceCalculationRepository } from '../infrastructure/repositories/price
     CalculatePriceUseCase,
     ManagePricingRuleUseCase,
     GetPriceCalculationHistoryUseCase,
-    
+
     // Export domain services
     PricingDomainService,
   ],

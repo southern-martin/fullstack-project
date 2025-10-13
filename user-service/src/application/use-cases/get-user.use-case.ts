@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { UserRepositoryInterface } from '../../domain/repositories/user.repository.interface';
-import { UserResponseDto } from '../dtos/user-response.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
+import { UserResponseDto } from "../dtos/user-response.dto";
 
 /**
  * Get User Use Case
@@ -9,9 +9,7 @@ import { UserResponseDto } from '../dtos/user-response.dto';
  */
 @Injectable()
 export class GetUserUseCase {
-  constructor(
-    private readonly userRepository: UserRepositoryInterface,
-  ) {}
+  constructor(private readonly userRepository: UserRepositoryInterface) {}
 
   /**
    * Executes the get user by ID use case
@@ -21,7 +19,7 @@ export class GetUserUseCase {
   async executeById(id: number): Promise<UserResponseDto> {
     const user = await this.userRepository.findById(id);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException("User not found");
     }
 
     return this.mapToResponseDto(user);
@@ -35,7 +33,7 @@ export class GetUserUseCase {
   async executeByEmail(email: string): Promise<UserResponseDto> {
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException("User not found");
     }
 
     return this.mapToResponseDto(user);
@@ -53,10 +51,14 @@ export class GetUserUseCase {
     limit: number = 10,
     search?: string
   ): Promise<{ users: UserResponseDto[]; total: number }> {
-    const { users, total } = await this.userRepository.findPaginated(page, limit, search);
-    
+    const { users, total } = await this.userRepository.findPaginated(
+      page,
+      limit,
+      search
+    );
+
     return {
-      users: users.map(user => this.mapToResponseDto(user)),
+      users: users.map((user) => this.mapToResponseDto(user)),
       total,
     };
   }
@@ -67,7 +69,7 @@ export class GetUserUseCase {
    */
   async executeActive(): Promise<UserResponseDto[]> {
     const users = await this.userRepository.findActive();
-    return users.map(user => this.mapToResponseDto(user));
+    return users.map((user) => this.mapToResponseDto(user));
   }
 
   /**
@@ -96,8 +98,8 @@ export class GetUserUseCase {
    */
   async executeByRole(roleName: string): Promise<UserResponseDto[]> {
     const users = await this.userRepository.findAll();
-    const usersWithRole = users.filter(user => user.hasRole(roleName));
-    return usersWithRole.map(user => this.mapToResponseDto(user));
+    const usersWithRole = users.filter((user) => user.hasRole(roleName));
+    return usersWithRole.map((user) => this.mapToResponseDto(user));
   }
 
   /**
@@ -117,7 +119,7 @@ export class GetUserUseCase {
       dateOfBirth: user.dateOfBirth,
       address: user.address,
       preferences: user.preferences,
-      roles: user.roles.map(role => ({
+      roles: user.roles.map((role) => ({
         id: role.id,
         name: role.name,
         description: role.description,

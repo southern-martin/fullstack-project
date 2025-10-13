@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { PriceCalculationRepositoryInterface } from '../../domain/repositories/price-calculation.repository.interface';
-import { PriceCalculationResponseDto } from '../dtos/price-calculation-response.dto';
+import { Injectable } from "@nestjs/common";
+import { PriceCalculationRepositoryInterface } from "../../domain/repositories/price-calculation.repository.interface";
+import { PriceCalculationResponseDto } from "../dtos/price-calculation-response.dto";
 
 /**
  * Get Price Calculation History Use Case
@@ -10,7 +10,7 @@ import { PriceCalculationResponseDto } from '../dtos/price-calculation-response.
 @Injectable()
 export class GetPriceCalculationHistoryUseCase {
   constructor(
-    private readonly priceCalculationRepository: PriceCalculationRepositoryInterface,
+    private readonly priceCalculationRepository: PriceCalculationRepositoryInterface
   ) {}
 
   /**
@@ -24,11 +24,17 @@ export class GetPriceCalculationHistoryUseCase {
     page: number = 1,
     limit: number = 10,
     search?: string
-  ): Promise<{ priceCalculations: PriceCalculationResponseDto[]; total: number }> {
-    const { priceCalculations, total } = await this.priceCalculationRepository.findAll(page, limit, search);
-    
+  ): Promise<{
+    priceCalculations: PriceCalculationResponseDto[];
+    total: number;
+  }> {
+    const { priceCalculations, total } =
+      await this.priceCalculationRepository.findAll(page, limit, search);
+
     return {
-      priceCalculations: priceCalculations.map(calculation => this.mapToResponseDto(calculation)),
+      priceCalculations: priceCalculations.map((calculation) =>
+        this.mapToResponseDto(calculation)
+      ),
       total,
     };
   }

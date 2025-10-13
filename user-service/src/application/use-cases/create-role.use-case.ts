@@ -1,7 +1,11 @@
-import { Injectable, ConflictException, BadRequestException } from '@nestjs/common';
-import { RoleRepositoryInterface } from '../../domain/repositories/role.repository.interface';
-import { CreateRoleDto } from '../dtos/create-role.dto';
-import { RoleResponseDto } from '../dtos/role-response.dto';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from "@nestjs/common";
+import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
+import { CreateRoleDto } from "../dtos/create-role.dto";
+import { RoleResponseDto } from "../dtos/role-response.dto";
 
 /**
  * Create Role Use Case
@@ -10,9 +14,7 @@ import { RoleResponseDto } from '../dtos/role-response.dto';
  */
 @Injectable()
 export class CreateRoleUseCase {
-  constructor(
-    private readonly roleRepository: RoleRepositoryInterface,
-  ) {}
+  constructor(private readonly roleRepository: RoleRepositoryInterface) {}
 
   /**
    * Executes the create role use case
@@ -23,13 +25,15 @@ export class CreateRoleUseCase {
     // 1. Validate input
     const validation = this.validateRoleCreationData(createRoleDto);
     if (!validation.isValid) {
-      throw new BadRequestException(validation.errors.join(', '));
+      throw new BadRequestException(validation.errors.join(", "));
     }
 
     // 2. Check if role name already exists
-    const existingRole = await this.roleRepository.findByName(createRoleDto.name);
+    const existingRole = await this.roleRepository.findByName(
+      createRoleDto.name
+    );
     if (existingRole) {
-      throw new ConflictException('Role name already exists');
+      throw new ConflictException("Role name already exists");
     }
 
     // 3. Create role entity
@@ -52,28 +56,31 @@ export class CreateRoleUseCase {
    * @param roleData - Role creation data
    * @returns Validation result
    */
-  private validateRoleCreationData(roleData: CreateRoleDto): { isValid: boolean; errors: string[] } {
+  private validateRoleCreationData(roleData: CreateRoleDto): {
+    isValid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     if (!roleData.name || roleData.name.trim().length < 2) {
-      errors.push('Role name must be at least 2 characters');
+      errors.push("Role name must be at least 2 characters");
     }
 
     if (roleData.name && roleData.name.length > 50) {
-      errors.push('Role name must not exceed 50 characters');
+      errors.push("Role name must not exceed 50 characters");
     }
 
     if (roleData.description && roleData.description.length > 200) {
-      errors.push('Role description must not exceed 200 characters');
+      errors.push("Role description must not exceed 200 characters");
     }
 
     if (roleData.permissions && !Array.isArray(roleData.permissions)) {
-      errors.push('Permissions must be an array');
+      errors.push("Permissions must be an array");
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
