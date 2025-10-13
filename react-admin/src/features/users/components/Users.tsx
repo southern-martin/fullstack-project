@@ -6,7 +6,7 @@ import {
     UserMinusIcon,
     UserPlusIcon
 } from '@heroicons/react/24/outline';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import {
@@ -17,6 +17,10 @@ import {
 import Button from '../../../shared/components/ui/Button';
 import Card from '../../../shared/components/ui/Card';
 import Modal from '../../../shared/components/ui/Modal';
+import { ServerPagination } from '../../../shared/components/ui/ServerPagination';
+import { ServerSearch } from '../../../shared/components/ui/ServerSearch';
+import { ServerSorting, SortOption } from '../../../shared/components/ui/ServerSorting';
+import { useServerPagination } from '../../../shared/hooks/useServerPagination';
 import { User } from '../../../shared/types';
 import { CreateUserRequest, UpdateUserRequest, userApiService } from '../services/userApiService';
 
@@ -24,11 +28,35 @@ import UserDetails from './UserDetails';
 import UserForm from './UserForm';
 
 const Users: React.FC = () => {
-
-    // Local state management
-    const [users, setUsers] = useState<User[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    // Server-side pagination
+    const {
+        data: users,
+        loading,
+        error,
+        currentPage,
+        pageSize,
+        total,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage,
+        startIndex,
+        endIndex,
+        searchTerm,
+        sortBy,
+        sortOrder,
+        goToPage,
+        changePageSize,
+        setSearch,
+        setSorting,
+        refresh,
+    } = useServerPagination({
+        fetchFunction: userApiService.getUsers,
+        initialPage: 1,
+        initialPageSize: 10,
+        initialSearch: '',
+        initialSortBy: 'createdAt',
+        initialSortOrder: 'desc',
+    });
 
     // Modal states
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -44,77 +72,64 @@ const Users: React.FC = () => {
         setModalFooter(footer);
     }, []);
 
-    // Load users
-    const loadUsers = useCallback(async () => {
-        try {
-            setLoading(true);
-            setError(null);
-            const response = await userApiService.getUsers({
-                page: 1,
-                limit: 100, // Maximum allowed by backend
-            });
-            setUsers(response.data);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to load users');
-            toast.error('Failed to load users: ' + (err instanceof Error ? err.message : 'Unknown error'));
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        loadUsers();
-    }, [loadUsers]);
+    // Sort options for the sorting component
+    const sortOptions: SortOption[] = useMemo(() => [
+        { key: 'firstName', label: 'First Name', defaultOrder: 'asc' },
+        { key: 'lastName', label: 'Last Name', defaultOrder: 'asc' },
+        { key: 'email', label: 'Email', defaultOrder: 'asc' },
+        { key: 'createdAt', label: 'Created Date', defaultOrder: 'desc' },
+        { key: 'isActive', label: 'Status', defaultOrder: 'asc' },
+    ], []);
 
     // CRUD actions
     const createUser = useCallback(async (userData: CreateUserRequest) => {
         try {
             await userApiService.createUser(userData);
             toast.success('User created successfully');
-            loadUsers();
+            refresh();
             setShowCreateModal(false);
             setModalFooter(null);
         } catch (error) {
             toast.error('Failed to create user: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [loadUsers]);
+    }, [refresh]);
 
     const updateUser = useCallback(async (id: number, userData: UpdateUserRequest) => {
         try {
             await userApiService.updateUser(id, userData);
             toast.success('User updated successfully');
-            loadUsers();
+            refresh();
             setShowEditModal(false);
             setModalFooter(null);
         } catch (error) {
             toast.error('Failed to update user: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [loadUsers]);
+    }, [refresh]);
 
     const deleteUser = useCallback(async (id: number) => {
         try {
             await userApiService.deleteUser(id);
             toast.success('User deleted successfully');
-            loadUsers();
+            refresh();
             setShowDeleteModal(false);
         } catch (error) {
             toast.error('Failed to delete user: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [loadUsers]);
+    }, [refresh]);
 
     const toggleUserStatus = useCallback(async (id: number, status: boolean) => {
         try {
             await userApiService.updateUser(id, { isActive: status });
             toast.success(status ? 'User activated' : 'User deactivated');
-            loadUsers();
+            refresh();
         } catch (error) {
             toast.error('Failed to toggle user status: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [loadUsers]);
+    }, [refresh]);
 
     // Table configuration
     const tableConfig: TableConfig<User> = useMemo(() => ({
@@ -186,19 +201,9 @@ const Users: React.FC = () => {
                 ),
             },
         ],
-        pagination: {
-            pageSize: 10,
-            pageSizeOptions: [5, 10, 25, 50],
-            showTotal: true,
-            showPageSize: true,
-        },
-        sorting: {
-            defaultSort: { key: 'createdAt', direction: 'desc' },
-        },
-        filtering: {
-            globalSearch: false,
-            searchPlaceholder: 'Search users...',
-        },
+        // pagination: undefined, // Disable client-side pagination since we're using server-side
+        // sorting: undefined, // Disable client-side sorting since we're using server-side
+        // filtering: undefined, // Disable client-side filtering since we're using server-side
         selection: {
             enabled: true,
             multiSelect: true,
@@ -261,30 +266,7 @@ const Users: React.FC = () => {
         emptyMessage: 'No users found',
     }), [toggleUserStatus]);
 
-    // Filter options for the toolbar
-    const filterOptions = [
-        {
-            key: 'isActive',
-            label: 'Status',
-            type: 'select' as const,
-            options: [
-                { label: 'All', value: '' },
-                { label: 'Active', value: 'true' },
-                { label: 'Inactive', value: 'false' },
-            ],
-        },
-        {
-            key: 'roles',
-            label: 'Role',
-            type: 'select' as const,
-            options: [
-                { label: 'All', value: '' },
-                { label: 'Admin', value: 'admin' },
-                { label: 'User', value: 'user' },
-                { label: 'Manager', value: 'manager' },
-            ],
-        },
-    ];
+    // Note: Filtering is now handled server-side through search and sorting
 
     // Export function
     const handleExport = useCallback(async (format: 'csv' | 'excel' | 'pdf') => {
@@ -321,27 +303,77 @@ const Users: React.FC = () => {
                 </Button>
             </div>
 
-            {/* Table with Toolbar */}
+            {/* Table with Server-Side Controls */}
             <Card>
-                <TableToolbar
-                    onExport={handleExport}
-                    filters={filterOptions}
-                    onFilterChange={() => { }} // TODO: Implement filtering
-                    onSearchChange={() => { }} // TODO: Implement search
-                    searchTerm=""
-                    activeFilters={[]}
-                    onClearAllFilters={() => { }} // TODO: Implement clear filters
-                    showSearch={true}
-                    showFilters={true}
-                    showExport={true}
-                    showSettings={true}
-                />
+                {/* Server-Side Search and Sorting Controls */}
+                <div className="p-4 border-b border-gray-200 bg-gray-50">
+                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center flex-1">
+                            <ServerSearch
+                                searchTerm={searchTerm}
+                                onSearchChange={setSearch}
+                                loading={loading}
+                                placeholder="Search users by name, email, or role..."
+                                className="w-full sm:w-80"
+                            />
+                            <ServerSorting
+                                sortBy={sortBy}
+                                sortOrder={sortOrder}
+                                onSortChange={setSorting}
+                                sortOptions={sortOptions}
+                                loading={loading}
+                            />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                onClick={() => handleExport('csv')}
+                                variant="secondary"
+                                size="sm"
+                                disabled={loading}
+                            >
+                                Export CSV
+                            </Button>
+                            <Button
+                                onClick={refresh}
+                                variant="secondary"
+                                size="sm"
+                                disabled={loading}
+                            >
+                                Refresh
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Table */}
                 <Table
                     config={tableConfig}
                     data={users}
                     loading={loading}
                     error={error || undefined}
                 />
+
+                {/* Server-Side Pagination */}
+                <div className="p-4 border-t border-gray-200 bg-gray-50">
+                    <ServerPagination
+                        currentPage={currentPage}
+                        pageSize={pageSize}
+                        total={total}
+                        totalPages={totalPages}
+                        hasNextPage={hasNextPage}
+                        hasPreviousPage={hasPreviousPage}
+                        startIndex={startIndex}
+                        endIndex={endIndex}
+                        loading={loading}
+                        pageSizeOptions={[5, 10, 25, 50, 100]}
+                        onPageChange={goToPage}
+                        onPageSizeChange={changePageSize}
+                        showPageSizeSelector={true}
+                        showTotalInfo={true}
+                        showPageNumbers={true}
+                        maxVisiblePages={5}
+                    />
+                </div>
             </Card>
 
             {/* Modals */}
