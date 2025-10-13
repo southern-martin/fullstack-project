@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
 } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
@@ -18,7 +19,9 @@ import { UserResponseDto } from "../dtos/user-response.dto";
 @Injectable()
 export class CreateUserUseCase {
   constructor(
+    @Inject('UserRepositoryInterface')
     private readonly userRepository: UserRepositoryInterface,
+    @Inject('RoleRepositoryInterface')
     private readonly roleRepository: RoleRepositoryInterface,
     private readonly userDomainService: UserDomainService
   ) {}

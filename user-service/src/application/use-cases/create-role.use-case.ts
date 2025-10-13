@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
 } from "@nestjs/common";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
@@ -14,7 +15,10 @@ import { RoleResponseDto } from "../dtos/role-response.dto";
  */
 @Injectable()
 export class CreateRoleUseCase {
-  constructor(private readonly roleRepository: RoleRepositoryInterface) {}
+  constructor(
+    @Inject('RoleRepositoryInterface')
+    private readonly roleRepository: RoleRepositoryInterface
+  ) {}
 
   /**
    * Executes the create role use case

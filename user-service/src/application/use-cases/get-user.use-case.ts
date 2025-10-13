@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
 import { UserResponseDto } from "../dtos/user-response.dto";
+import { PaginationDto } from "../../../shared/dto";
 
 /**
  * Get User Use Case
@@ -9,7 +10,10 @@ import { UserResponseDto } from "../dtos/user-response.dto";
  */
 @Injectable()
 export class GetUserUseCase {
-  constructor(private readonly userRepository: UserRepositoryInterface) {}
+  constructor(
+    @Inject('UserRepositoryInterface')
+    private readonly userRepository: UserRepositoryInterface
+  ) {}
 
   /**
    * Executes the get user by ID use case
@@ -41,21 +45,17 @@ export class GetUserUseCase {
 
   /**
    * Executes the get all users use case
-   * @param page - Page number
-   * @param limit - Items per page
+   * @param paginationDto - Pagination parameters
    * @param search - Search term
    * @returns Users and pagination info
    */
   async executeAll(
-    page: number = 1,
-    limit: number = 10,
+    paginationDto: PaginationDto,
     search?: string
   ): Promise<{ users: UserResponseDto[]; total: number }> {
-    const { users, total } = await this.userRepository.findPaginated(
-      page,
-      limit,
-      search
-    );
+    const { users, total } = search 
+      ? await this.userRepository.search(search, paginationDto)
+      : await this.userRepository.findAll(paginationDto);
 
     return {
       users: users.map((user) => this.mapToResponseDto(user)),
@@ -77,8 +77,8 @@ export class GetUserUseCase {
    * @returns User count
    */
   async executeCount(): Promise<{ count: number }> {
-    const { total } = await this.userRepository.findPaginated(1, 1);
-    return { count: total };
+    const count = await this.userRepository.count();
+    return { count };
   }
 
   /**

@@ -13,16 +13,12 @@ import { UpdateUserUseCase } from "./use-cases/update-user.use-case";
 // Domain Services
 import { UserDomainService } from "../domain/services/user.domain.service";
 
-// Repository Interfaces (will be implemented in infrastructure)
-
-// Infrastructure Implementations
-import { RoleRepository } from "../infrastructure/role.repository";
-import { UserRepository } from "../infrastructure/user.repository";
-
 /**
  * Application Module
  * Configures application layer dependencies
  * Follows Clean Architecture principles
+ * 
+ * Note: Repository implementations are provided by the Infrastructure Module
  */
 @Module({
   providers: [
@@ -38,16 +34,6 @@ import { UserRepository } from "../infrastructure/user.repository";
     GetRoleUseCase,
     UpdateRoleUseCase,
     DeleteRoleUseCase,
-
-    // Repository Implementations
-    {
-      provide: "UserRepositoryInterface",
-      useClass: UserRepository,
-    },
-    {
-      provide: "RoleRepositoryInterface",
-      useClass: RoleRepository,
-    },
   ],
   exports: [
     // Export use cases for controllers
