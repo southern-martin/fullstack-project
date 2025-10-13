@@ -11,6 +11,7 @@ import {
   Post,
   Query,
 } from "@nestjs/common";
+import { PaginationDto } from "@shared/infrastructure";
 import { AssignRolesDto } from "../../application/dto/assign-roles.dto";
 import { CreateUserDto } from "../../application/dto/create-user.dto";
 import { UpdateUserDto } from "../../application/dto/update-user.dto";
@@ -63,7 +64,9 @@ export class UserController {
     const pageNum = parseInt(page, 10) || 1;
     const limitNum = parseInt(limit, 10) || 10;
 
-    const paginationDto = { page: pageNum, limit: limitNum };
+    const paginationDto = new PaginationDto();
+    paginationDto.page = pageNum;
+    paginationDto.limit = limitNum;
     const result = await this.getUserUseCase.executeAll(paginationDto, search);
 
     const totalPages = Math.ceil(result.total / limitNum);

@@ -1,14 +1,16 @@
-import { Repository, FindOptionsWhere, FindManyOptions, FindOneOptions } from 'typeorm';
-import { BaseEntity } from '../core/base-entity';
-import { PaginationDto } from '../dto/pagination.dto';
-import { Result } from '../core/result';
+import { FindManyOptions, FindOptionsWhere, Repository } from "typeorm";
+import { BaseEntity } from "../core/base-entity";
+import { PaginationDto } from "../dto/pagination.dto";
 
 /**
  * Base Repository Interface
  */
 export interface IBaseRepository<T extends BaseEntity> {
   findById(id: number): Promise<T | null>;
-  findAll(pagination?: PaginationDto, search?: string): Promise<{ entities: T[]; total: number }>;
+  findAll(
+    pagination?: PaginationDto,
+    search?: string
+  ): Promise<{ entities: T[]; total: number }>;
   create(entity: Partial<T>): Promise<T>;
   update(id: number, entity: Partial<T>): Promise<T | null>;
   delete(id: number): Promise<boolean>;
@@ -18,11 +20,13 @@ export interface IBaseRepository<T extends BaseEntity> {
 
 /**
  * Base Repository
- * 
+ *
  * Abstract base repository providing common database operations
  * following Clean Architecture principles.
  */
-export abstract class BaseRepository<T extends BaseEntity> implements IBaseRepository<T> {
+export abstract class BaseRepository<T extends BaseEntity>
+  implements IBaseRepository<T>
+{
   constructor(protected repository: Repository<T>) {}
 
   /**
@@ -30,7 +34,9 @@ export abstract class BaseRepository<T extends BaseEntity> implements IBaseRepos
    */
   async findById(id: number): Promise<T | null> {
     try {
-      return await this.repository.findOne({ where: { id } as FindOptionsWhere<T> });
+      return await this.repository.findOne({
+        where: { id } as FindOptionsWhere<T>,
+      });
     } catch (error) {
       throw new Error(`Failed to find entity by ID ${id}: ${error}`);
     }
@@ -39,7 +45,10 @@ export abstract class BaseRepository<T extends BaseEntity> implements IBaseRepos
   /**
    * Find all entities with pagination and search
    */
-  async findAll(pagination?: PaginationDto, search?: string): Promise<{ entities: T[]; total: number }> {
+  async findAll(
+    pagination?: PaginationDto,
+    search?: string
+  ): Promise<{ entities: T[]; total: number }> {
     try {
       const options: FindManyOptions<T> = {};
 
@@ -73,8 +82,9 @@ export abstract class BaseRepository<T extends BaseEntity> implements IBaseRepos
    */
   async create(entity: Partial<T>): Promise<T> {
     try {
-      const newEntity = this.repository.create(entity);
-      return await this.repository.save(newEntity);
+      const newEntity = this.repository.create(entity as any);
+      const savedEntity = await this.repository.save(newEntity);
+      return Array.isArray(savedEntity) ? savedEntity[0] : savedEntity;
     } catch (error) {
       throw new Error(`Failed to create entity: ${error}`);
     }
@@ -114,10 +124,14 @@ export abstract class BaseRepository<T extends BaseEntity> implements IBaseRepos
    */
   async exists(id: number): Promise<boolean> {
     try {
-      const count = await this.repository.count({ where: { id } as FindOptionsWhere<T> });
+      const count = await this.repository.count({
+        where: { id } as FindOptionsWhere<T>,
+      });
       return count > 0;
     } catch (error) {
-      throw new Error(`Failed to check if entity exists with ID ${id}: ${error}`);
+      throw new Error(
+        `Failed to check if entity exists with ID ${id}: ${error}`
+      );
     }
   }
 
@@ -192,7 +206,9 @@ export abstract class BaseRepository<T extends BaseEntity> implements IBaseRepos
   /**
    * Build search conditions (to be implemented by subclasses)
    */
-  protected abstract buildSearchConditions(search: string): FindOptionsWhere<T> | FindOptionsWhere<T>[];
+  protected abstract buildSearchConditions(
+    search: string
+  ): FindOptionsWhere<T> | FindOptionsWhere<T>[];
 
   /**
    * Get repository instance
@@ -217,7 +233,7 @@ export abstract class BaseRepository<T extends BaseEntity> implements IBaseRepos
    */
   async startTransaction(): Promise<void> {
     try {
-      await this.repository.manager.query('START TRANSACTION');
+      await this.repository.manager.query("START TRANSACTION");
     } catch (error) {
       throw new Error(`Failed to start transaction: ${error}`);
     }
@@ -228,7 +244,7 @@ export abstract class BaseRepository<T extends BaseEntity> implements IBaseRepos
    */
   async commitTransaction(): Promise<void> {
     try {
-      await this.repository.manager.query('COMMIT');
+      await this.repository.manager.query("COMMIT");
     } catch (error) {
       throw new Error(`Failed to commit transaction: ${error}`);
     }
@@ -239,7 +255,7 @@ export abstract class BaseRepository<T extends BaseEntity> implements IBaseRepos
    */
   async rollbackTransaction(): Promise<void> {
     try {
-      await this.repository.manager.query('ROLLBACK');
+      await this.repository.manager.query("ROLLBACK");
     } catch (error) {
       throw new Error(`Failed to rollback transaction: ${error}`);
     }

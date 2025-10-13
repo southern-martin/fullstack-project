@@ -1,31 +1,25 @@
-import { Entity, Column, ManyToMany } from 'typeorm';
-import { BaseEntity } from '../../shared/kernel';
-
-@Entity('roles')
-export class Role extends BaseEntity {
-  @Column({ unique: true })
+export class Role {
+  id?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
   name: string;
-
-  @Column({ nullable: true })
-  description: string;
-
-  @Column({ default: true })
+  description?: string;
   isActive: boolean;
+  permissions?: string[];
+  metadata?: Record<string, any>;
+  priority?: number;
+  users?: any[];
 
-  @Column({ type: 'json', nullable: true })
-  permissions: string[];
-
-  @Column({ type: 'json', nullable: true })
-  metadata: Record<string, any>;
-
-  // Many-to-many relationship with users (handled in User entity)
-  // Note: The relationship is defined in User entity to avoid circular imports
+  constructor(data: Partial<Role> = {}) {
+    this.id = data.id;
+    this.createdAt = data.createdAt;
+    this.updatedAt = data.updatedAt;
+    this.name = data.name || "";
+    this.description = data.description;
+    this.isActive = data.isActive ?? true;
+    this.permissions = data.permissions;
+    this.metadata = data.metadata;
+    this.priority = data.priority;
+    this.users = data.users;
+  }
 }
-
-
-
-
-
-
-
-

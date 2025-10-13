@@ -30,14 +30,14 @@ export class NotFoundException extends HttpException {
    * Creates a NotFoundException for a specific resource
    */
   static forResource(
-    resource: string, 
+    resource: string,
     identifier?: string | number,
     searchCriteria?: Record<string, any>
   ): NotFoundException {
-    const message = identifier 
+    const message = identifier
       ? `${resource} with identifier '${identifier}' not found`
       : `${resource} not found`;
-    
+
     return new NotFoundException(message, resource, identifier, searchCriteria);
   }
 
@@ -45,49 +45,49 @@ export class NotFoundException extends HttpException {
    * Creates a NotFoundException for a user
    */
   static forUser(userId: string | number): NotFoundException {
-    return NotFoundException.forResource('User', userId);
+    return NotFoundException.forResource("User", userId);
   }
 
   /**
    * Creates a NotFoundException for a customer
    */
   static forCustomer(customerId: string | number): NotFoundException {
-    return NotFoundException.forResource('Customer', customerId);
+    return NotFoundException.forResource("Customer", customerId);
   }
 
   /**
    * Creates a NotFoundException for a carrier
    */
   static forCarrier(carrierId: string | number): NotFoundException {
-    return NotFoundException.forResource('Carrier', carrierId);
+    return NotFoundException.forResource("Carrier", carrierId);
   }
 
   /**
    * Creates a NotFoundException for a pricing rule
    */
   static forPricingRule(ruleId: string | number): NotFoundException {
-    return NotFoundException.forResource('Pricing Rule', ruleId);
+    return NotFoundException.forResource("Pricing Rule", ruleId);
   }
 
   /**
    * Creates a NotFoundException for a role
    */
   static forRole(roleId: string | number): NotFoundException {
-    return NotFoundException.forResource('Role', roleId);
+    return NotFoundException.forResource("Role", roleId);
   }
 
   /**
    * Creates a NotFoundException for a translation
    */
   static forTranslation(translationId: string | number): NotFoundException {
-    return NotFoundException.forResource('Translation', translationId);
+    return NotFoundException.forResource("Translation", translationId);
   }
 
   /**
    * Creates a NotFoundException for a language
    */
   static forLanguage(languageId: string | number): NotFoundException {
-    return NotFoundException.forResource('Language', languageId);
+    return NotFoundException.forResource("Language", languageId);
   }
 
   /**

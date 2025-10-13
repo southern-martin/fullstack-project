@@ -1,9 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
+import { ValidationException } from "@shared/infrastructure";
 import * as bcrypt from "bcrypt";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
 import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
 import { UserDomainService } from "../../domain/services/user.domain.service";
-import { ValidationException } from "../../shared/exceptions/validation.exception";
+import { User } from "../../domain/entities/user.entity";
 import { CreateUserDto } from "../dto/create-user.dto";
 import { UserResponseDto } from "../dto/user-response.dto";
 
@@ -100,14 +101,14 @@ export class CreateUserUseCase {
     // 6. Get roles if provided
     let roles = [];
     if (createUserDto.roleIds && createUserDto.roleIds.length > 0) {
-      const allRoles = await this.roleRepository.findAll();
-      roles = allRoles.filter((role) =>
+      const allRolesResult = await this.roleRepository.findAll();
+      roles = allRolesResult.roles.filter((role) =>
         createUserDto.roleIds.includes(role.id)
       );
     }
 
     // 7. Create user entity
-    const user = {
+    const user = new User({
       email: createUserDto.email.toLowerCase(),
       password: hashedPassword,
       firstName: createUserDto.firstName,
@@ -117,11 +118,11 @@ export class CreateUserUseCase {
       isEmailVerified: createUserDto.isEmailVerified ?? false,
       dateOfBirth: createUserDto.dateOfBirth
         ? new Date(createUserDto.dateOfBirth)
-        : null,
+        : undefined,
       address: createUserDto.address,
       preferences: createUserDto.preferences,
       roles,
-    };
+    });
 
     // 8. Save user in repository
     const savedUser = await this.userRepository.create(user);
@@ -139,6 +140,7 @@ export class CreateUserUseCase {
     return {
       id: user.id,
       email: user.email,
+      password: user.password,
       firstName: user.firstName,
       lastName: user.lastName,
       phone: user.phone,
@@ -147,6 +149,8 @@ export class CreateUserUseCase {
       dateOfBirth: user.dateOfBirth,
       address: user.address,
       preferences: user.preferences,
+      lastLoginAt: user.lastLoginAt,
+      passwordChangedAt: user.passwordChangedAt,
       roles: user.roles.map((role) => ({
         id: role.id,
         name: role.name,
@@ -156,6 +160,9 @@ export class CreateUserUseCase {
       })),
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
+      get fullName() {
+        return `${user.firstName} ${user.lastName}`.trim();
+      },
     };
   }
 }

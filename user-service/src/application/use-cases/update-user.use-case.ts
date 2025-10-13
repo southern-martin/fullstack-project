@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
+import { ValidationException } from "@shared/infrastructure";
 import * as bcrypt from "bcrypt";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
 import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
 import { UserDomainService } from "../../domain/services/user.domain.service";
-import { ValidationException } from "../../shared/exceptions/validation.exception";
 import { UpdateUserDto } from "../dto/update-user.dto";
 import { UserResponseDto } from "../dto/user-response.dto";
 
@@ -36,17 +36,23 @@ export class UpdateUserUseCase {
       throw new NotFoundException("User not found");
     }
 
-    // 2. Validate update data using domain service
+    // 2. Convert dateOfBirth string to Date if provided
+    const updateData: any = { ...updateUserDto };
+    if (updateData.dateOfBirth) {
+      updateData.dateOfBirth = new Date(updateData.dateOfBirth);
+    }
+
+    // 3. Validate update data using domain service
     const validation =
-      this.userDomainService.validateUserUpdateData(updateUserDto);
+      this.userDomainService.validateUserUpdateData(updateData);
     if (!validation.isValid) {
       throw ValidationException.fromFieldErrors(validation.fieldErrors);
     }
 
-    // 3. Check if email is being changed and if it already exists
-    if (updateUserDto.email && updateUserDto.email !== existingUser.email) {
+    // 4. Check if email is being changed and if it already exists
+    if (updateData.email && updateData.email !== existingUser.email) {
       const userWithSameEmail = await this.userRepository.findByEmail(
-        updateUserDto.email
+        updateData.email
       );
       if (userWithSameEmail) {
         throw ValidationException.fromFieldError(
@@ -56,17 +62,17 @@ export class UpdateUserUseCase {
       }
     }
 
-    // 4. Custom rule validation
+    // 5. Custom rule validation
     const customRuleErrors = [];
 
     // Custom rule: Check if email is being changed to a restricted domain
-    if (updateUserDto.email && updateUserDto.email !== existingUser.email) {
+    if (updateData.email && updateData.email !== existingUser.email) {
       const restrictedDomains = [
         "temp-mail.org",
         "10minutemail.com",
         "guerrillamail.com",
       ];
-      const emailDomain = updateUserDto.email.split("@")[1];
+      const emailDomain = updateData.email.split("@")[1];
       if (restrictedDomains.includes(emailDomain)) {
         customRuleErrors.push(
           "Temporary email addresses are not allowed. Please use a permanent email address."
@@ -75,7 +81,7 @@ export class UpdateUserUseCase {
     }
 
     // Custom rule: Check if password is in common passwords list
-    if (updateUserDto.password) {
+    if (updateData.password) {
       const commonPasswords = [
         "password",
         "123456",
@@ -83,7 +89,7 @@ export class UpdateUserUseCase {
         "qwerty",
         "letmein",
       ];
-      if (commonPasswords.includes(updateUserDto.password.toLowerCase())) {
+      if (commonPasswords.includes(updateData.password.toLowerCase())) {
         customRuleErrors.push(
           "This password is too common. Please choose a more secure password."
         );
@@ -95,10 +101,10 @@ export class UpdateUserUseCase {
       throw ValidationException.fromCustomRuleErrors(customRuleErrors);
     }
 
-    // 5. Validate preferences if provided
-    if (updateUserDto.preferences !== undefined) {
+    // 6. Validate preferences if provided
+    if (updateData.preferences !== undefined) {
       const preferencesValidation = this.userDomainService.validatePreferences(
-        updateUserDto.preferences
+        updateData.preferences
       );
       if (!preferencesValidation.isValid) {
         throw ValidationException.fromFieldError(
@@ -108,47 +114,47 @@ export class UpdateUserUseCase {
       }
     }
 
-    // 6. Prepare update data
-    const updateData: Partial<any> = {};
+    // 7. Prepare user update data
+    const userUpdateData: Partial<any> = {};
 
-    if (updateUserDto.email !== undefined)
-      updateData.email = updateUserDto.email;
-    if (updateUserDto.firstName !== undefined)
-      updateData.firstName = updateUserDto.firstName;
-    if (updateUserDto.lastName !== undefined)
-      updateData.lastName = updateUserDto.lastName;
-    if (updateUserDto.phone !== undefined)
-      updateData.phone = updateUserDto.phone;
-    if (updateUserDto.isActive !== undefined)
-      updateData.isActive = updateUserDto.isActive;
-    if (updateUserDto.isEmailVerified !== undefined)
-      updateData.isEmailVerified = updateUserDto.isEmailVerified;
-    if (updateUserDto.address !== undefined)
-      updateData.address = updateUserDto.address;
-    if (updateUserDto.preferences !== undefined)
-      updateData.preferences = updateUserDto.preferences;
+    if (updateData.email !== undefined)
+      userUpdateData.email = updateData.email;
+    if (updateData.firstName !== undefined)
+      userUpdateData.firstName = updateData.firstName;
+    if (updateData.lastName !== undefined)
+      userUpdateData.lastName = updateData.lastName;
+    if (updateData.phone !== undefined)
+      userUpdateData.phone = updateData.phone;
+    if (updateData.isActive !== undefined)
+      userUpdateData.isActive = updateData.isActive;
+    if (updateData.isEmailVerified !== undefined)
+      userUpdateData.isEmailVerified = updateData.isEmailVerified;
+    if (updateData.address !== undefined)
+      userUpdateData.address = updateData.address;
+    if (updateData.preferences !== undefined)
+      userUpdateData.preferences = updateData.preferences;
 
     // Hash password if provided
-    if (updateUserDto.password) {
-      updateData.password = await bcrypt.hash(updateUserDto.password, 10);
+    if (updateData.password) {
+      userUpdateData.password = await bcrypt.hash(updateData.password, 10);
     }
 
-    // Convert dateOfBirth string to Date if provided
-    if (updateUserDto.dateOfBirth) {
-      updateData.dateOfBirth = new Date(updateUserDto.dateOfBirth);
+    // dateOfBirth is already converted to Date above
+    if (updateData.dateOfBirth) {
+      userUpdateData.dateOfBirth = updateData.dateOfBirth;
     }
 
     // Handle role updates
-    if (updateUserDto.roleIds) {
-      const allRoles = await this.roleRepository.findAll();
-      const userRoles = allRoles.filter((role) =>
-        updateUserDto.roleIds.includes(role.id)
+    if (updateData.roleIds) {
+      const allRolesResult = await this.roleRepository.findAll();
+      const userRoles = allRolesResult.roles.filter((role) =>
+        updateData.roleIds.includes(role.id)
       );
-      updateData.roles = userRoles;
+      userUpdateData.roles = userRoles;
     }
 
-    // 7. Update user in repository
-    const updatedUser = await this.userRepository.update(id, updateData);
+    // 8. Update user in repository
+    const updatedUser = await this.userRepository.update(id, userUpdateData);
 
     // 8. Return response
     return this.mapToResponseDto(updatedUser);
@@ -168,8 +174,8 @@ export class UpdateUserUseCase {
     }
 
     // 2. Get roles
-    const allRoles = await this.roleRepository.findAll();
-    const userRoles = allRoles.filter((role) => roleIds.includes(role.id));
+    const allRolesResult = await this.roleRepository.findAll();
+    const userRoles = allRolesResult.roles.filter((role) => roleIds.includes(role.id));
 
     if (userRoles.length !== roleIds.length) {
       throw ValidationException.fromFieldError(
@@ -208,6 +214,7 @@ export class UpdateUserUseCase {
     return {
       id: user.id,
       email: user.email,
+      password: user.password,
       firstName: user.firstName,
       lastName: user.lastName,
       phone: user.phone,
@@ -216,6 +223,8 @@ export class UpdateUserUseCase {
       dateOfBirth: user.dateOfBirth,
       address: user.address,
       preferences: user.preferences,
+      lastLoginAt: user.lastLoginAt,
+      passwordChangedAt: user.passwordChangedAt,
       roles: user.roles.map((role) => ({
         id: role.id,
         name: role.name,
@@ -225,6 +234,9 @@ export class UpdateUserUseCase {
       })),
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
+      get fullName() {
+        return `${user.firstName} ${user.lastName}`.trim();
+      },
     };
   }
 }

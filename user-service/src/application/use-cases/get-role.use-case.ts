@@ -30,8 +30,8 @@ export class GetRoleUseCase {
    * @returns All roles
    */
   async executeAll(): Promise<RoleResponseDto[]> {
-    const roles = await this.roleRepository.findAll();
-    return roles.map((role) => this.mapToResponseDto(role));
+    const rolesResult = await this.roleRepository.findAll();
+    return rolesResult.roles.map((role) => this.mapToResponseDto(role));
   }
 
   /**

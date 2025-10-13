@@ -7,6 +7,7 @@ import {
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
 import { CreateRoleDto } from "../dto/create-role.dto";
 import { RoleResponseDto } from "../dto/role-response.dto";
+import { Role } from "../../domain/entities/role.entity";
 
 /**
  * Create Role Use Case
@@ -41,12 +42,12 @@ export class CreateRoleUseCase {
     }
 
     // 3. Create role entity
-    const role = {
+    const role = new Role({
       name: createRoleDto.name,
       description: createRoleDto.description,
       permissions: createRoleDto.permissions || [],
       isActive: createRoleDto.isActive ?? true,
-    };
+    });
 
     // 4. Save role in repository
     const savedRole = await this.roleRepository.create(role);

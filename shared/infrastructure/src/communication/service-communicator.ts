@@ -22,7 +22,7 @@ interface ServiceResponse<T = any> {
 
 /**
  * Service Communication Class
- * 
+ *
  * Provides standardized communication between microservices with retry logic,
  * error handling, and circuit breaker patterns.
  */
@@ -92,7 +92,7 @@ export class ServiceCommunicator {
       baseURL: config.baseURL,
       timeout: config.timeout,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -136,7 +136,7 @@ export class ServiceCommunicator {
    */
   private async makeRequest<T>(
     serviceName: string,
-    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
     endpoint: string,
     data?: any,
     retryCount: number = 0
@@ -152,19 +152,19 @@ export class ServiceCommunicator {
       let response: AxiosResponse<T>;
 
       switch (method) {
-        case 'GET':
+        case "GET":
           response = await service.get(endpoint);
           break;
-        case 'POST':
+        case "POST":
           response = await service.post(endpoint, data);
           break;
-        case 'PUT':
+        case "PUT":
           response = await service.put(endpoint, data);
           break;
-        case 'PATCH':
+        case "PATCH":
           response = await service.patch(endpoint, data);
           break;
-        case 'DELETE':
+        case "DELETE":
           response = await service.delete(endpoint);
           break;
         default:
@@ -174,19 +174,25 @@ export class ServiceCommunicator {
       return {
         data: response.data,
         status: response.status,
-        message: 'Success',
+        message: "Success",
       };
     } catch (error: any) {
       // Retry logic
       if (retryCount < config.retries && this.shouldRetry(error)) {
         await this.delay(config.retryDelay * (retryCount + 1));
-        return this.makeRequest(serviceName, method, endpoint, data, retryCount + 1);
+        return this.makeRequest(
+          serviceName,
+          method,
+          endpoint,
+          data,
+          retryCount + 1
+        );
       }
 
       return {
         data: null as T,
         status: error.response?.status || 500,
-        message: 'Request failed',
+        message: "Request failed",
         error: error.message,
       };
     }
@@ -204,84 +210,112 @@ export class ServiceCommunicator {
    * Delay execution
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
    * Get user by ID
    */
   async getUser(userId: string | number): Promise<ServiceResponse<any>> {
-    return this.makeRequest('user', 'GET', `/api/v1/users/${userId}`);
+    return this.makeRequest("user", "GET", `/api/v1/users/${userId}`);
   }
 
   /**
    * Get customer by ID
    */
-  async getCustomer(customerId: string | number): Promise<ServiceResponse<any>> {
-    return this.makeRequest('customer', 'GET', `/api/v1/customers/${customerId}`);
+  async getCustomer(
+    customerId: string | number
+  ): Promise<ServiceResponse<any>> {
+    return this.makeRequest(
+      "customer",
+      "GET",
+      `/api/v1/customers/${customerId}`
+    );
   }
 
   /**
    * Get carrier by ID
    */
   async getCarrier(carrierId: string | number): Promise<ServiceResponse<any>> {
-    return this.makeRequest('carrier', 'GET', `/api/v1/carriers/${carrierId}`);
+    return this.makeRequest("carrier", "GET", `/api/v1/carriers/${carrierId}`);
   }
 
   /**
    * Get pricing rule by ID
    */
   async getPricingRule(ruleId: string | number): Promise<ServiceResponse<any>> {
-    return this.makeRequest('pricing', 'GET', `/api/v1/pricing-rules/${ruleId}`);
+    return this.makeRequest(
+      "pricing",
+      "GET",
+      `/api/v1/pricing-rules/${ruleId}`
+    );
   }
 
   /**
    * Validate token
    */
   async validateToken(token: string): Promise<ServiceResponse<any>> {
-    return this.makeRequest('auth', 'POST', '/api/v1/auth/validate', { token });
+    return this.makeRequest("auth", "POST", "/api/v1/auth/validate", { token });
   }
 
   /**
    * Get service health
    */
   async getServiceHealth(serviceName: string): Promise<ServiceResponse<any>> {
-    return this.makeRequest(serviceName, 'GET', '/api/v1/health');
+    return this.makeRequest(serviceName, "GET", "/api/v1/health");
   }
 
   /**
    * Generic GET request
    */
-  async get<T>(serviceName: string, endpoint: string): Promise<ServiceResponse<T>> {
-    return this.makeRequest<T>(serviceName, 'GET', endpoint);
+  async get<T>(
+    serviceName: string,
+    endpoint: string
+  ): Promise<ServiceResponse<T>> {
+    return this.makeRequest<T>(serviceName, "GET", endpoint);
   }
 
   /**
    * Generic POST request
    */
-  async post<T>(serviceName: string, endpoint: string, data?: any): Promise<ServiceResponse<T>> {
-    return this.makeRequest<T>(serviceName, 'POST', endpoint, data);
+  async post<T>(
+    serviceName: string,
+    endpoint: string,
+    data?: any
+  ): Promise<ServiceResponse<T>> {
+    return this.makeRequest<T>(serviceName, "POST", endpoint, data);
   }
 
   /**
    * Generic PUT request
    */
-  async put<T>(serviceName: string, endpoint: string, data?: any): Promise<ServiceResponse<T>> {
-    return this.makeRequest<T>(serviceName, 'PUT', endpoint, data);
+  async put<T>(
+    serviceName: string,
+    endpoint: string,
+    data?: any
+  ): Promise<ServiceResponse<T>> {
+    return this.makeRequest<T>(serviceName, "PUT", endpoint, data);
   }
 
   /**
    * Generic PATCH request
    */
-  async patch<T>(serviceName: string, endpoint: string, data?: any): Promise<ServiceResponse<T>> {
-    return this.makeRequest<T>(serviceName, 'PATCH', endpoint, data);
+  async patch<T>(
+    serviceName: string,
+    endpoint: string,
+    data?: any
+  ): Promise<ServiceResponse<T>> {
+    return this.makeRequest<T>(serviceName, "PATCH", endpoint, data);
   }
 
   /**
    * Generic DELETE request
    */
-  async delete<T>(serviceName: string, endpoint: string): Promise<ServiceResponse<T>> {
-    return this.makeRequest<T>(serviceName, 'DELETE', endpoint);
+  async delete<T>(
+    serviceName: string,
+    endpoint: string
+  ): Promise<ServiceResponse<T>> {
+    return this.makeRequest<T>(serviceName, "DELETE", endpoint);
   }
 
   /**

@@ -1,9 +1,9 @@
-import { DataSourceOptions } from 'typeorm';
-import { DatabaseConfig } from './service-config';
+import { DataSourceOptions } from "typeorm";
+import { DatabaseConfig } from "./service-config";
 
 /**
  * Database Configuration Builder
- * 
+ *
  * Builds TypeORM DataSource options from service configuration.
  */
 export class DatabaseConfigBuilder {
@@ -15,7 +15,7 @@ export class DatabaseConfigBuilder {
     entities: any[]
   ): DataSourceOptions {
     return {
-      type: 'mysql',
+      type: "mysql",
       host: config.host,
       port: config.port,
       username: config.username,
@@ -29,8 +29,8 @@ export class DatabaseConfigBuilder {
         connectionLimit: 10,
         acquireTimeout: 60000,
         timeout: 60000,
-        charset: 'utf8mb4',
-        timezone: 'Z',
+        charset: "utf8mb4",
+        timezone: "Z",
       },
       migrations: [],
       subscribers: [],
@@ -55,7 +55,7 @@ export class DatabaseConfigBuilder {
     const baseOptions = this.buildDataSourceOptions(config, entities);
 
     switch (environment) {
-      case 'development':
+      case "development":
         return {
           ...baseOptions,
           synchronize: true,
@@ -66,27 +66,23 @@ export class DatabaseConfigBuilder {
           },
         };
 
-      case 'test':
+      case "test":
         return {
-          ...baseOptions,
-          database: `${config.database}_test`,
+          type: "sqlite",
+          database: `${config.database}_test.db`,
           synchronize: true,
           logging: false,
-          extra: {
-            ...baseOptions.extra,
-            connectionLimit: 2,
-          },
         };
 
-      case 'production':
+      case "production":
         return {
           ...baseOptions,
           synchronize: false,
           logging: false,
-          ssl: true,
           extra: {
             ...baseOptions.extra,
             connectionLimit: 20,
+            ssl: true,
             acquireTimeout: 30000,
             timeout: 30000,
           },
@@ -100,23 +96,26 @@ export class DatabaseConfigBuilder {
   /**
    * Validate database configuration
    */
-  static validateConfig(config: DatabaseConfig): { isValid: boolean; errors: string[] } {
+  static validateConfig(config: DatabaseConfig): {
+    isValid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     if (!config.host) {
-      errors.push('Database host is required');
+      errors.push("Database host is required");
     }
 
     if (!config.port || config.port < 1 || config.port > 65535) {
-      errors.push('Valid database port is required');
+      errors.push("Valid database port is required");
     }
 
     if (!config.username) {
-      errors.push('Database username is required');
+      errors.push("Database username is required");
     }
 
     if (!config.database) {
-      errors.push('Database name is required');
+      errors.push("Database name is required");
     }
 
     return {
@@ -129,14 +128,14 @@ export class DatabaseConfigBuilder {
    * Get database health check query
    */
   static getHealthCheckQuery(): string {
-    return 'SELECT 1 as health_check';
+    return "SELECT 1 as health_check";
   }
 
   /**
    * Get database version query
    */
   static getVersionQuery(): string {
-    return 'SELECT VERSION() as version';
+    return "SELECT VERSION() as version";
   }
 
   /**

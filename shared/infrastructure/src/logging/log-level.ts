@@ -1,6 +1,6 @@
 /**
  * Log Levels
- * 
+ *
  * Standardized log levels for all services.
  */
 export enum LogLevel {
@@ -15,18 +15,18 @@ export enum LogLevel {
  * Log Level Names
  */
 export const LogLevelNames = {
-  [LogLevel.ERROR]: 'ERROR',
-  [LogLevel.WARN]: 'WARN',
-  [LogLevel.INFO]: 'INFO',
-  [LogLevel.DEBUG]: 'DEBUG',
-  [LogLevel.VERBOSE]: 'VERBOSE',
+  [LogLevel.ERROR]: "ERROR",
+  [LogLevel.WARN]: "WARN",
+  [LogLevel.INFO]: "INFO",
+  [LogLevel.DEBUG]: "DEBUG",
+  [LogLevel.VERBOSE]: "VERBOSE",
 } as const;
 
 /**
  * Get log level name
  */
 export function getLogLevelName(level: LogLevel): string {
-  return LogLevelNames[level] || 'UNKNOWN';
+  return LogLevelNames[level] || "UNKNOWN";
 }
 
 /**
@@ -34,18 +34,18 @@ export function getLogLevelName(level: LogLevel): string {
  */
 export function parseLogLevel(level: string): LogLevel {
   const upperLevel = level.toUpperCase();
-  
+
   switch (upperLevel) {
-    case 'ERROR':
+    case "ERROR":
       return LogLevel.ERROR;
-    case 'WARN':
-    case 'WARNING':
+    case "WARN":
+    case "WARNING":
       return LogLevel.WARN;
-    case 'INFO':
+    case "INFO":
       return LogLevel.INFO;
-    case 'DEBUG':
+    case "DEBUG":
       return LogLevel.DEBUG;
-    case 'VERBOSE':
+    case "VERBOSE":
       return LogLevel.VERBOSE;
     default:
       return LogLevel.INFO;

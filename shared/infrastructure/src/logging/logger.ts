@@ -1,4 +1,4 @@
-import { LogLevel, getLogLevelName, parseLogLevel } from './log-level';
+import { LogLevel, getLogLevelName, parseLogLevel } from "./log-level";
 
 /**
  * Log Entry Interface
@@ -31,7 +31,7 @@ export interface LoggerConfig {
 
 /**
  * Logger
- * 
+ *
  * Standardized logger for all microservices with structured logging support.
  */
 export class Logger {
@@ -233,15 +233,15 @@ export class Logger {
   private writeToConsole(entry: LogEntry): void {
     const timestamp = entry.timestamp.toISOString();
     const level = getLogLevelName(entry.level);
-    const context = entry.context ? `[${entry.context}]` : '';
-    const service = entry.service ? `[${entry.service}]` : '';
-    const traceId = entry.traceId ? `[${entry.traceId}]` : '';
+    const context = entry.context ? `[${entry.context}]` : "";
+    const service = entry.service ? `[${entry.service}]` : "";
+    const traceId = entry.traceId ? `[${entry.traceId}]` : "";
 
     if (this.config.enableJson) {
       console.log(JSON.stringify(entry));
     } else {
       const prefix = `${timestamp} ${level} ${service}${context}${traceId}`;
-      
+
       if (entry.error) {
         console.error(`${prefix} ${entry.message}`, entry.error);
       } else if (entry.metadata) {
@@ -267,13 +267,15 @@ export class Logger {
   child(context: string): Logger {
     const childLogger = new Logger({
       ...this.config,
-      context: this.config.context ? `${this.config.context}:${context}` : context,
+      context: this.config.context
+        ? `${this.config.context}:${context}`
+        : context,
     });
-    
+
     if (this.traceId) {
       childLogger.setTraceId(this.traceId);
     }
-    
+
     return childLogger;
   }
 
@@ -303,8 +305,8 @@ export function createLogger(config: LoggerConfig): Logger {
  * Default logger instance
  */
 export const defaultLogger = createLogger({
-  level: parseLogLevel(process.env.LOG_LEVEL || 'INFO'),
-  service: process.env.SERVICE_NAME || 'unknown-service',
+  level: parseLogLevel(process.env.LOG_LEVEL || "INFO"),
+  service: process.env.SERVICE_NAME || "unknown-service",
   enableConsole: true,
-  enableJson: process.env.LOG_FORMAT === 'json',
+  enableJson: process.env.LOG_FORMAT === "json",
 });

@@ -1,4 +1,5 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
+import { BaseEntity } from '@shared/infrastructure';
 import { UserTypeOrmEntity } from './user.typeorm.entity';
 import { RoleTypeOrmEntity } from './role.typeorm.entity';
 
@@ -12,9 +13,7 @@ import { RoleTypeOrmEntity } from './role.typeorm.entity';
 @Index(['userId', 'roleId'], { unique: true })
 @Index(['assignedAt'])
 @Index(['assignedBy'])
-export class UserRoleTypeOrmEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class UserRoleTypeOrmEntity extends BaseEntity {
 
   @Column()
   userId: number;

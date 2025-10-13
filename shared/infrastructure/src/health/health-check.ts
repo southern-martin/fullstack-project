@@ -1,12 +1,12 @@
-import { Logger } from '../logging/logger';
+import { Logger } from "../logging/logger";
 
 /**
  * Health Check Status
  */
 export enum HealthStatus {
-  HEALTHY = 'healthy',
-  UNHEALTHY = 'unhealthy',
-  DEGRADED = 'degraded',
+  HEALTHY = "healthy",
+  UNHEALTHY = "unhealthy",
+  DEGRADED = "degraded",
 }
 
 /**
@@ -30,7 +30,7 @@ export interface IHealthCheck {
 
 /**
  * Health Check
- * 
+ *
  * Base class for health checks with common functionality.
  */
 export abstract class HealthCheck implements IHealthCheck {
@@ -47,7 +47,10 @@ export abstract class HealthCheck implements IHealthCheck {
   /**
    * Create healthy result
    */
-  protected createHealthyResult(message: string, details?: Record<string, any>): HealthCheckResult {
+  protected createHealthyResult(
+    message: string,
+    details?: Record<string, any>
+  ): HealthCheckResult {
     return {
       status: HealthStatus.HEALTHY,
       message,
@@ -59,7 +62,11 @@ export abstract class HealthCheck implements IHealthCheck {
   /**
    * Create unhealthy result
    */
-  protected createUnhealthyResult(message: string, error?: string, details?: Record<string, any>): HealthCheckResult {
+  protected createUnhealthyResult(
+    message: string,
+    error?: string,
+    details?: Record<string, any>
+  ): HealthCheckResult {
     return {
       status: HealthStatus.UNHEALTHY,
       message,
@@ -72,7 +79,10 @@ export abstract class HealthCheck implements IHealthCheck {
   /**
    * Create degraded result
    */
-  protected createDegradedResult(message: string, details?: Record<string, any>): HealthCheckResult {
+  protected createDegradedResult(
+    message: string,
+    details?: Record<string, any>
+  ): HealthCheckResult {
     return {
       status: HealthStatus.DEGRADED,
       message,
