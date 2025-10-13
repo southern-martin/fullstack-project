@@ -52,7 +52,7 @@ app.get('/api/v1/users', (req, res) => {
 // Create user endpoint
 app.post('/api/v1/users', createUserValidation, (req, res) => {
   const errors = validationResult(req);
-
+  
   if (!errors.isEmpty()) {
     // Format errors for frontend
     const fieldErrors = {};
@@ -62,7 +62,7 @@ app.post('/api/v1/users', createUserValidation, (req, res) => {
       }
       fieldErrors[error.path].push(error.msg);
     });
-
+    
     return res.status(400).json({
       message: 'Validation failed',
       fieldErrors,
@@ -70,7 +70,39 @@ app.post('/api/v1/users', createUserValidation, (req, res) => {
       error: 'Validation Error'
     });
   }
-
+  
+  // Business rule validation
+  const businessRuleErrors = [];
+  
+  // Business rule: Check if email already exists
+  const existingEmails = ['admin@example.com', 'user@example.com', 'test@example.com'];
+  if (existingEmails.includes(req.body.email.toLowerCase())) {
+    businessRuleErrors.push('This email address is already registered. Please use a different email.');
+  }
+  
+  // Business rule: Check if user is trying to use a restricted email domain
+  const restrictedDomains = ['temp-mail.org', '10minutemail.com', 'guerrillamail.com'];
+  const emailDomain = req.body.email.split('@')[1];
+  if (restrictedDomains.includes(emailDomain)) {
+    businessRuleErrors.push('Temporary email addresses are not allowed. Please use a permanent email address.');
+  }
+  
+  // Business rule: Check if password is in common passwords list
+  const commonPasswords = ['password', '123456', 'admin', 'qwerty', 'letmein'];
+  if (commonPasswords.includes(req.body.password.toLowerCase())) {
+    businessRuleErrors.push('This password is too common. Please choose a more secure password.');
+  }
+  
+  // If there are business rule errors, return them
+  if (businessRuleErrors.length > 0) {
+    return res.status(400).json({
+      message: 'Business rule validation failed',
+      businessRuleErrors,
+      statusCode: 400,
+      error: 'Business Rule Error'
+    });
+  }
+  
   // If validation passes, create user (mock response)
   const user = {
     id: Math.floor(Math.random() * 1000),
@@ -82,7 +114,7 @@ app.post('/api/v1/users', createUserValidation, (req, res) => {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
-
+  
   res.status(201).json(user);
 });
 
