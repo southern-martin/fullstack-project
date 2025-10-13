@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
@@ -10,6 +9,7 @@ import { UserRepositoryInterface } from "../../domain/repositories/user.reposito
 import { UserDomainService } from "../../domain/services/user.domain.service";
 import { CreateUserDto } from "../dtos/create-user.dto";
 import { UserResponseDto } from "../dtos/user-response.dto";
+import { ValidationException } from "../../../shared/exceptions";
 
 /**
  * Create User Use Case
@@ -36,7 +36,7 @@ export class CreateUserUseCase {
     const validation =
       this.userDomainService.validateUserCreationData(createUserDto);
     if (!validation.isValid) {
-      throw new BadRequestException(validation.errors.join(", "));
+      throw ValidationException.fromFieldErrors(validation.fieldErrors);
     }
 
     // 2. Check if user email already exists
@@ -44,7 +44,7 @@ export class CreateUserUseCase {
       createUserDto.email
     );
     if (existingUser) {
-      throw new ConflictException("Email already exists");
+      throw ValidationException.fromFieldError('email', 'This email address is already registered');
     }
 
     // 3. Validate preferences if provided
@@ -53,7 +53,7 @@ export class CreateUserUseCase {
         createUserDto.preferences
       );
       if (!preferencesValidation.isValid) {
-        throw new BadRequestException(preferencesValidation.errors.join(", "));
+        throw ValidationException.fromFieldError('preferences', preferencesValidation.errors.join(", "));
       }
     }
 
