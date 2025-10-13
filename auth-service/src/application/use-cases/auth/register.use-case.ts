@@ -4,9 +4,9 @@ import { UserRepositoryInterface } from '../../../domain/repositories/user.repos
 import { RoleRepositoryInterface } from '../../../domain/repositories/role.repository.interface';
 import { AuthDomainService } from '../../../domain/services/auth.domain.service';
 import { UserDomainService } from '../../../domain/services/user.domain.service';
-import { RegisterRequestDto } from '../../dtos/auth/register-request.dto';
-import { AuthResponseDto } from '../../dtos/auth/auth-response.dto';
-import { UserResponseDto } from '../../dtos/auth/user-response.dto';
+import { RegisterRequestDto } from '../../dto/auth/register-request.dto';
+import { AuthResponseDto } from '../../dto/auth/auth-response.dto';
+import { UserResponseDto } from '../../dto/auth/user-response.dto';
 
 /**
  * Register Use Case

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { CustomerRepositoryInterface } from "../../domain/repositories/customer.repository.interface";
-import { CustomerResponseDto } from "../dtos/customer-response.dto";
+import { CustomerResponseDto } from "../dto/customer-response.dto";
 
 /**
  * Get Customer Use Case

@@ -3,8 +3,8 @@ import { randomUUID } from "crypto";
 import { PriceCalculationRepositoryInterface } from "../../domain/repositories/price-calculation.repository.interface";
 import { PricingRuleRepositoryInterface } from "../../domain/repositories/pricing-rule.repository.interface";
 import { PricingDomainService } from "../../domain/services/pricing.domain.service";
-import { CalculatePriceDto } from "../dtos/calculate-price.dto";
-import { PriceCalculationResponseDto } from "../dtos/price-calculation-response.dto";
+import { CalculatePriceDto } from "../dto/calculate-price.dto";
+import { PriceCalculationResponseDto } from "../dto/price-calculation-response.dto";
 
 /**
  * Calculate Price Use Case

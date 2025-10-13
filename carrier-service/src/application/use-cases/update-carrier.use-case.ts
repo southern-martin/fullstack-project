@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { CarrierRepositoryInterface } from '../../domain/repositories/carrier.repository.interface';
 import { CarrierDomainService } from '../../domain/services/carrier.domain.service';
-import { UpdateCarrierDto } from '../dtos/update-carrier.dto';
-import { CarrierResponseDto } from '../dtos/carrier-response.dto';
+import { UpdateCarrierDto } from '../dto/update-carrier.dto';
+import { CarrierResponseDto } from '../dto/carrier-response.dto';
 
 /**
  * Update Carrier Use Case

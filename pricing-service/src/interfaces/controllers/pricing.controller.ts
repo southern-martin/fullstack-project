@@ -11,11 +11,11 @@ import {
   Post,
   Query,
 } from "@nestjs/common";
-import { CalculatePriceDto } from "../../application/dtos/calculate-price.dto";
-import { CreatePricingRuleDto } from "../../application/dtos/create-pricing-rule.dto";
-import { PriceCalculationResponseDto } from "../../application/dtos/price-calculation-response.dto";
-import { PricingRuleResponseDto } from "../../application/dtos/pricing-rule-response.dto";
-import { UpdatePricingRuleDto } from "../../application/dtos/update-pricing-rule.dto";
+import { CalculatePriceDto } from "../../application/dto/calculate-price.dto";
+import { CreatePricingRuleDto } from "../../application/dto/create-pricing-rule.dto";
+import { PriceCalculationResponseDto } from "../../application/dto/price-calculation-response.dto";
+import { PricingRuleResponseDto } from "../../application/dto/pricing-rule-response.dto";
+import { UpdatePricingRuleDto } from "../../application/dto/update-pricing-rule.dto";
 import { CalculatePriceUseCase } from "../../application/use-cases/calculate-price.use-case";
 import { GetPriceCalculationHistoryUseCase } from "../../application/use-cases/get-price-calculation-history.use-case";
 import { ManagePricingRuleUseCase } from "../../application/use-cases/manage-pricing-rule.use-case";

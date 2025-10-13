@@ -11,9 +11,9 @@ import {
   Post,
   Query,
 } from "@nestjs/common";
-import { CarrierResponseDto } from "../../application/dtos/carrier-response.dto";
-import { CreateCarrierDto } from "../../application/dtos/create-carrier.dto";
-import { UpdateCarrierDto } from "../../application/dtos/update-carrier.dto";
+import { CarrierResponseDto } from "../../application/dto/carrier-response.dto";
+import { CreateCarrierDto } from "../../application/dto/create-carrier.dto";
+import { UpdateCarrierDto } from "../../application/dto/update-carrier.dto";
 import { CreateCarrierUseCase } from "../../application/use-cases/create-carrier.use-case";
 import { DeleteCarrierUseCase } from "../../application/use-cases/delete-carrier.use-case";
 import { GetCarrierUseCase } from "../../application/use-cases/get-carrier.use-case";

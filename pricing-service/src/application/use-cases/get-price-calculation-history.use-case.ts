@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PriceCalculationRepositoryInterface } from "../../domain/repositories/price-calculation.repository.interface";
-import { PriceCalculationResponseDto } from "../dtos/price-calculation-response.dto";
+import { PriceCalculationResponseDto } from "../dto/price-calculation-response.dto";
 
 /**
  * Get Price Calculation History Use Case

@@ -2,7 +2,7 @@ import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
 import { USER_REPOSITORY_TOKEN } from "../../domain/tokens/repository.tokens";
-import { UserResponseDto } from "../dtos/user-response.dto";
+import { UserResponseDto } from "../dto/user-response.dto";
 
 export interface ValidateTokenUseCaseInterface {
   execute(token: string): Promise<UserResponseDto>;

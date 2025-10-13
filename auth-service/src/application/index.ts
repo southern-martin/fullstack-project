@@ -4,10 +4,10 @@ export * from "./use-cases/register.use-case";
 export * from "./use-cases/validate-token.use-case";
 
 // DTOs
-export * from "./dtos/auth-response.dto";
-export * from "./dtos/login-request.dto";
-export * from "./dtos/register-request.dto";
-export * from "./dtos/user-response.dto";
+export * from "./dto/auth-response.dto";
+export * from "./dto/login-request.dto";
+export * from "./dto/register-request.dto";
+export * from "./dto/user-response.dto";
 
 // Module
 export * from "./application.module";

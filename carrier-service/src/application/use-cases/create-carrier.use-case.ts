@@ -1,8 +1,8 @@
 import { Injectable, ConflictException, BadRequestException } from '@nestjs/common';
 import { CarrierRepositoryInterface } from '../../domain/repositories/carrier.repository.interface';
 import { CarrierDomainService } from '../../domain/services/carrier.domain.service';
-import { CreateCarrierDto } from '../dtos/create-carrier.dto';
-import { CarrierResponseDto } from '../dtos/carrier-response.dto';
+import { CreateCarrierDto } from '../dto/create-carrier.dto';
+import { CarrierResponseDto } from '../dto/carrier-response.dto';
 
 /**
  * Create Carrier Use Case

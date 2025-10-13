@@ -3,9 +3,9 @@ import { JwtService } from '@nestjs/jwt';
 import { UserRepositoryInterface } from '../../../domain/repositories/user.repository.interface';
 import { AuthDomainService } from '../../../domain/services/auth.domain.service';
 import { UserDomainService } from '../../../domain/services/user.domain.service';
-import { LoginRequestDto } from '../../dtos/auth/login-request.dto';
-import { AuthResponseDto } from '../../dtos/auth/auth-response.dto';
-import { UserResponseDto } from '../../dtos/auth/user-response.dto';
+import { LoginRequestDto } from '../../dto/auth/login-request.dto';
+import { AuthResponseDto } from '../../dto/auth/auth-response.dto';
+import { UserResponseDto } from '../../dto/auth/user-response.dto';
 
 /**
  * Login Use Case

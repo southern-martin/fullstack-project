@@ -6,8 +6,8 @@ import {
 } from "@nestjs/common";
 import { CustomerRepositoryInterface } from "../../domain/repositories/customer.repository.interface";
 import { CustomerDomainService } from "../../domain/services/customer.domain.service";
-import { CustomerResponseDto } from "../dtos/customer-response.dto";
-import { UpdateCustomerDto } from "../dtos/update-customer.dto";
+import { CustomerResponseDto } from "../dto/customer-response.dto";
+import { UpdateCustomerDto } from "../dto/update-customer.dto";
 
 /**
  * Update Customer Use Case

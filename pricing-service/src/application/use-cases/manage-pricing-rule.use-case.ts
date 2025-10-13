@@ -5,9 +5,9 @@ import {
 } from "@nestjs/common";
 import { PricingRuleRepositoryInterface } from "../../domain/repositories/pricing-rule.repository.interface";
 import { PricingDomainService } from "../../domain/services/pricing.domain.service";
-import { CreatePricingRuleDto } from "../dtos/create-pricing-rule.dto";
-import { PricingRuleResponseDto } from "../dtos/pricing-rule-response.dto";
-import { UpdatePricingRuleDto } from "../dtos/update-pricing-rule.dto";
+import { CreatePricingRuleDto } from "../dto/create-pricing-rule.dto";
+import { PricingRuleResponseDto } from "../dto/pricing-rule-response.dto";
+import { UpdatePricingRuleDto } from "../dto/update-pricing-rule.dto";
 
 /**
  * Manage Pricing Rule Use Case

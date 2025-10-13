@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CarrierRepositoryInterface } from '../../domain/repositories/carrier.repository.interface';
-import { CarrierResponseDto } from '../dtos/carrier-response.dto';
+import { CarrierResponseDto } from '../dto/carrier-response.dto';
 
 /**
  * Get Carrier Use Case

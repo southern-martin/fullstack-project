@@ -12,10 +12,10 @@ import { AuthGuard } from '@nestjs/passport';
 import { LoginUseCase } from '../../application/use-cases/auth/login.use-case';
 import { RegisterUseCase } from '../../application/use-cases/auth/register.use-case';
 import { ValidateTokenUseCase } from '../../application/use-cases/auth/validate-token.use-case';
-import { AuthResponseDto } from '../../application/dtos/auth/auth-response.dto';
-import { LoginRequestDto } from '../../application/dtos/auth/login-request.dto';
-import { RegisterRequestDto } from '../../application/dtos/auth/register-request.dto';
-import { UserResponseDto } from '../../application/dtos/auth/user-response.dto';
+import { AuthResponseDto } from '../../application/dto/auth/auth-response.dto';
+import { LoginRequestDto } from '../../application/dto/auth/login-request.dto';
+import { RegisterRequestDto } from '../../application/dto/auth/register-request.dto';
+import { UserResponseDto } from '../../application/dto/auth/user-response.dto';
 
 /**
  * Auth Controller
