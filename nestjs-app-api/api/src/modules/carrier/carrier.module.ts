@@ -1,13 +1,16 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { CarrierController } from './api/carrier.controller';
-import { CarrierService } from './application/services/carrier.service';
-import { Carrier } from './domain/entities/carrier.entity';
+import { Module } from "@nestjs/common";
+
+// Clean Architecture Modules
+import { CarrierApplicationModule } from "./application/application.module";
+import { CarrierInfrastructureModule } from "./infrastructure/infrastructure.module";
+import { CarrierInterfacesModule } from "./interfaces/interfaces.module";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Carrier])],
-  controllers: [CarrierController],
-  providers: [CarrierService],
-  exports: [CarrierService],
+  imports: [
+    CarrierApplicationModule,
+    CarrierInfrastructureModule,
+    CarrierInterfacesModule,
+  ],
+  exports: [CarrierApplicationModule],
 })
 export class CarrierModule {}
