@@ -78,17 +78,18 @@ class CustomerApiService {
       console.log('CustomerApiService constructor called');
       console.log('CUSTOMERS_API_CONFIG:', CUSTOMERS_API_CONFIG);
       this.basePath = CUSTOMERS_API_CONFIG?.ENDPOINTS?.LIST || '/customers';
-      console.log('CustomerApiService initialized with basePath:', this.basePath);
+      console.log(
+        'CustomerApiService initialized with basePath:',
+        this.basePath
+      );
     } catch (error) {
       console.error('Error initializing CustomerApiService:', error);
-      console.error('Error stack:', error.stack);
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
       this.basePath = '/customers'; // Fallback
     }
   }
 
-  async getCustomers(
-    params?: PaginationParams
-  ): Promise<{
+  async getCustomers(params?: PaginationParams): Promise<{
     customers: Customer[];
     total: number;
     page: number;

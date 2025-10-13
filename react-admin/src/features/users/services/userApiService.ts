@@ -37,7 +37,7 @@ class UserApiService {
       console.log('UserApiService initialized with basePath:', this.basePath);
     } catch (error) {
       console.error('Error initializing UserApiService:', error);
-      console.error('Error stack:', error.stack);
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
       this.basePath = '/users'; // Fallback
     }
   }

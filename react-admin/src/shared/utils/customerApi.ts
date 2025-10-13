@@ -19,7 +19,7 @@ class CustomerApiClient {
       console.log('CustomerApiClient initialized successfully');
     } catch (error) {
       console.error('Error initializing CustomerApiClient:', error);
-      console.error('Error stack:', error.stack);
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
       throw error;
     }
   }
