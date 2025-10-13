@@ -45,10 +45,13 @@ class CarrierApiService {
 
   constructor() {
     try {
+      console.log('CarrierApiService constructor called');
+      console.log('CARRIERS_API_CONFIG:', CARRIERS_API_CONFIG);
       this.basePath = CARRIERS_API_CONFIG?.ENDPOINTS?.LIST || '/carriers';
       console.log('CarrierApiService initialized with basePath:', this.basePath);
     } catch (error) {
       console.error('Error initializing CarrierApiService:', error);
+      console.error('Error stack:', error.stack);
       this.basePath = '/carriers'; // Fallback
     }
   }

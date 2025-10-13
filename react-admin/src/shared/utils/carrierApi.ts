@@ -6,13 +6,22 @@ class CarrierApiClient {
   private client: AxiosInstance;
 
   constructor() {
-    this.client = axios.create({
-      baseURL: CARRIER_API_CONFIG.BASE_URL,
-      timeout: CARRIER_API_CONFIG.TIMEOUT,
-      headers: CARRIER_API_CONFIG.HEADERS,
-    });
+    try {
+      console.log('CarrierApiClient constructor called');
+      console.log('CARRIER_API_CONFIG:', CARRIER_API_CONFIG);
+      this.client = axios.create({
+        baseURL: CARRIER_API_CONFIG.BASE_URL,
+        timeout: CARRIER_API_CONFIG.TIMEOUT,
+        headers: CARRIER_API_CONFIG.HEADERS,
+      });
 
-    this.setupInterceptors();
+      this.setupInterceptors();
+      console.log('CarrierApiClient initialized successfully');
+    } catch (error) {
+      console.error('Error initializing CarrierApiClient:', error);
+      console.error('Error stack:', error.stack);
+      throw error;
+    }
   }
 
   private setupInterceptors() {

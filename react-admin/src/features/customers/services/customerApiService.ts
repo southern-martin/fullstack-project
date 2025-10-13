@@ -75,10 +75,13 @@ class CustomerApiService {
 
   constructor() {
     try {
+      console.log('CustomerApiService constructor called');
+      console.log('CUSTOMERS_API_CONFIG:', CUSTOMERS_API_CONFIG);
       this.basePath = CUSTOMERS_API_CONFIG?.ENDPOINTS?.LIST || '/customers';
       console.log('CustomerApiService initialized with basePath:', this.basePath);
     } catch (error) {
       console.error('Error initializing CustomerApiService:', error);
+      console.error('Error stack:', error.stack);
       this.basePath = '/customers'; // Fallback
     }
   }
