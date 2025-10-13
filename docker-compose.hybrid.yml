@@ -1,0 +1,380 @@
+version: '3.8'
+
+name: fullstack-project-hybrid
+
+services:
+  # ===========================================
+  # SHARED INFRASTRUCTURE
+  # ===========================================
+  
+  # Shared Database (Auth + User Services)
+  shared-user-db:
+    image: mysql:8.0
+    container_name: shared-user-database
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: shared_root_password_2024
+      MYSQL_DATABASE: shared_user_db
+      MYSQL_USER: shared_user
+      MYSQL_PASSWORD: shared_password_2024
+    ports:
+      - "3306:3306"
+    volumes:
+      - shared_user_db_data:/var/lib/mysql
+      - ./shared-database/init:/docker-entrypoint-initdb.d
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pshared_root_password_2024"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
+
+  # Shared Redis (All Services)
+  shared-redis:
+    image: redis:7-alpine
+    container_name: shared-redis
+    restart: unless-stopped
+    command: redis-server --requirepass shared_redis_password_2024
+    ports:
+      - "6379:6379"
+    volumes:
+      - shared_redis_data:/data
+      - ./shared-redis/redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "shared_redis_password_2024", "ping"]
+      timeout: 10s
+      retries: 5
+      interval: 10s
+      start_period: 30s
+
+  # ===========================================
+  # CORE SERVICES (Shared Database)
+  # ===========================================
+  
+  # Auth Service
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      # Shared Database Configuration
+      DB_HOST: shared-user-db
+      DB_PORT: 3306
+      DB_USERNAME: shared_user
+      DB_PASSWORD: shared_password_2024
+      DB_NAME: shared_user_db
+      # Shared Redis Configuration
+      REDIS_HOST: shared-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: shared_redis_password_2024
+      REDIS_KEY_PREFIX: auth
+      # JWT Configuration
+      JWT_SECRET: your-jwt-secret-key-change-in-production
+      JWT_EXPIRATION: 24h
+    ports:
+      - "3001:3001"
+    depends_on:
+      shared-user-db:
+        condition: service_healthy
+      shared-redis:
+        condition: service_healthy
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/v1/health"]
+      timeout: 10s
+      retries: 3
+      interval: 30s
+      start_period: 40s
+
+  # User Service
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3003
+      # Shared Database Configuration
+      DB_HOST: shared-user-db
+      DB_PORT: 3306
+      DB_USERNAME: shared_user
+      DB_PASSWORD: shared_password_2024
+      DB_DATABASE: shared_user_db
+      # Shared Redis Configuration
+      REDIS_HOST: shared-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: shared_redis_password_2024
+      REDIS_KEY_PREFIX: user
+    ports:
+      - "3003:3003"
+    depends_on:
+      shared-user-db:
+        condition: service_healthy
+      shared-redis:
+        condition: service_healthy
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3003/api/v1/health"]
+      timeout: 10s
+      retries: 3
+      interval: 30s
+      start_period: 40s
+
+  # ===========================================
+  # BUSINESS SERVICES (Separate Databases)
+  # ===========================================
+  
+  # Customer Service Database
+  customer-service-db:
+    image: mysql:8.0
+    container_name: customer-service-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: customer_root_password
+      MYSQL_DATABASE: customer_service_db
+      MYSQL_USER: customer_user
+      MYSQL_PASSWORD: customer_password
+    ports:
+      - "3309:3306"
+    volumes:
+      - customer_service_db_data:/var/lib/mysql
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pcustomer_root_password"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
+
+  # Customer Service
+  customer-service:
+    build:
+      context: ./customer-service
+      dockerfile: Dockerfile
+    container_name: customer-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3004
+      # Separate Database Configuration
+      DB_HOST: customer-service-db
+      DB_PORT: 3306
+      DB_USERNAME: customer_user
+      DB_PASSWORD: customer_password
+      DB_NAME: customer_service_db
+      # Shared Redis Configuration
+      REDIS_HOST: shared-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: shared_redis_password_2024
+      REDIS_KEY_PREFIX: customer
+      # Cross-Service Communication
+      USER_SERVICE_URL: http://user-service:3003
+    ports:
+      - "3004:3004"
+    depends_on:
+      customer-service-db:
+        condition: service_healthy
+      shared-redis:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3004/api/v1/health"]
+      timeout: 10s
+      retries: 3
+      interval: 30s
+      start_period: 40s
+
+  # Carrier Service Database
+  carrier-service-db:
+    image: mysql:8.0
+    container_name: carrier-service-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: carrier_root_password
+      MYSQL_DATABASE: carrier_service_db
+      MYSQL_USER: carrier_user
+      MYSQL_PASSWORD: carrier_password
+    ports:
+      - "3310:3306"
+    volumes:
+      - carrier_service_db_data:/var/lib/mysql
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pcarrier_root_password"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
+
+  # Carrier Service
+  carrier-service:
+    build:
+      context: ./carrier-service
+      dockerfile: Dockerfile
+    container_name: carrier-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3005
+      # Separate Database Configuration
+      DB_HOST: carrier-service-db
+      DB_PORT: 3306
+      DB_USERNAME: carrier_user
+      DB_PASSWORD: carrier_password
+      DB_NAME: carrier_service_db
+      # Shared Redis Configuration
+      REDIS_HOST: shared-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: shared_redis_password_2024
+      REDIS_KEY_PREFIX: carrier
+      # Cross-Service Communication
+      USER_SERVICE_URL: http://user-service:3003
+    ports:
+      - "3005:3005"
+    depends_on:
+      carrier-service-db:
+        condition: service_healthy
+      shared-redis:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3005/api/v1/health"]
+      timeout: 10s
+      retries: 3
+      interval: 30s
+      start_period: 40s
+
+  # Pricing Service Database
+  pricing-service-db:
+    image: mysql:8.0
+    container_name: pricing-service-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: pricing_root_password
+      MYSQL_DATABASE: pricing_service_db
+      MYSQL_USER: pricing_user
+      MYSQL_PASSWORD: pricing_password
+    ports:
+      - "3311:3306"
+    volumes:
+      - pricing_service_db_data:/var/lib/mysql
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppricing_root_password"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
+
+  # Pricing Service
+  pricing-service:
+    build:
+      context: ./pricing-service
+      dockerfile: Dockerfile
+    container_name: pricing-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3006
+      # Separate Database Configuration
+      DB_HOST: pricing-service-db
+      DB_PORT: 3306
+      DB_USERNAME: pricing_user
+      DB_PASSWORD: pricing_password
+      DB_NAME: pricing_service_db
+      # Shared Redis Configuration
+      REDIS_HOST: shared-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: shared_redis_password_2024
+      REDIS_KEY_PREFIX: pricing
+      # Cross-Service Communication
+      CUSTOMER_SERVICE_URL: http://customer-service:3004
+      CARRIER_SERVICE_URL: http://carrier-service:3005
+    ports:
+      - "3006:3006"
+    depends_on:
+      pricing-service-db:
+        condition: service_healthy
+      shared-redis:
+        condition: service_healthy
+      customer-service:
+        condition: service_healthy
+      carrier-service:
+        condition: service_healthy
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3006/api/v1/health"]
+      timeout: 10s
+      retries: 3
+      interval: 30s
+      start_period: 40s
+
+  # ===========================================
+  # FRONTEND
+  # ===========================================
+  
+  # React Admin Frontend
+  react-admin:
+    build:
+      context: ./react-admin
+      dockerfile: Dockerfile
+    container_name: react-admin
+    restart: unless-stopped
+    environment:
+      REACT_APP_AUTH_API_URL: http://localhost:3001
+      REACT_APP_USER_API_URL: http://localhost:3003
+      REACT_APP_CUSTOMER_API_URL: http://localhost:3004
+      REACT_APP_CARRIER_API_URL: http://localhost:3005
+      REACT_APP_PRICING_API_URL: http://localhost:3006
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-service
+      - user-service
+      - customer-service
+      - carrier-service
+      - pricing-service
+    networks:
+      - shared-services-network
+
+volumes:
+  # Shared Infrastructure Volumes
+  shared_user_db_data:
+    driver: local
+  shared_redis_data:
+    driver: local
+  
+  # Business Services Volumes
+  customer_service_db_data:
+    driver: local
+  carrier_service_db_data:
+    driver: local
+  pricing_service_db_data:
+    driver: local
+
+networks:
+  shared-services-network:
+    driver: bridge
+    name: fullstack-project-hybrid-network
