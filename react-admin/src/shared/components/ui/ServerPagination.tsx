@@ -77,10 +77,10 @@ export const ServerPagination: React.FC<ServerPaginationProps> = ({
                 pages.push(i);
             }
         } else {
-      // Calculate start and end of visible range
-      const halfVisible = Math.floor(maxVisiblePages / 2);
-      let start = Math.max(1, currentPage - halfVisible);
-      const end = Math.min(totalPages, start + maxVisiblePages - 1);
+            // Calculate start and end of visible range
+            const halfVisible = Math.floor(maxVisiblePages / 2);
+            let start = Math.max(1, currentPage - halfVisible);
+            const end = Math.min(totalPages, start + maxVisiblePages - 1);
 
             // Adjust start if we're near the end
             if (end - start + 1 < maxVisiblePages) {
@@ -185,8 +185,8 @@ export const ServerPagination: React.FC<ServerPaginationProps> = ({
                                     onClick={() => handlePageChange(page as number)}
                                     disabled={loading}
                                     className={`relative inline-flex items-center px-4 py-2 text-sm font-medium border ${page === currentPage
-                                            ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                                            : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                                        ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                                         } focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed`}
                                     aria-label={`Go to page ${page}`}
                                     aria-current={page === currentPage ? 'page' : undefined}

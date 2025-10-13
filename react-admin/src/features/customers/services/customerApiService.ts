@@ -75,7 +75,13 @@ class CustomerApiService {
 
   async getCustomers(
     params?: PaginationParams
-  ): Promise<{ customers: Customer[]; total: number; page: number; limit: number; totalPages: number }> {
+  ): Promise<{
+    customers: Customer[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
@@ -86,7 +92,13 @@ class CustomerApiService {
     const url = queryParams.toString()
       ? `${this.basePath}?${queryParams}`
       : this.basePath;
-    return apiClient.get<{ customers: Customer[]; total: number; page: number; limit: number; totalPages: number }>(url);
+    return apiClient.get<{
+      customers: Customer[];
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    }>(url);
   }
 
   async getCustomerById(id: number): Promise<Customer> {
