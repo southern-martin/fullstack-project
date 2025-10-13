@@ -261,8 +261,8 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
 
     return (
         <div className="animate-fade-in">
-            {/* Show validation summary if there are errors */}
-            {Object.keys(errors).length > 0 && (
+            {/* Show validation summary only for general errors */}
+            {errors.general && (
                 <div className="bg-red-50 border border-red-200 rounded-md p-4 m-6 mb-0">
                     <div className="flex">
                         <div className="flex-shrink-0">
@@ -272,18 +272,10 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
                         </div>
                         <div className="ml-3">
                             <h3 className="text-sm font-medium text-red-800">
-                                {errors.general ? 'Error' : 'Please fix the following errors:'}
+                                Error
                             </h3>
                             <div className="mt-2 text-sm text-red-700">
-                                {errors.general ? (
-                                    <p>{errors.general}</p>
-                                ) : (
-                                    <ul className="list-disc pl-5 space-y-1">
-                                        {Object.entries(errors).map(([field, message]) => (
-                                            <li key={field}>{message}</li>
-                                        ))}
-                                    </ul>
-                                )}
+                                <p>{errors.general}</p>
                             </div>
                         </div>
                     </div>
