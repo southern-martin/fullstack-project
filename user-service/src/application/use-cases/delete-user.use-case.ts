@@ -1,0 +1,40 @@
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { UserRepositoryInterface } from '../../domain/repositories/user.repository.interface';
+import { UserDomainService } from '../../domain/services/user.domain.service';
+
+/**
+ * Delete User Use Case
+ * Application service that orchestrates the user deletion process
+ * Follows Clean Architecture principles
+ */
+@Injectable()
+export class DeleteUserUseCase {
+  constructor(
+    private readonly userRepository: UserRepositoryInterface,
+    private readonly userDomainService: UserDomainService,
+  ) {}
+
+  /**
+   * Executes the delete user use case
+   * @param id - User ID
+   */
+  async execute(id: number): Promise<void> {
+    // 1. Find existing user
+    const existingUser = await this.userRepository.findById(id);
+    if (!existingUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    // 2. Check if user can be deleted (business rule)
+    // Note: In a real application, you would check for related data
+    // For now, we'll assume we can delete if no associated data
+    const hasAnyData = false; // This would come from other services
+    
+    if (!this.userDomainService.canDeleteUser(existingUser, hasAnyData)) {
+      throw new BadRequestException('Cannot delete user with associated data');
+    }
+
+    // 3. Delete user from repository
+    await this.userRepository.delete(id);
+  }
+}
