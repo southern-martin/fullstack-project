@@ -10,27 +10,27 @@ import {
   Patch,
   Post,
   Query,
-} from '@nestjs/common';
-import { CreateCarrierUseCase } from '../../application/use-cases/create-carrier.use-case';
-import { GetCarrierUseCase } from '../../application/use-cases/get-carrier.use-case';
-import { UpdateCarrierUseCase } from '../../application/use-cases/update-carrier.use-case';
-import { DeleteCarrierUseCase } from '../../application/use-cases/delete-carrier.use-case';
-import { CreateCarrierDto } from '../../application/dtos/create-carrier.dto';
-import { UpdateCarrierDto } from '../../application/dtos/update-carrier.dto';
-import { CarrierResponseDto } from '../../application/dtos/carrier-response.dto';
+} from "@nestjs/common";
+import { CarrierResponseDto } from "../../application/dtos/carrier-response.dto";
+import { CreateCarrierDto } from "../../application/dtos/create-carrier.dto";
+import { UpdateCarrierDto } from "../../application/dtos/update-carrier.dto";
+import { CreateCarrierUseCase } from "../../application/use-cases/create-carrier.use-case";
+import { DeleteCarrierUseCase } from "../../application/use-cases/delete-carrier.use-case";
+import { GetCarrierUseCase } from "../../application/use-cases/get-carrier.use-case";
+import { UpdateCarrierUseCase } from "../../application/use-cases/update-carrier.use-case";
 
 /**
  * Carrier Controller
  * Interface adapter for HTTP requests
  * Follows Clean Architecture principles
  */
-@Controller('carriers')
+@Controller("carriers")
 export class CarrierController {
   constructor(
     private readonly createCarrierUseCase: CreateCarrierUseCase,
     private readonly getCarrierUseCase: GetCarrierUseCase,
     private readonly updateCarrierUseCase: UpdateCarrierUseCase,
-    private readonly deleteCarrierUseCase: DeleteCarrierUseCase,
+    private readonly deleteCarrierUseCase: DeleteCarrierUseCase
   ) {}
 
   /**
@@ -39,7 +39,9 @@ export class CarrierController {
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createCarrierDto: CreateCarrierDto): Promise<CarrierResponseDto> {
+  async create(
+    @Body() createCarrierDto: CreateCarrierDto
+  ): Promise<CarrierResponseDto> {
     return this.createCarrierUseCase.execute(createCarrierDto);
   }
 
@@ -49,9 +51,9 @@ export class CarrierController {
    */
   @Get()
   async findAll(
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '10',
-    @Query('search') search?: string
+    @Query("page") page: string = "1",
+    @Query("limit") limit: string = "10",
+    @Query("search") search?: string
   ): Promise<{ carriers: CarrierResponseDto[]; total: number }> {
     const pageNum = parseInt(page, 10) || 1;
     const limitNum = parseInt(limit, 10) || 10;
@@ -62,7 +64,7 @@ export class CarrierController {
    * Get active carriers endpoint
    * GET /carriers/active
    */
-  @Get('active')
+  @Get("active")
   async findActive(): Promise<CarrierResponseDto[]> {
     return this.getCarrierUseCase.executeActive();
   }
@@ -71,7 +73,7 @@ export class CarrierController {
    * Get carrier count endpoint
    * GET /carriers/count
    */
-  @Get('count')
+  @Get("count")
   async getCount(): Promise<{ count: number }> {
     return this.getCarrierUseCase.executeCount();
   }
@@ -80,8 +82,8 @@ export class CarrierController {
    * Get carrier by name endpoint
    * GET /carriers/name/:name
    */
-  @Get('name/:name')
-  async findByName(@Param('name') name: string): Promise<CarrierResponseDto> {
+  @Get("name/:name")
+  async findByName(@Param("name") name: string): Promise<CarrierResponseDto> {
     return this.getCarrierUseCase.executeByName(name);
   }
 
@@ -89,8 +91,10 @@ export class CarrierController {
    * Get carrier by ID endpoint
    * GET /carriers/:id
    */
-  @Get(':id')
-  async findById(@Param('id', ParseIntPipe) id: number): Promise<CarrierResponseDto> {
+  @Get(":id")
+  async findById(
+    @Param("id", ParseIntPipe) id: number
+  ): Promise<CarrierResponseDto> {
     return this.getCarrierUseCase.executeById(id);
   }
 
@@ -98,9 +102,9 @@ export class CarrierController {
    * Update carrier endpoint
    * PATCH /carriers/:id
    */
-  @Patch(':id')
+  @Patch(":id")
   async update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param("id", ParseIntPipe) id: number,
     @Body() updateCarrierDto: UpdateCarrierDto
   ): Promise<CarrierResponseDto> {
     return this.updateCarrierUseCase.execute(id, updateCarrierDto);
@@ -110,9 +114,9 @@ export class CarrierController {
    * Delete carrier endpoint
    * DELETE /carriers/:id
    */
-  @Delete(':id')
+  @Delete(":id")
   @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  async delete(@Param("id", ParseIntPipe) id: number): Promise<void> {
     return this.deleteCarrierUseCase.execute(id);
   }
 }

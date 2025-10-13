@@ -1,26 +1,45 @@
-import { Module } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
-import { CustomerController } from "./api/customer.controller";
-import { CustomerService } from "./application/services/customer.service";
-import { HealthController } from "./health/health.controller";
-import { DatabaseModule } from "./infrastructure/database/database.module";
-import { CustomerRepository } from "./infrastructure/repositories/customer.repository";
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
+// Clean Architecture Modules
+import { ApplicationModule } from './application/application.module';
+import { InterfacesModule } from './interfaces/interfaces.module';
+
+// TypeORM Entities
+import { Customer } from './domain/entities/customer.entity';
+
+/**
+ * Main Application Module
+ * Follows Clean Architecture principles
+ * Orchestrates all layers
+ */
 @Module({
   imports: [
+    // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [".env.local", ".env"],
+      envFilePath: ['.env.local', '.env'],
     }),
-    DatabaseModule,
+
+    // Database
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT) || 5432,
+      username: process.env.DB_USERNAME || 'postgres',
+      password: process.env.DB_PASSWORD || 'password',
+      database: process.env.DB_DATABASE || 'customer_service_db',
+      entities: [Customer],
+      synchronize: process.env.NODE_ENV !== 'production',
+      logging: process.env.NODE_ENV === 'development',
+    }),
+
+    // Clean Architecture Layers
+    ApplicationModule,
+    InterfacesModule,
   ],
-  controllers: [CustomerController, HealthController],
-  providers: [
-    CustomerService,
-    {
-      provide: "CustomerRepositoryInterface",
-      useClass: CustomerRepository,
-    },
-  ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
