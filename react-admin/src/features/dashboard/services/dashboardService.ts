@@ -1,7 +1,7 @@
-import { User } from "../../../shared/types";
-import { carrierApiClient } from "../../../shared/utils/carrierApi";
-import { customerApiClient } from "../../../shared/utils/customerApi";
-import { userApiService } from "../../users/services/userApiService";
+import { User } from '../../../shared/types';
+import { carrierApiClient } from '../../../shared/utils/carrierApi';
+import { customerApiClient } from '../../../shared/utils/customerApi';
+import { userApiService } from '../../users/services/userApiService';
 
 export interface DashboardStats {
   totalUsers: number;
@@ -10,7 +10,7 @@ export interface DashboardStats {
   activeUsers: number;
   recentUsers: User[];
   systemHealth: {
-    status: "healthy" | "warning" | "error";
+    status: 'healthy' | 'warning' | 'error';
     uptime: string;
     lastCheck: string;
   };
@@ -19,20 +19,17 @@ export interface DashboardStats {
 class DashboardService {
   async getDashboardStats(): Promise<DashboardStats> {
     try {
-      console.log("DashboardService: Starting to fetch dashboard stats...");
+      console.log('DashboardService: Starting to fetch dashboard stats...');
 
       // Fetch data from multiple services in parallel with error handling
-      const [
-        usersResponse,
-        customersResponse,
-        carriersResponse,
-      ] = await Promise.allSettled([
-        userApiService.getUsers({ page: 1, limit: 1 }),
-        customerApiClient.getCustomers({ page: 1, limit: 1 }),
-        carrierApiClient.getCarriers({ page: 1, limit: 1 }),
-      ]);
+      const [usersResponse, customersResponse, carriersResponse] =
+        await Promise.allSettled([
+          userApiService.getUsers({ page: 1, limit: 1 }),
+          customerApiClient.getCustomers({ page: 1, limit: 1 }),
+          carrierApiClient.getCarriers({ page: 1, limit: 1 }),
+        ]);
 
-      console.log("DashboardService: API responses received:", {
+      console.log('DashboardService: API responses received:', {
         users: usersResponse,
         customers: customersResponse,
         carriers: carriersResponse,
@@ -40,15 +37,15 @@ class DashboardService {
 
       // Extract data from settled promises
       const usersData =
-        usersResponse.status === "fulfilled"
+        usersResponse.status === 'fulfilled'
           ? usersResponse.value
           : { total: 0 };
       const customersData =
-        customersResponse.status === "fulfilled"
+        customersResponse.status === 'fulfilled'
           ? customersResponse.value.data
           : { total: 0 };
       const carriersData =
-        carriersResponse.status === "fulfilled"
+        carriersResponse.status === 'fulfilled'
           ? carriersResponse.value.data
           : { total: 0 };
 
@@ -58,12 +55,12 @@ class DashboardService {
         const recentUsersResponse = await userApiService.getUsers({
           page: 1,
           limit: 5,
-          sortBy: "createdAt",
-          sortOrder: "desc",
+          sortBy: 'createdAt',
+          sortOrder: 'desc',
         });
         recentUsersData = recentUsersResponse.data || [];
       } catch (error) {
-        console.warn("Failed to fetch recent users:", error);
+        console.warn('Failed to fetch recent users:', error);
         recentUsersData = [];
       }
 
@@ -74,13 +71,13 @@ class DashboardService {
         activeUsers: usersData.total || 0, // Use total users as active users for now
         recentUsers: recentUsersData,
         systemHealth: {
-          status: "healthy",
+          status: 'healthy',
           uptime: this.calculateUptime(),
           lastCheck: new Date().toISOString(),
         },
       };
     } catch (error) {
-      console.error("Error fetching dashboard stats:", error);
+      console.error('Error fetching dashboard stats:', error);
       // Return default stats in case of error
       return {
         totalUsers: 0,
@@ -89,8 +86,8 @@ class DashboardService {
         activeUsers: 0,
         recentUsers: [],
         systemHealth: {
-          status: "error",
-          uptime: "0h 0m",
+          status: 'error',
+          uptime: '0h 0m',
           lastCheck: new Date().toISOString(),
         },
       };
@@ -99,7 +96,7 @@ class DashboardService {
 
   private calculateUptime(): string {
     // This is a mock calculation - in a real app, you'd track actual uptime
-    const startTime = new Date("2024-01-01T00:00:00Z");
+    const startTime = new Date('2024-01-01T00:00:00Z');
     const now = new Date();
     const diffMs = now.getTime() - startTime.getTime();
 
@@ -120,13 +117,3 @@ class DashboardService {
 }
 
 export const dashboardService = new DashboardService();
-
-
-
-
-
-
-
-
-
-
