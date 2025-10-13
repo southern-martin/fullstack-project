@@ -1,22 +1,22 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus } from "@nestjs/common";
 
 /**
  * Validation Exception
- * 
+ *
  * Custom exception for handling validation errors with field-specific details.
  * This allows the frontend to display validation errors next to specific form fields.
  */
 export class ValidationException extends HttpException {
   constructor(
     public readonly fieldErrors: Record<string, string[]>,
-    message: string = 'Validation failed'
+    message: string = "Validation failed"
   ) {
     super(
       {
         message,
         fieldErrors,
         statusCode: HttpStatus.BAD_REQUEST,
-        error: 'Validation Error',
+        error: "Validation Error",
       },
       HttpStatus.BAD_REQUEST
     );
@@ -32,7 +32,9 @@ export class ValidationException extends HttpException {
   /**
    * Creates a ValidationException from multiple field errors
    */
-  static fromFieldErrors(fieldErrors: Record<string, string[]>): ValidationException {
+  static fromFieldErrors(
+    fieldErrors: Record<string, string[]>
+  ): ValidationException {
     return new ValidationException(fieldErrors);
   }
 
@@ -45,26 +47,26 @@ export class ValidationException extends HttpException {
   ): ValidationException {
     const fieldErrors: Record<string, string[]> = {};
 
-    errors.forEach(error => {
+    errors.forEach((error) => {
       // Try to map generic errors to specific fields
-      let field = 'general';
-      
-      if (error.toLowerCase().includes('email')) {
-        field = 'email';
-      } else if (error.toLowerCase().includes('password')) {
-        field = 'password';
-      } else if (error.toLowerCase().includes('first name')) {
-        field = 'firstName';
-      } else if (error.toLowerCase().includes('last name')) {
-        field = 'lastName';
-      } else if (error.toLowerCase().includes('phone')) {
-        field = 'phone';
-      } else if (error.toLowerCase().includes('date of birth')) {
-        field = 'dateOfBirth';
-      } else if (error.toLowerCase().includes('address')) {
-        field = 'address';
-      } else if (error.toLowerCase().includes('preferences')) {
-        field = 'preferences';
+      let field = "general";
+
+      if (error.toLowerCase().includes("email")) {
+        field = "email";
+      } else if (error.toLowerCase().includes("password")) {
+        field = "password";
+      } else if (error.toLowerCase().includes("first name")) {
+        field = "firstName";
+      } else if (error.toLowerCase().includes("last name")) {
+        field = "lastName";
+      } else if (error.toLowerCase().includes("phone")) {
+        field = "phone";
+      } else if (error.toLowerCase().includes("date of birth")) {
+        field = "dateOfBirth";
+      } else if (error.toLowerCase().includes("address")) {
+        field = "address";
+      } else if (error.toLowerCase().includes("preferences")) {
+        field = "preferences";
       }
 
       // Apply custom field mapping if provided
