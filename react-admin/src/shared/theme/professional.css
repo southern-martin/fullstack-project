@@ -166,6 +166,13 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 44px; /* Ensure minimum touch target size */
+  box-sizing: border-box; /* Ensure consistent box model */
+  margin: 0; /* Ensure no margin interference */
+  border: none; /* Ensure no border interference */
+  vertical-align: top; /* Ensure proper vertical alignment */
+  line-height: 1; /* Ensure consistent line height */
+  text-decoration: none; /* Ensure no text decoration interference */
+  outline: none; /* Ensure no outline interference */
 }
 
 .professional-btn::before {
@@ -221,6 +228,7 @@ body {
 /* Full-width button variant for forms and modals */
 .professional-btn-full {
   width: 100%;
+  margin: 0; /* Ensure no margin interference */
 }
 
 /* Professional Input Styles */
