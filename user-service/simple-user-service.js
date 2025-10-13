@@ -37,7 +37,7 @@ app.get('/api/v1/users', (req, res) => {
     createdAt: '2025-01-01T00:00:00.000Z',
     updatedAt: '2025-01-01T00:00:00.000Z'
   }));
-  
+
   res.json({
     users: users,
     total: users.length
@@ -201,12 +201,12 @@ app.patch('/api/v1/users/:id', (req, res) => {
     if (restrictedDomains.includes(emailDomain)) {
       customRuleErrors.push('Temporary email addresses are not allowed. Please use a permanent email address.');
     }
-    
+
     // Check if email already exists (only if it's different from current user's email)
     const currentUser = mockUsers[userId];
     if (currentUser) {
       const currentUserEmail = currentUser.email;
-      
+
       // Only check for duplicates if the email is actually being changed
       if (req.body.email.toLowerCase() !== currentUserEmail.toLowerCase()) {
         const existingEmails = Object.values(mockUsers).map(user => user.email.toLowerCase());
