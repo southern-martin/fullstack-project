@@ -1,15 +1,15 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+import { TypeOrmModule } from "@nestjs/typeorm";
 
 // Clean Architecture Modules
-import { ApplicationModule } from './application/application.module';
-import { InfrastructureModule } from './infrastructure/infrastructure.module';
-import { InterfacesModule } from './interfaces/interfaces.module';
+import { ApplicationModule } from "./application/application.module";
+import { InfrastructureModule } from "./infrastructure/infrastructure.module";
+import { InterfacesModule } from "./interfaces/interfaces.module";
 
 // TypeORM Entities
-import { UserTypeOrmEntity } from './infrastructure/database/typeorm/entities/user.typeorm.entity';
-import { RoleTypeOrmEntity } from './infrastructure/database/typeorm/entities/role.typeorm.entity';
+import { RoleTypeOrmEntity } from "./infrastructure/database/typeorm/entities/role.typeorm.entity";
+import { UserTypeOrmEntity } from "./infrastructure/database/typeorm/entities/user.typeorm.entity";
 
 /**
  * Main Application Module
@@ -21,20 +21,20 @@ import { RoleTypeOrmEntity } from './infrastructure/database/typeorm/entities/ro
     // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: ".env",
     }),
 
     // Database
     TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
+      type: "postgres",
+      host: process.env.DB_HOST || "localhost",
       port: parseInt(process.env.DB_PORT) || 5432,
-      username: process.env.DB_USERNAME || 'postgres',
-      password: process.env.DB_PASSWORD || 'password',
-      database: process.env.DB_DATABASE || 'auth_service_db',
+      username: process.env.DB_USERNAME || "postgres",
+      password: process.env.DB_PASSWORD || "password",
+      database: process.env.DB_DATABASE || "auth_service_db",
       entities: [UserTypeOrmEntity, RoleTypeOrmEntity],
-      synchronize: process.env.NODE_ENV !== 'production',
-      logging: process.env.NODE_ENV === 'development',
+      synchronize: process.env.NODE_ENV !== "production",
+      logging: process.env.NODE_ENV === "development",
     }),
 
     // Clean Architecture Layers
