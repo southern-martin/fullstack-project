@@ -190,6 +190,63 @@ app.put('/api/v1/users/:id', createUserValidation, (req, res) => {
   res.status(200).json(updatedUser);
 });
 
+// Patch user endpoint (for partial updates)
+app.patch('/api/v1/users/:id', (req, res) => {
+  const userId = parseInt(req.params.id);
+  
+  // For PATCH requests, we'll be more lenient with validation
+  // Only validate fields that are actually being updated
+  
+  const customRuleErrors = [];
+  
+  // Custom rule: Check if email is being changed to a restricted domain
+  if (req.body.email) {
+    const restrictedDomains = ['temp-mail.org', '10minutemail.com', 'guerrillamail.com'];
+    const emailDomain = req.body.email.split('@')[1];
+    if (restrictedDomains.includes(emailDomain)) {
+      customRuleErrors.push('Temporary email addresses are not allowed. Please use a permanent email address.');
+    }
+    
+    // Check if email already exists
+    const existingEmails = ['admin@example.com', 'user@example.com', 'test@example.com'];
+    if (existingEmails.includes(req.body.email.toLowerCase())) {
+      customRuleErrors.push('This email address is already registered. Please use a different email.');
+    }
+  }
+  
+  // Custom rule: Check if password is in common passwords list (only if password is provided)
+  if (req.body.password) {
+    const commonPasswords = ['password', '123456', 'admin', 'qwerty', 'letmein'];
+    if (commonPasswords.includes(req.body.password.toLowerCase())) {
+      customRuleErrors.push('This password is too common. Please choose a more secure password.');
+    }
+  }
+  
+  // If there are custom rule errors, return them
+  if (customRuleErrors.length > 0) {
+    return res.status(400).json({
+      message: 'Custom rule validation failed',
+      customRuleErrors,
+      statusCode: 400,
+      error: 'Custom Rule Error'
+    });
+  }
+  
+  // Mock successful user update (partial)
+  const updatedUser = {
+    id: userId,
+    email: req.body.email || 'existing@example.com',
+    firstName: req.body.firstName || 'Existing',
+    lastName: req.body.lastName || 'User',
+    isActive: req.body.isActive !== undefined ? req.body.isActive : true,
+    isEmailVerified: req.body.isEmailVerified !== undefined ? req.body.isEmailVerified : false,
+    createdAt: '2025-01-01T00:00:00.000Z',
+    updatedAt: new Date().toISOString()
+  };
+  
+  res.status(200).json(updatedUser);
+});
+
 // Health check
 app.get('/api/v1/health', (req, res) => {
   res.json({
