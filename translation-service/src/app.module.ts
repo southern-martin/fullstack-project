@@ -1,31 +1,46 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { TranslationController } from "./api/translation.controller";
-import { TranslationService } from "./application/services/translation.service";
-import { HealthController } from "./health/health.controller";
-import { DatabaseModule } from "./infrastructure/database/database.module";
-import { LanguageValueRepository } from "./infrastructure/repositories/language-value.repository";
-import { LanguageRepository } from "./infrastructure/repositories/language.repository";
+import { TypeOrmModule } from "@nestjs/typeorm";
 
+// Clean Architecture Modules
+import { ApplicationModule } from "./application/application.module";
+import { InterfacesModule } from "./interfaces/interfaces.module";
+
+// TypeORM Entities
+import { LanguageValue } from "./domain/entities/language-value.entity";
+import { Language } from "./domain/entities/language.entity";
+
+/**
+ * Main application module for the Translation Service.
+ * Configures global settings, database connection, and integrates
+ * the Clean Architecture layers (Application, Infrastructure, Interfaces).
+ */
 @Module({
   imports: [
+    // Configuration Module
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [".env.local", ".env"],
     }),
-    DatabaseModule,
+
+    // Database
+    TypeOrmModule.forRoot({
+      type: "postgres",
+      host: process.env.DB_HOST || "localhost",
+      port: parseInt(process.env.DB_PORT) || 5432,
+      username: process.env.DB_USERNAME || "postgres",
+      password: process.env.DB_PASSWORD || "password",
+      database: process.env.DB_DATABASE || "translation_service_db",
+      entities: [Language, LanguageValue],
+      synchronize: process.env.NODE_ENV !== "production",
+      logging: process.env.NODE_ENV === "development",
+    }),
+
+    // Clean Architecture Layers
+    ApplicationModule,
+    InterfacesModule,
   ],
-  controllers: [TranslationController, HealthController],
-  providers: [
-    TranslationService,
-    {
-      provide: "LanguageRepositoryInterface",
-      useClass: LanguageRepository,
-    },
-    {
-      provide: "LanguageValueRepositoryInterface",
-      useClass: LanguageValueRepository,
-    },
-  ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

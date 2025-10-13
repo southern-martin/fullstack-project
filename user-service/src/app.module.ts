@@ -1,22 +1,29 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { RoleController } from "./application/controllers/role.controller";
-import { UserController } from "./application/controllers/user.controller";
-import { RoleService } from "./application/services/role.service";
-import { UserService } from "./application/services/user.service";
+
+// Clean Architecture Modules
+import { ApplicationModule } from "./application/application.module";
+import { InterfacesModule } from "./interfaces/interfaces.module";
+
+// TypeORM Entities
 import { Role } from "./domain/entities/role.entity";
 import { User } from "./domain/entities/user.entity";
-import { HealthController } from "./health/health.controller";
-import { RoleRepository } from "./infrastructure/role.repository";
-import { UserRepository } from "./infrastructure/user.repository";
 
+/**
+ * Main Application Module
+ * Follows Clean Architecture principles
+ * Orchestrates all layers
+ */
 @Module({
   imports: [
+    // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [".env.local", ".env"],
     }),
+
+    // Database
     TypeOrmModule.forRoot({
       type: "mysql",
       host: process.env.DB_HOST || "localhost",
@@ -28,20 +35,12 @@ import { UserRepository } from "./infrastructure/user.repository";
       synchronize: process.env.NODE_ENV !== "production",
       logging: process.env.NODE_ENV === "development",
     }),
-    TypeOrmModule.forFeature([User, Role]),
+
+    // Clean Architecture Layers
+    ApplicationModule,
+    InterfacesModule,
   ],
-  controllers: [UserController, RoleController, HealthController],
-  providers: [
-    UserService,
-    RoleService,
-    {
-      provide: "UserRepositoryInterface",
-      useClass: UserRepository,
-    },
-    {
-      provide: "RoleRepositoryInterface",
-      useClass: RoleRepository,
-    },
-  ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

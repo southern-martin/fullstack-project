@@ -22,12 +22,7 @@ export interface LanguageValueRepositoryInterface {
   ): Promise<LanguageValue>;
   delete(id: number): Promise<void>;
   count(): Promise<number>;
+  countByLanguage(languageId: number): Promise<number>;
+  countApprovedByLanguage(languageId: number): Promise<number>;
   incrementUsageCount(id: number): Promise<void>;
 }
-
-
-
-
-
-
-
