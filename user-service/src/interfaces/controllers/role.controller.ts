@@ -10,9 +10,9 @@ import {
   Patch,
   Post,
 } from "@nestjs/common";
-import { CreateRoleDto } from "../../application/dtos/create-role.dto";
-import { RoleResponseDto } from "../../application/dtos/role-response.dto";
-import { UpdateRoleDto } from "../../application/dtos/update-role.dto";
+import { CreateRoleDto } from "../../application/dto/create-role.dto";
+import { RoleResponseDto } from "../../application/dto/role-response.dto";
+import { UpdateRoleDto } from "../../application/dto/update-role.dto";
 import { CreateRoleUseCase } from "../../application/use-cases/create-role.use-case";
 import { DeleteRoleUseCase } from "../../application/use-cases/delete-role.use-case";
 import { GetRoleUseCase } from "../../application/use-cases/get-role.use-case";
