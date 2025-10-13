@@ -11,8 +11,7 @@ import { toast } from 'react-hot-toast';
 
 import {
     Table,
-    TableConfig,
-    TableToolbar
+    TableConfig
 } from '../../../shared/components/table';
 import Button from '../../../shared/components/ui/Button';
 import Card from '../../../shared/components/ui/Card';
@@ -49,7 +48,7 @@ const Customers: React.FC = () => {
         setSearch,
         setSorting,
         refresh,
-    } = useServerPagination({
+    } = useServerPagination<Customer>({
         fetchFunction: customerService.getCustomers,
         initialPage: 1,
         initialPageSize: 10,

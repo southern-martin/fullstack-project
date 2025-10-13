@@ -52,12 +52,12 @@ export class GetCustomerUseCase {
     page: number = 1,
     limit: number = 10,
     search?: string
-  ): Promise<{ 
-    customers: CustomerResponseDto[]; 
-    total: number; 
-    page: number; 
-    limit: number; 
-    totalPages: number; 
+  ): Promise<{
+    customers: CustomerResponseDto[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
   }> {
     const { customers, total } = await this.customerRepository.findAll(
       page,
