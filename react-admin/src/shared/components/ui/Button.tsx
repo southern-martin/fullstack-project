@@ -16,13 +16,13 @@ const Button: React.FC<ButtonProps> = ({
     disabled,
     ...props
 }) => {
-    const baseStyles = 'professional-btn inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none relative overflow-hidden';
+    const baseStyles = 'professional-btn inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 relative overflow-hidden';
 
     const variantStyles = {
         primary: 'professional-btn-primary',
         secondary: 'professional-btn-secondary',
-        danger: 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 shadow-md hover:shadow-lg',
-        success: 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-md hover:shadow-lg',
+        danger: 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 focus:ring-red-500 shadow-md hover:shadow-lg',
+        success: 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 focus:ring-green-500 shadow-md hover:shadow-lg',
     };
 
     const sizeStyles = {
