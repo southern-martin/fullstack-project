@@ -42,7 +42,7 @@ app.get('/api/v1/users', (req, res) => {
       updatedAt: '2025-01-02T00:00:00.000Z'
     }
   ];
-  
+
   res.json({
     users: users,
     total: users.length
@@ -52,7 +52,7 @@ app.get('/api/v1/users', (req, res) => {
 // Create user endpoint
 app.post('/api/v1/users', createUserValidation, (req, res) => {
   const errors = validationResult(req);
-  
+
   if (!errors.isEmpty()) {
     // Format errors for frontend
     const fieldErrors = {};
@@ -62,7 +62,7 @@ app.post('/api/v1/users', createUserValidation, (req, res) => {
       }
       fieldErrors[error.path].push(error.msg);
     });
-    
+
     return res.status(400).json({
       message: 'Validation failed',
       fieldErrors,
@@ -70,7 +70,7 @@ app.post('/api/v1/users', createUserValidation, (req, res) => {
       error: 'Validation Error'
     });
   }
-  
+
   // If validation passes, create user (mock response)
   const user = {
     id: Math.floor(Math.random() * 1000),
@@ -82,7 +82,7 @@ app.post('/api/v1/users', createUserValidation, (req, res) => {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
-  
+
   res.status(201).json(user);
 });
 

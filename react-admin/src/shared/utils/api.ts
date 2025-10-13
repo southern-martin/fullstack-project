@@ -43,9 +43,9 @@ class ApiClient {
         // Debug logs removed
 
         // Handle validation errors (400 Bad Request)
-        if (response.status === 400 && errorData.errors) {
+        if (response.status === 400 && errorData.fieldErrors) {
           const validationError = new Error('Validation failed');
-          (validationError as any).validationErrors = errorData.errors;
+          (validationError as any).validationErrors = errorData.fieldErrors;
           (validationError as any).status = response.status;
           throw validationError;
         }

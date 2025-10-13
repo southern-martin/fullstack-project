@@ -177,6 +177,20 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
             await onSubmit(dataToSubmit);
         } catch (error: unknown) {
             // Handle validation errors from backend
+            if (error && typeof error === 'object' && 'validationErrors' in error) {
+                const validationError = error as { validationErrors: Record<string, string[]> };
+                // Convert array of errors to single error per field
+                const fieldErrors: Record<string, string> = {};
+                Object.entries(validationError.validationErrors).forEach(([field, errors]) => {
+                    if (Array.isArray(errors) && errors.length > 0) {
+                        fieldErrors[field] = errors[0]; // Take the first error for each field
+                    }
+                });
+                setErrors(fieldErrors);
+                return;
+            }
+
+            // Handle validation errors from backend (direct response format)
             if (error && typeof error === 'object' && 'response' in error) {
                 const axiosError = error as any;
                 if (axiosError.response?.data?.fieldErrors) {
@@ -194,13 +208,6 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
                     setErrors({ general: axiosError.response.data.message });
                     return;
                 }
-            }
-
-            // Handle validation errors from backend (legacy format)
-            if (error && typeof error === 'object' && 'validationErrors' in error) {
-                const validationError = error as { validationErrors: Record<string, string> };
-                setErrors(validationError.validationErrors);
-                return;
             }
 
             // Handle string-based validation errors (from backend response)
