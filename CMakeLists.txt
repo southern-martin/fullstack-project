@@ -30,43 +30,51 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(MYSQL REQUIRED mysqlclient)
 
 # Set project directories
-set(BACKEND_DIR ${CMAKE_SOURCE_DIR}/nestjs-app-api/api)
 set(FRONTEND_DIR ${CMAKE_SOURCE_DIR}/react-admin)
 set(GO_API_DIR ${CMAKE_SOURCE_DIR}/go-app-api)
 
-# Custom targets for backend (NestJS)
-add_custom_target(backend-install
+# Set microservices directories
+set(AUTH_SERVICE_DIR ${CMAKE_SOURCE_DIR}/auth-service)
+set(USER_SERVICE_DIR ${CMAKE_SOURCE_DIR}/user-service)
+set(CARRIER_SERVICE_DIR ${CMAKE_SOURCE_DIR}/carrier-service)
+set(CUSTOMER_SERVICE_DIR ${CMAKE_SOURCE_DIR}/customer-service)
+set(PRICING_SERVICE_DIR ${CMAKE_SOURCE_DIR}/pricing-service)
+set(TRANSLATION_SERVICE_DIR ${CMAKE_SOURCE_DIR}/translation-service)
+
+# Custom targets for microservices
+add_custom_target(microservices-install
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing microservices dependencies..."
     COMMAND ${NPM_EXECUTABLE} install
-    WORKING_DIRECTORY ${BACKEND_DIR}
-    COMMENT "Installing NestJS backend dependencies"
+    WORKING_DIRECTORY ${AUTH_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} install
+    WORKING_DIRECTORY ${USER_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} install
+    WORKING_DIRECTORY ${CARRIER_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} install
+    WORKING_DIRECTORY ${CUSTOMER_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} install
+    WORKING_DIRECTORY ${PRICING_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} install
+    WORKING_DIRECTORY ${TRANSLATION_SERVICE_DIR}
+    COMMENT "Installing all microservices dependencies"
 )
 
-add_custom_target(backend-build
+add_custom_target(microservices-build
+    COMMAND ${CMAKE_COMMAND} -E echo "Building all microservices..."
     COMMAND ${NPM_EXECUTABLE} run build
-    WORKING_DIRECTORY ${BACKEND_DIR}
-    DEPENDS backend-install
-    COMMENT "Building NestJS backend"
-)
-
-add_custom_target(backend-start
-    COMMAND ${NPM_EXECUTABLE} start
-    WORKING_DIRECTORY ${BACKEND_DIR}
-    DEPENDS backend-build
-    COMMENT "Starting NestJS backend server"
-)
-
-add_custom_target(backend-dev
-    COMMAND ${NPM_EXECUTABLE} run start:dev
-    WORKING_DIRECTORY ${BACKEND_DIR}
-    DEPENDS backend-install
-    COMMENT "Starting NestJS backend in development mode"
-)
-
-add_custom_target(backend-debug
-    COMMAND ${NPM_EXECUTABLE} run start:debug
-    WORKING_DIRECTORY ${BACKEND_DIR}
-    DEPENDS backend-install
-    COMMENT "Starting NestJS backend in debug mode"
+    WORKING_DIRECTORY ${AUTH_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} run build
+    WORKING_DIRECTORY ${USER_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} run build
+    WORKING_DIRECTORY ${CARRIER_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} run build
+    WORKING_DIRECTORY ${CUSTOMER_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} run build
+    WORKING_DIRECTORY ${PRICING_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} run build
+    WORKING_DIRECTORY ${TRANSLATION_SERVICE_DIR}
+    DEPENDS microservices-install
+    COMMENT "Building all microservices"
 )
 
 # Custom targets for frontend (React)
@@ -120,32 +128,30 @@ add_custom_target(go-api-debug
 
 # Combined targets
 add_custom_target(install-all
-    DEPENDS backend-install frontend-install
+    DEPENDS microservices-install frontend-install
     COMMENT "Installing all dependencies"
 )
 
 add_custom_target(build-all
-    DEPENDS backend-build frontend-build go-api-build
+    DEPENDS microservices-build frontend-build go-api-build
     COMMENT "Building all projects"
 )
 
 add_custom_target(start-all
-    DEPENDS backend-start frontend-start
+    DEPENDS dev-microservices frontend-start
     COMMENT "Starting all development servers"
 )
 
 add_custom_target(debug-all
-    DEPENDS backend-debug frontend-debug
+    DEPENDS dev-microservices frontend-debug
     COMMENT "Starting all services in debug mode"
 )
 
 # Development targets
-add_custom_target(dev-backend
-    COMMAND ${CMAKE_COMMAND} -E echo "Starting backend development server..."
-    COMMAND ${NPM_EXECUTABLE} run start:dev
-    WORKING_DIRECTORY ${BACKEND_DIR}
-    DEPENDS backend-install
-    COMMENT "Starting NestJS backend in development mode with hot reload"
+add_custom_target(dev-microservices
+    COMMAND ${CMAKE_COMMAND} -E echo "Starting all microservices in development mode..."
+    COMMAND ${CMAKE_COMMAND} -E echo "Use Docker Compose or individual service scripts for development"
+    COMMENT "Microservices development mode - use Docker Compose or individual scripts"
 )
 
 add_custom_target(dev-frontend
@@ -158,19 +164,30 @@ add_custom_target(dev-frontend
 
 add_custom_target(dev-all
     COMMAND ${CMAKE_COMMAND} -E echo "Starting all development servers..."
-    COMMAND ${CMAKE_COMMAND} -E echo "Backend: http://localhost:3001"
+    COMMAND ${CMAKE_COMMAND} -E echo "Microservices: Use Docker Compose or individual service scripts"
     COMMAND ${CMAKE_COMMAND} -E echo "Frontend: http://localhost:3000"
     COMMAND ${CMAKE_COMMAND} -E echo "Go API: http://localhost:8080"
-    DEPENDS dev-backend dev-frontend
+    DEPENDS dev-microservices dev-frontend
     COMMENT "Starting all development servers with hot reload"
 )
 
 # Testing targets
-add_custom_target(test-backend
+add_custom_target(test-microservices
+    COMMAND ${CMAKE_COMMAND} -E echo "Running microservices tests..."
     COMMAND ${NPM_EXECUTABLE} test
-    WORKING_DIRECTORY ${BACKEND_DIR}
-    DEPENDS backend-install
-    COMMENT "Running NestJS backend tests"
+    WORKING_DIRECTORY ${AUTH_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} test
+    WORKING_DIRECTORY ${USER_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} test
+    WORKING_DIRECTORY ${CARRIER_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} test
+    WORKING_DIRECTORY ${CUSTOMER_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} test
+    WORKING_DIRECTORY ${PRICING_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} test
+    WORKING_DIRECTORY ${TRANSLATION_SERVICE_DIR}
+    DEPENDS microservices-install
+    COMMENT "Running all microservices tests"
 )
 
 add_custom_target(test-frontend
@@ -181,15 +198,26 @@ add_custom_target(test-frontend
 )
 
 add_custom_target(test-all
-    DEPENDS test-backend test-frontend
+    DEPENDS test-microservices test-frontend
     COMMENT "Running all tests"
 )
 
 # Clean targets
-add_custom_target(clean-backend
+add_custom_target(clean-microservices
+    COMMAND ${CMAKE_COMMAND} -E echo "Cleaning microservices build artifacts..."
     COMMAND ${NPM_EXECUTABLE} run clean
-    WORKING_DIRECTORY ${BACKEND_DIR}
-    COMMENT "Cleaning NestJS backend build artifacts"
+    WORKING_DIRECTORY ${AUTH_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} run clean
+    WORKING_DIRECTORY ${USER_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} run clean
+    WORKING_DIRECTORY ${CARRIER_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} run clean
+    WORKING_DIRECTORY ${CUSTOMER_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} run clean
+    WORKING_DIRECTORY ${PRICING_SERVICE_DIR}
+    COMMAND ${NPM_EXECUTABLE} run clean
+    WORKING_DIRECTORY ${TRANSLATION_SERVICE_DIR}
+    COMMENT "Cleaning all microservices build artifacts"
 )
 
 add_custom_target(clean-frontend
@@ -199,23 +227,21 @@ add_custom_target(clean-frontend
 )
 
 add_custom_target(clean-all
-    DEPENDS clean-backend clean-frontend
+    DEPENDS clean-microservices clean-frontend
     COMMENT "Cleaning all build artifacts"
 )
 
 # Database targets
 add_custom_target(db-migrate
-    COMMAND ${NPM_EXECUTABLE} run migration:run
-    WORKING_DIRECTORY ${BACKEND_DIR}
-    DEPENDS backend-install
-    COMMENT "Running database migrations"
+    COMMAND ${CMAKE_COMMAND} -E echo "Running database migrations for microservices..."
+    COMMAND ${CMAKE_COMMAND} -E echo "Use individual service migration scripts or Docker Compose"
+    COMMENT "Database migrations - use individual service scripts or Docker Compose"
 )
 
 add_custom_target(db-seed
-    COMMAND ${NPM_EXECUTABLE} run seed:run
-    WORKING_DIRECTORY ${BACKEND_DIR}
-    DEPENDS backend-install
-    COMMENT "Seeding database with initial data"
+    COMMAND ${CMAKE_COMMAND} -E echo "Seeding databases for microservices..."
+    COMMAND ${CMAKE_COMMAND} -E echo "Use individual service seed scripts or Docker Compose"
+    COMMENT "Database seeding - use individual service scripts or Docker Compose"
 )
 
 # Docker targets
@@ -329,15 +355,16 @@ add_custom_target(health-check
 )
 
 # Logging targets
-add_custom_target(logs-backend
-    COMMAND tail -f ${BACKEND_DIR}/logs/*.log
-    COMMENT "Viewing backend logs"
+add_custom_target(logs-microservices
+    COMMAND ${CMAKE_COMMAND} -E echo "Viewing microservices logs..."
+    COMMAND ${CMAKE_COMMAND} -E echo "Use Docker Compose logs or individual service log commands"
+    COMMENT "Microservices logs - use Docker Compose or individual service commands"
 )
 
 add_custom_target(logs-all
     COMMAND ${CMAKE_COMMAND} -E echo "Viewing all service logs..."
-    COMMAND tail -f ${BACKEND_DIR}/logs/*.log ${FRONTEND_DIR}/logs/*.log
-    COMMENT "Viewing all service logs"
+    COMMAND ${CMAKE_COMMAND} -E echo "Use Docker Compose logs or individual service log commands"
+    COMMENT "All service logs - use Docker Compose or individual service commands"
 )
 
 # Set default target

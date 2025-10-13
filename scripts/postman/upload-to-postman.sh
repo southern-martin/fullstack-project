@@ -84,7 +84,7 @@ get_project_name() {
     
     # Try to get project name from package.json files in subdirectories
     if [ -z "$project_name" ] || [ "$project_name" = "null" ]; then
-        for package_file in "react-admin/package.json" "nestjs-app-api/api/package.json" "auth-service/package.json"; do
+        for package_file in "react-admin/package.json" "auth-service/package.json" "user-service/package.json" "carrier-service/package.json" "customer-service/package.json" "pricing-service/package.json" "translation-service/package.json"; do
             if [ -f "$PROJECT_ROOT/$package_file" ]; then
                 project_name=$(jq -r '.name // empty' "$PROJECT_ROOT/$package_file" 2>/dev/null)
                 if [ -n "$project_name" ] && [ "$project_name" != "null" ]; then
