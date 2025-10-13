@@ -1,31 +1,46 @@
-import { Module } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
-import { PricingController } from "./api/pricing.controller";
-import { PricingService } from "./application/services/pricing.service";
-import { HealthController } from "./health/health.controller";
-import { DatabaseModule } from "./infrastructure/database/database.module";
-import { PriceCalculationRepository } from "./infrastructure/repositories/price-calculation.repository";
-import { PricingRuleRepository } from "./infrastructure/repositories/pricing-rule.repository";
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
+// Clean Architecture Modules
+import { ApplicationModule } from './application/application.module';
+import { InterfacesModule } from './interfaces/interfaces.module';
+
+// TypeORM Entities
+import { PricingRule } from './domain/entities/pricing-rule.entity';
+import { PriceCalculation } from './domain/entities/price-calculation.entity';
+
+/**
+ * Main Application Module
+ * Follows Clean Architecture principles
+ * Orchestrates all layers
+ */
 @Module({
   imports: [
+    // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [".env.local", ".env"],
+      envFilePath: ['.env.local', '.env'],
     }),
-    DatabaseModule,
+
+    // Database
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT) || 5432,
+      username: process.env.DB_USERNAME || 'postgres',
+      password: process.env.DB_PASSWORD || 'password',
+      database: process.env.DB_DATABASE || 'pricing_service_db',
+      entities: [PricingRule, PriceCalculation],
+      synchronize: process.env.NODE_ENV !== 'production',
+      logging: process.env.NODE_ENV === 'development',
+    }),
+
+    // Clean Architecture Layers
+    ApplicationModule,
+    InterfacesModule,
   ],
-  controllers: [PricingController, HealthController],
-  providers: [
-    PricingService,
-    {
-      provide: "PricingRuleRepositoryInterface",
-      useClass: PricingRuleRepository,
-    },
-    {
-      provide: "PriceCalculationRepositoryInterface",
-      useClass: PriceCalculationRepository,
-    },
-  ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
