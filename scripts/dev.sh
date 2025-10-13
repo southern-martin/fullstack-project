@@ -14,9 +14,16 @@ NC='\033[0m' # No Color
 
 # Project directories
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-BACKEND_DIR="${PROJECT_ROOT}/nestjs-app-api/api"
 FRONTEND_DIR="${PROJECT_ROOT}/react-admin"
 GO_API_DIR="${PROJECT_ROOT}/go-app-api"
+
+# Microservices directories
+AUTH_SERVICE_DIR="${PROJECT_ROOT}/auth-service"
+USER_SERVICE_DIR="${PROJECT_ROOT}/user-service"
+CARRIER_SERVICE_DIR="${PROJECT_ROOT}/carrier-service"
+CUSTOMER_SERVICE_DIR="${PROJECT_ROOT}/customer-service"
+PRICING_SERVICE_DIR="${PROJECT_ROOT}/pricing-service"
+TRANSLATION_SERVICE_DIR="${PROJECT_ROOT}/translation-service"
 
 # Function to print colored output
 print_status() {
