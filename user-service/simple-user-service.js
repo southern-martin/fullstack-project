@@ -71,35 +71,35 @@ app.post('/api/v1/users', createUserValidation, (req, res) => {
     });
   }
   
-  // Business rule validation
-  const businessRuleErrors = [];
+  // Custom rule validation
+  const customRuleErrors = [];
   
-  // Business rule: Check if email already exists
+  // Custom rule: Check if email already exists
   const existingEmails = ['admin@example.com', 'user@example.com', 'test@example.com'];
   if (existingEmails.includes(req.body.email.toLowerCase())) {
-    businessRuleErrors.push('This email address is already registered. Please use a different email.');
+    customRuleErrors.push('This email address is already registered. Please use a different email.');
   }
   
-  // Business rule: Check if user is trying to use a restricted email domain
+  // Custom rule: Check if user is trying to use a restricted email domain
   const restrictedDomains = ['temp-mail.org', '10minutemail.com', 'guerrillamail.com'];
   const emailDomain = req.body.email.split('@')[1];
   if (restrictedDomains.includes(emailDomain)) {
-    businessRuleErrors.push('Temporary email addresses are not allowed. Please use a permanent email address.');
+    customRuleErrors.push('Temporary email addresses are not allowed. Please use a permanent email address.');
   }
   
-  // Business rule: Check if password is in common passwords list
+  // Custom rule: Check if password is in common passwords list
   const commonPasswords = ['password', '123456', 'admin', 'qwerty', 'letmein'];
   if (commonPasswords.includes(req.body.password.toLowerCase())) {
-    businessRuleErrors.push('This password is too common. Please choose a more secure password.');
+    customRuleErrors.push('This password is too common. Please choose a more secure password.');
   }
   
-  // If there are business rule errors, return them
-  if (businessRuleErrors.length > 0) {
+  // If there are custom rule errors, return them
+  if (customRuleErrors.length > 0) {
     return res.status(400).json({
-      message: 'Business rule validation failed',
-      businessRuleErrors,
+      message: 'Custom rule validation failed',
+      customRuleErrors,
       statusCode: 400,
-      error: 'Business Rule Error'
+      error: 'Custom Rule Error'
     });
   }
   

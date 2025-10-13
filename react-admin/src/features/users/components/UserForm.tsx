@@ -159,11 +159,11 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
         try {
             await onSubmit(dataToSubmit);
         } catch (error: unknown) {
-            // Handle business rule errors from backend
-            if (error && typeof error === 'object' && 'businessRuleErrors' in error) {
-                const businessRuleError = error as { businessRuleErrors: string[] };
-                // Display business rule errors in the validation summary
-                setErrors({ general: businessRuleError.businessRuleErrors.join(' ') });
+            // Handle custom rule errors from backend
+            if (error && typeof error === 'object' && 'customRuleErrors' in error) {
+                const customRuleError = error as { customRuleErrors: string[] };
+                // Display custom rule errors in the validation summary
+                setErrors({ general: customRuleError.customRuleErrors.join(' ') });
                 return;
             }
 

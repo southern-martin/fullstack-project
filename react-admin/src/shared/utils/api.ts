@@ -50,12 +50,15 @@ class ApiClient {
           throw validationError;
         }
 
-        // Handle business rule errors (400 Bad Request)
-        if (response.status === 400 && errorData.businessRuleErrors) {
-          const businessRuleError = new Error('Business rule validation failed');
-          (businessRuleError as any).businessRuleErrors = errorData.businessRuleErrors;
-          (businessRuleError as any).status = response.status;
-          throw businessRuleError;
+        // Handle custom rule errors (400 Bad Request)
+        if (response.status === 400 && errorData.customRuleErrors) {
+          const customRuleError = new Error(
+            'Custom rule validation failed'
+          );
+          (customRuleError as any).customRuleErrors =
+            errorData.customRuleErrors;
+          (customRuleError as any).status = response.status;
+          throw customRuleError;
         }
 
         // Handle other HTTP errors
