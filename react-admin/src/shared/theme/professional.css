@@ -151,7 +151,6 @@ body {
 
 .professional-card:hover {
   box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
 }
 
 /* Professional Button Styles */
@@ -178,6 +177,7 @@ body {
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   transition: left 0.5s;
+  pointer-events: none;
 }
 
 .professional-btn:hover::before {
@@ -194,7 +194,6 @@ body {
 .professional-btn-primary:hover {
   background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-700) 100%);
   box-shadow: var(--shadow-lg);
-  transform: translateY(-1px);
 }
 
 .professional-btn-primary:focus {
@@ -212,7 +211,6 @@ body {
 .professional-btn-secondary:hover {
   background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
   box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
 }
 
 .professional-btn-secondary:focus {
@@ -399,7 +397,6 @@ body {
 }
 
 .professional-hover-lift:hover {
-  transform: translateY(-4px);
   box-shadow: var(--shadow-xl);
 }
 
