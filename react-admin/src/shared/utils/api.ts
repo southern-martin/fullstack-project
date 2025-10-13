@@ -71,8 +71,8 @@ class ApiClient {
       // Debug logs removed
       return data;
     } catch (error) {
-      // Only log non-validation errors to avoid console spam
-      if (!(error as any).validationErrors) {
+      // Only log non-validation errors and non-404 errors to avoid console spam
+      if (!(error as any).validationErrors && (error as any).status !== 404) {
         console.error('API request failed:', error);
       }
       throw error;

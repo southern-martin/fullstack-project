@@ -27,6 +27,12 @@ import CustomerDetails from './CustomerDetails';
 import CustomerForm from './CustomerForm';
 
 const Customers: React.FC = () => {
+    // Memoize the fetch function to prevent infinite loops
+    const fetchCustomers = useCallback(
+        (params: any) => customerService.getCustomers(params),
+        []
+    );
+
     // Server-side pagination
     const {
         data: customers,
@@ -49,7 +55,7 @@ const Customers: React.FC = () => {
         setSorting,
         refresh,
     } = useServerPagination<Customer>({
-        fetchFunction: customerService.getCustomers,
+        fetchFunction: fetchCustomers,
         initialPage: 1,
         initialPageSize: 10,
         initialSearch: '',

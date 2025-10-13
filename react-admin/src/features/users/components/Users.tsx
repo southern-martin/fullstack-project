@@ -27,6 +27,12 @@ import UserDetails from './UserDetails';
 import UserForm from './UserForm';
 
 const Users: React.FC = () => {
+    // Memoize the fetch function to prevent infinite loops
+    const fetchUsers = useCallback(
+        (params: any) => userApiService.getUsers(params),
+        []
+    );
+
     // Server-side pagination
     const {
         data: users,
@@ -49,7 +55,7 @@ const Users: React.FC = () => {
         setSorting,
         refresh,
     } = useServerPagination<User>({
-        fetchFunction: userApiService.getUsers,
+        fetchFunction: fetchUsers,
         initialPage: 1,
         initialPageSize: 10,
         initialSearch: '',
