@@ -192,7 +192,53 @@ app.patch('/api/v1/users/:id', (req, res) => {
   // For PATCH requests, we'll be more lenient with validation
   // Only validate fields that are actually being updated
 
+  const fieldErrors = {};
   const customRuleErrors = [];
+
+  // Basic field validation for provided fields
+  if (req.body.email !== undefined) {
+    if (!req.body.email || req.body.email.trim() === '') {
+      fieldErrors.email = ['Email is required'];
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(req.body.email)) {
+      fieldErrors.email = ['Please enter a valid email address'];
+    }
+  }
+
+  if (req.body.firstName !== undefined) {
+    if (!req.body.firstName || req.body.firstName.trim() === '') {
+      fieldErrors.firstName = ['First name is required'];
+    } else if (req.body.firstName.trim().length < 2) {
+      fieldErrors.firstName = ['First name must be at least 2 characters'];
+    } else if (req.body.firstName.length > 50) {
+      fieldErrors.firstName = ['First name must not exceed 50 characters'];
+    }
+  }
+
+  if (req.body.lastName !== undefined) {
+    if (!req.body.lastName || req.body.lastName.trim() === '') {
+      fieldErrors.lastName = ['Last name is required'];
+    } else if (req.body.lastName.trim().length < 2) {
+      fieldErrors.lastName = ['Last name must be at least 2 characters'];
+    } else if (req.body.lastName.length > 50) {
+      fieldErrors.lastName = ['Last name must not exceed 50 characters'];
+    }
+  }
+
+  if (req.body.password !== undefined && req.body.password) {
+    if (req.body.password.length < 8) {
+      fieldErrors.password = ['Password must be at least 8 characters'];
+    }
+  }
+
+  // If there are field validation errors, return them
+  if (Object.keys(fieldErrors).length > 0) {
+    return res.status(400).json({
+      message: 'Validation failed',
+      fieldErrors,
+      statusCode: 400,
+      error: 'Validation Error'
+    });
+  }
 
   // Custom rule: Check if email is being changed to a restricted domain
   if (req.body.email) {
