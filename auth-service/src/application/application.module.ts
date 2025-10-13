@@ -1,49 +1,66 @@
-import { Module } from "@nestjs/common";
-import { ConfigModule, ConfigService } from "@nestjs/config";
-import { JwtModule } from "@nestjs/jwt";
-import { PassportModule } from "@nestjs/passport";
-import { AuthDomainService } from "../domain/services/auth.domain.service";
-import { DatabaseModule } from "../infrastructure/database/database.module";
-import { JwtStrategy } from "../infrastructure/strategies/jwt.strategy";
-import { LoginUseCase } from "./use-cases/login.use-case";
-import { RegisterUseCase } from "./use-cases/register.use-case";
-import { ValidateTokenUseCase } from "./use-cases/validate-token.use-case";
+import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 
+// Use Cases
+import { LoginUseCase } from './use-cases/auth/login.use-case';
+import { RegisterUseCase } from './use-cases/auth/register.use-case';
+import { ValidateTokenUseCase } from './use-cases/auth/validate-token.use-case';
+
+// Domain Services
+import { AuthDomainService } from '../domain/services/auth.domain.service';
+import { UserDomainService } from '../domain/services/user.domain.service';
+
+// Repository Interfaces (will be implemented in infrastructure)
+import { UserRepositoryInterface } from '../domain/repositories/user.repository.interface';
+import { RoleRepositoryInterface } from '../domain/repositories/role.repository.interface';
+
+// Infrastructure Implementations
+import { UserTypeOrmRepository } from '../infrastructure/database/typeorm/repositories/user.typeorm.repository';
+import { RoleTypeOrmRepository } from '../infrastructure/database/typeorm/repositories/role.typeorm.repository';
+
+/**
+ * Application Module
+ * Configures application layer dependencies
+ * Follows Clean Architecture principles
+ */
 @Module({
   imports: [
-    DatabaseModule,
     PassportModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>("JWT_SECRET", "your-secret-key"),
-        signOptions: {
-          expiresIn: configService.get<string>("JWT_EXPIRES_IN", "24h"),
-        },
-      }),
-      inject: [ConfigService],
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || 'your-secret-key',
+      signOptions: { expiresIn: '1h' },
     }),
   ],
   providers: [
+    // Domain Services
     AuthDomainService,
+    UserDomainService,
+
+    // Use Cases
     LoginUseCase,
     RegisterUseCase,
     ValidateTokenUseCase,
-    JwtStrategy,
+
+    // Repository Implementations
+    {
+      provide: 'UserRepositoryInterface',
+      useClass: UserTypeOrmRepository,
+    },
+    {
+      provide: 'RoleRepositoryInterface',
+      useClass: RoleTypeOrmRepository,
+    },
   ],
   exports: [
-    AuthDomainService,
+    // Export use cases for controllers
     LoginUseCase,
     RegisterUseCase,
     ValidateTokenUseCase,
+    
+    // Export domain services
+    AuthDomainService,
+    UserDomainService,
   ],
 })
 export class ApplicationModule {}
-
-
-
-
-
-
-
-
