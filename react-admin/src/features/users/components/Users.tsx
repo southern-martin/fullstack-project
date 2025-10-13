@@ -37,6 +37,12 @@ const Users: React.FC = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [modalTitle, setModalTitle] = useState('');
+    const [modalFooter, setModalFooter] = useState<React.ReactNode>(null);
+
+    // Handle footer from UserForm
+    const handleFooterReady = useCallback((footer: React.ReactNode) => {
+        setModalFooter(footer);
+    }, []);
 
     // Load users
     const loadUsers = useCallback(async () => {
@@ -67,6 +73,7 @@ const Users: React.FC = () => {
             toast.success('User created successfully');
             loadUsers();
             setShowCreateModal(false);
+            setModalFooter(null);
         } catch (error) {
             toast.error('Failed to create user: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
@@ -79,6 +86,7 @@ const Users: React.FC = () => {
             toast.success('User updated successfully');
             loadUsers();
             setShowEditModal(false);
+            setModalFooter(null);
         } catch (error) {
             toast.error('Failed to update user: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
@@ -217,6 +225,7 @@ const Users: React.FC = () => {
                     const user = Array.isArray(data) ? data[0] : data;
                     setSelectedUser(user);
                     setModalTitle('Edit User');
+                    setModalFooter(null);
                     setShowEditModal(true);
                 },
             },
@@ -302,6 +311,7 @@ const Users: React.FC = () => {
                 <Button
                     onClick={() => {
                         setModalTitle('Create New User');
+                        setModalFooter(null);
                         setShowCreateModal(true);
                     }}
                     className="flex items-center space-x-2"
@@ -340,15 +350,19 @@ const Users: React.FC = () => {
                     isOpen={true}
                     onClose={() => {
                         setShowCreateModal(false);
+                        setModalFooter(null);
                     }}
                     title={modalTitle}
                     size="lg"
+                    footer={modalFooter}
                 >
                     <UserForm
                         onSubmit={(userData) => createUser(userData as CreateUserRequest)}
                         onCancel={() => {
                             setShowCreateModal(false);
+                            setModalFooter(null);
                         }}
+                        onFooterReady={handleFooterReady}
                     />
                 </Modal>
             )}
@@ -358,16 +372,20 @@ const Users: React.FC = () => {
                     isOpen={true}
                     onClose={() => {
                         setShowEditModal(false);
+                        setModalFooter(null);
                     }}
                     title={modalTitle}
                     size="lg"
+                    footer={modalFooter}
                 >
                     <UserForm
                         user={selectedUser}
                         onSubmit={(userData) => updateUser(selectedUser.id, userData)}
                         onCancel={() => {
                             setShowEditModal(false);
+                            setModalFooter(null);
                         }}
+                        onFooterReady={handleFooterReady}
                     />
                 </Modal>
             )}

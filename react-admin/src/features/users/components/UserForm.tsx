@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import Button from '../../../shared/components/ui/Button';
 import { CheckboxField, FormField, SelectField } from '../../../shared/components/ui/FormField';
@@ -25,6 +25,7 @@ interface UserFormProps {
     user?: User;
     onSubmit: (data: CreateUserRequest | UpdateUserRequest) => Promise<void>;
     onCancel: () => void;
+    onFooterReady?: (footer: React.ReactNode) => void;
 }
 
 // Helper function to clear field errors
@@ -68,7 +69,7 @@ const createSubmissionData = (
  * - Displays error messages if translation loading fails
  * - Provides smooth user experience without text flashing
  */
-const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
+const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterReady }) => {
 
     // Form state
     const [formData, setFormData] = useState(initialFormData);
@@ -76,6 +77,13 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
     const [roles, setRoles] = useState<Role[]>([]);
     const [loadingRoles, setLoadingRoles] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Use ref to access current form data without causing re-renders
+    const formDataRef = useRef(formData);
+    formDataRef.current = formData;
+
+    // Use ref to track if footer has been passed to parent
+    const footerPassedRef = useRef(false);
 
 
     // Initialize form data and roles
@@ -149,26 +157,27 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
     // Client-side validation
     const validateForm = (): Record<string, string> => {
         const errors: Record<string, string> = {};
+        const currentFormData = formDataRef.current;
 
-        if (!formData.firstName || formData.firstName.length < 2) {
+        if (!currentFormData.firstName || currentFormData.firstName.length < 2) {
             errors.firstName = 'First name must be at least 2 characters long';
         }
 
-        if (!formData.lastName || formData.lastName.length < 2) {
+        if (!currentFormData.lastName || currentFormData.lastName.length < 2) {
             errors.lastName = 'Last name must be at least 2 characters long';
         }
 
-        if (!formData.email) {
+        if (!currentFormData.email) {
             errors.email = 'Email is required';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(currentFormData.email)) {
             errors.email = 'Please enter a valid email address';
         }
 
-        if (!user && (!formData.password || formData.password.length < 8)) {
+        if (!user && (!currentFormData.password || currentFormData.password.length < 8)) {
             errors.password = 'Password must be at least 8 characters long';
         }
 
-        if (!formData.roleIds || formData.roleIds.length === 0) {
+        if (!currentFormData.roleIds || currentFormData.roleIds.length === 0) {
             errors.roleIds = 'Please select at least one role';
         }
 
@@ -183,6 +192,9 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
         // Clear previous errors
         setErrors({});
 
+        // Get current form data from ref
+        const currentFormData = formDataRef.current;
+
         // Client-side validation
         const clientErrors = validateForm();
         if (Object.keys(clientErrors).length > 0) {
@@ -192,7 +204,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
 
         setIsSubmitting(true);
 
-        const dataToSubmit = createSubmissionData(formData, user);
+        const dataToSubmit = createSubmissionData(currentFormData, user);
 
         try {
             await onSubmit(dataToSubmit);
@@ -243,10 +255,10 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
         } finally {
             setIsSubmitting(false);
         }
-    }, [formData, user]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [user, onSubmit]); // Remove formData from dependencies
 
-    // Render footer directly - no more onFooterRender pattern
-    const footer = (
+    // Memoize footer to prevent infinite re-renders
+    const footer = useMemo(() => (
         <div className="flex justify-end space-x-3">
             <Button
                 type="button"
@@ -270,9 +282,15 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
                 }
             </Button>
         </div>
-    );
+    ), [onCancel, isSubmitting, handleSubmit, user]);
 
-
+    // Pass footer to parent component only once when component mounts
+    useEffect(() => {
+        if (onFooterReady && !footerPassedRef.current) {
+            onFooterReady(footer);
+            footerPassedRef.current = true;
+        }
+    }, [onFooterReady, footer]);
 
     return (
         <div className="animate-fade-in">
@@ -363,7 +381,6 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
                     error={errors.isActive}
                 />
             </div>
-            {footer}
         </div>
     );
 };

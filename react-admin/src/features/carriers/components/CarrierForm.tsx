@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import Button from '../../../shared/components/ui/Button';
@@ -9,9 +9,10 @@ interface CarrierFormProps {
     carrier?: Carrier;
     onSubmit: (data: CreateCarrierRequest | UpdateCarrierRequest) => Promise<void>;
     onCancel: () => void;
+    onFooterReady?: (footer: React.ReactNode) => void;
 }
 
-const CarrierForm: React.FC<CarrierFormProps> = ({ carrier, onSubmit, onCancel }) => {
+const CarrierForm: React.FC<CarrierFormProps> = ({ carrier, onSubmit, onCancel, onFooterReady }) => {
     const [formData, setFormData] = useState({
         name: '',
         code: '',
@@ -21,6 +22,13 @@ const CarrierForm: React.FC<CarrierFormProps> = ({ carrier, onSubmit, onCancel }
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Use ref to access current form data without causing re-renders
+    const formDataRef = useRef(formData);
+    formDataRef.current = formData;
+
+    // Use ref to track if footer has been passed to parent
+    const footerPassedRef = useRef(false);
 
     useEffect(() => {
         if (carrier) {
@@ -45,24 +53,25 @@ const CarrierForm: React.FC<CarrierFormProps> = ({ carrier, onSubmit, onCancel }
 
     const validateForm = useCallback((): boolean => {
         const newErrors: Record<string, string> = {};
+        const currentFormData = formDataRef.current;
 
-        if (!formData.name.trim()) {
+        if (!currentFormData.name.trim()) {
             newErrors.name = 'Name is required';
         }
 
-        if (!formData.code.trim()) {
+        if (!currentFormData.code.trim()) {
             newErrors.code = 'Code is required';
-        } else if (!/^[A-Z0-9_-]+$/.test(formData.code.trim())) {
+        } else if (!/^[A-Z0-9_-]+$/.test(currentFormData.code.trim())) {
             newErrors.code = 'Code must contain only uppercase letters, numbers, hyphens, and underscores';
         }
 
-        if (formData.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactEmail)) {
+        if (currentFormData.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(currentFormData.contactEmail)) {
             newErrors.contactEmail = 'Please enter a valid email address';
         }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
-    }, [formData]);
+    }, []);
 
     const handleSubmit = useCallback(async (e?: React.FormEvent) => {
         if (e) {
@@ -75,13 +84,14 @@ const CarrierForm: React.FC<CarrierFormProps> = ({ carrier, onSubmit, onCancel }
 
         setIsSubmitting(true);
         try {
+            const currentFormData = formDataRef.current;
             const submitData = {
-                name: formData.name.trim(),
-                description: formData.description.trim() || undefined,
-                contactEmail: formData.contactEmail.trim() || undefined,
-                contactPhone: formData.contactPhone.trim() || undefined,
+                name: currentFormData.name.trim(),
+                description: currentFormData.description.trim() || undefined,
+                contactEmail: currentFormData.contactEmail.trim() || undefined,
+                contactPhone: currentFormData.contactPhone.trim() || undefined,
                 metadata: {
-                    code: formData.code.trim().toUpperCase()
+                    code: currentFormData.code.trim().toUpperCase()
                 }
             };
 
@@ -95,10 +105,10 @@ const CarrierForm: React.FC<CarrierFormProps> = ({ carrier, onSubmit, onCancel }
         } finally {
             setIsSubmitting(false);
         }
-    }, [formData, validateForm]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [validateForm, onSubmit]);
 
-    // Render footer directly - no more onFooterRender pattern
-    const footer = (
+    // Memoize footer to prevent infinite re-renders
+    const footer = useMemo(() => (
         <div className="flex justify-end space-x-3">
             <Button
                 type="button"
@@ -122,7 +132,15 @@ const CarrierForm: React.FC<CarrierFormProps> = ({ carrier, onSubmit, onCancel }
                 }
             </Button>
         </div>
-    );
+    ), [onCancel, isSubmitting, handleSubmit, carrier]);
+
+    // Pass footer to parent component only once when component mounts
+    useEffect(() => {
+        if (onFooterReady && !footerPassedRef.current) {
+            onFooterReady(footer);
+            footerPassedRef.current = true;
+        }
+    }, [onFooterReady, footer]);
 
     return (
         <>
@@ -192,7 +210,6 @@ const CarrierForm: React.FC<CarrierFormProps> = ({ carrier, onSubmit, onCancel }
                     </div>
                 </div>
             </div>
-            {footer}
         </>
     );
 };

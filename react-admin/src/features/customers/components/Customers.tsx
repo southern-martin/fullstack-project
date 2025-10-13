@@ -37,6 +37,12 @@ const Customers: React.FC = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [modalTitle, setModalTitle] = useState('');
+    const [modalFooter, setModalFooter] = useState<React.ReactNode>(null);
+
+    // Handle footer from CustomerForm
+    const handleFooterReady = useCallback((footer: React.ReactNode) => {
+        setModalFooter(footer);
+    }, []);
 
     // Load customers
     const loadCustomers = useCallback(async () => {
@@ -67,6 +73,7 @@ const Customers: React.FC = () => {
             toast.success('Customer created successfully');
             loadCustomers();
             setShowCreateModal(false);
+            setModalFooter(null);
         } catch (error) {
             toast.error('Failed to create customer: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
@@ -79,6 +86,7 @@ const Customers: React.FC = () => {
             toast.success('Customer updated successfully');
             loadCustomers();
             setShowEditModal(false);
+            setModalFooter(null);
         } catch (error) {
             toast.error('Failed to update customer: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
@@ -208,6 +216,7 @@ const Customers: React.FC = () => {
                     const customer = Array.isArray(data) ? data[0] : data;
                     setSelectedCustomer(customer);
                     setModalTitle('Edit Customer');
+                    setModalFooter(null);
                     setShowEditModal(true);
                 },
             },
@@ -288,6 +297,7 @@ const Customers: React.FC = () => {
                 <Button
                     onClick={() => {
                         setModalTitle('Create New Customer');
+                        setModalFooter(null);
                         setShowCreateModal(true);
                     }}
                     className="flex items-center space-x-2"
@@ -326,15 +336,19 @@ const Customers: React.FC = () => {
                     isOpen={true}
                     onClose={() => {
                         setShowCreateModal(false);
+                        setModalFooter(null);
                     }}
                     title={modalTitle}
                     size="lg"
+                    footer={modalFooter}
                 >
                     <CustomerForm
                         onSubmit={createCustomer}
                         onCancel={() => {
                             setShowCreateModal(false);
+                            setModalFooter(null);
                         }}
+                        onFooterReady={handleFooterReady}
                     />
                 </Modal>
             )}
@@ -344,16 +358,20 @@ const Customers: React.FC = () => {
                     isOpen={true}
                     onClose={() => {
                         setShowEditModal(false);
+                        setModalFooter(null);
                     }}
                     title={modalTitle}
                     size="lg"
+                    footer={modalFooter}
                 >
                     <CustomerForm
                         customer={selectedCustomer}
                         onSubmit={(customerData) => updateCustomer(selectedCustomer.id, customerData)}
                         onCancel={() => {
                             setShowEditModal(false);
+                            setModalFooter(null);
                         }}
+                        onFooterReady={handleFooterReady}
                     />
                 </Modal>
             )}
