@@ -9,7 +9,16 @@ const port = 3003;
 const mockUsers = {
   1: { id: 1, email: 'user1@example.com', firstName: 'John', lastName: 'Doe' },
   2: { id: 2, email: 'user2@example.com', firstName: 'Jane', lastName: 'Smith' },
-  3: { id: 3, email: 'admin@example.com', firstName: 'Admin', lastName: 'User' }
+  3: { id: 3, email: 'admin@example.com', firstName: 'Admin', lastName: 'User' },
+  4: { id: 4, email: 'alice@example.com', firstName: 'Alice', lastName: 'Johnson' },
+  5: { id: 5, email: 'bob@example.com', firstName: 'Bob', lastName: 'Wilson' },
+  6: { id: 6, email: 'carol@example.com', firstName: 'Carol', lastName: 'Brown' },
+  7: { id: 7, email: 'david@example.com', firstName: 'David', lastName: 'Davis' },
+  8: { id: 8, email: 'eve@example.com', firstName: 'Eve', lastName: 'Miller' },
+  9: { id: 9, email: 'frank@example.com', firstName: 'Frank', lastName: 'Garcia' },
+  10: { id: 10, email: 'grace@example.com', firstName: 'Grace', lastName: 'Martinez' },
+  11: { id: 11, email: 'henry@example.com', firstName: 'Henry', lastName: 'Anderson' },
+  12: { id: 12, email: 'iris@example.com', firstName: 'Iris', lastName: 'Taylor' }
 };
 
 // Middleware
@@ -26,8 +35,13 @@ const createUserValidation = [
 
 // Get users endpoint
 app.get('/api/v1/users', (req, res) => {
+  // Parse pagination parameters
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const search = req.query.search || '';
+
   // Convert mock users to the expected format
-  const users = Object.values(mockUsers).map(user => ({
+  let users = Object.values(mockUsers).map(user => ({
     id: user.id,
     email: user.email,
     firstName: user.firstName,
@@ -38,9 +52,31 @@ app.get('/api/v1/users', (req, res) => {
     updatedAt: '2025-01-01T00:00:00.000Z'
   }));
 
+  // Apply search filter if provided
+  if (search) {
+    const searchLower = search.toLowerCase();
+    users = users.filter(user =>
+      user.firstName.toLowerCase().includes(searchLower) ||
+      user.lastName.toLowerCase().includes(searchLower) ||
+      user.email.toLowerCase().includes(searchLower)
+    );
+  }
+
+  // Calculate pagination
+  const total = users.length;
+  const totalPages = Math.ceil(total / limit);
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+
+  // Get paginated users
+  const paginatedUsers = users.slice(startIndex, endIndex);
+
   res.json({
-    users: users,
-    total: users.length
+    users: paginatedUsers,
+    total: total,
+    page: page,
+    limit: limit,
+    totalPages: totalPages
   });
 });
 
