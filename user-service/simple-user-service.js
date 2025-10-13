@@ -17,6 +17,38 @@ const createUserValidation = [
   body('lastName').notEmpty().withMessage('Last name is required').isLength({ min: 2 }).withMessage('Last name must be at least 2 characters'),
 ];
 
+// Get users endpoint
+app.get('/api/v1/users', (req, res) => {
+  // Mock users data
+  const users = [
+    {
+      id: 1,
+      email: 'admin@example.com',
+      firstName: 'Admin',
+      lastName: 'User',
+      isActive: true,
+      isEmailVerified: true,
+      createdAt: '2025-01-01T00:00:00.000Z',
+      updatedAt: '2025-01-01T00:00:00.000Z'
+    },
+    {
+      id: 2,
+      email: 'user@example.com',
+      firstName: 'Regular',
+      lastName: 'User',
+      isActive: true,
+      isEmailVerified: false,
+      createdAt: '2025-01-02T00:00:00.000Z',
+      updatedAt: '2025-01-02T00:00:00.000Z'
+    }
+  ];
+  
+  res.json({
+    users: users,
+    total: users.length
+  });
+});
+
 // Create user endpoint
 app.post('/api/v1/users', createUserValidation, (req, res) => {
   const errors = validationResult(req);
