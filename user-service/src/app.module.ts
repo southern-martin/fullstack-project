@@ -3,17 +3,17 @@ import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
 // Clean Architecture Modules
-import { ApplicationModule } from "./application/application.module";
 import { InterfacesModule } from "./interfaces/interfaces.module";
 
-// TypeORM Entities
-import { Role } from "./domain/entities/role.entity";
-import { User } from "./domain/entities/user.entity";
+// TypeORM Entities (Infrastructure Layer)
+import { UserTypeOrmEntity } from "./infrastructure/database/typeorm/entities/user.typeorm.entity";
+import { RoleTypeOrmEntity } from "./infrastructure/database/typeorm/entities/role.typeorm.entity";
+import { UserRoleTypeOrmEntity } from "./infrastructure/database/typeorm/entities/user-role.typeorm.entity";
 
 /**
  * Main Application Module
  * Follows Clean Architecture principles
- * Orchestrates all layers
+ * Orchestrates all layers through the Interfaces module
  */
 @Module({
   imports: [
@@ -31,13 +31,14 @@ import { User } from "./domain/entities/user.entity";
       username: process.env.DB_USERNAME || "root",
       password: process.env.DB_PASSWORD || "password",
       database: process.env.DB_DATABASE || "user_service_db",
-      entities: [User, Role],
+      entities: [UserTypeOrmEntity, RoleTypeOrmEntity, UserRoleTypeOrmEntity],
       synchronize: process.env.NODE_ENV !== "production",
       logging: process.env.NODE_ENV === "development",
+      migrations: ["dist/infrastructure/database/typeorm/migrations/*.js"],
+      migrationsRun: process.env.NODE_ENV === "production",
     }),
 
-    // Clean Architecture Layers
-    ApplicationModule,
+    // Clean Architecture Layers (only import Interfaces module)
     InterfacesModule,
   ],
   controllers: [],
