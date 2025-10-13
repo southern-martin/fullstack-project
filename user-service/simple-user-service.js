@@ -118,6 +118,78 @@ app.post('/api/v1/users', createUserValidation, (req, res) => {
   res.status(201).json(user);
 });
 
+// Update user endpoint
+app.put('/api/v1/users/:id', createUserValidation, (req, res) => {
+  const userId = parseInt(req.params.id);
+  const errors = validationResult(req);
+  
+  if (!errors.isEmpty()) {
+    // Format errors for frontend
+    const fieldErrors = {};
+    errors.array().forEach(error => {
+      if (!fieldErrors[error.path]) {
+        fieldErrors[error.path] = [];
+      }
+      fieldErrors[error.path].push(error.msg);
+    });
+    
+    return res.status(400).json({
+      message: 'Validation failed',
+      fieldErrors,
+      statusCode: 400,
+      error: 'Validation Error'
+    });
+  }
+  
+  // Custom rule validation
+  const customRuleErrors = [];
+  
+  // Custom rule: Check if email already exists (excluding current user)
+  const existingEmails = ['admin@example.com', 'user@example.com', 'test@example.com'];
+  if (existingEmails.includes(req.body.email.toLowerCase())) {
+    customRuleErrors.push('This email address is already registered. Please use a different email.');
+  }
+  
+  // Custom rule: Check if user is trying to use a restricted email domain
+  const restrictedDomains = ['temp-mail.org', '10minutemail.com', 'guerrillamail.com'];
+  const emailDomain = req.body.email.split('@')[1];
+  if (restrictedDomains.includes(emailDomain)) {
+    customRuleErrors.push('Temporary email addresses are not allowed. Please use a permanent email address.');
+  }
+  
+  // Custom rule: Check if password is in common passwords list (only if password is provided)
+  if (req.body.password) {
+    const commonPasswords = ['password', '123456', 'admin', 'qwerty', 'letmein'];
+    if (commonPasswords.includes(req.body.password.toLowerCase())) {
+      customRuleErrors.push('This password is too common. Please choose a more secure password.');
+    }
+  }
+  
+  // If there are custom rule errors, return them
+  if (customRuleErrors.length > 0) {
+    return res.status(400).json({
+      message: 'Custom rule validation failed',
+      customRuleErrors,
+      statusCode: 400,
+      error: 'Custom Rule Error'
+    });
+  }
+  
+  // Mock successful user update
+  const updatedUser = {
+    id: userId,
+    email: req.body.email,
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    isActive: req.body.isActive !== undefined ? req.body.isActive : true,
+    isEmailVerified: req.body.isEmailVerified !== undefined ? req.body.isEmailVerified : false,
+    createdAt: '2025-01-01T00:00:00.000Z',
+    updatedAt: new Date().toISOString()
+  };
+  
+  res.status(200).json(updatedUser);
+});
+
 // Health check
 app.get('/api/v1/health', (req, res) => {
   res.json({

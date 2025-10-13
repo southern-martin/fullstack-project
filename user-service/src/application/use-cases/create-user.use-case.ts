@@ -50,16 +50,30 @@ export class CreateUserUseCase {
     const customRuleErrors = [];
 
     // Custom rule: Check if user is trying to use a restricted email domain
-    const restrictedDomains = ['temp-mail.org', '10minutemail.com', 'guerrillamail.com'];
-    const emailDomain = createUserDto.email.split('@')[1];
+    const restrictedDomains = [
+      "temp-mail.org",
+      "10minutemail.com",
+      "guerrillamail.com",
+    ];
+    const emailDomain = createUserDto.email.split("@")[1];
     if (restrictedDomains.includes(emailDomain)) {
-      customRuleErrors.push('Temporary email addresses are not allowed. Please use a permanent email address.');
+      customRuleErrors.push(
+        "Temporary email addresses are not allowed. Please use a permanent email address."
+      );
     }
 
     // Custom rule: Check if password is in common passwords list
-    const commonPasswords = ['password', '123456', 'admin', 'qwerty', 'letmein'];
+    const commonPasswords = [
+      "password",
+      "123456",
+      "admin",
+      "qwerty",
+      "letmein",
+    ];
     if (commonPasswords.includes(createUserDto.password.toLowerCase())) {
-      customRuleErrors.push('This password is too common. Please choose a more secure password.');
+      customRuleErrors.push(
+        "This password is too common. Please choose a more secure password."
+      );
     }
 
     // If there are custom rule errors, throw them

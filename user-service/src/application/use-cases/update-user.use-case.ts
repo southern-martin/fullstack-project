@@ -61,18 +61,32 @@ export class UpdateUserUseCase {
 
     // Custom rule: Check if email is being changed to a restricted domain
     if (updateUserDto.email && updateUserDto.email !== existingUser.email) {
-      const restrictedDomains = ['temp-mail.org', '10minutemail.com', 'guerrillamail.com'];
-      const emailDomain = updateUserDto.email.split('@')[1];
+      const restrictedDomains = [
+        "temp-mail.org",
+        "10minutemail.com",
+        "guerrillamail.com",
+      ];
+      const emailDomain = updateUserDto.email.split("@")[1];
       if (restrictedDomains.includes(emailDomain)) {
-        customRuleErrors.push('Temporary email addresses are not allowed. Please use a permanent email address.');
+        customRuleErrors.push(
+          "Temporary email addresses are not allowed. Please use a permanent email address."
+        );
       }
     }
 
     // Custom rule: Check if password is in common passwords list
     if (updateUserDto.password) {
-      const commonPasswords = ['password', '123456', 'admin', 'qwerty', 'letmein'];
+      const commonPasswords = [
+        "password",
+        "123456",
+        "admin",
+        "qwerty",
+        "letmein",
+      ];
       if (commonPasswords.includes(updateUserDto.password.toLowerCase())) {
-        customRuleErrors.push('This password is too common. Please choose a more secure password.');
+        customRuleErrors.push(
+          "This password is too common. Please choose a more secure password."
+        );
       }
     }
 
