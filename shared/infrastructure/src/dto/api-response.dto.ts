@@ -1,6 +1,6 @@
 /**
  * API Response DTO
- * 
+ *
  * Standardized response format for all API endpoints.
  */
 export class ApiResponseDto<T = any> {
@@ -12,7 +12,7 @@ export class ApiResponseDto<T = any> {
 
   constructor(
     data: T,
-    message: string = 'Success',
+    message: string = "Success",
     statusCode: number = 200,
     success: boolean = true
   ) {
@@ -27,21 +27,26 @@ export class ApiResponseDto<T = any> {
    * Create a successful response
    */
   static success<T>(data: T, message?: string): ApiResponseDto<T> {
-    return new ApiResponseDto(data, message || 'Success', 200, true);
+    return new ApiResponseDto(data, message || "Success", 200, true);
   }
 
   /**
    * Create a created response (201)
    */
   static created<T>(data: T, message?: string): ApiResponseDto<T> {
-    return new ApiResponseDto(data, message || 'Created successfully', 201, true);
+    return new ApiResponseDto(
+      data,
+      message || "Created successfully",
+      201,
+      true
+    );
   }
 
   /**
    * Create a no content response (204)
    */
   static noContent(message?: string): ApiResponseDto<null> {
-    return new ApiResponseDto(null, message || 'No content', 204, true);
+    return new ApiResponseDto(null, message || "No content", 204, true);
   }
 
   /**
@@ -54,9 +59,9 @@ export class ApiResponseDto<T = any> {
   ): ApiResponseDto<PaginatedData<T>> {
     const paginatedData: PaginatedData<T> = {
       items: data,
-      pagination
+      pagination,
     };
-    return new ApiResponseDto(paginatedData, message || 'Success', 200, true);
+    return new ApiResponseDto(paginatedData, message || "Success", 200, true);
   }
 
   /**
@@ -74,7 +79,7 @@ export class ApiResponseDto<T = any> {
       message: this.message,
       statusCode: this.statusCode,
       timestamp: this.timestamp,
-      success: this.success
+      success: this.success,
     };
   }
 }

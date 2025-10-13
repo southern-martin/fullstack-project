@@ -1,5 +1,5 @@
-import { validate, ValidationError } from 'class-validator';
-import { plainToClass } from 'class-transformer';
+import { plainToClass } from "class-transformer";
+import { validate, ValidationError } from "class-validator";
 
 /**
  * Validation Result
@@ -12,7 +12,7 @@ export interface ValidationResult {
 
 /**
  * Validation Utils
- * 
+ *
  * Utility functions for validation across all services.
  */
 export class ValidationUtils {
@@ -31,15 +31,17 @@ export class ValidationUtils {
     });
 
     const fieldErrors: Record<string, string[]> = {};
-    
-    errors.forEach(error => {
+
+    errors.forEach((error) => {
       const fieldName = error.property;
-      const errorMessages = error.constraints ? Object.values(error.constraints) : ['Invalid value'];
-      
+      const errorMessages = error.constraints
+        ? Object.values(error.constraints)
+        : ["Invalid value"];
+
       if (!fieldErrors[fieldName]) {
         fieldErrors[fieldName] = [];
       }
-      fieldErrors[fieldName].push(...errorMessages);
+      fieldErrors[fieldName].push(...(errorMessages as string[]));
     });
 
     return {
@@ -62,33 +64,36 @@ export class ValidationUtils {
    */
   static isValidPhone(phone: string): boolean {
     const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
+    return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ""));
   }
 
   /**
    * Validate password strength
    */
-  static isValidPassword(password: string): { isValid: boolean; errors: string[] } {
+  static isValidPassword(password: string): {
+    isValid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     if (password.length < 8) {
-      errors.push('Password must be at least 8 characters long');
+      errors.push("Password must be at least 8 characters long");
     }
 
     if (!/[A-Z]/.test(password)) {
-      errors.push('Password must contain at least one uppercase letter');
+      errors.push("Password must contain at least one uppercase letter");
     }
 
     if (!/[a-z]/.test(password)) {
-      errors.push('Password must contain at least one lowercase letter');
+      errors.push("Password must contain at least one lowercase letter");
     }
 
     if (!/\d/.test(password)) {
-      errors.push('Password must contain at least one number');
+      errors.push("Password must contain at least one number");
     }
 
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      errors.push('Password must contain at least one special character');
+      errors.push("Password must contain at least one special character");
     }
 
     return {
@@ -121,7 +126,8 @@ export class ValidationUtils {
    * Validate UUID format
    */
   static isValidUuid(uuid: string): boolean {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     return uuidRegex.test(uuid);
   }
 
@@ -129,7 +135,7 @@ export class ValidationUtils {
    * Sanitize string input
    */
   static sanitizeString(input: string): string {
-    return input.trim().replace(/[<>]/g, '');
+    return input.trim().replace(/[<>]/g, "");
   }
 
   /**
@@ -141,7 +147,7 @@ export class ValidationUtils {
     maxLength: number = 255
   ): { isValid: boolean; value: string; error?: string } {
     const sanitized = this.sanitizeString(input);
-    
+
     if (sanitized.length < minLength) {
       return {
         isValid: false,
@@ -226,7 +232,7 @@ export class ValidationUtils {
   ): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
-    rules.forEach(rule => {
+    rules.forEach((rule) => {
       if (!rule.condition) {
         errors.push(rule.error);
       }
@@ -241,17 +247,21 @@ export class ValidationUtils {
   /**
    * Format validation errors for API response
    */
-  static formatValidationErrors(errors: ValidationError[]): Record<string, string[]> {
+  static formatValidationErrors(
+    errors: ValidationError[]
+  ): Record<string, string[]> {
     const fieldErrors: Record<string, string[]> = {};
 
-    errors.forEach(error => {
+    errors.forEach((error) => {
       const fieldName = error.property;
-      const errorMessages = error.constraints ? Object.values(error.constraints) : ['Invalid value'];
-      
+      const errorMessages = error.constraints
+        ? Object.values(error.constraints)
+        : ["Invalid value"];
+
       if (!fieldErrors[fieldName]) {
         fieldErrors[fieldName] = [];
       }
-      fieldErrors[fieldName].push(...errorMessages);
+      fieldErrors[fieldName].push(...(errorMessages as string[]));
     });
 
     return fieldErrors;
@@ -265,7 +275,7 @@ export class ValidationUtils {
       return true;
     }
 
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       return value.trim().length === 0;
     }
 
@@ -273,7 +283,7 @@ export class ValidationUtils {
       return value.length === 0;
     }
 
-    if (typeof value === 'object') {
+    if (typeof value === "object") {
       return Object.keys(value).length === 0;
     }
 

@@ -1,9 +1,9 @@
-import { IsOptional, IsInt, Min, Max } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type } from "class-transformer";
+import { IsInt, IsOptional, Max, Min } from "class-validator";
 
 /**
  * Pagination DTO
- * 
+ *
  * Standardized pagination parameters for all services.
  */
 export class PaginationDto {
@@ -27,7 +27,7 @@ export class PaginationDto {
   sortBy?: string;
 
   @IsOptional()
-  sortOrder?: 'asc' | 'desc' = 'asc';
+  sortOrder?: "asc" | "desc" = "asc";
 
   /**
    * Get the offset for database queries
@@ -67,8 +67,8 @@ export class PaginationDto {
   /**
    * Get the sort order
    */
-  getSortOrder(): 'asc' | 'desc' {
-    return this.sortOrder || 'asc';
+  getSortOrder(): "asc" | "desc" {
+    return this.sortOrder || "asc";
   }
 
   /**

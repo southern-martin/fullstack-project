@@ -1,10 +1,10 @@
-import { DataSource, DataSourceOptions } from 'typeorm';
-import { Logger } from '../logging/logger';
+import { DataSource, DataSourceOptions } from "typeorm";
+import { Logger } from "../logging/logger";
 
 /**
  * Database Configuration
  */
-export interface DatabaseConfig {
+export interface ConnectionConfig {
   host: string;
   port: number;
   username: string;
@@ -19,15 +19,15 @@ export interface DatabaseConfig {
 
 /**
  * Connection Manager
- * 
+ *
  * Manages database connections and provides connection pooling.
  */
 export class ConnectionManager {
   private dataSource: DataSource | null = null;
   private logger: Logger;
-  private config: DatabaseConfig;
+  private config: ConnectionConfig;
 
-  constructor(config: DatabaseConfig, logger: Logger) {
+  constructor(config: ConnectionConfig, logger: Logger) {
     this.config = config;
     this.logger = logger;
   }
@@ -38,7 +38,7 @@ export class ConnectionManager {
   async initialize(): Promise<void> {
     try {
       const dataSourceOptions: DataSourceOptions = {
-        type: 'mysql',
+        type: "mysql",
         host: this.config.host,
         port: this.config.port,
         username: this.config.username,
@@ -59,13 +59,16 @@ export class ConnectionManager {
       this.dataSource = new DataSource(dataSourceOptions);
       await this.dataSource.initialize();
 
-      this.logger.info('Database connection initialized successfully', {
+      this.logger.info("Database connection initialized successfully", {
         host: this.config.host,
         port: this.config.port,
         database: this.config.database,
       });
     } catch (error) {
-      this.logger.error('Failed to initialize database connection', error as Error);
+      this.logger.error(
+        "Failed to initialize database connection",
+        error as Error
+      );
       throw error;
     }
   }
@@ -75,7 +78,7 @@ export class ConnectionManager {
    */
   getDataSource(): DataSource {
     if (!this.dataSource) {
-      throw new Error('Database connection not initialized');
+      throw new Error("Database connection not initialized");
     }
     return this.dataSource;
   }
@@ -94,16 +97,16 @@ export class ConnectionManager {
     try {
       if (!this.dataSource || !this.dataSource.isInitialized) {
         return {
-          status: 'disconnected',
-          details: { error: 'Database connection not initialized' },
+          status: "disconnected",
+          details: { error: "Database connection not initialized" },
         };
       }
 
       // Test connection with a simple query
-      await this.dataSource.query('SELECT 1');
+      await this.dataSource.query("SELECT 1");
 
       return {
-        status: 'connected',
+        status: "connected",
         details: {
           host: this.config.host,
           port: this.config.port,
@@ -113,7 +116,7 @@ export class ConnectionManager {
       };
     } catch (error) {
       return {
-        status: 'error',
+        status: "error",
         details: { error: (error as Error).message },
       };
     }
@@ -126,10 +129,10 @@ export class ConnectionManager {
     try {
       if (this.dataSource && this.dataSource.isInitialized) {
         await this.dataSource.destroy();
-        this.logger.info('Database connection closed successfully');
+        this.logger.info("Database connection closed successfully");
       }
     } catch (error) {
-      this.logger.error('Failed to close database connection', error as Error);
+      this.logger.error("Failed to close database connection", error as Error);
       throw error;
     }
   }
@@ -140,12 +143,12 @@ export class ConnectionManager {
   async executeQuery(query: string, parameters?: any[]): Promise<any> {
     try {
       if (!this.dataSource || !this.dataSource.isInitialized) {
-        throw new Error('Database connection not initialized');
+        throw new Error("Database connection not initialized");
       }
 
       return await this.dataSource.query(query, parameters);
     } catch (error) {
-      this.logger.error('Failed to execute query', error as Error, {
+      this.logger.error("Failed to execute query", error as Error, {
         query,
         parameters,
       });
@@ -159,14 +162,14 @@ export class ConnectionManager {
   async startTransaction(): Promise<any> {
     try {
       if (!this.dataSource || !this.dataSource.isInitialized) {
-        throw new Error('Database connection not initialized');
+        throw new Error("Database connection not initialized");
       }
 
       return await this.dataSource.manager.transaction(async (manager) => {
         return manager;
       });
     } catch (error) {
-      this.logger.error('Failed to start transaction', error as Error);
+      this.logger.error("Failed to start transaction", error as Error);
       throw error;
     }
   }
@@ -199,7 +202,7 @@ export class ConnectionManager {
         return acc;
       }, {});
     } catch (error) {
-      this.logger.error('Failed to get connection statistics', error as Error);
+      this.logger.error("Failed to get connection statistics", error as Error);
       return null;
     }
   }
@@ -207,14 +210,14 @@ export class ConnectionManager {
   /**
    * Update configuration
    */
-  updateConfig(newConfig: Partial<DatabaseConfig>): void {
+  updateConfig(newConfig: Partial<ConnectionConfig>): void {
     this.config = { ...this.config, ...newConfig };
   }
 
   /**
    * Get current configuration
    */
-  getConfig(): DatabaseConfig {
+  getConfig(): ConnectionConfig {
     return { ...this.config };
   }
 }
@@ -222,6 +225,9 @@ export class ConnectionManager {
 /**
  * Create connection manager
  */
-export function createConnectionManager(config: DatabaseConfig, logger: Logger): ConnectionManager {
+export function createConnectionManager(
+  config: ConnectionConfig,
+  logger: Logger
+): ConnectionManager {
   return new ConnectionManager(config, logger);
 }

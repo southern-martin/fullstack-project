@@ -32,7 +32,9 @@ export class ValidationException extends HttpException {
   /**
    * Creates a ValidationException from multiple field errors
    */
-  static fromFieldErrors(fieldErrors: Record<string, string[]>): ValidationException {
+  static fromFieldErrors(
+    fieldErrors: Record<string, string[]>
+  ): ValidationException {
     return new ValidationException(fieldErrors);
   }
 
@@ -130,6 +132,9 @@ export class ValidationException extends HttpException {
    * Get total number of errors
    */
   getErrorCount(): number {
-    return Object.values(this.fieldErrors).reduce((total, errors) => total + errors.length, 0);
+    return Object.values(this.fieldErrors).reduce(
+      (total, errors) => total + errors.length,
+      0
+    );
   }
 }

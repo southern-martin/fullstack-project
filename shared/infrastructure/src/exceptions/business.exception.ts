@@ -28,14 +28,17 @@ export class BusinessException extends HttpException {
   /**
    * Creates a BusinessException for resource not found
    */
-  static notFound(resource: string, identifier?: string | number): BusinessException {
-    const message = identifier 
+  static notFound(
+    resource: string,
+    identifier?: string | number
+  ): BusinessException {
+    const message = identifier
       ? `${resource} with identifier '${identifier}' not found`
       : `${resource} not found`;
-    
+
     return new BusinessException(
       message,
-      'RESOURCE_NOT_FOUND',
+      "RESOURCE_NOT_FOUND",
       { resource, identifier },
       HttpStatus.NOT_FOUND
     );
@@ -44,14 +47,17 @@ export class BusinessException extends HttpException {
   /**
    * Creates a BusinessException for resource already exists
    */
-  static alreadyExists(resource: string, identifier?: string | number): BusinessException {
-    const message = identifier 
+  static alreadyExists(
+    resource: string,
+    identifier?: string | number
+  ): BusinessException {
+    const message = identifier
       ? `${resource} with identifier '${identifier}' already exists`
       : `${resource} already exists`;
-    
+
     return new BusinessException(
       message,
-      'RESOURCE_ALREADY_EXISTS',
+      "RESOURCE_ALREADY_EXISTS",
       { resource, identifier },
       HttpStatus.CONFLICT
     );
@@ -60,10 +66,13 @@ export class BusinessException extends HttpException {
   /**
    * Creates a BusinessException for insufficient permissions
    */
-  static insufficientPermissions(action: string, resource: string): BusinessException {
+  static insufficientPermissions(
+    action: string,
+    resource: string
+  ): BusinessException {
     return new BusinessException(
       `Insufficient permissions to ${action} ${resource}`,
-      'INSUFFICIENT_PERMISSIONS',
+      "INSUFFICIENT_PERMISSIONS",
       { action, resource },
       HttpStatus.FORBIDDEN
     );
@@ -72,10 +81,13 @@ export class BusinessException extends HttpException {
   /**
    * Creates a BusinessException for business rule violation
    */
-  static businessRuleViolation(rule: string, details?: Record<string, any>): BusinessException {
+  static businessRuleViolation(
+    rule: string,
+    details?: Record<string, any>
+  ): BusinessException {
     return new BusinessException(
       `Business rule violation: ${rule}`,
-      'BUSINESS_RULE_VIOLATION',
+      "BUSINESS_RULE_VIOLATION",
       { rule, ...details },
       HttpStatus.BAD_REQUEST
     );
@@ -84,14 +96,17 @@ export class BusinessException extends HttpException {
   /**
    * Creates a BusinessException for operation not allowed
    */
-  static operationNotAllowed(operation: string, reason?: string): BusinessException {
-    const message = reason 
+  static operationNotAllowed(
+    operation: string,
+    reason?: string
+  ): BusinessException {
+    const message = reason
       ? `Operation '${operation}' is not allowed: ${reason}`
       : `Operation '${operation}' is not allowed`;
-    
+
     return new BusinessException(
       message,
-      'OPERATION_NOT_ALLOWED',
+      "OPERATION_NOT_ALLOWED",
       { operation, reason },
       HttpStatus.BAD_REQUEST
     );
@@ -100,10 +115,13 @@ export class BusinessException extends HttpException {
   /**
    * Creates a BusinessException for external service error
    */
-  static externalServiceError(service: string, error: string): BusinessException {
+  static externalServiceError(
+    service: string,
+    error: string
+  ): BusinessException {
     return new BusinessException(
       `External service '${service}' error: ${error}`,
-      'EXTERNAL_SERVICE_ERROR',
+      "EXTERNAL_SERVICE_ERROR",
       { service, originalError: error },
       HttpStatus.BAD_GATEWAY
     );

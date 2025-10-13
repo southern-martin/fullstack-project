@@ -1,8 +1,12 @@
-import { registerDecorator, ValidationOptions, ValidationArguments } from 'class-validator';
+import {
+  registerDecorator,
+  ValidationArguments,
+  ValidationOptions,
+} from "class-validator";
 
 /**
  * Custom Validators
- * 
+ *
  * Custom validation decorators for common validation scenarios.
  */
 
@@ -12,13 +16,13 @@ import { registerDecorator, ValidationOptions, ValidationArguments } from 'class
 export function IsNotEmptyString(validationOptions?: ValidationOptions) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
-      name: 'isNotEmptyString',
+      name: "isNotEmptyString",
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
       validator: {
         validate(value: any, args: ValidationArguments) {
-          return typeof value === 'string' && value.trim().length > 0;
+          return typeof value === "string" && value.trim().length > 0;
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} must not be empty`;
@@ -34,21 +38,27 @@ export function IsNotEmptyString(validationOptions?: ValidationOptions) {
 export function IsStrongPassword(validationOptions?: ValidationOptions) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
-      name: 'isStrongPassword',
+      name: "isStrongPassword",
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
       validator: {
         validate(value: any, args: ValidationArguments) {
-          if (typeof value !== 'string') return false;
-          
+          if (typeof value !== "string") return false;
+
           const hasMinLength = value.length >= 8;
           const hasUpperCase = /[A-Z]/.test(value);
           const hasLowerCase = /[a-z]/.test(value);
           const hasNumbers = /\d/.test(value);
           const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(value);
-          
-          return hasMinLength && hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChar;
+
+          return (
+            hasMinLength &&
+            hasUpperCase &&
+            hasLowerCase &&
+            hasNumbers &&
+            hasSpecialChar
+          );
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} must be at least 8 characters long and contain uppercase, lowercase, number, and special character`;
@@ -64,16 +74,16 @@ export function IsStrongPassword(validationOptions?: ValidationOptions) {
 export function IsValidPhoneNumber(validationOptions?: ValidationOptions) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
-      name: 'isValidPhoneNumber',
+      name: "isValidPhoneNumber",
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
       validator: {
         validate(value: any, args: ValidationArguments) {
-          if (typeof value !== 'string') return false;
-          
+          if (typeof value !== "string") return false;
+
           const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-          return phoneRegex.test(value.replace(/[\s\-\(\)]/g, ''));
+          return phoneRegex.test(value.replace(/[\s\-\(\)]/g, ""));
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} must be a valid phone number`;
@@ -89,14 +99,14 @@ export function IsValidPhoneNumber(validationOptions?: ValidationOptions) {
 export function IsValidUrl(validationOptions?: ValidationOptions) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
-      name: 'isValidUrl',
+      name: "isValidUrl",
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
       validator: {
         validate(value: any, args: ValidationArguments) {
-          if (typeof value !== 'string') return false;
-          
+          if (typeof value !== "string") return false;
+
           try {
             new URL(value);
             return true;
@@ -118,14 +128,14 @@ export function IsValidUrl(validationOptions?: ValidationOptions) {
 export function IsValidDateString(validationOptions?: ValidationOptions) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
-      name: 'isValidDateString',
+      name: "isValidDateString",
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
       validator: {
         validate(value: any, args: ValidationArguments) {
-          if (typeof value !== 'string') return false;
-          
+          if (typeof value !== "string") return false;
+
           const date = new Date(value);
           return date instanceof Date && !isNaN(date.getTime());
         },
@@ -143,15 +153,16 @@ export function IsValidDateString(validationOptions?: ValidationOptions) {
 export function IsValidUuid(validationOptions?: ValidationOptions) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
-      name: 'isValidUuid',
+      name: "isValidUuid",
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
       validator: {
         validate(value: any, args: ValidationArguments) {
-          if (typeof value !== 'string') return false;
-          
-          const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+          if (typeof value !== "string") return false;
+
+          const uuidRegex =
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
           return uuidRegex.test(value);
         },
         defaultMessage(args: ValidationArguments) {
@@ -165,10 +176,14 @@ export function IsValidUuid(validationOptions?: ValidationOptions) {
 /**
  * Is In Range validator for numbers
  */
-export function IsInRange(min: number, max: number, validationOptions?: ValidationOptions) {
+export function IsInRange(
+  min: number,
+  max: number,
+  validationOptions?: ValidationOptions
+) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
-      name: 'isInRange',
+      name: "isInRange",
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
@@ -177,8 +192,10 @@ export function IsInRange(min: number, max: number, validationOptions?: Validati
         validate(value: any, args: ValidationArguments) {
           const [minValue, maxValue] = args.constraints;
           const numValue = Number(value);
-          
-          return !isNaN(numValue) && numValue >= minValue && numValue <= maxValue;
+
+          return (
+            !isNaN(numValue) && numValue >= minValue && numValue <= maxValue
+          );
         },
         defaultMessage(args: ValidationArguments) {
           const [minValue, maxValue] = args.constraints;
@@ -192,10 +209,14 @@ export function IsInRange(min: number, max: number, validationOptions?: Validati
 /**
  * Is Array Length validator
  */
-export function IsArrayLength(min: number, max?: number, validationOptions?: ValidationOptions) {
+export function IsArrayLength(
+  min: number,
+  max?: number,
+  validationOptions?: ValidationOptions
+) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
-      name: 'isArrayLength',
+      name: "isArrayLength",
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
@@ -203,12 +224,12 @@ export function IsArrayLength(min: number, max?: number, validationOptions?: Val
       validator: {
         validate(value: any, args: ValidationArguments) {
           if (!Array.isArray(value)) return false;
-          
+
           const [minLength, maxLength] = args.constraints;
-          
+
           if (value.length < minLength) return false;
           if (maxLength && value.length > maxLength) return false;
-          
+
           return true;
         },
         defaultMessage(args: ValidationArguments) {
@@ -229,7 +250,7 @@ export function IsArrayLength(min: number, max?: number, validationOptions?: Val
 export function IsNotEmptyArray(validationOptions?: ValidationOptions) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
-      name: 'isNotEmptyArray',
+      name: "isNotEmptyArray",
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
@@ -248,10 +269,13 @@ export function IsNotEmptyArray(validationOptions?: ValidationOptions) {
 /**
  * Is Valid Enum validator
  */
-export function IsValidEnum(enumObject: any, validationOptions?: ValidationOptions) {
+export function IsValidEnum(
+  enumObject: any,
+  validationOptions?: ValidationOptions
+) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
-      name: 'isValidEnum',
+      name: "isValidEnum",
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
@@ -263,7 +287,7 @@ export function IsValidEnum(enumObject: any, validationOptions?: ValidationOptio
         },
         defaultMessage(args: ValidationArguments) {
           const [enumObj] = args.constraints;
-          const validValues = Object.values(enumObj).join(', ');
+          const validValues = Object.values(enumObj).join(", ");
           return `${args.property} must be one of: ${validValues}`;
         },
       },
@@ -277,17 +301,17 @@ export function IsValidEnum(enumObject: any, validationOptions?: ValidationOptio
 export function IsFutureDate(validationOptions?: ValidationOptions) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
-      name: 'isFutureDate',
+      name: "isFutureDate",
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
       validator: {
         validate(value: any, args: ValidationArguments) {
-          if (typeof value !== 'string') return false;
-          
+          if (typeof value !== "string") return false;
+
           const date = new Date(value);
           if (!(date instanceof Date && !isNaN(date.getTime()))) return false;
-          
+
           return date > new Date();
         },
         defaultMessage(args: ValidationArguments) {
@@ -304,17 +328,17 @@ export function IsFutureDate(validationOptions?: ValidationOptions) {
 export function IsPastDate(validationOptions?: ValidationOptions) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
-      name: 'isPastDate',
+      name: "isPastDate",
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
       validator: {
         validate(value: any, args: ValidationArguments) {
-          if (typeof value !== 'string') return false;
-          
+          if (typeof value !== "string") return false;
+
           const date = new Date(value);
           if (!(date instanceof Date && !isNaN(date.getTime()))) return false;
-          
+
           return date < new Date();
         },
         defaultMessage(args: ValidationArguments) {

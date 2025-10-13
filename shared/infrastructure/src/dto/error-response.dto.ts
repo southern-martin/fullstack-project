@@ -1,6 +1,6 @@
 /**
  * Error Response DTO
- * 
+ *
  * Standardized error response format for all API endpoints.
  */
 export class ErrorResponseDto {
@@ -40,7 +40,7 @@ export class ErrorResponseDto {
     return new ErrorResponseDto(
       message,
       400,
-      'Validation Error',
+      "Validation Error",
       path,
       fieldErrors
     );
@@ -58,7 +58,7 @@ export class ErrorResponseDto {
     return new ErrorResponseDto(
       message,
       400,
-      'Business Error',
+      "Business Error",
       path,
       undefined,
       { errorCode, ...details }
@@ -74,58 +74,44 @@ export class ErrorResponseDto {
     identifier?: string | number,
     path?: string
   ): ErrorResponseDto {
-    return new ErrorResponseDto(
-      message,
-      404,
-      'Not Found',
-      path,
-      undefined,
-      { resource, identifier }
-    );
+    return new ErrorResponseDto(message, 404, "Not Found", path, undefined, {
+      resource,
+      identifier,
+    });
   }
 
   /**
    * Create an unauthorized error response
    */
   static unauthorized(
-    message: string = 'Unauthorized',
+    message: string = "Unauthorized",
     path?: string
   ): ErrorResponseDto {
-    return new ErrorResponseDto(
-      message,
-      401,
-      'Unauthorized',
-      path
-    );
+    return new ErrorResponseDto(message, 401, "Unauthorized", path);
   }
 
   /**
    * Create a forbidden error response
    */
   static forbidden(
-    message: string = 'Forbidden',
+    message: string = "Forbidden",
     path?: string
   ): ErrorResponseDto {
-    return new ErrorResponseDto(
-      message,
-      403,
-      'Forbidden',
-      path
-    );
+    return new ErrorResponseDto(message, 403, "Forbidden", path);
   }
 
   /**
    * Create an internal server error response
    */
   static internal(
-    message: string = 'Internal Server Error',
+    message: string = "Internal Server Error",
     path?: string,
     details?: Record<string, any>
   ): ErrorResponseDto {
     return new ErrorResponseDto(
       message,
       500,
-      'Internal Server Error',
+      "Internal Server Error",
       path,
       undefined,
       details
@@ -136,29 +122,24 @@ export class ErrorResponseDto {
    * Create a service unavailable error response
    */
   static serviceUnavailable(
-    message: string = 'Service Unavailable',
+    message: string = "Service Unavailable",
     path?: string
   ): ErrorResponseDto {
-    return new ErrorResponseDto(
-      message,
-      503,
-      'Service Unavailable',
-      path
-    );
+    return new ErrorResponseDto(message, 503, "Service Unavailable", path);
   }
 
   /**
    * Check if this is a validation error
    */
   isValidationError(): boolean {
-    return this.statusCode === 400 && this.error === 'Validation Error';
+    return this.statusCode === 400 && this.error === "Validation Error";
   }
 
   /**
    * Check if this is a business error
    */
   isBusinessError(): boolean {
-    return this.statusCode === 400 && this.error === 'Business Error';
+    return this.statusCode === 400 && this.error === "Business Error";
   }
 
   /**

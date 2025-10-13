@@ -19,7 +19,9 @@ export abstract class DomainEvent {
    * Generate a unique event ID
    */
   private generateEventId(): string {
-    return `${this.eventType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `${this.eventType}_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
   }
 
   /**
@@ -35,7 +37,7 @@ export abstract class DomainEvent {
       eventId: this.eventId,
       eventType: this.eventType,
       occurredOn: this.occurredOn.toISOString(),
-      version: '1.0'
+      version: "1.0",
     };
   }
 
@@ -45,7 +47,7 @@ export abstract class DomainEvent {
   toJSON(): string {
     return JSON.stringify({
       metadata: this.getEventMetadata(),
-      data: this.getEventData()
+      data: this.getEventData(),
     });
   }
 

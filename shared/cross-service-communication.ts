@@ -4,7 +4,7 @@
  * This module provides utilities for inter-service communication
  * in the hybrid database architecture where some services share
  * databases and others use separate databases.
- * 
+ *
  * @deprecated Use @shared/infrastructure instead
  */
 

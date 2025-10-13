@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 
 /**
  * HTTP Client Configuration
@@ -25,7 +25,7 @@ export interface HttpClientResponse<T = any> {
 
 /**
  * HTTP Client
- * 
+ *
  * A robust HTTP client with retry logic, error handling, and request/response interceptors.
  */
 export class HttpClient {
@@ -38,7 +38,7 @@ export class HttpClient {
       retries: 3,
       retryDelay: 1000,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       ...config,
     };
@@ -60,7 +60,7 @@ export class HttpClient {
     instance.interceptors.request.use(
       (config) => {
         // Add request timestamp
-        config.metadata = { startTime: Date.now() };
+        (config as any).metadata = { startTime: Date.now() };
         return config;
       },
       (error) => Promise.reject(error)
@@ -70,15 +70,15 @@ export class HttpClient {
     instance.interceptors.response.use(
       (response) => {
         // Add response time
-        const duration = Date.now() - response.config.metadata?.startTime;
-        response.config.metadata = { ...response.config.metadata, duration };
+        const duration = Date.now() - (response.config as any).metadata?.startTime;
+        (response.config as any).metadata = { ...(response.config as any).metadata, duration };
         return response;
       },
       (error) => {
         // Add error information
-        if (error.config?.metadata) {
-          const duration = Date.now() - error.config.metadata.startTime;
-          error.config.metadata.duration = duration;
+        if ((error.config as any)?.metadata) {
+          const duration = Date.now() - (error.config as any).metadata.startTime;
+          (error.config as any).metadata.duration = duration;
         }
         return Promise.reject(error);
       }
@@ -91,7 +91,7 @@ export class HttpClient {
    * Make HTTP request with retry logic
    */
   private async makeRequest<T>(
-    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
     url: string,
     data?: any,
     config?: AxiosRequestConfig,
@@ -101,19 +101,19 @@ export class HttpClient {
       let response: AxiosResponse<T>;
 
       switch (method) {
-        case 'GET':
+        case "GET":
           response = await this.instance.get(url, config);
           break;
-        case 'POST':
+        case "POST":
           response = await this.instance.post(url, data, config);
           break;
-        case 'PUT':
+        case "PUT":
           response = await this.instance.put(url, data, config);
           break;
-        case 'PATCH':
+        case "PATCH":
           response = await this.instance.patch(url, data, config);
           break;
-        case 'DELETE':
+        case "DELETE":
           response = await this.instance.delete(url, config);
           break;
         default:
@@ -137,7 +137,7 @@ export class HttpClient {
       return {
         data: null as T,
         status: error.response?.status || 500,
-        statusText: error.response?.statusText || 'Internal Server Error',
+        statusText: error.response?.statusText || "Internal Server Error",
         headers: error.response?.headers || {},
         success: false,
         error: error.message,
@@ -157,42 +157,60 @@ export class HttpClient {
    * Delay execution
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
    * GET request
    */
-  async get<T>(url: string, config?: AxiosRequestConfig): Promise<HttpClientResponse<T>> {
-    return this.makeRequest<T>('GET', url, undefined, config);
+  async get<T>(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<HttpClientResponse<T>> {
+    return this.makeRequest<T>("GET", url, undefined, config);
   }
 
   /**
    * POST request
    */
-  async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<HttpClientResponse<T>> {
-    return this.makeRequest<T>('POST', url, data, config);
+  async post<T>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<HttpClientResponse<T>> {
+    return this.makeRequest<T>("POST", url, data, config);
   }
 
   /**
    * PUT request
    */
-  async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<HttpClientResponse<T>> {
-    return this.makeRequest<T>('PUT', url, data, config);
+  async put<T>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<HttpClientResponse<T>> {
+    return this.makeRequest<T>("PUT", url, data, config);
   }
 
   /**
    * PATCH request
    */
-  async patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<HttpClientResponse<T>> {
-    return this.makeRequest<T>('PATCH', url, data, config);
+  async patch<T>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<HttpClientResponse<T>> {
+    return this.makeRequest<T>("PATCH", url, data, config);
   }
 
   /**
    * DELETE request
    */
-  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<HttpClientResponse<T>> {
-    return this.makeRequest<T>('DELETE', url, undefined, config);
+  async delete<T>(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<HttpClientResponse<T>> {
+    return this.makeRequest<T>("DELETE", url, undefined, config);
   }
 
   /**
@@ -200,7 +218,10 @@ export class HttpClient {
    */
   setDefaultHeaders(headers: Record<string, string>): void {
     Object.assign(this.config.headers, headers);
-    this.instance.defaults.headers = { ...this.instance.defaults.headers, ...headers };
+    this.instance.defaults.headers = {
+      ...this.instance.defaults.headers,
+      ...headers,
+    };
   }
 
   /**
@@ -229,7 +250,7 @@ export class HttpClient {
    */
   updateConfig(newConfig: Partial<HttpClientConfig>): void {
     this.config = { ...this.config, ...newConfig };
-    
+
     if (newConfig.baseURL) {
       this.instance.defaults.baseURL = newConfig.baseURL;
     }
