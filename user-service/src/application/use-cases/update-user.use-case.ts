@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -10,6 +9,7 @@ import { UserRepositoryInterface } from "../../domain/repositories/user.reposito
 import { UserDomainService } from "../../domain/services/user.domain.service";
 import { UpdateUserDto } from "../dtos/update-user.dto";
 import { UserResponseDto } from "../dtos/user-response.dto";
+import { ValidationException } from "../../../shared/exceptions";
 
 /**
  * Update User Use Case
@@ -44,7 +44,7 @@ export class UpdateUserUseCase {
     const validation =
       this.userDomainService.validateUserUpdateData(updateUserDto);
     if (!validation.isValid) {
-      throw new BadRequestException(validation.errors.join(", "));
+      throw ValidationException.fromFieldErrors(validation.fieldErrors);
     }
 
     // 3. Check if email is being changed and if it already exists
@@ -53,7 +53,7 @@ export class UpdateUserUseCase {
         updateUserDto.email
       );
       if (userWithSameEmail) {
-        throw new ConflictException("Email already exists");
+        throw ValidationException.fromFieldError('email', 'This email address is already registered');
       }
     }
 
@@ -63,7 +63,7 @@ export class UpdateUserUseCase {
         updateUserDto.preferences
       );
       if (!preferencesValidation.isValid) {
-        throw new BadRequestException(preferencesValidation.errors.join(", "));
+        throw ValidationException.fromFieldError('preferences', preferencesValidation.errors.join(", "));
       }
     }
 
@@ -131,7 +131,7 @@ export class UpdateUserUseCase {
     const userRoles = allRoles.filter((role) => roleIds.includes(role.id));
 
     if (userRoles.length !== roleIds.length) {
-      throw new BadRequestException("One or more role IDs are invalid");
+      throw ValidationException.fromFieldError('roleIds', 'One or more role IDs are invalid');
     }
 
     // 3. Validate role assignment using domain service
@@ -140,7 +140,7 @@ export class UpdateUserUseCase {
       userRoles
     );
     if (!validation.isValid) {
-      throw new BadRequestException(validation.errors.join(", "));
+      throw ValidationException.fromFieldError('roleIds', validation.errors.join(", "));
     }
 
     // 4. Update user roles in repository

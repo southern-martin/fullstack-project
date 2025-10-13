@@ -20,53 +20,87 @@ export class UserDomainService {
     phone?: string;
     dateOfBirth?: string;
     address?: any;
-  }): { isValid: boolean; errors: string[] } {
+  }): { isValid: boolean; errors: string[]; fieldErrors: Record<string, string[]> } {
     const errors: string[] = [];
+    const fieldErrors: Record<string, string[]> = {};
 
     // Email validation
-    if (!userData.email || !this.isValidEmail(userData.email)) {
-      errors.push("Valid email is required");
+    if (!userData.email) {
+      const error = "Email is required";
+      errors.push(error);
+      fieldErrors.email = [error];
+    } else if (!this.isValidEmail(userData.email)) {
+      const error = "Please enter a valid email address";
+      errors.push(error);
+      fieldErrors.email = [error];
     }
 
     // Password validation
-    if (!userData.password || !this.isValidPassword(userData.password)) {
-      errors.push(
-        "Password must be at least 8 characters with uppercase, lowercase, number, and special character"
-      );
+    if (!userData.password) {
+      const error = "Password is required";
+      errors.push(error);
+      fieldErrors.password = [error];
+    } else if (!this.isValidPassword(userData.password)) {
+      const error = "Password must be at least 8 characters with uppercase, lowercase, number, and special character";
+      errors.push(error);
+      fieldErrors.password = [error];
     }
 
-    // Name validation
-    if (!userData.firstName || userData.firstName.trim().length < 2) {
-      errors.push("First name must be at least 2 characters");
+    // First name validation
+    if (!userData.firstName) {
+      const error = "First name is required";
+      errors.push(error);
+      fieldErrors.firstName = [error];
+    } else if (userData.firstName.trim().length < 2) {
+      const error = "First name must be at least 2 characters";
+      errors.push(error);
+      fieldErrors.firstName = [error];
+    } else if (userData.firstName.length > 50) {
+      const error = "First name must not exceed 50 characters";
+      errors.push(error);
+      fieldErrors.firstName = [error];
     }
 
-    if (!userData.lastName || userData.lastName.trim().length < 2) {
-      errors.push("Last name must be at least 2 characters");
+    // Last name validation
+    if (!userData.lastName) {
+      const error = "Last name is required";
+      errors.push(error);
+      fieldErrors.lastName = [error];
+    } else if (userData.lastName.trim().length < 2) {
+      const error = "Last name must be at least 2 characters";
+      errors.push(error);
+      fieldErrors.lastName = [error];
+    } else if (userData.lastName.length > 50) {
+      const error = "Last name must not exceed 50 characters";
+      errors.push(error);
+      fieldErrors.lastName = [error];
     }
 
     // Phone validation (optional)
     if (userData.phone && !this.isValidPhone(userData.phone)) {
-      errors.push("Phone number format is invalid");
+      const error = "Please enter a valid phone number";
+      errors.push(error);
+      fieldErrors.phone = [error];
     }
 
     // Date of birth validation (optional)
-    if (
-      userData.dateOfBirth &&
-      !this.isValidDateOfBirth(userData.dateOfBirth)
-    ) {
-      errors.push(
-        "Date of birth must be a valid date and user must be at least 13 years old"
-      );
+    if (userData.dateOfBirth && !this.isValidDateOfBirth(userData.dateOfBirth)) {
+      const error = "Date of birth must be a valid date and user must be at least 13 years old";
+      errors.push(error);
+      fieldErrors.dateOfBirth = [error];
     }
 
     // Address validation (optional)
     if (userData.address && !this.isValidAddress(userData.address)) {
-      errors.push("Address format is invalid");
+      const error = "Please provide a valid address with street, city, and country";
+      errors.push(error);
+      fieldErrors.address = [error];
     }
 
     return {
       isValid: errors.length === 0,
       errors,
+      fieldErrors,
     };
   }
 
@@ -77,68 +111,84 @@ export class UserDomainService {
   validateUserUpdateData(updateData: Partial<User>): {
     isValid: boolean;
     errors: string[];
+    fieldErrors: Record<string, string[]>;
   } {
     const errors: string[] = [];
+    const fieldErrors: Record<string, string[]> = {};
 
     // Email validation
-    if (
-      updateData.email !== undefined &&
-      !this.isValidEmail(updateData.email)
-    ) {
-      errors.push("Email format is invalid");
+    if (updateData.email !== undefined) {
+      if (!updateData.email) {
+        const error = "Email is required";
+        errors.push(error);
+        fieldErrors.email = [error];
+      } else if (!this.isValidEmail(updateData.email)) {
+        const error = "Please enter a valid email address";
+        errors.push(error);
+        fieldErrors.email = [error];
+      }
     }
 
     // Password validation
-    if (
-      updateData.password !== undefined &&
-      !this.isValidPassword(updateData.password)
-    ) {
-      errors.push(
-        "Password must be at least 8 characters with uppercase, lowercase, number, and special character"
-      );
+    if (updateData.password !== undefined && updateData.password) {
+      if (!this.isValidPassword(updateData.password)) {
+        const error = "Password must be at least 8 characters with uppercase, lowercase, number, and special character";
+        errors.push(error);
+        fieldErrors.password = [error];
+      }
     }
 
-    // Name validation
-    if (
-      updateData.firstName !== undefined &&
-      updateData.firstName.trim().length < 2
-    ) {
-      errors.push("First name must be at least 2 characters");
+    // First name validation
+    if (updateData.firstName !== undefined) {
+      if (!updateData.firstName || updateData.firstName.trim().length < 2) {
+        const error = "First name must be at least 2 characters";
+        errors.push(error);
+        fieldErrors.firstName = [error];
+      } else if (updateData.firstName.length > 50) {
+        const error = "First name must not exceed 50 characters";
+        errors.push(error);
+        fieldErrors.firstName = [error];
+      }
     }
 
-    if (
-      updateData.lastName !== undefined &&
-      updateData.lastName.trim().length < 2
-    ) {
-      errors.push("Last name must be at least 2 characters");
+    // Last name validation
+    if (updateData.lastName !== undefined) {
+      if (!updateData.lastName || updateData.lastName.trim().length < 2) {
+        const error = "Last name must be at least 2 characters";
+        errors.push(error);
+        fieldErrors.lastName = [error];
+      } else if (updateData.lastName.length > 50) {
+        const error = "Last name must not exceed 50 characters";
+        errors.push(error);
+        fieldErrors.lastName = [error];
+      }
     }
 
     // Phone validation
-    if (
-      updateData.phone !== undefined &&
-      !this.isValidPhone(updateData.phone)
-    ) {
-      errors.push("Phone number format is invalid");
+    if (updateData.phone !== undefined && updateData.phone && !this.isValidPhone(updateData.phone)) {
+      const error = "Please enter a valid phone number";
+      errors.push(error);
+      fieldErrors.phone = [error];
     }
 
     // Date of birth validation
-    if (
-      updateData.dateOfBirth &&
-      !this.isValidDateOfBirth(updateData.dateOfBirth.toString())
-    ) {
-      errors.push(
-        "Date of birth must be a valid date and user must be at least 13 years old"
-      );
+    if (updateData.dateOfBirth && !this.isValidDateOfBirth(updateData.dateOfBirth.toString())) {
+      const error = "Date of birth must be a valid date and user must be at least 13 years old";
+      errors.push(error);
+      fieldErrors.dateOfBirth = [error];
     }
 
     // Address validation
     if (updateData.address && !this.isValidAddress(updateData.address)) {
-      errors.push("Address format is invalid");
+      const error = "Please provide a valid address with street, city, and country";
+      errors.push(error);
+      fieldErrors.address = [error];
     }
 
     return {
       isValid: errors.length === 0,
       errors,
+      fieldErrors,
     };
   }
 
