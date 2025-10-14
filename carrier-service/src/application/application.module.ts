@@ -1,19 +1,18 @@
-import { Module } from '@nestjs/common';
+import { Module } from "@nestjs/common";
 
 // Use Cases
-import { CreateCarrierUseCase } from './use-cases/create-carrier.use-case';
-import { GetCarrierUseCase } from './use-cases/get-carrier.use-case';
-import { UpdateCarrierUseCase } from './use-cases/update-carrier.use-case';
-import { DeleteCarrierUseCase } from './use-cases/delete-carrier.use-case';
+import { CreateCarrierUseCase } from "./use-cases/create-carrier.use-case";
+import { DeleteCarrierUseCase } from "./use-cases/delete-carrier.use-case";
+import { GetCarrierUseCase } from "./use-cases/get-carrier.use-case";
+import { UpdateCarrierUseCase } from "./use-cases/update-carrier.use-case";
 
 // Domain Services
-import { CarrierDomainService } from '../domain/services/carrier.domain.service';
+import { CarrierDomainService } from "../domain/services/carrier.domain.service";
 
 // Repository Interfaces (will be implemented in infrastructure)
-import { CarrierRepositoryInterface } from '../domain/repositories/carrier.repository.interface';
 
 // Infrastructure Implementations
-import { CarrierRepository } from '../infrastructure/repositories/carrier.repository';
+import { CarrierRepository } from "../infrastructure/database/typeorm/repositories/carrier.repository";
 
 /**
  * Application Module
@@ -33,7 +32,7 @@ import { CarrierRepository } from '../infrastructure/repositories/carrier.reposi
 
     // Repository Implementations
     {
-      provide: 'CarrierRepositoryInterface',
+      provide: "CarrierRepositoryInterface",
       useClass: CarrierRepository,
     },
   ],
@@ -43,7 +42,7 @@ import { CarrierRepository } from '../infrastructure/repositories/carrier.reposi
     GetCarrierUseCase,
     UpdateCarrierUseCase,
     DeleteCarrierUseCase,
-    
+
     // Export domain services
     CarrierDomainService,
   ],

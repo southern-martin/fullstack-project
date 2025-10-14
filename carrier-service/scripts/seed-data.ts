@@ -1,13 +1,13 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "../src/app.module";
 import { CreateCarrierDto } from "../src/application/dto/create-carrier.dto";
-import { CarrierService } from "../src/application/services/carrier.service";
+import { CreateCarrierUseCase } from "../src/application/use-cases/create-carrier.use-case";
 
 async function seedData() {
   console.log("🌱 Starting Carrier Service data seeding...");
 
   const app = await NestFactory.createApplicationContext(AppModule);
-  const carrierService = app.get(CarrierService);
+  const createCarrierUseCase = app.get(CreateCarrierUseCase);
 
   try {
     // Clear existing data
@@ -94,7 +94,7 @@ async function seedData() {
     console.log("🚚 Creating sample carriers...");
     for (const carrierData of sampleCarriers) {
       try {
-        const carrier = await carrierService.create(carrierData);
+        const carrier = await createCarrierUseCase.execute(carrierData);
         console.log(
           `✅ Created carrier: ${carrier.name} (${carrier.metadata?.code})`
         );
@@ -110,9 +110,8 @@ async function seedData() {
       }
     }
 
-    // Get total count
-    const count = await carrierService.getCount();
-    console.log(`📊 Total carriers in database: ${count.count}`);
+    // Get total count (placeholder - would need to implement count use case)
+    console.log(`📊 Sample carriers created successfully`);
 
     console.log("🎉 Carrier Service seeding completed successfully!");
   } catch (error) {
@@ -124,10 +123,3 @@ async function seedData() {
 
 // Run seeding
 seedData().catch(console.error);
-
-
-
-
-
-
-

@@ -1,7 +1,8 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { Carrier } from "../../domain/entities/carrier.entity";
+import { CarrierTypeOrmEntity } from "./typeorm/entities/carrier.typeorm.entity";
+import { CarrierRepository } from "./typeorm/repositories/carrier.repository";
 
 @Module({
   imports: [
@@ -14,21 +15,20 @@ import { Carrier } from "../../domain/entities/carrier.entity";
         username: configService.get("DB_USERNAME", "root"),
         password: configService.get("DB_PASSWORD", "password"),
         database: configService.get("DB_NAME", "carrier_service_db"),
-        entities: [Carrier],
+        entities: [CarrierTypeOrmEntity],
         synchronize: configService.get("NODE_ENV") === "development",
         logging: configService.get("NODE_ENV") === "development",
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Carrier]),
+    TypeOrmModule.forFeature([CarrierTypeOrmEntity]),
   ],
-  exports: [TypeOrmModule],
+  providers: [
+    {
+      provide: "CarrierRepositoryInterface",
+      useClass: CarrierRepository,
+    },
+  ],
+  exports: [TypeOrmModule, "CarrierRepositoryInterface"],
 })
 export class DatabaseModule {}
-
-
-
-
-
-
-
