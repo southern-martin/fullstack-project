@@ -1,22 +1,22 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
-  ManyToMany,
-  JoinTable,
+  Entity,
   Index,
-} from 'typeorm';
-import { RoleTypeOrmEntity } from './role.typeorm.entity';
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
+import { RoleTypeOrmEntity } from "./role.typeorm.entity";
 
 /**
  * TypeORM User Entity
  * Infrastructure layer - database representation
  * Maps to domain User entity
  */
-@Entity('users')
-@Index(['email'], { unique: true })
+@Entity("users")
+@Index(["email"], { unique: true })
 export class UserTypeOrmEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -54,11 +54,32 @@ export class UserTypeOrmEntity {
   @Column({ nullable: true })
   passwordChangedAt: Date;
 
+  @Column({ nullable: true })
+  dateOfBirth: Date;
+
+  @Column({ type: "json", nullable: true })
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
+
+  @Column({ type: "json", nullable: true })
+  preferences: Record<string, any>;
+
+  @Column({ nullable: true })
+  emailVerifiedAt: Date;
+
+  @Column({ type: "json", nullable: true })
+  metadata: Record<string, any>;
+
   @ManyToMany(() => RoleTypeOrmEntity, { eager: true })
   @JoinTable({
-    name: 'user_roles',
-    joinColumn: { name: 'userId', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'roleId', referencedColumnName: 'id' },
+    name: "user_roles",
+    joinColumn: { name: "userId", referencedColumnName: "id" },
+    inverseJoinColumn: { name: "roleId", referencedColumnName: "id" },
   })
   roles: RoleTypeOrmEntity[];
 

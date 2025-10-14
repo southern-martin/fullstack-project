@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
@@ -17,6 +18,7 @@ import { UpdateCustomerDto } from "../dto/update-customer.dto";
 @Injectable()
 export class UpdateCustomerUseCase {
   constructor(
+    @Inject("CustomerRepositoryInterface")
     private readonly customerRepository: CustomerRepositoryInterface,
     private readonly customerDomainService: CustomerDomainService
   ) {}
@@ -37,14 +39,20 @@ export class UpdateCustomerUseCase {
       throw new NotFoundException("Customer not found");
     }
 
-    // 2. Validate update data using domain service
+    // 2. Convert dateOfBirth string to Date if provided
+    const updateData: any = { ...updateCustomerDto };
+    if (updateData.dateOfBirth) {
+      updateData.dateOfBirth = new Date(updateData.dateOfBirth);
+    }
+
+    // 3. Validate update data using domain service
     const validation =
-      this.customerDomainService.validateCustomerUpdateData(updateCustomerDto);
+      this.customerDomainService.validateCustomerUpdateData(updateData);
     if (!validation.isValid) {
       throw new BadRequestException(validation.errors.join(", "));
     }
 
-    // 3. Check if email is being changed and if it already exists
+    // 4. Check if email is being changed and if it already exists
     if (
       updateCustomerDto.email &&
       updateCustomerDto.email !== existingCustomer.email
@@ -57,7 +65,7 @@ export class UpdateCustomerUseCase {
       }
     }
 
-    // 4. Validate preferences if provided
+    // 5. Validate preferences if provided
     if (updateCustomerDto.preferences !== undefined) {
       const preferencesValidation =
         this.customerDomainService.validatePreferences(
@@ -68,36 +76,33 @@ export class UpdateCustomerUseCase {
       }
     }
 
-    // 5. Prepare update data
-    const updateData: Partial<any> = {};
+    // 6. Prepare update data
+    const finalUpdateData: Partial<any> = {};
 
-    if (updateCustomerDto.email !== undefined)
-      updateData.email = updateCustomerDto.email;
-    if (updateCustomerDto.firstName !== undefined)
-      updateData.firstName = updateCustomerDto.firstName;
-    if (updateCustomerDto.lastName !== undefined)
-      updateData.lastName = updateCustomerDto.lastName;
-    if (updateCustomerDto.phone !== undefined)
-      updateData.phone = updateCustomerDto.phone;
-    if (updateCustomerDto.isActive !== undefined)
-      updateData.isActive = updateCustomerDto.isActive;
-    if (updateCustomerDto.address !== undefined)
-      updateData.address = updateCustomerDto.address;
-    if (updateCustomerDto.preferences !== undefined)
-      updateData.preferences = updateCustomerDto.preferences;
+    if (updateData.email !== undefined)
+      finalUpdateData.email = updateData.email;
+    if (updateData.firstName !== undefined)
+      finalUpdateData.firstName = updateData.firstName;
+    if (updateData.lastName !== undefined)
+      finalUpdateData.lastName = updateData.lastName;
+    if (updateData.phone !== undefined)
+      finalUpdateData.phone = updateData.phone;
+    if (updateData.isActive !== undefined)
+      finalUpdateData.isActive = updateData.isActive;
+    if (updateData.address !== undefined)
+      finalUpdateData.address = updateData.address;
+    if (updateData.preferences !== undefined)
+      finalUpdateData.preferences = updateData.preferences;
+    if (updateData.dateOfBirth !== undefined)
+      finalUpdateData.dateOfBirth = updateData.dateOfBirth;
 
-    // Convert dateOfBirth string to Date if provided
-    if (updateCustomerDto.dateOfBirth) {
-      updateData.dateOfBirth = new Date(updateCustomerDto.dateOfBirth);
-    }
-
-    // 6. Update customer in repository
+    // 7. Update customer in repository
     const updatedCustomer = await this.customerRepository.update(
       id,
-      updateData
+      finalUpdateData
     );
 
-    // 7. Return response
+    // 8. Return response
     return this.mapToResponseDto(updatedCustomer);
   }
 
@@ -119,6 +124,9 @@ export class UpdateCustomerUseCase {
       preferences: customer.preferences,
       createdAt: customer.createdAt,
       updatedAt: customer.updatedAt,
+      get fullName() {
+        return `${customer.firstName} ${customer.lastName}`.trim();
+      },
     };
   }
 }

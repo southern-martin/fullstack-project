@@ -1,23 +1,21 @@
-import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
+import { Module } from "@nestjs/common";
+import { JwtModule } from "@nestjs/jwt";
+import { PassportModule } from "@nestjs/passport";
 
 // Use Cases
-import { LoginUseCase } from './use-cases/auth/login.use-case';
-import { RegisterUseCase } from './use-cases/auth/register.use-case';
-import { ValidateTokenUseCase } from './use-cases/auth/validate-token.use-case';
+import { LoginUseCase } from "./use-cases/auth/login.use-case";
+import { RegisterUseCase } from "./use-cases/auth/register.use-case";
+import { ValidateTokenUseCase } from "./use-cases/auth/validate-token.use-case";
 
 // Domain Services
-import { AuthDomainService } from '../domain/services/auth.domain.service';
-import { UserDomainService } from '../domain/services/user.domain.service';
+import { AuthDomainService } from "../domain/services/auth.domain.service";
+import { UserDomainService } from "../domain/services/user.domain.service";
 
 // Repository Interfaces (will be implemented in infrastructure)
-import { UserRepositoryInterface } from '../domain/repositories/user.repository.interface';
-import { RoleRepositoryInterface } from '../domain/repositories/role.repository.interface';
 
 // Infrastructure Implementations
-import { UserTypeOrmRepository } from '../infrastructure/database/typeorm/repositories/user.typeorm.repository';
-import { RoleTypeOrmRepository } from '../infrastructure/database/typeorm/repositories/role.typeorm.repository';
+import { RoleRepository } from "../infrastructure/database/typeorm/repositories/role.repository";
+import { UserRepository } from "../infrastructure/database/typeorm/repositories/user.repository";
 
 /**
  * Application Module
@@ -28,8 +26,8 @@ import { RoleTypeOrmRepository } from '../infrastructure/database/typeorm/reposi
   imports: [
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'your-secret-key',
-      signOptions: { expiresIn: '1h' },
+      secret: process.env.JWT_SECRET || "your-secret-key",
+      signOptions: { expiresIn: "1h" },
     }),
   ],
   providers: [
@@ -44,12 +42,12 @@ import { RoleTypeOrmRepository } from '../infrastructure/database/typeorm/reposi
 
     // Repository Implementations
     {
-      provide: 'UserRepositoryInterface',
-      useClass: UserTypeOrmRepository,
+      provide: "UserRepositoryInterface",
+      useClass: UserRepository,
     },
     {
-      provide: 'RoleRepositoryInterface',
-      useClass: RoleTypeOrmRepository,
+      provide: "RoleRepositoryInterface",
+      useClass: RoleRepository,
     },
   ],
   exports: [
@@ -57,7 +55,7 @@ import { RoleTypeOrmRepository } from '../infrastructure/database/typeorm/reposi
     LoginUseCase,
     RegisterUseCase,
     ValidateTokenUseCase,
-    
+
     // Export domain services
     AuthDomainService,
     UserDomainService,

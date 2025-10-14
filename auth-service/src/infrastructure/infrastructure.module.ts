@@ -1,17 +1,15 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Module } from "@nestjs/common";
+import { TypeOrmModule } from "@nestjs/typeorm";
 
 // TypeORM Entities
-import { UserTypeOrmEntity } from './database/typeorm/entities/user.typeorm.entity';
-import { RoleTypeOrmEntity } from './database/typeorm/entities/role.typeorm.entity';
+import { RoleTypeOrmEntity } from "./database/typeorm/entities/role.typeorm.entity";
+import { UserTypeOrmEntity } from "./database/typeorm/entities/user.typeorm.entity";
 
 // Repository Implementations
-import { UserTypeOrmRepository } from './database/typeorm/repositories/user.typeorm.repository';
-import { RoleTypeOrmRepository } from './database/typeorm/repositories/role.typeorm.repository';
+import { RoleRepository } from "./database/typeorm/repositories/role.repository";
+import { UserRepository } from "./database/typeorm/repositories/user.repository";
 
 // Repository Interfaces
-import { UserRepositoryInterface } from '../domain/repositories/user.repository.interface';
-import { RoleRepositoryInterface } from '../domain/repositories/role.repository.interface';
 
 /**
  * Infrastructure Module
@@ -19,27 +17,22 @@ import { RoleRepositoryInterface } from '../domain/repositories/role.repository.
  * Follows Clean Architecture principles
  */
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      UserTypeOrmEntity,
-      RoleTypeOrmEntity,
-    ]),
-  ],
+  imports: [TypeOrmModule.forFeature([UserTypeOrmEntity, RoleTypeOrmEntity])],
   providers: [
     // Repository Implementations
     {
-      provide: 'UserRepositoryInterface',
-      useClass: UserTypeOrmRepository,
+      provide: "UserRepositoryInterface",
+      useClass: UserRepository,
     },
     {
-      provide: 'RoleRepositoryInterface',
-      useClass: RoleTypeOrmRepository,
+      provide: "RoleRepositoryInterface",
+      useClass: RoleRepository,
     },
   ],
   exports: [
     // Export repository implementations
-    'UserRepositoryInterface',
-    'RoleRepositoryInterface',
+    "UserRepositoryInterface",
+    "RoleRepositoryInterface",
   ],
 })
 export class InfrastructureModule {}

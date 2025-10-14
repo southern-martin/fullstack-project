@@ -25,11 +25,11 @@ const TranslationDetails: React.FC<TranslationDetailsProps> = ({
                         </p>
                     </div>
                     <div className="flex items-center space-x-2">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${translation.isApproved
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${translation.isActive
                             ? 'bg-green-100 text-green-800'
                             : 'bg-yellow-100 text-yellow-800'
                             }`}>
-                            {translation.isApproved ? 'Approved' : 'Pending'}
+                            {translation.isActive ? 'Active' : 'Inactive'}
                         </span>
                     </div>
                 </div>
@@ -51,54 +51,26 @@ const TranslationDetails: React.FC<TranslationDetailsProps> = ({
                     </label>
                     <div className="flex items-center px-3 py-2 bg-gray-50 border border-gray-200 rounded-md">
                         <span className="text-lg mr-2">
-                            {translation.language?.metadata?.flag || '🌐'}
+                            🌐
                         </span>
                         <span className="text-sm text-gray-900">
-                            {translation.language?.name} ({translation.language?.code})
+                            Language ID: {translation.languageId} ({translation.languageCode})
                         </span>
                     </div>
                 </div>
 
-                {/* Original Text */}
+                {/* Translation Value */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Original Text
+                        Translation Value
                     </label>
                     <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md">
                         <p className="text-sm text-gray-900 whitespace-pre-wrap">
-                            {translation.originalText}
+                            {translation.value}
                         </p>
                     </div>
                 </div>
 
-                {/* Translated Text */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Translated Text
-                    </label>
-                    <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md">
-                        <p className="text-sm text-gray-900 whitespace-pre-wrap">
-                            {translation.translatedText}
-                        </p>
-                    </div>
-                </div>
-
-                {/* Context */}
-                {translation.context && (
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Context
-                        </label>
-                        <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md">
-                            <span className="text-sm text-gray-900">
-                                {typeof translation.context === 'string'
-                                    ? translation.context
-                                    : JSON.stringify(translation.context)
-                                }
-                            </span>
-                        </div>
-                    </div>
-                )}
 
                 {/* Metadata */}
                 <div className="grid grid-cols-2 gap-4">
@@ -124,17 +96,6 @@ const TranslationDetails: React.FC<TranslationDetailsProps> = ({
                     </div>
                 </div>
 
-                {/* Approval Info */}
-                {translation.isApproved && translation.approvedBy && (
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Approved By
-                        </label>
-                        <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md">
-                            <span className="text-sm text-gray-900">{translation.approvedBy}</span>
-                        </div>
-                    </div>
-                )}
             </div>
 
             {/* Actions */}

@@ -1,8 +1,9 @@
-import { User } from "../../domain/entities/user.entity";
+import { User } from "../../../domain/entities/user.entity";
 
 export class UserResponseDto {
   id: number;
   email: string;
+  password: string;
   firstName: string;
   lastName: string;
   phone?: string;
@@ -18,6 +19,9 @@ export class UserResponseDto {
   };
   preferences?: Record<string, any>;
   lastLoginAt?: Date;
+  passwordChangedAt?: Date;
+  emailVerifiedAt?: Date;
+  metadata?: Record<string, any>;
   roles: {
     id: number;
     name: string;
@@ -30,6 +34,7 @@ export class UserResponseDto {
   constructor(user: User) {
     this.id = user.id;
     this.email = user.email;
+    this.password = user.password;
     this.firstName = user.firstName;
     this.lastName = user.lastName;
     this.phone = user.phone;
@@ -39,6 +44,9 @@ export class UserResponseDto {
     this.address = user.address;
     this.preferences = user.preferences;
     this.lastLoginAt = user.lastLoginAt;
+    this.passwordChangedAt = user.passwordChangedAt;
+    this.emailVerifiedAt = user.emailVerifiedAt;
+    this.metadata = user.metadata;
     this.roles =
       user.roles?.map((role) => ({
         id: role.id,
@@ -49,12 +57,8 @@ export class UserResponseDto {
     this.createdAt = user.createdAt;
     this.updatedAt = user.updatedAt;
   }
+
+  get fullName(): string {
+    return `${this.firstName} ${this.lastName}`.trim();
+  }
 }
-
-
-
-
-
-
-
-

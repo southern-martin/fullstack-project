@@ -1,5 +1,4 @@
-import { BaseEntity } from "typeorm";
-import { Column, Entity, Index, OneToMany } from "typeorm";
+import { BaseEntity, Column, Entity, Index, OneToMany } from "typeorm";
 import { UserRoleTypeOrmEntity } from "./user-role.typeorm.entity";
 
 /**
@@ -19,7 +18,11 @@ export class UserTypeOrmEntity extends BaseEntity {
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
 
-  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP", onUpdate: "CURRENT_TIMESTAMP" })
+  @Column({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    onUpdate: "CURRENT_TIMESTAMP",
+  })
   updatedAt: Date;
   @Column({ unique: true, length: 255 })
   email: string;

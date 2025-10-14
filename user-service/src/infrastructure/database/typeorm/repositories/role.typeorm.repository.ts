@@ -1,9 +1,9 @@
+import { Role } from "@/domain/entities/role.entity";
+import { RoleRepositoryInterface } from "@/domain/repositories/role.repository.interface";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { PaginationDto } from "@shared/infrastructure";
 import { Between, Repository } from "typeorm";
-import { Role } from "@/domain/entities/role.entity";
-import { RoleRepositoryInterface } from "@/domain/repositories/role.repository.interface";
 import { RoleTypeOrmEntity } from "../entities/role.typeorm.entity";
 
 /**
@@ -194,7 +194,11 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
     return entities.map((entity) => this.toDomainEntity(entity));
   }
 
-  async findPaginated(page: number, limit: number, search?: string): Promise<{ roles: Role[]; total: number }> {
+  async findPaginated(
+    page: number,
+    limit: number,
+    search?: string
+  ): Promise<{ roles: Role[]; total: number }> {
     const queryBuilder = this.roleRepository.createQueryBuilder("role");
 
     if (search) {

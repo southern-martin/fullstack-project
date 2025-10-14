@@ -14,7 +14,7 @@ import { UpdateCustomerUseCase } from "../application/use-cases/update-customer.
 import { CustomerDomainService } from "../domain/services/customer.domain.service";
 
 // Infrastructure
-import { CustomerRepository } from "../infrastructure/repositories/customer.repository";
+import { CustomerRepository } from "../infrastructure/database/typeorm/repositories/customer.repository";
 
 /**
  * Interfaces Module

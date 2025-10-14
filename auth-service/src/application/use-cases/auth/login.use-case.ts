@@ -1,11 +1,16 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { UserRepositoryInterface } from '../../../domain/repositories/user.repository.interface';
-import { AuthDomainService } from '../../../domain/services/auth.domain.service';
-import { UserDomainService } from '../../../domain/services/user.domain.service';
-import { LoginRequestDto } from '../../dto/auth/login-request.dto';
-import { AuthResponseDto } from '../../dto/auth/auth-response.dto';
-import { UserResponseDto } from '../../dto/auth/user-response.dto';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { UserRepositoryInterface } from "../../../domain/repositories/user.repository.interface";
+import { AuthDomainService } from "../../../domain/services/auth.domain.service";
+import { UserDomainService } from "../../../domain/services/user.domain.service";
+import { AuthResponseDto } from "../../dto/auth/auth-response.dto";
+import { LoginRequestDto } from "../../dto/auth/login-request.dto";
+import { UserResponseDto } from "../../dto/auth/user-response.dto";
 
 /**
  * Login Use Case
@@ -15,10 +20,11 @@ import { UserResponseDto } from '../../dto/auth/user-response.dto';
 @Injectable()
 export class LoginUseCase {
   constructor(
+    @Inject("UserRepositoryInterface")
     private readonly userRepository: UserRepositoryInterface,
     private readonly authDomainService: AuthDomainService,
     private readonly userDomainService: UserDomainService,
-    private readonly jwtService: JwtService,
+    private readonly jwtService: JwtService
   ) {}
 
   /**
@@ -33,28 +39,32 @@ export class LoginUseCase {
     // 2. Find user by email
     const user = await this.userRepository.findByEmail(loginDto.email);
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException("Invalid credentials");
     }
 
     // 3. Check if user can authenticate (business rules)
     if (!this.authDomainService.canUserAuthenticate(user)) {
-      throw new UnauthorizedException('Account is inactive or email not verified');
+      throw new UnauthorizedException(
+        "Account is inactive or email not verified"
+      );
     }
 
     // 4. Validate password
     const isPasswordValid = await this.userRepository.validatePassword(
-      loginDto.password,
-      user.password
+      user.id,
+      loginDto.password
     );
     if (!isPasswordValid) {
       // Update failed login attempts
       await this.userRepository.incrementFailedLoginAttempts(user.id);
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException("Invalid credentials");
     }
 
     // 5. Check if account is locked
     if (this.authDomainService.isAccountLocked(user.failedLoginAttempts || 0)) {
-      throw new UnauthorizedException('Account is locked due to too many failed attempts');
+      throw new UnauthorizedException(
+        "Account is locked due to too many failed attempts"
+      );
     }
 
     // 6. Reset failed login attempts on successful login
@@ -69,8 +79,9 @@ export class LoginUseCase {
     // 9. Return response
     return {
       access_token: token,
+      token: token,
       user: this.mapUserToResponseDto(user),
-      expires_in: this.authDomainService.getSessionTimeout(),
+      expiresIn: this.authDomainService.getSessionTimeout().toString(),
     };
   }
 
@@ -80,11 +91,11 @@ export class LoginUseCase {
    */
   private validateLoginInput(loginDto: LoginRequestDto): void {
     if (!loginDto.email || !loginDto.password) {
-      throw new BadRequestException('Email and password are required');
+      throw new BadRequestException("Email and password are required");
     }
 
     if (!this.authDomainService.isValidEmail(loginDto.email)) {
-      throw new BadRequestException('Invalid email format');
+      throw new BadRequestException("Invalid email format");
     }
   }
 
@@ -111,7 +122,7 @@ export class LoginUseCase {
    */
   private getUserPermissions(user: any): string[] {
     const permissions = new Set<string>();
-    
+
     user.roles?.forEach((role: any) => {
       role.permissions?.forEach((permission: string) => {
         permissions.add(permission);
@@ -130,20 +141,31 @@ export class LoginUseCase {
     return {
       id: user.id,
       email: user.email,
+      password: user.password,
       firstName: user.firstName,
       lastName: user.lastName,
       phone: user.phone,
       isActive: user.isActive,
       isEmailVerified: user.isEmailVerified,
-      roles: user.roles?.map((role: any) => ({
-        id: role.id,
-        name: role.name,
-        description: role.description,
-        permissions: role.permissions,
-      })) || [],
+      dateOfBirth: user.dateOfBirth,
+      address: user.address,
+      preferences: user.preferences,
+      lastLoginAt: user.lastLoginAt,
+      passwordChangedAt: user.passwordChangedAt,
+      emailVerifiedAt: user.emailVerifiedAt,
+      metadata: user.metadata,
+      roles:
+        user.roles?.map((role: any) => ({
+          id: role.id,
+          name: role.name,
+          description: role.description,
+          permissions: role.permissions,
+        })) || [],
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
-      lastLoginAt: user.lastLoginAt,
+      get fullName() {
+        return `${user.firstName} ${user.lastName}`.trim();
+      },
     };
   }
 }

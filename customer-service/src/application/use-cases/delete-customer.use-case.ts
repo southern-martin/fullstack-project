@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
@@ -14,6 +15,7 @@ import { CustomerDomainService } from "../../domain/services/customer.domain.ser
 @Injectable()
 export class DeleteCustomerUseCase {
   constructor(
+    @Inject("CustomerRepositoryInterface")
     private readonly customerRepository: CustomerRepositoryInterface,
     private readonly customerDomainService: CustomerDomainService
   ) {}

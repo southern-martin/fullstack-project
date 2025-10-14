@@ -1,8 +1,7 @@
 import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
-import { USER_REPOSITORY_TOKEN } from "../../domain/tokens/repository.tokens";
-import { UserResponseDto } from "../dto/user-response.dto";
+import { UserRepositoryInterface } from "../../../domain/repositories/user.repository.interface";
+import { UserResponseDto } from "../../dto/auth/user-response.dto";
 
 export interface ValidateTokenUseCaseInterface {
   execute(token: string): Promise<UserResponseDto>;
@@ -11,7 +10,7 @@ export interface ValidateTokenUseCaseInterface {
 @Injectable()
 export class ValidateTokenUseCase implements ValidateTokenUseCaseInterface {
   constructor(
-    @Inject(USER_REPOSITORY_TOKEN)
+    @Inject("UserRepositoryInterface")
     private readonly userRepository: UserRepositoryInterface,
     private readonly jwtService: JwtService
   ) {}

@@ -117,14 +117,12 @@ export class UpdateUserUseCase {
     // 7. Prepare user update data
     const userUpdateData: Partial<any> = {};
 
-    if (updateData.email !== undefined)
-      userUpdateData.email = updateData.email;
+    if (updateData.email !== undefined) userUpdateData.email = updateData.email;
     if (updateData.firstName !== undefined)
       userUpdateData.firstName = updateData.firstName;
     if (updateData.lastName !== undefined)
       userUpdateData.lastName = updateData.lastName;
-    if (updateData.phone !== undefined)
-      userUpdateData.phone = updateData.phone;
+    if (updateData.phone !== undefined) userUpdateData.phone = updateData.phone;
     if (updateData.isActive !== undefined)
       userUpdateData.isActive = updateData.isActive;
     if (updateData.isEmailVerified !== undefined)
@@ -175,7 +173,9 @@ export class UpdateUserUseCase {
 
     // 2. Get roles
     const allRolesResult = await this.roleRepository.findAll();
-    const userRoles = allRolesResult.roles.filter((role) => roleIds.includes(role.id));
+    const userRoles = allRolesResult.roles.filter((role) =>
+      roleIds.includes(role.id)
+    );
 
     if (userRoles.length !== roleIds.length) {
       throw ValidationException.fromFieldError(
