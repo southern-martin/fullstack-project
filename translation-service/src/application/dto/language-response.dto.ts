@@ -1,4 +1,5 @@
 import { Expose } from "class-transformer";
+import { Language } from "../../domain/entities/language.entity";
 
 export class LanguageResponseDto {
   @Expose()
@@ -33,11 +34,18 @@ export class LanguageResponseDto {
 
   @Expose()
   updatedAt: Date;
+
+  static fromDomain(language: Language): LanguageResponseDto {
+    const dto = new LanguageResponseDto();
+    dto.id = language.id;
+    dto.code = language.code;
+    dto.name = language.name;
+    dto.nativeName = language.nativeName;
+    dto.isActive = language.isActive;
+    dto.isDefault = language.isDefault;
+    dto.metadata = language.metadata;
+    dto.createdAt = language.createdAt;
+    dto.updatedAt = language.updatedAt;
+    return dto;
+  }
 }
-
-
-
-
-
-
-

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
@@ -19,7 +20,9 @@ import { ManageTranslationUseCase } from "./manage-translation.use-case";
 @Injectable()
 export class TranslateTextUseCase {
   constructor(
+    @Inject("LanguageRepositoryInterface")
     private readonly languageRepository: LanguageRepositoryInterface,
+    @Inject("LanguageValueRepositoryInterface")
     private readonly languageValueRepository: LanguageValueRepositoryInterface,
     private readonly translationDomainService: TranslationDomainService,
     private readonly manageTranslationUseCase: ManageTranslationUseCase

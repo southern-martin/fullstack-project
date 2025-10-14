@@ -11,6 +11,7 @@ import {
   Post,
   Query,
 } from "@nestjs/common";
+import { PaginationDto } from "@shared/infrastructure";
 import { CreateLanguageDto } from "../../application/dto/create-language.dto";
 import { CreateTranslationDto } from "../../application/dto/create-translation.dto";
 import { LanguageResponseDto } from "../../application/dto/language-response.dto";
@@ -59,7 +60,8 @@ export class TranslationController {
    */
   @Get("languages")
   async findAllLanguages(): Promise<LanguageResponseDto[]> {
-    return await this.manageLanguageUseCase.getAll();
+    const result = await this.manageLanguageUseCase.getAll();
+    return result.languages;
   }
 
   /**
@@ -165,11 +167,13 @@ export class TranslationController {
   ): Promise<{ translations: TranslationResponseDto[]; total: number }> {
     const pageNum = parseInt(page, 10) || 1;
     const limitNum = parseInt(limit, 10) || 10;
-    return await this.manageTranslationUseCase.getAll(
-      pageNum,
-      limitNum,
-      search
-    );
+    const pagination = new PaginationDto();
+    pagination.page = pageNum;
+    pagination.limit = limitNum;
+    pagination.search = search || "";
+    pagination.sortBy = "createdAt";
+    pagination.sortOrder = "desc";
+    return await this.manageTranslationUseCase.getAll(pagination);
   }
 
   /**

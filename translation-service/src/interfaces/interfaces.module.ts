@@ -13,8 +13,8 @@ import { TranslateTextUseCase } from "../application/use-cases/translate-text.us
 import { TranslationDomainService } from "../domain/services/translation.domain.service";
 
 // Infrastructure
-import { LanguageValueRepository } from "../infrastructure/repositories/language-value.repository";
-import { LanguageRepository } from "../infrastructure/repositories/language.repository";
+import { LanguageValueRepository } from "../infrastructure/database/typeorm/repositories/language-value.repository";
+import { LanguageRepository } from "../infrastructure/database/typeorm/repositories/language.repository";
 
 /**
  * Interfaces Module

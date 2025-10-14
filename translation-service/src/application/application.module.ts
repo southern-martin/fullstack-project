@@ -11,8 +11,8 @@ import { TranslationDomainService } from "../domain/services/translation.domain.
 // Repository Interfaces (will be implemented in infrastructure)
 
 // Infrastructure Implementations
-import { LanguageValueRepository } from "../infrastructure/repositories/language-value.repository";
-import { LanguageRepository } from "../infrastructure/repositories/language.repository";
+import { LanguageValueRepository } from "../infrastructure/database/typeorm/repositories/language-value.repository";
+import { LanguageRepository } from "../infrastructure/database/typeorm/repositories/language.repository";
 
 /**
  * Application Module
