@@ -1,8 +1,10 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { PricingRule } from "../../domain/entities/pricing-rule.entity";
 import { PricingRuleRepositoryInterface } from "../../domain/repositories/pricing-rule.repository.interface";
 import { PricingDomainService } from "../../domain/services/pricing.domain.service";
 import { CreatePricingRuleDto } from "../dto/create-pricing-rule.dto";
@@ -17,6 +19,7 @@ import { UpdatePricingRuleDto } from "../dto/update-pricing-rule.dto";
 @Injectable()
 export class ManagePricingRuleUseCase {
   constructor(
+    @Inject("PricingRuleRepositoryInterface")
     private readonly pricingRuleRepository: PricingRuleRepositoryInterface,
     private readonly pricingDomainService: PricingDomainService
   ) {}
@@ -39,7 +42,7 @@ export class ManagePricingRuleUseCase {
     }
 
     // 2. Create pricing rule entity
-    const pricingRule = {
+    const pricingRule = new PricingRule({
       name: createPricingRuleDto.name,
       description: createPricingRuleDto.description,
       isActive: createPricingRuleDto.isActive ?? true,
@@ -48,11 +51,11 @@ export class ManagePricingRuleUseCase {
       priority: createPricingRuleDto.priority ?? 0,
       validFrom: createPricingRuleDto.validFrom
         ? new Date(createPricingRuleDto.validFrom)
-        : null,
+        : undefined,
       validTo: createPricingRuleDto.validTo
         ? new Date(createPricingRuleDto.validTo)
-        : null,
-    };
+        : undefined,
+    });
 
     // 3. Save pricing rule in repository
     const savedRule = await this.pricingRuleRepository.create(pricingRule);
@@ -86,16 +89,23 @@ export class ManagePricingRuleUseCase {
     page: number = 1,
     limit: number = 10,
     search?: string
-  ): Promise<{ pricingRules: PricingRuleResponseDto[]; total: number }> {
-    const { pricingRules, total } = await this.pricingRuleRepository.findAll(
-      page,
-      limit,
-      search
-    );
+  ): Promise<{
+    pricingRules: PricingRuleResponseDto[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    const { pricingRules, total } =
+      await this.pricingRuleRepository.findPaginated(page, limit, search);
+    const totalPages = Math.ceil(total / limit);
 
     return {
       pricingRules: pricingRules.map((rule) => this.mapToResponseDto(rule)),
       total,
+      page,
+      limit,
+      totalPages,
     };
   }
 
@@ -115,16 +125,26 @@ export class ManagePricingRuleUseCase {
       throw new NotFoundException("Pricing rule not found");
     }
 
-    // 2. Validate update data using domain service
-    const validation =
-      this.pricingDomainService.validatePricingRuleUpdateData(
-        updatePricingRuleDto
-      );
+    // 2. Prepare update data for validation
+    const updateDataForValidation: Partial<PricingRule> = {
+      ...updatePricingRuleDto,
+      validFrom: updatePricingRuleDto.validFrom
+        ? new Date(updatePricingRuleDto.validFrom)
+        : undefined,
+      validTo: updatePricingRuleDto.validTo
+        ? new Date(updatePricingRuleDto.validTo)
+        : undefined,
+    };
+
+    // 3. Validate update data using domain service
+    const validation = this.pricingDomainService.validatePricingRuleUpdateData(
+      updateDataForValidation
+    );
     if (!validation.isValid) {
       throw new BadRequestException(validation.errors.join(", "));
     }
 
-    // 3. Prepare update data
+    // 4. Prepare update data
     const updateData: Partial<any> = {};
 
     if (updatePricingRuleDto.name !== undefined)
@@ -150,10 +170,10 @@ export class ManagePricingRuleUseCase {
         : null;
     }
 
-    // 4. Update rule in repository
+    // 5. Update rule in repository
     const updatedRule = await this.pricingRuleRepository.update(id, updateData);
 
-    // 5. Return response
+    // 6. Return response
     return this.mapToResponseDto(updatedRule);
   }
 

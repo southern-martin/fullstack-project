@@ -1,8 +1,10 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { PriceCalculation } from "../../domain/entities/price-calculation.entity";
-import { PricingRule } from "../../domain/entities/pricing-rule.entity";
+import { PriceCalculationTypeOrmEntity } from "./typeorm/entities/price-calculation.typeorm.entity";
+import { PricingRuleTypeOrmEntity } from "./typeorm/entities/pricing-rule.typeorm.entity";
+import { PriceCalculationRepository } from "./typeorm/repositories/price-calculation.repository";
+import { PricingRuleRepository } from "./typeorm/repositories/pricing-rule.repository";
 
 @Module({
   imports: [
@@ -15,21 +17,31 @@ import { PricingRule } from "../../domain/entities/pricing-rule.entity";
         username: configService.get("DB_USERNAME", "root"),
         password: configService.get("DB_PASSWORD", "password"),
         database: configService.get("DB_NAME", "pricing_service_db"),
-        entities: [PricingRule, PriceCalculation],
+        entities: [PricingRuleTypeOrmEntity, PriceCalculationTypeOrmEntity],
         synchronize: configService.get("NODE_ENV") === "development",
         logging: configService.get("NODE_ENV") === "development",
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([PricingRule, PriceCalculation]),
+    TypeOrmModule.forFeature([
+      PricingRuleTypeOrmEntity,
+      PriceCalculationTypeOrmEntity,
+    ]),
   ],
-  exports: [TypeOrmModule],
+  providers: [
+    {
+      provide: "PricingRuleRepositoryInterface",
+      useClass: PricingRuleRepository,
+    },
+    {
+      provide: "PriceCalculationRepositoryInterface",
+      useClass: PriceCalculationRepository,
+    },
+  ],
+  exports: [
+    TypeOrmModule,
+    "PricingRuleRepositoryInterface",
+    "PriceCalculationRepositoryInterface",
+  ],
 })
 export class DatabaseModule {}
-
-
-
-
-
-
-

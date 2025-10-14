@@ -11,8 +11,8 @@ import { PricingDomainService } from "../domain/services/pricing.domain.service"
 // Repository Interfaces (will be implemented in infrastructure)
 
 // Infrastructure Implementations
-import { PriceCalculationRepository } from "../infrastructure/repositories/price-calculation.repository";
-import { PricingRuleRepository } from "../infrastructure/repositories/pricing-rule.repository";
+import { PriceCalculationRepository } from "../infrastructure/database/typeorm/repositories/price-calculation.repository";
+import { PricingRuleRepository } from "../infrastructure/database/typeorm/repositories/pricing-rule.repository";
 
 /**
  * Application Module

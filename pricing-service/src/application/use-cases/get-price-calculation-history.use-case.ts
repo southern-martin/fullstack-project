@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { PriceCalculationRepositoryInterface } from "../../domain/repositories/price-calculation.repository.interface";
 import { PriceCalculationResponseDto } from "../dto/price-calculation-response.dto";
 
@@ -10,6 +10,7 @@ import { PriceCalculationResponseDto } from "../dto/price-calculation-response.d
 @Injectable()
 export class GetPriceCalculationHistoryUseCase {
   constructor(
+    @Inject("PriceCalculationRepositoryInterface")
     private readonly priceCalculationRepository: PriceCalculationRepositoryInterface
   ) {}
 
@@ -27,15 +28,22 @@ export class GetPriceCalculationHistoryUseCase {
   ): Promise<{
     priceCalculations: PriceCalculationResponseDto[];
     total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
   }> {
     const { priceCalculations, total } =
-      await this.priceCalculationRepository.findAll(page, limit, search);
+      await this.priceCalculationRepository.findPaginated(page, limit, search);
+    const totalPages = Math.ceil(total / limit);
 
     return {
       priceCalculations: priceCalculations.map((calculation) =>
         this.mapToResponseDto(calculation)
       ),
       total,
+      page,
+      limit,
+      totalPages,
     };
   }
 
@@ -60,7 +68,9 @@ export class GetPriceCalculationHistoryUseCase {
       request: calculation.request,
       calculation: calculation.calculation,
       appliedRules: calculation.appliedRules,
+      calculatedAt: calculation.calculatedAt,
       createdAt: calculation.createdAt,
+      updatedAt: calculation.updatedAt,
     };
   }
 }

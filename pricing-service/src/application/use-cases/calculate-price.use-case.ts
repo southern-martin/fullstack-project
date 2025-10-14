@@ -1,5 +1,6 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import { randomUUID } from "crypto";
+import { PriceCalculation } from "../../domain/entities/price-calculation.entity";
 import { PriceCalculationRepositoryInterface } from "../../domain/repositories/price-calculation.repository.interface";
 import { PricingRuleRepositoryInterface } from "../../domain/repositories/pricing-rule.repository.interface";
 import { PricingDomainService } from "../../domain/services/pricing.domain.service";
@@ -14,7 +15,9 @@ import { PriceCalculationResponseDto } from "../dto/price-calculation-response.d
 @Injectable()
 export class CalculatePriceUseCase {
   constructor(
+    @Inject("PricingRuleRepositoryInterface")
     private readonly pricingRuleRepository: PricingRuleRepositoryInterface,
+    @Inject("PriceCalculationRepositoryInterface")
     private readonly priceCalculationRepository: PriceCalculationRepositoryInterface,
     private readonly pricingDomainService: PricingDomainService
   ) {}
@@ -63,7 +66,7 @@ export class CalculatePriceUseCase {
 
     // 6. Create price calculation record
     const requestId = randomUUID();
-    const priceCalculation = {
+    const priceCalculation = new PriceCalculation({
       requestId,
       request: {
         carrierId: calculatePriceDto.carrierId,
@@ -77,7 +80,7 @@ export class CalculatePriceUseCase {
       },
       calculation: calculation.calculation,
       appliedRules: calculation.appliedRules,
-    };
+    });
 
     // 7. Save calculation in repository
     const savedCalculation =
@@ -199,7 +202,9 @@ export class CalculatePriceUseCase {
       request: calculation.request,
       calculation: calculation.calculation,
       appliedRules: calculation.appliedRules,
+      calculatedAt: calculation.calculatedAt,
       createdAt: calculation.createdAt,
+      updatedAt: calculation.updatedAt,
     };
   }
 }
