@@ -4,6 +4,7 @@
 .PHONY: help setup build start debug dev stop restart test clean health logs
 .PHONY: backend-setup backend-build backend-start backend-debug backend-test
 .PHONY: frontend-setup frontend-build frontend-start frontend-debug frontend-test
+.PHONY: react-admin2-setup react-admin2-build react-admin2-start react-admin2-debug react-admin2-test react-admin2-stop
 .PHONY: go-build go-run go-debug
 .PHONY: docker-clean docker-clean-all docker-clean-system docker-clean-auth docker-status
 .PHONY: docker-build docker-up docker-down docker-start docker-restart docker-logs
@@ -51,6 +52,14 @@ help:
 	@echo "  frontend-debug  - Start frontend in debug mode"
 	@echo "  frontend-test   - Test frontend only"
 	@echo ""
+	@echo "React Admin 2 targets:"
+	@echo "  react-admin2-setup  - Setup React Admin 2 only"
+	@echo "  react-admin2-build  - Build React Admin 2 only"
+	@echo "  react-admin2-start  - Start React Admin 2 only"
+	@echo "  react-admin2-debug  - Start React Admin 2 in debug mode"
+	@echo "  react-admin2-test   - Test React Admin 2 only"
+	@echo "  react-admin2-stop   - Stop React Admin 2"
+	@echo ""
 	@echo "Go API targets:"
 	@echo "  go-build        - Build Go API"
 	@echo "  go-run          - Run Go API"
@@ -61,6 +70,8 @@ help:
 	@echo "  make dev        # Start all in development mode"
 	@echo "  make debug      # Start all in debug mode"
 	@echo "  make stop       # Stop all services"
+	@echo "  make react-admin2-start  # Start React Admin 2 only"
+	@echo "  make react-admin2-quick  # Quick setup and start React Admin 2"
 
 # Setup and build targets
 setup:
@@ -148,6 +159,38 @@ frontend-test:
 	@echo "Testing frontend..."
 	@./scripts/dev.sh frontend-test
 
+# React Admin 2 specific targets
+react-admin2-setup:
+	@echo "Setting up React Admin 2..."
+	@cd react-admin2 && npm install
+	@echo "✅ React Admin 2 setup completed!"
+
+react-admin2-build:
+	@echo "Building React Admin 2..."
+	@cd react-admin2 && npm run build
+	@echo "✅ React Admin 2 build completed!"
+
+react-admin2-start:
+	@echo "🚀 Starting React Admin 2..."
+	@cd react-admin2 && npm start
+	@echo "✅ React Admin 2 started on http://localhost:3000!"
+
+react-admin2-debug:
+	@echo "🐛 Starting React Admin 2 in debug mode..."
+	@cd react-admin2 && npm start
+	@echo "✅ React Admin 2 debug mode started!"
+
+react-admin2-test:
+	@echo "Testing React Admin 2..."
+	@cd react-admin2 && npm test
+	@echo "✅ React Admin 2 tests completed!"
+
+react-admin2-stop:
+	@echo "🛑 Stopping React Admin 2..."
+	@pkill -f "react-admin2.*npm start" || true
+	@pkill -f "react-scripts start" || true
+	@echo "✅ React Admin 2 stopped!"
+
 # Go API targets
 go-build:
 	@echo "Building Go API..."
@@ -170,6 +213,13 @@ quick-dev: setup dev
 
 quick-debug: setup debug
 	@echo "Quick debug setup completed!"
+
+# React Admin 2 quick commands
+react-admin2-quick: react-admin2-setup react-admin2-start
+	@echo "React Admin 2 quick start completed!"
+
+react-admin2-dev: react-admin2-setup react-admin2-start
+	@echo "React Admin 2 development setup completed!"
 
 # Docker management targets
 docker-build:
