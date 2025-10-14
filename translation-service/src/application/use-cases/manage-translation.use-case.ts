@@ -1,9 +1,11 @@
 import {
   BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { PaginationDto } from "@shared/infrastructure";
 import { LanguageValue } from "../../domain/entities/language-value.entity";
 import { LanguageValueRepositoryInterface } from "../../domain/repositories/language-value.repository.interface";
 import { TranslationDomainService } from "../../domain/services/translation.domain.service";
@@ -20,6 +22,7 @@ import { UpdateTranslationDto } from "../dto/update-translation.dto";
 @Injectable()
 export class ManageTranslationUseCase {
   constructor(
+    @Inject("LanguageValueRepositoryInterface")
     private readonly languageValueRepository: LanguageValueRepositoryInterface,
     private readonly translationDomainService: TranslationDomainService
   ) {}
@@ -58,13 +61,14 @@ export class ManageTranslationUseCase {
     }
 
     // 4. Create translation entity
-    const languageValue = new LanguageValue();
-    languageValue.key = key;
-    languageValue.originalText = createTranslationDto.originalText;
-    languageValue.translatedText = createTranslationDto.translatedText;
-    languageValue.languageId = createTranslationDto.languageId;
-    languageValue.context = createTranslationDto.context || {};
-    languageValue.isApproved = createTranslationDto.isApproved ?? false;
+    const languageValue = new LanguageValue({
+      key,
+      originalText: createTranslationDto.originalText,
+      translatedText: createTranslationDto.translatedText,
+      languageId: createTranslationDto.languageId,
+      context: createTranslationDto.context || {},
+      isApproved: createTranslationDto.isApproved ?? false,
+    });
 
     // 5. Save translation in repository
     const savedTranslation =
@@ -90,25 +94,31 @@ export class ManageTranslationUseCase {
 
   /**
    * Retrieves all translations with pagination and optional search.
-   * @param page The page number.
-   * @param limit The number of items per page.
-   * @param search Optional search string.
+   * @param pagination Pagination parameters
    * @returns A paginated list of translation response DTOs.
    */
-  async getAll(
-    page: number = 1,
-    limit: number = 10,
-    search?: string
-  ): Promise<{ translations: TranslationResponseDto[]; total: number }> {
-    const { languageValues, total } =
-      await this.languageValueRepository.findAll(page, limit, search);
-
-    return {
-      translations: languageValues.map((translation) =>
-        this.mapToResponseDto(translation)
-      ),
-      total,
-    };
+  async getAll(pagination?: PaginationDto): Promise<{
+    translations: TranslationResponseDto[];
+    total: number;
+  }> {
+    if (pagination) {
+      const result =
+        await this.languageValueRepository.findPaginated(pagination);
+      return {
+        translations: result.languageValues.map((translation) =>
+          this.mapToResponseDto(translation)
+        ),
+        total: result.total,
+      };
+    } else {
+      const languageValues = await this.languageValueRepository.findMany([]);
+      return {
+        translations: languageValues.map((translation) =>
+          this.mapToResponseDto(translation)
+        ),
+        total: languageValues.length,
+      };
+    }
   }
 
   /**

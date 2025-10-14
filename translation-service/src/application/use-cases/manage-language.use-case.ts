@@ -1,9 +1,11 @@
 import {
   BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { PaginationDto } from "@shared/infrastructure";
 import { Language } from "../../domain/entities/language.entity";
 import { LanguageRepositoryInterface } from "../../domain/repositories/language.repository.interface";
 import { TranslationDomainService } from "../../domain/services/translation.domain.service";
@@ -20,6 +22,7 @@ import { UpdateLanguageDto } from "../dto/update-language.dto";
 @Injectable()
 export class ManageLanguageUseCase {
   constructor(
+    @Inject("LanguageRepositoryInterface")
     private readonly languageRepository: LanguageRepositoryInterface,
     private readonly translationDomainService: TranslationDomainService
   ) {}
@@ -62,14 +65,14 @@ export class ManageLanguageUseCase {
     }
 
     // 4. Create language entity
-    const language = new Language();
-    language.code = createLanguageDto.code;
-    language.name = createLanguageDto.name;
-    language.nativeName =
-      createLanguageDto.nativeName || createLanguageDto.name;
-    language.isActive = createLanguageDto.isActive ?? true;
-    language.isDefault = createLanguageDto.isDefault ?? false;
-    language.metadata = createLanguageDto.metadata || {};
+    const language = new Language({
+      code: createLanguageDto.code,
+      name: createLanguageDto.name,
+      nativeName: createLanguageDto.nativeName || createLanguageDto.name,
+      isActive: createLanguageDto.isActive ?? true,
+      isDefault: createLanguageDto.isDefault ?? false,
+      metadata: createLanguageDto.metadata || {},
+    });
 
     // 5. Save language in repository
     const savedLanguage = await this.languageRepository.create(language);
@@ -107,12 +110,29 @@ export class ManageLanguageUseCase {
   }
 
   /**
-   * Retrieves all languages.
-   * @returns A list of language response DTOs.
+   * Retrieves all languages with pagination.
+   * @param pagination Pagination parameters
+   * @returns A paginated list of language response DTOs.
    */
-  async getAll(): Promise<LanguageResponseDto[]> {
-    const languages = await this.languageRepository.findAll();
-    return languages.map((language) => this.mapToResponseDto(language));
+  async getAll(pagination?: PaginationDto): Promise<{
+    languages: LanguageResponseDto[];
+    total: number;
+  }> {
+    if (pagination) {
+      const result = await this.languageRepository.findPaginated(pagination);
+      return {
+        languages: result.languages.map((language) =>
+          this.mapToResponseDto(language)
+        ),
+        total: result.total,
+      };
+    } else {
+      const languages = await this.languageRepository.findActive();
+      return {
+        languages: languages.map((language) => this.mapToResponseDto(language)),
+        total: languages.length,
+      };
+    }
   }
 
   /**
