@@ -1,26 +1,8 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
-
-@Entity("price_calculations")
 export class PriceCalculation {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  @Column()
+  id?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
   requestId: string;
-
-  @Column({ type: "json" })
   request: {
     carrierId: number;
     serviceType: string;
@@ -31,8 +13,6 @@ export class PriceCalculation {
     customerType?: string;
     customerId?: number;
   };
-
-  @Column({ type: "json" })
   calculation: {
     baseRate: number;
     weightRate: number;
@@ -51,21 +31,43 @@ export class PriceCalculation {
     total: number;
     currency: string;
   };
-
-  @Column({ type: "json", nullable: true })
-  appliedRules: Array<{
+  appliedRules?: Array<{
     ruleId: number;
     ruleName: string;
     priority: number;
   }>;
+  calculatedAt?: Date;
 
-  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  calculatedAt: Date;
+  constructor(data: Partial<PriceCalculation> = {}) {
+    this.id = data.id;
+    this.createdAt = data.createdAt;
+    this.updatedAt = data.updatedAt;
+    this.requestId = data.requestId || "";
+    this.request = data.request || {
+      carrierId: 0,
+      serviceType: "",
+      weight: 0,
+      originCountry: "",
+      destinationCountry: "",
+    };
+    this.calculation = data.calculation || {
+      baseRate: 0,
+      weightRate: 0,
+      surcharges: [],
+      discounts: [],
+      subtotal: 0,
+      total: 0,
+      currency: "USD",
+    };
+    this.appliedRules = data.appliedRules;
+    this.calculatedAt = data.calculatedAt;
+  }
+
+  get totalAmount(): number {
+    return this.calculation.total;
+  }
+
+  get currency(): string {
+    return this.calculation.currency;
+  }
 }
-
-
-
-
-
-
-

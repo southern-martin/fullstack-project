@@ -13,8 +13,8 @@ import { ManagePricingRuleUseCase } from "../application/use-cases/manage-pricin
 import { PricingDomainService } from "../domain/services/pricing.domain.service";
 
 // Infrastructure
-import { PriceCalculationRepository } from "../infrastructure/repositories/price-calculation.repository";
-import { PricingRuleRepository } from "../infrastructure/repositories/pricing-rule.repository";
+import { PriceCalculationRepository } from "../infrastructure/database/typeorm/repositories/price-calculation.repository";
+import { PricingRuleRepository } from "../infrastructure/database/typeorm/repositories/pricing-rule.repository";
 
 /**
  * Interfaces Module

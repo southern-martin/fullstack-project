@@ -1,32 +1,10 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
-
-@Entity("pricing_rules")
 export class PricingRule {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  @Column()
+  id?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
   name: string;
-
-  @Column({ nullable: true })
-  description: string;
-
-  @Column({ default: true })
+  description?: string;
   isActive: boolean;
-
-  @Column({ type: "json" })
   conditions: {
     carrierId?: number;
     serviceType?: string;
@@ -42,8 +20,6 @@ export class PricingRule {
     destinationCountry?: string;
     customerType?: string;
   };
-
-  @Column({ type: "json" })
   pricing: {
     baseRate: number;
     currency: string;
@@ -62,13 +38,35 @@ export class PricingRule {
       percentage?: number;
     }>;
   };
-
-  @Column({ type: "int", default: 0 })
   priority: number;
+  validFrom?: Date;
+  validTo?: Date;
 
-  @Column({ type: "date", nullable: true })
-  validFrom: Date;
+  constructor(data: Partial<PricingRule> = {}) {
+    this.id = data.id;
+    this.createdAt = data.createdAt;
+    this.updatedAt = data.updatedAt;
+    this.name = data.name || "";
+    this.description = data.description;
+    this.isActive = data.isActive ?? true;
+    this.conditions = data.conditions || {};
+    this.pricing = data.pricing || { baseRate: 0, currency: "USD" };
+    this.priority = data.priority ?? 0;
+    this.validFrom = data.validFrom;
+    this.validTo = data.validTo;
+  }
 
-  @Column({ type: "date", nullable: true })
-  validTo: Date;
+  get isCurrentlyValid(): boolean {
+    const now = new Date();
+    const validFrom = this.validFrom ? new Date(this.validFrom) : null;
+    const validTo = this.validTo ? new Date(this.validTo) : null;
+
+    if (validFrom && now < validFrom) return false;
+    if (validTo && now > validTo) return false;
+    return true;
+  }
+
+  get displayName(): string {
+    return this.name;
+  }
 }
