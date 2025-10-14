@@ -1,7 +1,8 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { Customer } from "../../domain/entities/customer.entity";
+import { CustomerTypeOrmEntity } from "./typeorm/entities/customer.typeorm.entity";
+import { CustomerRepository } from "./typeorm/repositories/customer.repository";
 
 @Module({
   imports: [
@@ -14,21 +15,20 @@ import { Customer } from "../../domain/entities/customer.entity";
         username: configService.get("DB_USERNAME", "root"),
         password: configService.get("DB_PASSWORD", "password"),
         database: configService.get("DB_NAME", "customer_service_db"),
-        entities: [Customer],
+        entities: [CustomerTypeOrmEntity],
         synchronize: configService.get("NODE_ENV") === "development",
         logging: configService.get("NODE_ENV") === "development",
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Customer]),
+    TypeOrmModule.forFeature([CustomerTypeOrmEntity]),
   ],
-  exports: [TypeOrmModule],
+  providers: [
+    {
+      provide: "CustomerRepositoryInterface",
+      useClass: CustomerRepository,
+    },
+  ],
+  exports: [TypeOrmModule, "CustomerRepositoryInterface"],
 })
 export class DatabaseModule {}
-
-
-
-
-
-
-

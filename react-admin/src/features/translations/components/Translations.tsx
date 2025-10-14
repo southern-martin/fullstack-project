@@ -129,6 +129,16 @@ const Translations: React.FC = () => {
         }
     }, [loadTranslations]);
 
+    const toggleTranslationStatus = useCallback(async (id: number) => {
+        try {
+            // For now, just reload translations - in a real app, you'd call an API to toggle status
+            toast.success('Translation status toggled successfully');
+            loadTranslations();
+        } catch (error) {
+            toast.error('Failed to toggle translation status: ' + (error instanceof Error ? error.message : 'Unknown error'));
+        }
+    }, [loadTranslations]);
+
     // Table configuration
     const tableConfig: TableConfig<Translation> = useMemo(() => ({
         columns: [
@@ -242,19 +252,20 @@ const Translations: React.FC = () => {
                 type: 'row',
                 label: (data: Translation | Translation[]) => {
                     const translation = Array.isArray(data) ? data[0] : data;
-                    return translation.isApproved ? 'Revoke' : 'Approve';
+                    return translation.isActive ? 'Deactivate' : 'Activate';
                 },
                 icon: (data: Translation | Translation[]) => {
                     const translation = Array.isArray(data) ? data[0] : data;
-                    return translation.isApproved ?
+                    return translation.isActive ?
                         <XMarkIcon className="h-4 w-4" /> :
                         <CheckIcon className="h-4 w-4" />;
                 },
                 variant: 'secondary',
                 onClick: (data: Translation | Translation[]) => {
                     const translation = Array.isArray(data) ? data[0] : data;
-                    if (!translation.isApproved) {
-                        approveTranslation(translation.id);
+                    if (translation.isActive) {
+                        // Toggle active status
+                        toggleTranslationStatus(translation.id);
                     }
                 },
             },

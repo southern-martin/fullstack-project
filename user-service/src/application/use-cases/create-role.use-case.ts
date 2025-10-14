@@ -4,10 +4,10 @@ import {
   Inject,
   Injectable,
 } from "@nestjs/common";
+import { Role } from "../../domain/entities/role.entity";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
 import { CreateRoleDto } from "../dto/create-role.dto";
 import { RoleResponseDto } from "../dto/role-response.dto";
-import { Role } from "../../domain/entities/role.entity";
 
 /**
  * Create Role Use Case
@@ -17,7 +17,7 @@ import { Role } from "../../domain/entities/role.entity";
 @Injectable()
 export class CreateRoleUseCase {
   constructor(
-    @Inject('RoleRepositoryInterface')
+    @Inject("RoleRepositoryInterface")
     private readonly roleRepository: RoleRepositoryInterface
   ) {}
 

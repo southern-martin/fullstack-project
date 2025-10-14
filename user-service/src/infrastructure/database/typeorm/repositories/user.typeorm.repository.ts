@@ -1,9 +1,9 @@
+import { User } from "@/domain/entities/user.entity";
+import { UserRepositoryInterface } from "@/domain/repositories/user.repository.interface";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { PaginationDto } from "@shared/infrastructure";
 import { Between, Repository } from "typeorm";
-import { User } from "@/domain/entities/user.entity";
-import { UserRepositoryInterface } from "@/domain/repositories/user.repository.interface";
 import { UserTypeOrmEntity } from "../entities/user.typeorm.entity";
 
 /**
@@ -194,7 +194,11 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
     return user;
   }
 
-  async findPaginated(page: number, limit: number, search?: string): Promise<{ users: User[]; total: number }> {
+  async findPaginated(
+    page: number,
+    limit: number,
+    search?: string
+  ): Promise<{ users: User[]; total: number }> {
     const queryBuilder = this.userRepository
       .createQueryBuilder("user")
       .leftJoinAndSelect("user.userRoles", "userRole")

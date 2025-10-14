@@ -124,7 +124,7 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
                             className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
                         >
                             <div className="flex items-center space-x-3">
-                                <span className="text-2xl">{language.metadata?.flag || '🌐'}</span>
+                                <span className="text-2xl">🌐</span>
                                 <div>
                                     <div className="flex items-center space-x-2">
                                         <span className="font-medium text-gray-900">
@@ -133,7 +133,7 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
                                         <span className="text-sm text-gray-500">
                                             ({language.code})
                                         </span>
-                                        {language.isDefault && (
+                                        {language.code === 'en' && (
                                             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
                                                 Default
                                             </span>
@@ -172,7 +172,7 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
                                         <CheckIcon className="h-4 w-4" />
                                     )}
                                 </Button>
-                                {!language.isDefault && (
+                                {language.code !== 'en' && (
                                     <Button
                                         variant="danger"
                                         size="sm"
@@ -248,12 +248,12 @@ const LanguageForm: React.FC<LanguageFormProps> = ({
         name: language?.name || '',
         nativeName: language?.nativeName || '',
         isActive: language?.isActive ?? true,
-        isDefault: language?.isDefault ?? false,
-        flag: language?.metadata?.flag || '',
-        region: language?.metadata?.region || '',
-        currency: language?.metadata?.currency || '',
-        direction: language?.metadata?.direction || 'ltr',
-        dateFormat: language?.metadata?.dateFormat || 'MM/DD/YYYY',
+        isDefault: language?.code === 'en' ?? false,
+        flag: '🌐',
+        region: language?.code?.toUpperCase() || '',
+        currency: language?.code === 'en' ? 'USD' : 'EUR',
+        direction: language?.isRTL ? 'rtl' : 'ltr',
+        dateFormat: 'MM/DD/YYYY',
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);

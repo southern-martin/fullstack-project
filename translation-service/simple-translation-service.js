@@ -32,63 +32,73 @@ languages.forEach(lang => {
         name: lang.name,
         nativeName: lang.nativeName,
         isRTL: lang.isRTL,
-        isActive: true
+        isActive: true,
+        isDefault: lang.code === 'en',
+        metadata: {
+            flag: `flag-${lang.code}`,
+            direction: lang.isRTL ? 'rtl' : 'ltr',
+            region: lang.code.toUpperCase(),
+            currency: lang.code === 'en' ? 'USD' : 'EUR',
+            dateFormat: 'MM/DD/YYYY'
+        },
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedAt: '2025-01-01T00:00:00.000Z'
     };
     nextLanguageId++;
 });
 
-// Generate 50 mock translations
+// Generate 50 mock translations with proper structure
 const translationKeys = [
-    'welcome.message',
-    'login.title',
-    'login.email',
-    'login.password',
-    'login.button',
-    'register.title',
-    'register.firstName',
-    'register.lastName',
-    'register.email',
-    'register.password',
-    'register.confirmPassword',
-    'register.button',
-    'dashboard.title',
-    'dashboard.welcome',
-    'users.title',
-    'users.create',
-    'users.edit',
-    'users.delete',
-    'users.search',
-    'users.filter',
-    'customers.title',
-    'customers.create',
-    'customers.edit',
-    'customers.delete',
-    'carriers.title',
-    'carriers.create',
-    'carriers.edit',
-    'carriers.delete',
-    'pricing.title',
-    'pricing.rules',
-    'pricing.calculate',
-    'settings.title',
-    'settings.language',
-    'settings.theme',
-    'settings.notifications',
-    'common.save',
-    'common.cancel',
-    'common.delete',
-    'common.edit',
-    'common.create',
-    'common.search',
-    'common.filter',
-    'common.export',
-    'common.import',
-    'common.refresh',
-    'common.loading',
-    'common.error',
-    'common.success',
-    'common.confirm',
-    'common.back'
+    { key: 'welcome.message', originalText: 'Welcome to our platform', context: { category: 'general', module: 'welcome' } },
+    { key: 'login.title', originalText: 'Sign In', context: { category: 'auth', module: 'login' } },
+    { key: 'login.email', originalText: 'Email Address', context: { category: 'auth', module: 'login', field: 'email' } },
+    { key: 'login.password', originalText: 'Password', context: { category: 'auth', module: 'login', field: 'password' } },
+    { key: 'login.button', originalText: 'Sign In', context: { category: 'auth', module: 'login', component: 'button' } },
+    { key: 'register.title', originalText: 'Create Account', context: { category: 'auth', module: 'register' } },
+    { key: 'register.firstName', originalText: 'First Name', context: { category: 'auth', module: 'register', field: 'firstName' } },
+    { key: 'register.lastName', originalText: 'Last Name', context: { category: 'auth', module: 'register', field: 'lastName' } },
+    { key: 'register.email', originalText: 'Email Address', context: { category: 'auth', module: 'register', field: 'email' } },
+    { key: 'register.password', originalText: 'Password', context: { category: 'auth', module: 'register', field: 'password' } },
+    { key: 'register.confirmPassword', originalText: 'Confirm Password', context: { category: 'auth', module: 'register', field: 'confirmPassword' } },
+    { key: 'register.button', originalText: 'Create Account', context: { category: 'auth', module: 'register', component: 'button' } },
+    { key: 'dashboard.title', originalText: 'Dashboard', context: { category: 'navigation', module: 'dashboard' } },
+    { key: 'dashboard.welcome', originalText: 'Welcome to your dashboard', context: { category: 'general', module: 'dashboard' } },
+    { key: 'users.title', originalText: 'Users', context: { category: 'navigation', module: 'users' } },
+    { key: 'users.create', originalText: 'Create User', context: { category: 'users', module: 'users', component: 'button' } },
+    { key: 'users.edit', originalText: 'Edit User', context: { category: 'users', module: 'users', component: 'button' } },
+    { key: 'users.delete', originalText: 'Delete User', context: { category: 'users', module: 'users', component: 'button' } },
+    { key: 'users.search', originalText: 'Search Users', context: { category: 'users', module: 'users', field: 'search' } },
+    { key: 'users.filter', originalText: 'Filter Users', context: { category: 'users', module: 'users', component: 'filter' } },
+    { key: 'customers.title', originalText: 'Customers', context: { category: 'navigation', module: 'customers' } },
+    { key: 'customers.create', originalText: 'Create Customer', context: { category: 'customers', module: 'customers', component: 'button' } },
+    { key: 'customers.edit', originalText: 'Edit Customer', context: { category: 'customers', module: 'customers', component: 'button' } },
+    { key: 'customers.delete', originalText: 'Delete Customer', context: { category: 'customers', module: 'customers', component: 'button' } },
+    { key: 'carriers.title', originalText: 'Carriers', context: { category: 'navigation', module: 'carriers' } },
+    { key: 'carriers.create', originalText: 'Create Carrier', context: { category: 'carriers', module: 'carriers', component: 'button' } },
+    { key: 'carriers.edit', originalText: 'Edit Carrier', context: { category: 'carriers', module: 'carriers', component: 'button' } },
+    { key: 'carriers.delete', originalText: 'Delete Carrier', context: { category: 'carriers', module: 'carriers', component: 'button' } },
+    { key: 'pricing.title', originalText: 'Pricing', context: { category: 'navigation', module: 'pricing' } },
+    { key: 'pricing.rules', originalText: 'Pricing Rules', context: { category: 'pricing', module: 'pricing' } },
+    { key: 'pricing.calculate', originalText: 'Calculate Price', context: { category: 'pricing', module: 'pricing', component: 'button' } },
+    { key: 'settings.title', originalText: 'Settings', context: { category: 'navigation', module: 'settings' } },
+    { key: 'settings.language', originalText: 'Language', context: { category: 'settings', module: 'settings', field: 'language' } },
+    { key: 'settings.theme', originalText: 'Theme', context: { category: 'settings', module: 'settings', field: 'theme' } },
+    { key: 'settings.notifications', originalText: 'Notifications', context: { category: 'settings', module: 'settings', field: 'notifications' } },
+    { key: 'common.save', originalText: 'Save', context: { category: 'common', component: 'button' } },
+    { key: 'common.cancel', originalText: 'Cancel', context: { category: 'common', component: 'button' } },
+    { key: 'common.delete', originalText: 'Delete', context: { category: 'common', component: 'button' } },
+    { key: 'common.edit', originalText: 'Edit', context: { category: 'common', component: 'button' } },
+    { key: 'common.create', originalText: 'Create', context: { category: 'common', component: 'button' } },
+    { key: 'common.search', originalText: 'Search', context: { category: 'common', field: 'search' } },
+    { key: 'common.filter', originalText: 'Filter', context: { category: 'common', component: 'filter' } },
+    { key: 'common.export', originalText: 'Export', context: { category: 'common', component: 'button' } },
+    { key: 'common.import', originalText: 'Import', context: { category: 'common', component: 'button' } },
+    { key: 'common.refresh', originalText: 'Refresh', context: { category: 'common', component: 'button' } },
+    { key: 'common.loading', originalText: 'Loading...', context: { category: 'common', component: 'status' } },
+    { key: 'common.error', originalText: 'Error', context: { category: 'common', component: 'status' } },
+    { key: 'common.success', originalText: 'Success', context: { category: 'common', component: 'status' } },
+    { key: 'common.confirm', originalText: 'Confirm', context: { category: 'common', component: 'button' } },
+    { key: 'common.back', originalText: 'Back', context: { category: 'common', component: 'button' } }
 ];
 
 const translations = {
@@ -251,17 +261,39 @@ const translations = {
 };
 
 // Generate translations for each language
-translationKeys.forEach(key => {
+translationKeys.forEach(translationKey => {
     Object.keys(translations).forEach(langCode => {
         const language = Object.values(mockLanguages).find(l => l.code === langCode);
-        if (language && translations[langCode][key]) {
+        if (language && translations[langCode] && translations[langCode][translationKey.key]) {
             mockTranslations[nextTranslationId] = {
                 id: nextTranslationId,
-                key: key,
+                key: translationKey.key,
+                originalText: translationKey.originalText,
+                translatedText: translations[langCode][translationKey.key],
                 languageId: language.id,
-                languageCode: langCode,
-                value: translations[langCode][key],
-                isActive: true
+                language: {
+                    id: language.id,
+                    code: language.code,
+                    name: language.name,
+                    nativeName: language.nativeName,
+                    isActive: language.isActive,
+                    isDefault: language.code === 'en',
+                    metadata: {
+                        flag: `flag-${language.code}`,
+                        direction: language.isRTL ? 'rtl' : 'ltr',
+                        region: language.code.toUpperCase(),
+                        currency: language.code === 'en' ? 'USD' : 'EUR',
+                        dateFormat: 'MM/DD/YYYY'
+                    }
+                },
+                context: translationKey.context,
+                isApproved: true,
+                approvedBy: 'system',
+                approvedAt: '2025-01-01T00:00:00.000Z',
+                usageCount: Math.floor(Math.random() * 100),
+                lastUsedAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+                createdAt: '2025-01-01T00:00:00.000Z',
+                updatedAt: '2025-01-01T00:00:00.000Z'
             };
             nextTranslationId++;
         }
@@ -286,7 +318,7 @@ const createTranslationValidation = [
 ];
 
 // Get languages endpoint
-app.get('/api/v1/languages', (req, res) => {
+app.get('/api/v1/translation/languages', (req, res) => {
     // Parse pagination parameters
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -332,8 +364,28 @@ app.get('/api/v1/languages', (req, res) => {
     });
 });
 
+// Get active languages endpoint
+app.get('/api/v1/translation/languages/active', (req, res) => {
+    const activeLanguages = Object.values(mockLanguages)
+        .filter(language => language.isActive)
+        .map(language => ({
+            id: language.id,
+            code: language.code,
+            name: language.name,
+            nativeName: language.nativeName,
+            isRTL: language.isRTL,
+            isActive: language.isActive
+        }));
+
+    res.json({
+        success: true,
+        data: activeLanguages,
+        total: activeLanguages.length
+    });
+});
+
 // Get translations endpoint
-app.get('/api/v1/translations', (req, res) => {
+app.get('/api/v1/translation/translations', (req, res) => {
     // Parse pagination parameters
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -346,10 +398,10 @@ app.get('/api/v1/translations', (req, res) => {
         key: translation.key,
         languageId: translation.languageId,
         languageCode: translation.languageCode,
-        value: translation.value,
-        isActive: translation.isActive,
-        createdAt: '2025-01-01T00:00:00.000Z',
-        updatedAt: '2025-01-01T00:00:00.000Z'
+        value: translation.value || translation.translatedText || 'No translation',
+        isActive: translation.isActive !== undefined ? translation.isActive : true,
+        createdAt: translation.createdAt || '2025-01-01T00:00:00.000Z',
+        updatedAt: translation.updatedAt || '2025-01-01T00:00:00.000Z'
     }));
 
     // Apply filters if provided
@@ -385,8 +437,59 @@ app.get('/api/v1/translations', (req, res) => {
     });
 });
 
+// Get language by ID
+app.get('/api/v1/translation/languages/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const language = mockLanguages[id];
+
+    if (!language) {
+        return res.status(404).json({
+            success: false,
+            message: 'Language not found'
+        });
+    }
+
+    res.json({
+        success: true,
+        data: language
+    });
+});
+
+// Get language by code
+app.get('/api/v1/translation/languages/code/:code', (req, res) => {
+    const code = req.params.code;
+    const language = Object.values(mockLanguages).find(lang => lang.code === code);
+
+    if (!language) {
+        return res.status(404).json({
+            success: false,
+            message: 'Language not found'
+        });
+    }
+
+    res.json({
+        success: true,
+        data: language
+    });
+});
+
+// Get language count
+app.get('/api/v1/translation/languages/count', (req, res) => {
+    const total = Object.keys(mockLanguages).length;
+    const active = Object.values(mockLanguages).filter(lang => lang.isActive).length;
+
+    res.json({
+        success: true,
+        data: {
+            total: total,
+            active: active,
+            inactive: total - active
+        }
+    });
+});
+
 // Get translations by language code
-app.get('/api/v1/translations/:languageCode', (req, res) => {
+app.get('/api/v1/translation/translations/:languageCode', (req, res) => {
     const languageCode = req.params.languageCode;
 
     const translations = Object.values(mockTranslations)
@@ -399,8 +502,54 @@ app.get('/api/v1/translations/:languageCode', (req, res) => {
     res.json(translations);
 });
 
+// Get translation by ID
+app.get('/api/v1/translation/translations/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const translation = mockTranslations[id];
+
+    if (!translation) {
+        return res.status(404).json({
+            success: false,
+            message: 'Translation not found'
+        });
+    }
+
+    res.json({
+        success: true,
+        data: translation
+    });
+});
+
+// Get translation count
+app.get('/api/v1/translation/translations/count', (req, res) => {
+    const total = Object.keys(mockTranslations).length;
+    const active = Object.values(mockTranslations).filter(trans => trans.isActive).length;
+
+    res.json({
+        success: true,
+        data: {
+            total: total,
+            active: active,
+            inactive: total - active
+        }
+    });
+});
+
+// Get pending translations
+app.get('/api/v1/translation/translations/pending', (req, res) => {
+    const pendingTranslations = Object.values(mockTranslations)
+        .filter(translation => !translation.isActive)
+        .slice(0, 10); // Limit to 10 for demo
+
+    res.json({
+        success: true,
+        data: pendingTranslations,
+        total: pendingTranslations.length
+    });
+});
+
 // Create language endpoint
-app.post('/api/v1/languages', createLanguageValidation, (req, res) => {
+app.post('/api/v1/translation/languages', createLanguageValidation, (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -459,7 +608,7 @@ app.post('/api/v1/languages', createLanguageValidation, (req, res) => {
 });
 
 // Create translation endpoint
-app.post('/api/v1/translations', createTranslationValidation, (req, res) => {
+app.post('/api/v1/translation/translations', createTranslationValidation, (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {

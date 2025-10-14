@@ -1,8 +1,10 @@
 import {
   BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
 } from "@nestjs/common";
+import { Customer } from "../../domain/entities/customer.entity";
 import { CustomerRepositoryInterface } from "../../domain/repositories/customer.repository.interface";
 import { CustomerDomainService } from "../../domain/services/customer.domain.service";
 import { CreateCustomerDto } from "../dto/create-customer.dto";
@@ -16,6 +18,7 @@ import { CustomerResponseDto } from "../dto/customer-response.dto";
 @Injectable()
 export class CreateCustomerUseCase {
   constructor(
+    @Inject("CustomerRepositoryInterface")
     private readonly customerRepository: CustomerRepositoryInterface,
     private readonly customerDomainService: CustomerDomainService
   ) {}
@@ -57,7 +60,7 @@ export class CreateCustomerUseCase {
     }
 
     // 4. Create customer entity
-    const customer = {
+    const customer = new Customer({
       email: createCustomerDto.email.toLowerCase(),
       firstName: createCustomerDto.firstName,
       lastName: createCustomerDto.lastName,
@@ -65,10 +68,10 @@ export class CreateCustomerUseCase {
       isActive: createCustomerDto.isActive ?? true,
       dateOfBirth: createCustomerDto.dateOfBirth
         ? new Date(createCustomerDto.dateOfBirth)
-        : null,
+        : undefined,
       address: createCustomerDto.address,
       preferences: createCustomerDto.preferences,
-    };
+    });
 
     // 5. Save customer in repository
     const savedCustomer = await this.customerRepository.create(customer);
@@ -95,6 +98,9 @@ export class CreateCustomerUseCase {
       preferences: customer.preferences,
       createdAt: customer.createdAt,
       updatedAt: customer.updatedAt,
+      get fullName() {
+        return `${customer.firstName} ${customer.lastName}`.trim();
+      },
     };
   }
 }

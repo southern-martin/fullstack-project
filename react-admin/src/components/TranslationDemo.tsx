@@ -137,7 +137,7 @@ const TranslationDemo: React.FC = () => {
                                 {languages.map((language) => (
                                     <SelectItem key={language.id} value={language.code}>
                                         <div className="flex items-center space-x-2">
-                                            <span>{language.metadata.flag}</span>
+                                            <span>🌐</span>
                                             <span>{language.name}</span>
                                             <span className="text-muted-foreground">({language.code})</span>
                                         </div>
@@ -219,23 +219,13 @@ const TranslationDemo: React.FC = () => {
                                         return language ? (
                                             <div className="text-sm space-y-1">
                                                 <div className="flex items-center space-x-2">
-                                                    <span>{language.metadata.flag}</span>
+                                                    <span>🌐</span>
                                                     <span className="font-medium">{language.name}</span>
                                                     <span className="text-muted-foreground">({language.nativeName})</span>
                                                 </div>
                                                 <div className="text-muted-foreground">
-                                                    Direction: {language.metadata.direction?.toUpperCase()}
+                                                    Direction: {language.isRTL ? 'RTL' : 'LTR'}
                                                 </div>
-                                                {language.metadata.region && (
-                                                    <div className="text-muted-foreground">
-                                                        Region: {language.metadata.region}
-                                                    </div>
-                                                )}
-                                                {language.metadata.currency && (
-                                                    <div className="text-muted-foreground">
-                                                        Currency: {language.metadata.currency}
-                                                    </div>
-                                                )}
                                             </div>
                                         ) : null;
                                     })()}
@@ -253,7 +243,7 @@ const TranslationDemo: React.FC = () => {
                                             className="cursor-pointer"
                                             onClick={() => setSelectedLanguage(language.code)}
                                         >
-                                            {language.metadata.flag} {language.code}
+                                            🌐 {language.code}
                                         </Badge>
                                     ))}
                                 </div>

@@ -20,10 +20,8 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
 }) => {
     const [formData, setFormData] = useState({
         key: translation?.key || '',
-        originalText: translation?.originalText || '',
-        translatedText: translation?.translatedText || '',
+        value: translation?.value || '',
         languageId: translation?.languageId?.toString() || '',
-        context: typeof translation?.context === 'string' ? translation.context : '',
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,7 +39,7 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
         }
 
         const currentFormData = formDataRef.current;
-        if (!currentFormData.key.trim() || !currentFormData.originalText.trim() || !currentFormData.translatedText.trim() || !currentFormData.languageId) {
+        if (!currentFormData.key.trim() || !currentFormData.value.trim() || !currentFormData.languageId) {
             toast.error('Please fill in all required fields');
             return;
         }
@@ -137,56 +135,25 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
                         <option value="">Select a language</option>
                         {languages.map((language) => (
                             <option key={language.id} value={language.id}>
-                                {language.metadata?.flag} {language.name} ({language.code})
+                                🌐 {language.name} ({language.code})
                             </option>
                         ))}
                     </select>
                 </div>
 
-                {/* Original Text */}
+                {/* Translation Value */}
                 <div>
-                    <label htmlFor="originalText" className="block text-sm font-medium text-gray-700 mb-2">
-                        Original Text *
+                    <label htmlFor="value" className="block text-sm font-medium text-gray-700 mb-2">
+                        Translation Value *
                     </label>
                     <textarea
-                        id="originalText"
-                        value={formData.originalText}
-                        onChange={(e) => handleChange('originalText', e.target.value)}
+                        id="value"
+                        value={formData.value}
+                        onChange={(e) => handleChange('value', e.target.value)}
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Enter the original text..."
+                        placeholder="Enter the translation value..."
                         required
-                    />
-                </div>
-
-                {/* Translated Text */}
-                <div>
-                    <label htmlFor="translatedText" className="block text-sm font-medium text-gray-700 mb-2">
-                        Translated Text *
-                    </label>
-                    <textarea
-                        id="translatedText"
-                        value={formData.translatedText}
-                        onChange={(e) => handleChange('translatedText', e.target.value)}
-                        rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Enter the translated text..."
-                        required
-                    />
-                </div>
-
-                {/* Context */}
-                <div>
-                    <label htmlFor="context" className="block text-sm font-medium text-gray-700 mb-2">
-                        Context
-                    </label>
-                    <input
-                        type="text"
-                        id="context"
-                        value={formData.context}
-                        onChange={(e) => handleChange('context', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="e.g., ui, email, notification"
                     />
                 </div>
             </div>

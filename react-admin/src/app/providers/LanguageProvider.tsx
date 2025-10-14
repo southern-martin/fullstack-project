@@ -42,7 +42,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
 
         // Update document language and direction
         document.documentElement.lang = language.code;
-        if (language.metadata?.direction === 'rtl') {
+        if (language.isRTL) {
             document.documentElement.dir = 'rtl';
         } else {
             document.documentElement.dir = 'ltr';

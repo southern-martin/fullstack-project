@@ -12,7 +12,7 @@ import { CustomerDomainService } from "../domain/services/customer.domain.servic
 // Repository Interfaces (will be implemented in infrastructure)
 
 // Infrastructure Implementations
-import { CustomerRepository } from "../infrastructure/repositories/customer.repository";
+import { CustomerRepository } from "../infrastructure/database/typeorm/repositories/customer.repository";
 
 /**
  * Application Module

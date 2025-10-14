@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { CustomerRepositoryInterface } from "../../domain/repositories/customer.repository.interface";
 import { CustomerResponseDto } from "../dto/customer-response.dto";
 
@@ -10,6 +10,7 @@ import { CustomerResponseDto } from "../dto/customer-response.dto";
 @Injectable()
 export class GetCustomerUseCase {
   constructor(
+    @Inject("CustomerRepositoryInterface")
     private readonly customerRepository: CustomerRepositoryInterface
   ) {}
 
@@ -59,7 +60,7 @@ export class GetCustomerUseCase {
     limit: number;
     totalPages: number;
   }> {
-    const { customers, total } = await this.customerRepository.findAll(
+    const { customers, total } = await this.customerRepository.findPaginated(
       page,
       limit,
       search
@@ -112,6 +113,9 @@ export class GetCustomerUseCase {
       preferences: customer.preferences,
       createdAt: customer.createdAt,
       updatedAt: customer.updatedAt,
+      get fullName() {
+        return `${customer.firstName} ${customer.lastName}`.trim();
+      },
     };
   }
 }

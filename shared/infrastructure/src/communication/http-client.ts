@@ -70,14 +70,19 @@ export class HttpClient {
     instance.interceptors.response.use(
       (response) => {
         // Add response time
-        const duration = Date.now() - (response.config as any).metadata?.startTime;
-        (response.config as any).metadata = { ...(response.config as any).metadata, duration };
+        const duration =
+          Date.now() - (response.config as any).metadata?.startTime;
+        (response.config as any).metadata = {
+          ...(response.config as any).metadata,
+          duration,
+        };
         return response;
       },
       (error) => {
         // Add error information
         if ((error.config as any)?.metadata) {
-          const duration = Date.now() - (error.config as any).metadata.startTime;
+          const duration =
+            Date.now() - (error.config as any).metadata.startTime;
           (error.config as any).metadata.duration = duration;
         }
         return Promise.reject(error);

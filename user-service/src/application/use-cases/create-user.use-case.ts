@@ -1,10 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { ValidationException } from "@shared/infrastructure";
 import * as bcrypt from "bcrypt";
+import { User } from "../../domain/entities/user.entity";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
 import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
 import { UserDomainService } from "../../domain/services/user.domain.service";
-import { User } from "../../domain/entities/user.entity";
 import { CreateUserDto } from "../dto/create-user.dto";
 import { UserResponseDto } from "../dto/user-response.dto";
 

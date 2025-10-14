@@ -44,11 +44,9 @@ export class CustomerResponseDto {
 
   @Expose()
   updatedAt: Date;
+
+  @Expose()
+  get fullName(): string {
+    return `${this.firstName} ${this.lastName}`.trim();
+  }
 }
-
-
-
-
-
-
-

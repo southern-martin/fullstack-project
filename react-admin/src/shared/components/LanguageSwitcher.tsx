@@ -65,7 +65,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
     if (!currentLanguage && languages.length > 0) {
         // If we have languages but no current language, set the first one as default
-        const defaultLang = languages.find(lang => lang.isDefault) || languages[0];
+        const defaultLang = languages.find(lang => lang.code === 'en') || languages[0];
         setCurrentLanguage(defaultLang);
         return null; // Will re-render with the set language
     }
@@ -87,7 +87,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
                 aria-label="Select language"
             >
                 <GlobeAltIcon className="h-4 w-4" />
-                <span className="text-lg">{currentLanguage.metadata?.flag || '🌐'}</span>
+                <span className="text-lg">🌐</span>
                 <span className="hidden sm:inline">{currentLanguage.name}</span>
                 <ChevronDownIcon className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -114,12 +114,12 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
                                     className={`w-full flex items-center space-x-3 px-4 py-2 text-sm text-left hover:bg-gray-50 transition-colors ${currentLanguage.id === language.id ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
                                         }`}
                                 >
-                                    <span className="text-lg">{language.metadata?.flag || '🌐'}</span>
+                                    <span className="text-lg">🌐</span>
                                     <div className="flex-1">
                                         <div className="font-medium">{language.name}</div>
                                         <div className="text-xs text-gray-500">{language.nativeName}</div>
                                     </div>
-                                    {language.isDefault && (
+                                    {language.code === 'en' && (
                                         <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
                                             Default
                                         </span>

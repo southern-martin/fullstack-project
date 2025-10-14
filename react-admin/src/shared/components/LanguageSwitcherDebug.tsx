@@ -42,12 +42,12 @@ const LanguageSwitcherDebug: React.FC = () => {
                         key={language.id}
                         onClick={() => handleSetLanguage(language)}
                         className={`block w-full text-left p-2 rounded ${currentLanguage?.id === language.id
-                                ? 'bg-blue-200 text-blue-800'
-                                : 'bg-white text-gray-700 hover:bg-gray-100'
+                            ? 'bg-blue-200 text-blue-800'
+                            : 'bg-white text-gray-700 hover:bg-gray-100'
                             }`}
                     >
-                        {language.metadata?.flag} {language.name} ({language.code})
-                        {language.isDefault && ' - DEFAULT'}
+                        🌐 {language.name} ({language.code})
+                        {language.code === 'en' && ' - DEFAULT'}
                     </button>
                 ))}
             </div>

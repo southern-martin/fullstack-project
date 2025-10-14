@@ -98,7 +98,9 @@ export class GetUserUseCase {
    */
   async executeByRole(roleName: string): Promise<UserResponseDto[]> {
     const usersResult = await this.userRepository.findAll();
-    const usersWithRole = usersResult.users.filter((user) => user.hasRole(roleName));
+    const usersWithRole = usersResult.users.filter((user) =>
+      user.hasRole(roleName)
+    );
     return usersWithRole.map((user) => this.mapToResponseDto(user));
   }
 
