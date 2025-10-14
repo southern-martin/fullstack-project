@@ -1,20 +1,20 @@
-import { Module } from '@nestjs/common';
+import { Module } from "@nestjs/common";
 
 // Controllers
-import { CarrierController } from './controllers/carrier.controller';
-import { HealthController } from './controllers/health.controller';
+import { CarrierController } from "./controllers/carrier.controller";
+import { HealthController } from "./controllers/health.controller";
 
 // Use Cases (from application layer)
-import { CreateCarrierUseCase } from '../application/use-cases/create-carrier.use-case';
-import { GetCarrierUseCase } from '../application/use-cases/get-carrier.use-case';
-import { UpdateCarrierUseCase } from '../application/use-cases/update-carrier.use-case';
-import { DeleteCarrierUseCase } from '../application/use-cases/delete-carrier.use-case';
+import { CreateCarrierUseCase } from "../application/use-cases/create-carrier.use-case";
+import { DeleteCarrierUseCase } from "../application/use-cases/delete-carrier.use-case";
+import { GetCarrierUseCase } from "../application/use-cases/get-carrier.use-case";
+import { UpdateCarrierUseCase } from "../application/use-cases/update-carrier.use-case";
 
 // Domain Services
-import { CarrierDomainService } from '../domain/services/carrier.domain.service';
+import { CarrierDomainService } from "../domain/services/carrier.domain.service";
 
 // Infrastructure
-import { CarrierRepository } from '../infrastructure/repositories/carrier.repository';
+import { CarrierRepository } from "../infrastructure/database/typeorm/repositories/carrier.repository";
 
 /**
  * Interfaces Module
@@ -22,10 +22,7 @@ import { CarrierRepository } from '../infrastructure/repositories/carrier.reposi
  * Follows Clean Architecture principles
  */
 @Module({
-  controllers: [
-    CarrierController,
-    HealthController,
-  ],
+  controllers: [CarrierController, HealthController],
   providers: [
     // Use Cases
     CreateCarrierUseCase,
@@ -38,7 +35,7 @@ import { CarrierRepository } from '../infrastructure/repositories/carrier.reposi
 
     // Repository Implementation
     {
-      provide: 'CarrierRepositoryInterface',
+      provide: "CarrierRepositoryInterface",
       useClass: CarrierRepository,
     },
   ],

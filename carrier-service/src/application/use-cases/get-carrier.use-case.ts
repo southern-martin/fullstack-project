@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { CarrierRepositoryInterface } from '../../domain/repositories/carrier.repository.interface';
-import { CarrierResponseDto } from '../dto/carrier-response.dto';
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { CarrierRepositoryInterface } from "../../domain/repositories/carrier.repository.interface";
+import { CarrierResponseDto } from "../dto/carrier-response.dto";
 
 /**
  * Get Carrier Use Case
@@ -10,7 +10,8 @@ import { CarrierResponseDto } from '../dto/carrier-response.dto';
 @Injectable()
 export class GetCarrierUseCase {
   constructor(
-    private readonly carrierRepository: CarrierRepositoryInterface,
+    @Inject("CarrierRepositoryInterface")
+    private readonly carrierRepository: CarrierRepositoryInterface
   ) {}
 
   /**
@@ -21,7 +22,7 @@ export class GetCarrierUseCase {
   async executeById(id: number): Promise<CarrierResponseDto> {
     const carrier = await this.carrierRepository.findById(id);
     if (!carrier) {
-      throw new NotFoundException('Carrier not found');
+      throw new NotFoundException("Carrier not found");
     }
 
     return this.mapToResponseDto(carrier);
@@ -35,7 +36,7 @@ export class GetCarrierUseCase {
   async executeByName(name: string): Promise<CarrierResponseDto> {
     const carrier = await this.carrierRepository.findByName(name);
     if (!carrier) {
-      throw new NotFoundException('Carrier not found');
+      throw new NotFoundException("Carrier not found");
     }
 
     return this.mapToResponseDto(carrier);
@@ -52,12 +53,26 @@ export class GetCarrierUseCase {
     page: number = 1,
     limit: number = 10,
     search?: string
-  ): Promise<{ carriers: CarrierResponseDto[]; total: number }> {
-    const { carriers, total } = await this.carrierRepository.findAll(page, limit, search);
-    
+  ): Promise<{
+    carriers: CarrierResponseDto[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    const { carriers, total } = await this.carrierRepository.findPaginated(
+      page,
+      limit,
+      search
+    );
+    const totalPages = Math.ceil(total / limit);
+
     return {
-      carriers: carriers.map(carrier => this.mapToResponseDto(carrier)),
+      carriers: carriers.map((carrier) => this.mapToResponseDto(carrier)),
       total,
+      page,
+      limit,
+      totalPages,
     };
   }
 
@@ -67,7 +82,7 @@ export class GetCarrierUseCase {
    */
   async executeActive(): Promise<CarrierResponseDto[]> {
     const carriers = await this.carrierRepository.findActive();
-    return carriers.map(carrier => this.mapToResponseDto(carrier));
+    return carriers.map((carrier) => this.mapToResponseDto(carrier));
   }
 
   /**

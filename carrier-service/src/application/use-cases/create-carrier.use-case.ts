@@ -1,8 +1,14 @@
-import { Injectable, ConflictException, BadRequestException } from '@nestjs/common';
-import { CarrierRepositoryInterface } from '../../domain/repositories/carrier.repository.interface';
-import { CarrierDomainService } from '../../domain/services/carrier.domain.service';
-import { CreateCarrierDto } from '../dto/create-carrier.dto';
-import { CarrierResponseDto } from '../dto/carrier-response.dto';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+} from "@nestjs/common";
+import { Carrier } from "../../domain/entities/carrier.entity";
+import { CarrierRepositoryInterface } from "../../domain/repositories/carrier.repository.interface";
+import { CarrierDomainService } from "../../domain/services/carrier.domain.service";
+import { CarrierResponseDto } from "../dto/carrier-response.dto";
+import { CreateCarrierDto } from "../dto/create-carrier.dto";
 
 /**
  * Create Carrier Use Case
@@ -12,8 +18,9 @@ import { CarrierResponseDto } from '../dto/carrier-response.dto';
 @Injectable()
 export class CreateCarrierUseCase {
   constructor(
+    @Inject("CarrierRepositoryInterface")
     private readonly carrierRepository: CarrierRepositoryInterface,
-    private readonly carrierDomainService: CarrierDomainService,
+    private readonly carrierDomainService: CarrierDomainService
   ) {}
 
   /**
@@ -21,36 +28,43 @@ export class CreateCarrierUseCase {
    * @param createCarrierDto - Carrier creation data
    * @returns Created carrier response
    */
-  async execute(createCarrierDto: CreateCarrierDto): Promise<CarrierResponseDto> {
+  async execute(
+    createCarrierDto: CreateCarrierDto
+  ): Promise<CarrierResponseDto> {
     // 1. Validate input using domain service
-    const validation = this.carrierDomainService.validateCarrierCreationData(createCarrierDto);
+    const validation =
+      this.carrierDomainService.validateCarrierCreationData(createCarrierDto);
     if (!validation.isValid) {
-      throw new BadRequestException(validation.errors.join(', '));
+      throw new BadRequestException(validation.errors.join(", "));
     }
 
     // 2. Check if carrier name already exists
-    const existingCarrier = await this.carrierRepository.findByName(createCarrierDto.name);
+    const existingCarrier = await this.carrierRepository.findByName(
+      createCarrierDto.name
+    );
     if (existingCarrier) {
-      throw new ConflictException('Carrier name already exists');
+      throw new ConflictException("Carrier name already exists");
     }
 
     // 3. Validate metadata if provided
     if (createCarrierDto.metadata) {
-      const metadataValidation = this.carrierDomainService.validateMetadata(createCarrierDto.metadata);
+      const metadataValidation = this.carrierDomainService.validateMetadata(
+        createCarrierDto.metadata
+      );
       if (!metadataValidation.isValid) {
-        throw new BadRequestException(metadataValidation.errors.join(', '));
+        throw new BadRequestException(metadataValidation.errors.join(", "));
       }
     }
 
     // 4. Create carrier entity
-    const carrier = {
+    const carrier = new Carrier({
       name: createCarrierDto.name,
       description: createCarrierDto.description,
       isActive: createCarrierDto.isActive ?? true,
       contactEmail: createCarrierDto.contactEmail,
       contactPhone: createCarrierDto.contactPhone,
       metadata: createCarrierDto.metadata,
-    };
+    });
 
     // 5. Save carrier in repository
     const savedCarrier = await this.carrierRepository.create(carrier);
