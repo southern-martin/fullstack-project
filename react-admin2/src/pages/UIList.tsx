@@ -1,5 +1,5 @@
+import { CalendarIcon, CheckIcon, ExclamationTriangleIcon, InformationCircleIcon, TagIcon, UserIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import React from 'react';
-import { CheckIcon, XMarkIcon, ExclamationTriangleIcon, InformationCircleIcon, UserIcon, CalendarIcon, TagIcon } from '@heroicons/react/24/outline';
 
 const UIList: React.FC = () => {
     const todoItems = [
