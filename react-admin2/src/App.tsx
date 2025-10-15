@@ -1,8 +1,63 @@
-
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
+import AnalyticsDashboard from './pages/AnalyticsDashboard';
+import CRMDashboard from './pages/CRMDashboard';
 import Dashboard from './pages/Dashboard';
+import LogisticsDashboard from './pages/LogisticsDashboard';
+import MarketingDashboard from './pages/MarketingDashboard';
+import SaaSDashboard from './pages/SaaSDashboard';
+import StocksDashboard from './pages/StocksDashboard';
+
+// E-commerce pages
+import AddProduct from './pages/AddProduct';
+import Billing from './pages/Billing';
+import CreateInvoice from './pages/CreateInvoice';
+import Invoices from './pages/Invoices';
+import Products from './pages/Products';
+import SingleInvoice from './pages/SingleInvoice';
+import SingleTransaction from './pages/SingleTransaction';
+import Transactions from './pages/Transactions';
+
+// AI Assistant
+import AIAssistant from './pages/AIAssistant';
+
+// Calendar
+import Calendar from './pages/Calendar';
+
+// Form pages
+import FormElements from './pages/FormElements';
+import FormLayouts from './pages/FormLayouts';
+import FormValidation from './pages/FormValidation';
+import FormWizards from './pages/FormWizards';
+
+// Profile
+import Profile from './pages/Profile';
+
+// Table pages
+import BasicTables from './pages/BasicTables';
+import DataTables from './pages/DataTables';
+
+// Pages section
+import FAQ from './pages/FAQ';
+import FileManager from './pages/FileManager';
+import PricingTables from './pages/PricingTables';
+
+// Support section
+import SupportChat from './pages/SupportChat';
+import SupportTicketList from './pages/SupportTicketList';
+import SupportTicketReply from './pages/SupportTicketReply';
+import SupportTickets from './pages/SupportTickets';
+
+// Charts section
+import BarChart from './pages/BarChart';
+import LineChart from './pages/LineChart';
+import PieChart from './pages/PieChart';
+
+// UI Elements section
+import UIAlerts from './pages/UIAlerts';
+import UIButtons from './pages/UIButtons';
+import UICards from './pages/UICards';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -15,6 +70,65 @@ function App() {
           <Routes>
             <Route path="/" element={<Layout />}>
               <Route index element={<Dashboard />} />
+
+              {/* Dashboard Types */}
+              <Route path="ecommerce" element={<Dashboard />} />
+              <Route path="analytics" element={<AnalyticsDashboard />} />
+              <Route path="marketing" element={<MarketingDashboard />} />
+              <Route path="crm" element={<CRMDashboard />} />
+              <Route path="stocks" element={<StocksDashboard />} />
+              <Route path="saas" element={<SaaSDashboard />} />
+              <Route path="logistics" element={<LogisticsDashboard />} />
+
+              {/* AI Assistant */}
+              <Route path="ai-assistant" element={<AIAssistant />} />
+
+              {/* Calendar */}
+              <Route path="calendar" element={<Calendar />} />
+
+              {/* Form Routes */}
+              <Route path="forms/elements" element={<FormElements />} />
+              <Route path="forms/layouts" element={<FormLayouts />} />
+              <Route path="forms/wizards" element={<FormWizards />} />
+              <Route path="forms/validation" element={<FormValidation />} />
+
+              {/* Profile */}
+              <Route path="profile" element={<Profile />} />
+
+              {/* Table Routes */}
+              <Route path="tables/basic" element={<BasicTables />} />
+              <Route path="tables/data" element={<DataTables />} />
+
+              {/* Pages Routes */}
+              <Route path="pages/files" element={<FileManager />} />
+              <Route path="pages/pricing" element={<PricingTables />} />
+              <Route path="pages/faq" element={<FAQ />} />
+
+              {/* Support Routes */}
+              <Route path="support/chat" element={<SupportChat />} />
+              <Route path="support/tickets" element={<SupportTickets />} />
+              <Route path="support/tickets/list" element={<SupportTicketList />} />
+              <Route path="support/tickets/reply" element={<SupportTicketReply />} />
+
+              {/* Charts Routes */}
+              <Route path="charts/line" element={<LineChart />} />
+              <Route path="charts/bar" element={<BarChart />} />
+              <Route path="charts/pie" element={<PieChart />} />
+
+              {/* UI Elements Routes */}
+              <Route path="ui/alerts" element={<UIAlerts />} />
+              <Route path="ui/buttons" element={<UIButtons />} />
+              <Route path="ui/cards" element={<UICards />} />
+
+              {/* E-commerce Routes */}
+              <Route path="products" element={<Products />} />
+              <Route path="products/add" element={<AddProduct />} />
+              <Route path="billing" element={<Billing />} />
+              <Route path="invoices" element={<Invoices />} />
+              <Route path="invoices/single" element={<SingleInvoice />} />
+              <Route path="invoices/create" element={<CreateInvoice />} />
+              <Route path="transactions" element={<Transactions />} />
+              <Route path="transactions/single" element={<SingleTransaction />} />
             </Route>
           </Routes>
         </div>
