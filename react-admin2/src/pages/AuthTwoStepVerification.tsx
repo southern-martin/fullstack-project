@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { ArrowLeftIcon, ExclamationTriangleIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeftIcon, ShieldCheckIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 const AuthTwoStepVerification: React.FC = () => {
     const [code, setCode] = useState(['', '', '', '', '', '']);
@@ -21,7 +21,7 @@ const AuthTwoStepVerification: React.FC = () => {
 
     const handleInputChange = (index: number, value: string) => {
         if (value.length > 1) return; // Only allow single character
-        
+
         const newCode = [...code];
         newCode[index] = value;
         setCode(newCode);
@@ -43,14 +43,14 @@ const AuthTwoStepVerification: React.FC = () => {
         e.preventDefault();
         const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
         const newCode = [...code];
-        
+
         for (let i = 0; i < pastedData.length; i++) {
             newCode[i] = pastedData[i];
         }
-        
+
         setCode(newCode);
         setError('');
-        
+
         // Focus the next empty input or the last one
         const nextIndex = Math.min(pastedData.length, 5);
         inputRefs.current[nextIndex]?.focus();
@@ -59,7 +59,7 @@ const AuthTwoStepVerification: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const fullCode = code.join('');
-        
+
         if (fullCode.length !== 6) {
             setError('Please enter the complete 6-digit code');
             return;
@@ -89,7 +89,7 @@ const AuthTwoStepVerification: React.FC = () => {
         setCode(['', '', '', '', '', '']);
         setError('');
         inputRefs.current[0]?.focus();
-        
+
         // Simulate resending code
         console.log('Resending verification code...');
     };
