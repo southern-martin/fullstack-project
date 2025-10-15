@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDownIcon, UserIcon, CogIcon, BellIcon, ArrowRightOnRectangleIcon, PlusIcon, PencilIcon, TrashIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { ArrowRightOnRectangleIcon, BellIcon, ChevronDownIcon, CogIcon, EyeIcon, PencilIcon, TrashIcon, UserIcon } from '@heroicons/react/24/outline';
+import React, { useEffect, useRef, useState } from 'react';
 
 const UIDropdowns: React.FC = () => {
     const [isOpen, setIsOpen] = useState<string | null>(null);
@@ -61,7 +61,7 @@ const UIDropdowns: React.FC = () => {
                                     <span>Options</span>
                                     <ChevronDownIcon className="h-4 w-4" />
                                 </button>
-                                
+
                                 {isOpen === 'basic' && (
                                     <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
                                         <div className="py-1">
@@ -98,7 +98,7 @@ const UIDropdowns: React.FC = () => {
                                     <span>John Doe</span>
                                     <ChevronDownIcon className="h-4 w-4" />
                                 </button>
-                                
+
                                 {isOpen === 'user' && (
                                     <div className="absolute top-full right-0 mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
                                         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -110,11 +110,10 @@ const UIDropdowns: React.FC = () => {
                                                 <div key={index}>
                                                     <a
                                                         href={item.href}
-                                                        className={`flex items-center space-x-3 px-4 py-2 text-sm ${
-                                                            item.name === 'Sign out'
+                                                        className={`flex items-center space-x-3 px-4 py-2 text-sm ${item.name === 'Sign out'
                                                                 ? 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
                                                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         <item.icon className="h-4 w-4" />
                                                         <span>{item.name}</span>
@@ -143,7 +142,7 @@ const UIDropdowns: React.FC = () => {
                                     <span>Actions</span>
                                     <ChevronDownIcon className="h-4 w-4" />
                                 </button>
-                                
+
                                 {isOpen === 'actions' && (
                                     <div className="absolute top-full left-0 mt-1 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
                                         <div className="py-1">
@@ -151,11 +150,10 @@ const UIDropdowns: React.FC = () => {
                                                 <a
                                                     key={index}
                                                     href={item.href}
-                                                    className={`flex items-center space-x-3 px-4 py-2 text-sm ${
-                                                        item.danger
+                                                    className={`flex items-center space-x-3 px-4 py-2 text-sm ${item.danger
                                                             ? 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
                                                             : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <item.icon className="h-4 w-4" />
                                                     <span>{item.name}</span>
@@ -182,7 +180,7 @@ const UIDropdowns: React.FC = () => {
                                     <span>Select Status</span>
                                     <ChevronDownIcon className="h-4 w-4" />
                                 </button>
-                                
+
                                 {isOpen === 'status' && (
                                     <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
                                         <div className="py-1">
@@ -217,7 +215,7 @@ const UIDropdowns: React.FC = () => {
                                     <span>Categories</span>
                                     <ChevronDownIcon className="h-4 w-4" />
                                 </button>
-                                
+
                                 {isOpen === 'multilevel' && (
                                     <div className="absolute top-full left-0 mt-1 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
                                         <div className="py-1">
@@ -233,9 +231,9 @@ const UIDropdowns: React.FC = () => {
                                             <a href="#" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                                                 Books
                                             </a>
-                                            
+
                                             <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
-                                            
+
                                             <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                                 Services
                                             </div>
@@ -266,7 +264,7 @@ const UIDropdowns: React.FC = () => {
                                     <span>Select User</span>
                                     <ChevronDownIcon className="h-4 w-4" />
                                 </button>
-                                
+
                                 {isOpen === 'search' && (
                                     <div className="absolute top-full left-0 mt-1 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
                                         <div className="p-3 border-b border-gray-200 dark:border-gray-700">
@@ -311,7 +309,7 @@ const UIDropdowns: React.FC = () => {
                                     <span>Left Aligned</span>
                                     <ChevronDownIcon className="h-4 w-4" />
                                 </button>
-                                
+
                                 {isOpen === 'left' && (
                                     <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
                                         <div className="py-1">
@@ -334,7 +332,7 @@ const UIDropdowns: React.FC = () => {
                                     <span>Right Aligned</span>
                                     <ChevronDownIcon className="h-4 w-4" />
                                 </button>
-                                
+
                                 {isOpen === 'right' && (
                                     <div className="absolute top-full right-0 mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
                                         <div className="py-1">

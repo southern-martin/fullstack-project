@@ -67,13 +67,19 @@ import UIAvatars from './pages/UIAvatars';
 import UIBadge from './pages/UIBadge';
 import UIBreadcrumb from './pages/UIBreadcrumb';
 import UIButtonGroup from './pages/UIButtonGroup';
+import UIButtons from './pages/UIButtons';
+import UICards from './pages/UICards';
 import UICarousel from './pages/UICarousel';
 import UIDropdowns from './pages/UIDropdowns';
 import UIImages from './pages/UIImages';
 import UILinks from './pages/UILinks';
 import UIList from './pages/UIList';
-import UIButtons from './pages/UIButtons';
-import UICards from './pages/UICards';
+
+// Authentication pages
+import AuthSignIn from './pages/AuthSignIn';
+import AuthSignUp from './pages/AuthSignUp';
+import AuthResetPassword from './pages/AuthResetPassword';
+import AuthTwoStepVerification from './pages/AuthTwoStepVerification';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -138,19 +144,19 @@ function App() {
               <Route path="charts/bar" element={<BarChart />} />
               <Route path="charts/pie" element={<PieChart />} />
 
-               {/* UI Elements Routes */}
-               <Route path="ui/alerts" element={<UIAlerts />} />
-               <Route path="ui/buttons" element={<UIButtons />} />
-               <Route path="ui/cards" element={<UICards />} />
-               <Route path="ui/avatars" element={<UIAvatars />} />
-               <Route path="ui/badge" element={<UIBadge />} />
-               <Route path="ui/breadcrumb" element={<UIBreadcrumb />} />
-               <Route path="ui/button-group" element={<UIButtonGroup />} />
-               <Route path="ui/carousel" element={<UICarousel />} />
-               <Route path="ui/dropdowns" element={<UIDropdowns />} />
-               <Route path="ui/images" element={<UIImages />} />
-               <Route path="ui/links" element={<UILinks />} />
-               <Route path="ui/list" element={<UIList />} />
+              {/* UI Elements Routes */}
+              <Route path="ui/alerts" element={<UIAlerts />} />
+              <Route path="ui/buttons" element={<UIButtons />} />
+              <Route path="ui/cards" element={<UICards />} />
+              <Route path="ui/avatars" element={<UIAvatars />} />
+              <Route path="ui/badge" element={<UIBadge />} />
+              <Route path="ui/breadcrumb" element={<UIBreadcrumb />} />
+              <Route path="ui/button-group" element={<UIButtonGroup />} />
+              <Route path="ui/carousel" element={<UICarousel />} />
+              <Route path="ui/dropdowns" element={<UIDropdowns />} />
+              <Route path="ui/images" element={<UIImages />} />
+              <Route path="ui/links" element={<UILinks />} />
+              <Route path="ui/list" element={<UIList />} />
 
               {/* E-commerce Routes */}
               <Route path="products" element={<Products />} />
@@ -162,6 +168,12 @@ function App() {
               <Route path="transactions" element={<Transactions />} />
               <Route path="transactions/single" element={<SingleTransaction />} />
             </Route>
+
+            {/* Authentication Routes */}
+            <Route path="/auth/signin" element={<AuthSignIn />} />
+            <Route path="/auth/signup" element={<AuthSignUp />} />
+            <Route path="/auth/reset" element={<AuthResetPassword />} />
+            <Route path="/auth/2fa" element={<AuthTwoStepVerification />} />
           </Routes>
         </div>
       </Router>

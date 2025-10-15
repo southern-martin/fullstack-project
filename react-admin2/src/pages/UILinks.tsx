@@ -1,5 +1,5 @@
+import { ArrowRightIcon, ArrowTopRightOnSquareIcon, ExternalLinkIcon } from '@heroicons/react/24/outline';
 import React from 'react';
-import { ExternalLinkIcon, ArrowRightIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 
 const UILinks: React.FC = () => {
     const linkVariants = [
