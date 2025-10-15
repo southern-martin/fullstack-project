@@ -5,7 +5,7 @@ import {
     TrashIcon,
     TruckIcon
 } from '@heroicons/react/24/outline';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import {
@@ -16,18 +16,35 @@ import {
 import Button from '../../../shared/components/ui/Button';
 import Card from '../../../shared/components/ui/Card';
 import Modal from '../../../shared/components/ui/Modal';
-import { Carrier } from '../../../shared/types';
-import { carrierService } from '../services/carrierService';
+import {
+    useCarriers,
+    useCreateCarrier,
+    useDeleteCarrier,
+    useUpdateCarrier
+} from '../hooks/useCarrierQueries';
+import { Carrier, CreateCarrierRequest, UpdateCarrierRequest } from '../services/carrierApiService';
 
 import CarrierDetails from './CarrierDetails';
 import CarrierForm from './CarrierForm';
 
 const Carriers: React.FC = () => {
+    // TanStack Query hooks
+    const {
+        data: carriersResponse,
+        isLoading: loading,
+        error,
+        refetch: refresh
+    } = useCarriers({
+        page: 1,
+        limit: 100, // Maximum allowed by backend
+    });
 
-    // Local state management
-    const [carriers, setCarriers] = useState<Carrier[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const createCarrierMutation = useCreateCarrier();
+    const updateCarrierMutation = useUpdateCarrier();
+    const deleteCarrierMutation = useDeleteCarrier();
+
+    // Extract data from response
+    const carriers = carriersResponse?.carriers || [];
 
     // Modal states
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -43,66 +60,41 @@ const Carriers: React.FC = () => {
         setModalFooter(footer);
     }, []);
 
-    // Load carriers
-    const loadCarriers = useCallback(async () => {
+    // CRUD actions using TanStack Query mutations
+    const createCarrier = useCallback(async (carrierData: CreateCarrierRequest | UpdateCarrierRequest) => {
         try {
-            setLoading(true);
-            setError(null);
-            const response = await carrierService.getCarriers({
-                page: 1,
-                limit: 100, // Maximum allowed by backend
-            });
-            setCarriers(response.carriers);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to load carriers');
-            toast.error('Failed to load carriers: ' + (err instanceof Error ? err.message : 'Unknown error'));
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        loadCarriers();
-    }, [loadCarriers]);
-
-    // CRUD actions
-    const createCarrier = useCallback(async (carrierData: any) => {
-        try {
-            await carrierService.createCarrier(carrierData);
+            await createCarrierMutation.mutateAsync(carrierData as CreateCarrierRequest);
             toast.success('Carrier created successfully');
-            loadCarriers();
             setShowCreateModal(false);
             setModalFooter(null);
         } catch (error) {
             toast.error('Failed to create carrier: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [loadCarriers]);
+    }, [createCarrierMutation]);
 
-    const updateCarrier = useCallback(async (id: number, carrierData: any) => {
+    const updateCarrier = useCallback(async (id: number, carrierData: CreateCarrierRequest | UpdateCarrierRequest) => {
         try {
-            await carrierService.updateCarrier(id, carrierData);
+            await updateCarrierMutation.mutateAsync({ id, data: carrierData as UpdateCarrierRequest });
             toast.success('Carrier updated successfully');
-            loadCarriers();
             setShowEditModal(false);
             setModalFooter(null);
         } catch (error) {
             toast.error('Failed to update carrier: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [loadCarriers]);
+    }, [updateCarrierMutation]);
 
     const deleteCarrier = useCallback(async (id: number) => {
         try {
-            await carrierService.deleteCarrier(id);
+            await deleteCarrierMutation.mutateAsync(id);
             toast.success('Carrier deleted successfully');
-            loadCarriers();
             setShowDeleteModal(false);
         } catch (error) {
             toast.error('Failed to delete carrier: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [loadCarriers]);
+    }, [deleteCarrierMutation]);
 
     // Table configuration
     const tableConfig: TableConfig<Carrier> = useMemo(() => ({
@@ -278,17 +270,27 @@ const Carriers: React.FC = () => {
                     <h1 className="text-2xl font-bold text-gray-900">{'Carriers'}</h1>
                     <p className="text-gray-600">{'Manage your carrier partners'}</p>
                 </div>
-                <Button
-                    onClick={() => {
-                        setModalTitle('Create New Carrier');
-                        setModalFooter(null);
-                        setShowCreateModal(true);
-                    }}
-                    className="flex items-center space-x-2"
-                >
-                    <PlusIcon className="h-4 w-4" />
-                    {'Add Carrier'}
-                </Button>
+                <div className="flex items-center space-x-3">
+                    <Button
+                        onClick={() => {
+                            setModalTitle('Create New Carrier');
+                            setModalFooter(null);
+                            setShowCreateModal(true);
+                        }}
+                        className="flex items-center space-x-2"
+                    >
+                        <PlusIcon className="h-4 w-4" />
+                        {'Add Carrier'}
+                    </Button>
+                    <Button
+                        onClick={() => refresh()}
+                        variant="secondary"
+                        size="sm"
+                        disabled={loading}
+                    >
+                        Refresh
+                    </Button>
+                </div>
             </div>
 
             {/* Table with Toolbar */}
@@ -310,7 +312,7 @@ const Carriers: React.FC = () => {
                     config={tableConfig}
                     data={carriers}
                     loading={loading}
-                    error={error || undefined}
+                    error={error?.message || undefined}
                 />
             </Card>
 
