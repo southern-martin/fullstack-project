@@ -10,9 +10,8 @@ import SaaSDashboard from './pages/SaaSDashboard';
 import StocksDashboard from './pages/StocksDashboard';
 
 // E-commerce pages
-import AddProduct from './pages/AddProduct';
+import { AddProduct, CreateInvoice } from './components/forms';
 import Billing from './pages/Billing';
-import CreateInvoice from './pages/CreateInvoice';
 import Invoices from './pages/Invoices';
 import Products from './pages/Products';
 import SingleInvoice from './pages/SingleInvoice';
@@ -26,10 +25,7 @@ import AIAssistant from './pages/AIAssistant';
 import Calendar from './pages/Calendar';
 
 // Form pages
-import FormElements from './pages/FormElements';
-import FormLayouts from './pages/FormLayouts';
-import FormValidation from './pages/FormValidation';
-import FormWizards from './pages/FormWizards';
+import { FormElements, FormLayouts, FormValidation, FormWizards } from './components/forms';
 
 // Profile
 import Profile from './pages/Profile';
