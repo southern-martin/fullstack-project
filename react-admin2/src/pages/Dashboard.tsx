@@ -1,6 +1,7 @@
 import {
     ArrowDownIcon,
     ArrowUpIcon,
+    CubeIcon,
     ShoppingBagIcon,
     UserGroupIcon
 } from '@heroicons/react/24/outline';
@@ -23,6 +24,13 @@ const Dashboard: React.FC = () => {
             change: '9.05%',
             changeType: 'increase',
             icon: ShoppingBagIcon,
+        },
+        {
+            name: 'Products',
+            value: '1,247',
+            change: '7.23%',
+            changeType: 'increase',
+            icon: CubeIcon,
         },
     ];
 
@@ -99,7 +107,7 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 md:gap-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 md:gap-6">
                 {stats.map((stat, index) => {
                     const Icon = stat.icon;
                     return (
