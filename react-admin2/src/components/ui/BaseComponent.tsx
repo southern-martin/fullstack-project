@@ -249,3 +249,5 @@ export function useBaseComponent<P extends BaseComponentProps>(props: P) {
 }
 
 // Export types and utilities
+export { BaseComponent, useBaseComponent, withBaseComponent };
+

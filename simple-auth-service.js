@@ -4,7 +4,12 @@ const app = express();
 const PORT = 3001;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: ['http://localhost:3000', 'http://localhost:3002'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept-Language']
+}));
 app.use(express.json());
 
 // Mock users database
@@ -22,6 +27,13 @@ const users = [
         password: 'user123',
         name: 'Regular User',
         role: 'user'
+    },
+    {
+        id: 3,
+        email: 'test@gmail.com',
+        password: 'Admin123',
+        name: 'Test User',
+        role: 'admin'
     }
 ];
 

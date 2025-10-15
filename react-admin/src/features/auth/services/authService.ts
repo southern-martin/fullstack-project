@@ -115,7 +115,7 @@ class AuthService {
 
   async healthCheck(): Promise<boolean> {
     try {
-      await authApiClient.get('/auth/health');
+      await authApiClient.get('/health');
       return true;
     } catch (error) {
       console.error('Auth service health check failed:', error);

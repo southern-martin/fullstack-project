@@ -19,49 +19,51 @@ import Modal from '../../../shared/components/ui/Modal';
 import { ServerPagination } from '../../../shared/components/ui/ServerPagination';
 import { ServerSearch } from '../../../shared/components/ui/ServerSearch';
 import { ServerSorting, SortOption } from '../../../shared/components/ui/ServerSorting';
-import { useServerPagination } from '../../../shared/hooks/useServerPagination';
-import { Customer } from '../../../shared/types';
-import { customerService } from '../services/customerService';
+import { CreateCustomerData, Customer, UpdateCustomerData } from '../../../shared/types';
+import {
+    useCreateCustomer,
+    useCustomers,
+    useDeleteCustomer,
+    useUpdateCustomer
+} from '../hooks/useCustomerQueries';
 
 import CustomerDetails from './CustomerDetails';
 import CustomerForm from './CustomerForm';
 
 const Customers: React.FC = () => {
-    // Memoize the fetch function to prevent infinite loops
-    const fetchCustomers = useCallback(
-        (params: any) => customerService.getCustomers(params),
-        []
-    );
+    // Local state for pagination and search
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [sortBy, setSortBy] = useState('createdAt');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-    // Server-side pagination
+    // TanStack Query hooks
     const {
-        data: customers,
-        loading,
+        data: customersResponse,
+        isLoading: loading,
         error,
-        currentPage,
-        pageSize,
-        total,
-        totalPages,
-        hasNextPage,
-        hasPreviousPage,
-        startIndex,
-        endIndex,
-        searchTerm,
-        sortBy,
+        refetch: refresh
+    } = useCustomers({
+        page: currentPage,
+        limit: pageSize,
+        search: searchTerm || undefined,
+        sortBy: sortBy || undefined,
         sortOrder,
-        goToPage,
-        changePageSize,
-        setSearch,
-        setSorting,
-        refresh,
-    } = useServerPagination<Customer>({
-        fetchFunction: fetchCustomers,
-        initialPage: 1,
-        initialPageSize: 10,
-        initialSearch: '',
-        initialSortBy: 'createdAt',
-        initialSortOrder: 'desc',
     });
+
+    const createCustomerMutation = useCreateCustomer();
+    const updateCustomerMutation = useUpdateCustomer();
+    const deleteCustomerMutation = useDeleteCustomer();
+
+    // Extract data from response
+    const customers = customersResponse?.data || [];
+    const total = customersResponse?.total || 0;
+    const totalPages = customersResponse?.totalPages || 0;
+    const hasNextPage = currentPage < totalPages;
+    const hasPreviousPage = currentPage > 1;
+    const startIndex = total > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+    const endIndex = Math.min(currentPage * pageSize, total);
 
     // Modal states
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -86,54 +88,76 @@ const Customers: React.FC = () => {
         { key: 'isActive', label: 'Status', defaultOrder: 'asc' },
     ], []);
 
-    // CRUD actions
-    const createCustomer = useCallback(async (customerData: any) => {
+    // CRUD actions using TanStack Query mutations
+    const createCustomer = useCallback(async (customerData: CreateCustomerData) => {
         try {
-            await customerService.createCustomer(customerData);
+            await createCustomerMutation.mutateAsync(customerData);
             toast.success('Customer created successfully');
-            refresh();
             setShowCreateModal(false);
             setModalFooter(null);
         } catch (error) {
             toast.error('Failed to create customer: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [refresh]);
+    }, [createCustomerMutation]);
 
-    const updateCustomer = useCallback(async (id: number, customerData: any) => {
+    const updateCustomer = useCallback(async (id: number, customerData: UpdateCustomerData) => {
         try {
-            await customerService.updateCustomer(id, customerData);
+            await updateCustomerMutation.mutateAsync({ id, data: customerData });
             toast.success('Customer updated successfully');
-            refresh();
             setShowEditModal(false);
             setModalFooter(null);
         } catch (error) {
             toast.error('Failed to update customer: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [refresh]);
+    }, [updateCustomerMutation]);
 
     const deleteCustomer = useCallback(async (id: number) => {
         try {
-            await customerService.deleteCustomer(id);
+            await deleteCustomerMutation.mutateAsync(id);
             toast.success('Customer deleted successfully');
-            refresh();
             setShowDeleteModal(false);
         } catch (error) {
             toast.error('Failed to delete customer: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [refresh]);
+    }, [deleteCustomerMutation]);
 
     const toggleCustomerStatus = useCallback(async (id: number, status: boolean) => {
         try {
-            await customerService.updateCustomer(id, { isActive: status });
+            await updateCustomerMutation.mutateAsync({ id, data: { isActive: status } });
             toast.success(status ? 'Customer activated' : 'Customer deactivated');
-            refresh();
         } catch (error) {
             toast.error('Failed to toggle customer status: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
+    }, [updateCustomerMutation]);
+
+    // Pagination and search handlers
+    const goToPage = useCallback((page: number) => {
+        setCurrentPage(page);
+    }, []);
+
+    const changePageSize = useCallback((newPageSize: number) => {
+        setPageSize(newPageSize);
+        setCurrentPage(1); // Reset to first page when changing page size
+    }, []);
+
+    const setSearch = useCallback((search: string) => {
+        setSearchTerm(search);
+        setCurrentPage(1); // Reset to first page when searching
+    }, []);
+
+    const setSorting = useCallback((sort: string, order: 'asc' | 'desc') => {
+        setSortBy(sort);
+        setSortOrder(order);
+        setCurrentPage(1); // Reset to first page when sorting
+    }, []);
+
+    // Refresh handler for the refresh button
+    const handleRefresh = useCallback(() => {
+        refresh();
     }, [refresh]);
 
     // Table configuration
@@ -330,7 +354,7 @@ const Customers: React.FC = () => {
                                 Export CSV
                             </Button>
                             <Button
-                                onClick={refresh}
+                                onClick={handleRefresh}
                                 variant="secondary"
                                 size="sm"
                                 disabled={loading}
@@ -346,7 +370,7 @@ const Customers: React.FC = () => {
                     config={tableConfig}
                     data={customers}
                     loading={loading}
-                    error={error || undefined}
+                    error={error?.message || undefined}
                 />
 
                 {/* Server-Side Pagination */}
@@ -385,7 +409,7 @@ const Customers: React.FC = () => {
                     footer={modalFooter}
                 >
                     <CustomerForm
-                        onSubmit={createCustomer}
+                        onSubmit={(customerData) => createCustomer(customerData as CreateCustomerData)}
                         onCancel={() => {
                             setShowCreateModal(false);
                             setModalFooter(null);
@@ -408,7 +432,7 @@ const Customers: React.FC = () => {
                 >
                     <CustomerForm
                         customer={selectedCustomer}
-                        onSubmit={(customerData) => updateCustomer(selectedCustomer.id, customerData)}
+                        onSubmit={(customerData) => updateCustomer(selectedCustomer.id, customerData as UpdateCustomerData)}
                         onCancel={() => {
                             setShowEditModal(false);
                             setModalFooter(null);

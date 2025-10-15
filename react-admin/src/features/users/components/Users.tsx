@@ -19,49 +19,51 @@ import Modal from '../../../shared/components/ui/Modal';
 import { ServerPagination } from '../../../shared/components/ui/ServerPagination';
 import { ServerSearch } from '../../../shared/components/ui/ServerSearch';
 import { ServerSorting, SortOption } from '../../../shared/components/ui/ServerSorting';
-import { useServerPagination } from '../../../shared/hooks/useServerPagination';
-import { User } from '../../../shared/types';
-import { CreateUserRequest, UpdateUserRequest, userApiService } from '../services/userApiService';
+import { CreateUserData, UpdateUserData, User } from '../../../shared/types';
+import {
+    useCreateUser,
+    useDeleteUser,
+    useUpdateUser,
+    useUsers
+} from '../hooks/useUserQueries';
 
 import UserDetails from './UserDetails';
 import UserForm from './UserForm';
 
 const Users: React.FC = () => {
-    // Memoize the fetch function to prevent infinite loops
-    const fetchUsers = useCallback(
-        (params: any) => userApiService.getUsers(params),
-        []
-    );
+    // Local state for pagination and search
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [sortBy, setSortBy] = useState('createdAt');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-    // Server-side pagination
+    // TanStack Query hooks
     const {
-        data: users,
-        loading,
+        data: usersResponse,
+        isLoading: loading,
         error,
-        currentPage,
-        pageSize,
-        total,
-        totalPages,
-        hasNextPage,
-        hasPreviousPage,
-        startIndex,
-        endIndex,
-        searchTerm,
-        sortBy,
+        refetch: refresh
+    } = useUsers({
+        page: currentPage,
+        limit: pageSize,
+        search: searchTerm || undefined,
+        sortBy: sortBy || undefined,
         sortOrder,
-        goToPage,
-        changePageSize,
-        setSearch,
-        setSorting,
-        refresh,
-    } = useServerPagination<User>({
-        fetchFunction: fetchUsers,
-        initialPage: 1,
-        initialPageSize: 10,
-        initialSearch: '',
-        initialSortBy: 'createdAt',
-        initialSortOrder: 'desc',
     });
+
+    const createUserMutation = useCreateUser();
+    const updateUserMutation = useUpdateUser();
+    const deleteUserMutation = useDeleteUser();
+
+    // Extract data from response
+    const users = usersResponse?.data || [];
+    const total = usersResponse?.total || 0;
+    const totalPages = usersResponse?.totalPages || 0;
+    const hasNextPage = currentPage < totalPages;
+    const hasPreviousPage = currentPage > 1;
+    const startIndex = total > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+    const endIndex = Math.min(currentPage * pageSize, total);
 
     // Modal states
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -86,54 +88,76 @@ const Users: React.FC = () => {
         { key: 'isActive', label: 'Status', defaultOrder: 'asc' },
     ], []);
 
-    // CRUD actions
-    const createUser = useCallback(async (userData: CreateUserRequest) => {
+    // CRUD actions using TanStack Query mutations
+    const createUser = useCallback(async (userData: CreateUserData) => {
         try {
-            await userApiService.createUser(userData);
+            await createUserMutation.mutateAsync(userData);
             toast.success('User created successfully');
-            refresh();
             setShowCreateModal(false);
             setModalFooter(null);
         } catch (error) {
             toast.error('Failed to create user: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [refresh]);
+    }, [createUserMutation]);
 
-    const updateUser = useCallback(async (id: number, userData: UpdateUserRequest) => {
+    const updateUser = useCallback(async (id: number, userData: UpdateUserData) => {
         try {
-            await userApiService.updateUser(id, userData);
+            await updateUserMutation.mutateAsync({ id, data: userData });
             toast.success('User updated successfully');
-            refresh();
             setShowEditModal(false);
             setModalFooter(null);
         } catch (error) {
             toast.error('Failed to update user: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [refresh]);
+    }, [updateUserMutation]);
 
     const deleteUser = useCallback(async (id: number) => {
         try {
-            await userApiService.deleteUser(id);
+            await deleteUserMutation.mutateAsync(id);
             toast.success('User deleted successfully');
-            refresh();
             setShowDeleteModal(false);
         } catch (error) {
             toast.error('Failed to delete user: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [refresh]);
+    }, [deleteUserMutation]);
 
     const toggleUserStatus = useCallback(async (id: number, status: boolean) => {
         try {
-            await userApiService.updateUser(id, { isActive: status });
+            await updateUserMutation.mutateAsync({ id, data: { isActive: status } });
             toast.success(status ? 'User activated' : 'User deactivated');
-            refresh();
         } catch (error) {
             toast.error('Failed to toggle user status: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
+    }, [updateUserMutation]);
+
+    // Pagination and search handlers
+    const goToPage = useCallback((page: number) => {
+        setCurrentPage(page);
+    }, []);
+
+    const changePageSize = useCallback((newPageSize: number) => {
+        setPageSize(newPageSize);
+        setCurrentPage(1); // Reset to first page when changing page size
+    }, []);
+
+    const setSearch = useCallback((search: string) => {
+        setSearchTerm(search);
+        setCurrentPage(1); // Reset to first page when searching
+    }, []);
+
+    const setSorting = useCallback((sort: string, order: 'asc' | 'desc') => {
+        setSortBy(sort);
+        setSortOrder(order);
+        setCurrentPage(1); // Reset to first page when sorting
+    }, []);
+
+    // Refresh handler for the refresh button
+    const handleRefresh = useCallback(() => {
+        refresh();
     }, [refresh]);
 
     // Table configuration
@@ -339,7 +363,7 @@ const Users: React.FC = () => {
                                 Export CSV
                             </Button>
                             <Button
-                                onClick={refresh}
+                                onClick={handleRefresh}
                                 variant="secondary"
                                 size="sm"
                                 disabled={loading}
@@ -355,7 +379,7 @@ const Users: React.FC = () => {
                     config={tableConfig}
                     data={users}
                     loading={loading}
-                    error={error || undefined}
+                    error={error?.message || undefined}
                 />
 
                 {/* Server-Side Pagination */}
@@ -394,7 +418,7 @@ const Users: React.FC = () => {
                     footer={modalFooter}
                 >
                     <UserForm
-                        onSubmit={(userData) => createUser(userData as CreateUserRequest)}
+                        onSubmit={(userData) => createUser(userData as CreateUserData)}
                         onCancel={() => {
                             setShowCreateModal(false);
                             setModalFooter(null);
@@ -417,7 +441,7 @@ const Users: React.FC = () => {
                 >
                     <UserForm
                         user={selectedUser}
-                        onSubmit={(userData) => updateUser(selectedUser.id, userData)}
+                        onSubmit={(userData) => updateUser(selectedUser.id, userData as UpdateUserData)}
                         onCancel={() => {
                             setShowEditModal(false);
                             setModalFooter(null);
