@@ -1,61 +1,52 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, JoinTable, ManyToMany } from 'typeorm';
-import { BaseEntity } from '../../shared/kernel';
-import { Role } from './role.entity';
+import { Role } from "./role.entity";
 
-@Entity('users')
-export class User extends BaseEntity {
-  @Column({ unique: true })
+export class User {
+  id?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
   email: string;
-
-  @Column()
   password: string;
-
-  @Column()
   firstName: string;
-
-  @Column()
   lastName: string;
-
-  @Column({ nullable: true })
-  phone: string;
-
-  @Column({ default: true })
+  phone?: string;
   isActive: boolean;
-
-  @Column({ default: false })
   isEmailVerified: boolean;
-
-  @Column({ type: 'date', nullable: true })
-  dateOfBirth: Date;
-
-  @Column({ type: 'json', nullable: true })
-  address: {
+  dateOfBirth?: Date;
+  address?: {
     street: string;
     city: string;
     state: string;
     zipCode: string;
     country: string;
   };
-
-  @Column({ type: 'json', nullable: true })
-  preferences: Record<string, any>;
-
-  @Column({ type: 'timestamp', nullable: true })
-  lastLoginAt: Date;
-
-  @Column({ type: 'timestamp', nullable: true })
-  passwordChangedAt: Date;
-
-  @ManyToMany(() => Role, { eager: true })
-  @JoinTable({
-    name: 'user_roles',
-    joinColumn: { name: 'userId', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'roleId', referencedColumnName: 'id' },
-  })
+  preferences?: Record<string, any>;
+  lastLoginAt?: Date;
+  passwordChangedAt?: Date;
+  emailVerifiedAt?: Date;
+  metadata?: Record<string, any>;
   roles: Role[];
 
-  @BeforeInsert()
-  @BeforeUpdate()
+  constructor(data: Partial<User> = {}) {
+    this.id = data.id;
+    this.createdAt = data.createdAt;
+    this.updatedAt = data.updatedAt;
+    this.email = data.email || "";
+    this.password = data.password || "";
+    this.firstName = data.firstName || "";
+    this.lastName = data.lastName || "";
+    this.phone = data.phone;
+    this.isActive = data.isActive ?? true;
+    this.isEmailVerified = data.isEmailVerified ?? false;
+    this.dateOfBirth = data.dateOfBirth;
+    this.address = data.address;
+    this.preferences = data.preferences;
+    this.lastLoginAt = data.lastLoginAt;
+    this.passwordChangedAt = data.passwordChangedAt;
+    this.emailVerifiedAt = data.emailVerifiedAt;
+    this.metadata = data.metadata;
+    this.roles = data.roles || [];
+  }
+
   normalizeEmail() {
     if (this.email) {
       this.email = this.email.toLowerCase().trim();
@@ -67,28 +58,21 @@ export class User extends BaseEntity {
   }
 
   hasRole(roleName: string): boolean {
-    return this.roles?.some(role => role.name === roleName) || false;
+    return this.roles?.some((role) => role.name === roleName) || false;
   }
 
   hasPermission(permission: string): boolean {
-    return this.roles?.some(role => 
-      role.permissions?.includes(permission)
-    ) || false;
+    return (
+      this.roles?.some((role) => role.permissions?.includes(permission)) ||
+      false
+    );
   }
 
   isAdmin(): boolean {
-    return this.hasRole('admin') || this.hasRole('super_admin');
+    return this.hasRole("admin") || this.hasRole("super_admin");
   }
 
   canManageUsers(): boolean {
-    return this.hasPermission('users.manage') || this.isAdmin();
+    return this.hasPermission("users.manage") || this.isAdmin();
   }
 }
-
-
-
-
-
-
-
-

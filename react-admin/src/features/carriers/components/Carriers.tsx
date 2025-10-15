@@ -36,6 +36,12 @@ const Carriers: React.FC = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
     const [modalTitle, setModalTitle] = useState('');
+    const [modalFooter, setModalFooter] = useState<React.ReactNode>(null);
+
+    // Handle footer from CarrierForm
+    const handleFooterReady = useCallback((footer: React.ReactNode) => {
+        setModalFooter(footer);
+    }, []);
 
     // Load carriers
     const loadCarriers = useCallback(async () => {
@@ -66,6 +72,7 @@ const Carriers: React.FC = () => {
             toast.success('Carrier created successfully');
             loadCarriers();
             setShowCreateModal(false);
+            setModalFooter(null);
         } catch (error) {
             toast.error('Failed to create carrier: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
@@ -78,6 +85,7 @@ const Carriers: React.FC = () => {
             toast.success('Carrier updated successfully');
             loadCarriers();
             setShowEditModal(false);
+            setModalFooter(null);
         } catch (error) {
             toast.error('Failed to update carrier: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
@@ -202,6 +210,7 @@ const Carriers: React.FC = () => {
                     const carrier = Array.isArray(data) ? data[0] : data;
                     setSelectedCarrier(carrier);
                     setModalTitle('Edit Carrier');
+                    setModalFooter(null);
                     setShowEditModal(true);
                 },
             },
@@ -272,6 +281,7 @@ const Carriers: React.FC = () => {
                 <Button
                     onClick={() => {
                         setModalTitle('Create New Carrier');
+                        setModalFooter(null);
                         setShowCreateModal(true);
                     }}
                     className="flex items-center space-x-2"
@@ -310,15 +320,19 @@ const Carriers: React.FC = () => {
                     isOpen={true}
                     onClose={() => {
                         setShowCreateModal(false);
+                        setModalFooter(null);
                     }}
                     title={modalTitle}
                     size="lg"
+                    footer={modalFooter}
                 >
                     <CarrierForm
                         onSubmit={createCarrier}
                         onCancel={() => {
                             setShowCreateModal(false);
+                            setModalFooter(null);
                         }}
+                        onFooterReady={handleFooterReady}
                     />
                 </Modal>
             )}
@@ -328,16 +342,20 @@ const Carriers: React.FC = () => {
                     isOpen={true}
                     onClose={() => {
                         setShowEditModal(false);
+                        setModalFooter(null);
                     }}
                     title={modalTitle}
                     size="lg"
+                    footer={modalFooter}
                 >
                     <CarrierForm
                         carrier={selectedCarrier}
                         onSubmit={(carrierData) => updateCarrier(selectedCarrier.id, carrierData)}
                         onCancel={() => {
                             setShowEditModal(false);
+                            setModalFooter(null);
                         }}
+                        onFooterReady={handleFooterReady}
                     />
                 </Modal>
             )}

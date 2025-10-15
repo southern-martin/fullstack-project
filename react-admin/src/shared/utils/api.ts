@@ -43,11 +43,20 @@ class ApiClient {
         // Debug logs removed
 
         // Handle validation errors (400 Bad Request)
-        if (response.status === 400 && errorData.errors) {
+        if (response.status === 400 && errorData.fieldErrors) {
           const validationError = new Error('Validation failed');
-          (validationError as any).validationErrors = errorData.errors;
+          (validationError as any).validationErrors = errorData.fieldErrors;
           (validationError as any).status = response.status;
           throw validationError;
+        }
+
+        // Handle custom rule errors (400 Bad Request)
+        if (response.status === 400 && errorData.customRuleErrors) {
+          const customRuleError = new Error('Custom rule validation failed');
+          (customRuleError as any).customRuleErrors =
+            errorData.customRuleErrors;
+          (customRuleError as any).status = response.status;
+          throw customRuleError;
         }
 
         // Handle other HTTP errors
@@ -62,8 +71,8 @@ class ApiClient {
       // Debug logs removed
       return data;
     } catch (error) {
-      // Only log non-validation errors to avoid console spam
-      if (!(error as any).validationErrors) {
+      // Only log non-validation errors and non-404 errors to avoid console spam
+      if (!(error as any).validationErrors && (error as any).status !== 404) {
         console.error('API request failed:', error);
       }
       throw error;

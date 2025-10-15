@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import Button from '../../../shared/components/ui/Button';
 import { CheckboxField, FormField, SelectField } from '../../../shared/components/ui/FormField';
@@ -25,6 +25,7 @@ interface UserFormProps {
     user?: User;
     onSubmit: (data: CreateUserRequest | UpdateUserRequest) => Promise<void>;
     onCancel: () => void;
+    onFooterReady?: (footer: React.ReactNode) => void;
 }
 
 // Helper function to clear field errors
@@ -68,7 +69,7 @@ const createSubmissionData = (
  * - Displays error messages if translation loading fails
  * - Provides smooth user experience without text flashing
  */
-const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
+const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterReady }) => {
 
     // Form state
     const [formData, setFormData] = useState(initialFormData);
@@ -76,6 +77,13 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
     const [roles, setRoles] = useState<Role[]>([]);
     const [loadingRoles, setLoadingRoles] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Use ref to access current form data without causing re-renders
+    const formDataRef = useRef(formData);
+    formDataRef.current = formData;
+
+    // Use ref to track if footer has been passed to parent
+    const footerPassedRef = useRef(false);
 
 
     // Initialize form data and roles
@@ -113,27 +121,10 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
             setFormData(prev => ({ ...prev, [name]: value }));
         }
 
-        // Clear field error when user starts typing
+        // Clear field error when user starts typing (but no client-side validation)
         if (errors[name]) {
             setErrors(prev => clearFieldError(prev, name));
         }
-
-        // Real-time validation for specific fields
-        const newErrors = { ...errors };
-        delete newErrors[name]; // Clear existing error for this field
-
-        // Validate specific fields in real-time
-        if (name === 'email' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-            newErrors.email = 'Please enter a valid email address';
-        } else if (name === 'firstName' && value && value.length < 2) {
-            newErrors.firstName = 'First name must be at least 2 characters long';
-        } else if (name === 'lastName' && value && value.length < 2) {
-            newErrors.lastName = 'Last name must be at least 2 characters long';
-        } else if (name === 'password' && value && value.length < 8) {
-            newErrors.password = 'Password must be at least 8 characters long';
-        }
-
-        setErrors(newErrors);
     };
 
     const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -146,34 +137,8 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
         }
     };
 
-    // Client-side validation
-    const validateForm = (): Record<string, string> => {
-        const errors: Record<string, string> = {};
-
-        if (!formData.firstName || formData.firstName.length < 2) {
-            errors.firstName = 'First name must be at least 2 characters long';
-        }
-
-        if (!formData.lastName || formData.lastName.length < 2) {
-            errors.lastName = 'Last name must be at least 2 characters long';
-        }
-
-        if (!formData.email) {
-            errors.email = 'Email is required';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            errors.email = 'Please enter a valid email address';
-        }
-
-        if (!user && (!formData.password || formData.password.length < 8)) {
-            errors.password = 'Password must be at least 8 characters long';
-        }
-
-        if (!formData.roleIds || formData.roleIds.length === 0) {
-            errors.roleIds = 'Please select at least one role';
-        }
-
-        return errors;
-    };
+    // Client-side validation removed - all validation is now handled by the server
+    // The form will display server-side validation errors returned from the API
 
     const handleSubmit = useCallback(async (e?: React.FormEvent) => {
         if (e) {
@@ -183,59 +148,64 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
         // Clear previous errors
         setErrors({});
 
-        // Client-side validation
-        const clientErrors = validateForm();
-        if (Object.keys(clientErrors).length > 0) {
-            setErrors(clientErrors);
-            return;
-        }
+        // Get current form data from ref
+        const currentFormData = formDataRef.current;
 
+        // No client-side validation - all validation is handled by the server
         setIsSubmitting(true);
 
-        const dataToSubmit = createSubmissionData(formData, user);
+        const dataToSubmit = createSubmissionData(currentFormData, user);
 
         try {
             await onSubmit(dataToSubmit);
         } catch (error: unknown) {
+            // Handle custom rule errors from backend
+            if (error && typeof error === 'object' && 'customRuleErrors' in error) {
+                const customRuleError = error as { customRuleErrors: string[] };
+                // Display custom rule errors in the validation summary
+                setErrors({ general: customRuleError.customRuleErrors.join(' ') });
+                return;
+            }
+
             // Handle validation errors from backend
             if (error && typeof error === 'object' && 'validationErrors' in error) {
-                const validationError = error as { validationErrors: Record<string, string> };
-                setErrors(validationError.validationErrors);
-                // Don't re-throw validation errors - they're handled by the form
+                const validationError = error as { validationErrors: Record<string, string[]> };
+                // Convert array of errors to single error per field
+                const fieldErrors: Record<string, string> = {};
+                Object.entries(validationError.validationErrors).forEach(([field, errors]) => {
+                    if (Array.isArray(errors) && errors.length > 0) {
+                        fieldErrors[field] = errors[0]; // Take the first error for each field
+                    }
+                });
+                setErrors(fieldErrors);
                 return;
+            }
+
+            // Handle validation errors from backend (direct response format)
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as any;
+                if (axiosError.response?.data?.fieldErrors) {
+                    // Handle field-specific validation errors from the server
+                    const fieldErrors: Record<string, string> = {};
+                    Object.entries(axiosError.response.data.fieldErrors).forEach(([field, errors]) => {
+                        if (Array.isArray(errors) && errors.length > 0) {
+                            fieldErrors[field] = errors[0]; // Take the first error for each field
+                        }
+                    });
+                    setErrors(fieldErrors);
+                    return;
+                } else if (axiosError.response?.data?.message) {
+                    // Handle general error messages
+                    setErrors({ general: axiosError.response.data.message });
+                    return;
+                }
             }
 
             // Handle string-based validation errors (from backend response)
             if (error && typeof error === 'object' && 'message' in error) {
                 const errorMessage = (error as { message: string }).message;
-
-                // Check if it's a validation error message
-                if (errorMessage.includes('must be') || errorMessage.includes('required')) {
-                    // Parse the validation error message into individual field errors
-                    const fieldErrors: Record<string, string> = {};
-
-                    // Split by comma and process each validation rule
-                    const rules = errorMessage.split(',');
-                    rules.forEach(rule => {
-                        const trimmedRule = rule.trim();
-                        if (trimmedRule.includes('email must be an email')) {
-                            fieldErrors.email = 'Please enter a valid email address';
-                        } else if (trimmedRule.includes('password must be longer than or equal to 8 characters')) {
-                            fieldErrors.password = 'Password must be at least 8 characters long';
-                        } else if (trimmedRule.includes('firstName must be longer than or equal to 2 characters')) {
-                            fieldErrors.firstName = 'First name must be at least 2 characters long';
-                        } else if (trimmedRule.includes('lastName must be longer than or equal to 2 characters')) {
-                            fieldErrors.lastName = 'Last name must be at least 2 characters long';
-                        } else {
-                            // Generic error for other validation rules
-                            const field = trimmedRule.split(' ')[0];
-                            fieldErrors[field] = trimmedRule;
-                        }
-                    });
-
-                    setErrors(fieldErrors);
-                    return;
-                }
+                setErrors({ general: errorMessage });
+                return;
             }
 
             // Re-throw non-validation errors so the parent component can handle them
@@ -243,10 +213,10 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
         } finally {
             setIsSubmitting(false);
         }
-    }, [formData, user]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [user, onSubmit]); // Remove formData from dependencies
 
-    // Render footer directly - no more onFooterRender pattern
-    const footer = (
+    // Memoize footer to prevent infinite re-renders
+    const footer = useMemo(() => (
         <div className="flex justify-end space-x-3">
             <Button
                 type="button"
@@ -270,14 +240,20 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
                 }
             </Button>
         </div>
-    );
+    ), [onCancel, isSubmitting, handleSubmit, user]);
 
-
+    // Pass footer to parent component only once when component mounts
+    useEffect(() => {
+        if (onFooterReady && !footerPassedRef.current) {
+            onFooterReady(footer);
+            footerPassedRef.current = true;
+        }
+    }, [onFooterReady, footer]);
 
     return (
         <div className="animate-fade-in">
-            {/* Show validation summary if there are errors */}
-            {Object.keys(errors).length > 0 && (
+            {/* Show validation summary only for general errors */}
+            {errors.general && (
                 <div className="bg-red-50 border border-red-200 rounded-md p-4 m-6 mb-0">
                     <div className="flex">
                         <div className="flex-shrink-0">
@@ -287,14 +263,10 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
                         </div>
                         <div className="ml-3">
                             <h3 className="text-sm font-medium text-red-800">
-                                Please fix the following errors:
+                                Error
                             </h3>
                             <div className="mt-2 text-sm text-red-700">
-                                <ul className="list-disc pl-5 space-y-1">
-                                    {Object.entries(errors).map(([field, message]) => (
-                                        <li key={field}>{message}</li>
-                                    ))}
-                                </ul>
+                                <p>{errors.general}</p>
                             </div>
                         </div>
                     </div>
@@ -363,7 +335,6 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
                     error={errors.isActive}
                 />
             </div>
-            {footer}
         </div>
     );
 };

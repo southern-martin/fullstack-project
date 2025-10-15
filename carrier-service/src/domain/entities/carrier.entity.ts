@@ -1,39 +1,13 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
-
-@Entity("carriers")
 export class Carrier {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  @Column({ unique: true })
+  id?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
   name: string;
-
-  @Column({ nullable: true })
-  description: string;
-
-  @Column({ default: true })
+  description?: string;
   isActive: boolean;
-
-  @Column({ nullable: true })
-  contactEmail: string;
-
-  @Column({ nullable: true })
-  contactPhone: string;
-
-  @Column({ type: "json", nullable: true })
-  metadata: {
+  contactEmail?: string;
+  contactPhone?: string;
+  metadata?: {
     code?: string;
     website?: string;
     trackingUrl?: string;
@@ -45,11 +19,24 @@ export class Carrier {
       perKgRate?: number;
     };
   };
+
+  constructor(data: Partial<Carrier> = {}) {
+    this.id = data.id;
+    this.createdAt = data.createdAt;
+    this.updatedAt = data.updatedAt;
+    this.name = data.name || "";
+    this.description = data.description;
+    this.isActive = data.isActive ?? true;
+    this.contactEmail = data.contactEmail;
+    this.contactPhone = data.contactPhone;
+    this.metadata = data.metadata;
+  }
+
+  get displayName(): string {
+    return this.name;
+  }
+
+  get isContactable(): boolean {
+    return !!(this.contactEmail || this.contactPhone);
+  }
 }
-
-
-
-
-
-
-

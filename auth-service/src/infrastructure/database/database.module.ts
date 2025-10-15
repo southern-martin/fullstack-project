@@ -1,14 +1,10 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { Role } from "../../domain/entities/role.entity";
-import { User } from "../../domain/entities/user.entity";
-import {
-  ROLE_REPOSITORY_TOKEN,
-  USER_REPOSITORY_TOKEN,
-} from "../../domain/tokens/repository.tokens";
-import { RoleRepository } from "../repositories/role.repository";
-import { UserRepository } from "../repositories/user.repository";
+import { RoleTypeOrmEntity } from "./typeorm/entities/role.typeorm.entity";
+import { UserTypeOrmEntity } from "./typeorm/entities/user.typeorm.entity";
+import { RoleRepository } from "./typeorm/repositories/role.repository";
+import { UserRepository } from "./typeorm/repositories/user.repository";
 
 @Module({
   imports: [
@@ -21,24 +17,24 @@ import { UserRepository } from "../repositories/user.repository";
         username: configService.get<string>("DB_USERNAME", "root"),
         password: configService.get<string>("DB_PASSWORD", ""),
         database: configService.get<string>("DB_NAME", "auth_service_db"),
-        entities: [User, Role],
+        entities: [UserTypeOrmEntity, RoleTypeOrmEntity],
         synchronize: configService.get<string>("NODE_ENV") === "development",
         logging: configService.get<string>("NODE_ENV") === "development",
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([User, Role]),
+    TypeOrmModule.forFeature([UserTypeOrmEntity, RoleTypeOrmEntity]),
   ],
   providers: [
     {
-      provide: USER_REPOSITORY_TOKEN,
+      provide: "UserRepositoryInterface",
       useClass: UserRepository,
     },
     {
-      provide: ROLE_REPOSITORY_TOKEN,
+      provide: "RoleRepositoryInterface",
       useClass: RoleRepository,
     },
   ],
-  exports: [USER_REPOSITORY_TOKEN, ROLE_REPOSITORY_TOKEN],
+  exports: ["UserRepositoryInterface", "RoleRepositoryInterface"],
 })
 export class DatabaseModule {}

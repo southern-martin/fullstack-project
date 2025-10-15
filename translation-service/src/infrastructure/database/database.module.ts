@@ -1,8 +1,10 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { LanguageValue } from "../../domain/entities/language-value.entity";
-import { Language } from "../../domain/entities/language.entity";
+import { LanguageValueTypeOrmEntity } from "./typeorm/entities/language-value.typeorm.entity";
+import { LanguageTypeOrmEntity } from "./typeorm/entities/language.typeorm.entity";
+import { LanguageValueRepository } from "./typeorm/repositories/language-value.repository";
+import { LanguageRepository } from "./typeorm/repositories/language.repository";
 
 @Module({
   imports: [
@@ -15,21 +17,31 @@ import { Language } from "../../domain/entities/language.entity";
         username: configService.get("DB_USERNAME", "root"),
         password: configService.get("DB_PASSWORD", "password"),
         database: configService.get("DB_NAME", "translation_service_db"),
-        entities: [Language, LanguageValue],
+        entities: [LanguageTypeOrmEntity, LanguageValueTypeOrmEntity],
         synchronize: configService.get("NODE_ENV") === "development",
         logging: configService.get("NODE_ENV") === "development",
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Language, LanguageValue]),
+    TypeOrmModule.forFeature([
+      LanguageTypeOrmEntity,
+      LanguageValueTypeOrmEntity,
+    ]),
   ],
-  exports: [TypeOrmModule],
+  providers: [
+    {
+      provide: "LanguageRepositoryInterface",
+      useClass: LanguageRepository,
+    },
+    {
+      provide: "LanguageValueRepositoryInterface",
+      useClass: LanguageValueRepository,
+    },
+  ],
+  exports: [
+    TypeOrmModule,
+    "LanguageRepositoryInterface",
+    "LanguageValueRepositoryInterface",
+  ],
 })
 export class DatabaseModule {}
-
-
-
-
-
-
-

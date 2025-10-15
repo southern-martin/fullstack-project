@@ -41,7 +41,23 @@ export interface UpdateCarrierRequest {
 }
 
 class CarrierApiService {
-  private readonly basePath = CARRIERS_API_CONFIG.ENDPOINTS.LIST;
+  private readonly basePath: string;
+
+  constructor() {
+    try {
+      console.log('CarrierApiService constructor called');
+      console.log('CARRIERS_API_CONFIG:', CARRIERS_API_CONFIG);
+      this.basePath = CARRIERS_API_CONFIG?.ENDPOINTS?.LIST || '/carriers';
+      console.log(
+        'CarrierApiService initialized with basePath:',
+        this.basePath
+      );
+    } catch (error) {
+      console.error('Error initializing CarrierApiService:', error);
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+      this.basePath = '/carriers'; // Fallback
+    }
+  }
 
   async getCarriers(
     params?: PaginationParams

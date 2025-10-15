@@ -1,4 +1,5 @@
 import { Exclude, Expose, Type } from 'class-transformer';
+import { RoleResponseDto } from './role-response.dto';
 
 export class UserResponseDto {
   @Expose()
@@ -62,31 +63,6 @@ export class UserResponseDto {
   }
 }
 
-export class RoleResponseDto {
-  @Expose()
-  id: number;
-
-  @Expose()
-  name: string;
-
-  @Expose()
-  description?: string;
-
-  @Expose()
-  isActive: boolean;
-
-  @Expose()
-  permissions?: string[];
-
-  @Expose()
-  metadata?: Record<string, any>;
-
-  @Expose()
-  createdAt: Date;
-
-  @Expose()
-  updatedAt: Date;
-}
 
 
 

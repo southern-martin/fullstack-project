@@ -1,13 +1,15 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "../src/app.module";
 import { CreatePricingRuleDto } from "../src/application/dto/create-pricing-rule.dto";
-import { PricingService } from "../src/application/services/pricing.service";
+import { CalculatePriceUseCase } from "../src/application/use-cases/calculate-price.use-case";
+import { ManagePricingRuleUseCase } from "../src/application/use-cases/manage-pricing-rule.use-case";
 
 async function seedData() {
   console.log("🌱 Starting Pricing Service data seeding...");
 
   const app = await NestFactory.createApplicationContext(AppModule);
-  const pricingService = app.get(PricingService);
+  const managePricingRuleUseCase = app.get(ManagePricingRuleUseCase);
+  const calculatePriceUseCase = app.get(CalculatePriceUseCase);
 
   try {
     // Clear existing data
@@ -157,7 +159,7 @@ async function seedData() {
     console.log("💰 Creating sample pricing rules...");
     for (const ruleData of samplePricingRules) {
       try {
-        const rule = await pricingService.createPricingRule(ruleData);
+        const rule = await managePricingRuleUseCase.create(ruleData);
         console.log(
           `✅ Created pricing rule: ${rule.name} (Priority: ${rule.priority})`
         );
@@ -170,13 +172,13 @@ async function seedData() {
     }
 
     // Get total count
-    const count = await pricingService.getPricingRuleCount();
+    const count = await managePricingRuleUseCase.getCount();
     console.log(`📊 Total pricing rules in database: ${count.count}`);
 
     // Test price calculation
     console.log("🧮 Testing price calculation...");
     try {
-      const testCalculation = await pricingService.calculatePrice({
+      const testCalculation = await calculatePriceUseCase.execute({
         carrierId: 1,
         serviceType: "Express",
         weight: 5,
@@ -201,10 +203,3 @@ async function seedData() {
 
 // Run seeding
 seedData().catch(console.error);
-
-
-
-
-
-
-

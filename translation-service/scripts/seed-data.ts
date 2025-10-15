@@ -2,13 +2,17 @@ import { NestFactory } from "@nestjs/core";
 import { AppModule } from "../src/app.module";
 import { CreateLanguageDto } from "../src/application/dto/create-language.dto";
 import { CreateTranslationDto } from "../src/application/dto/create-translation.dto";
-import { TranslationService } from "../src/application/services/translation.service";
+import { ManageLanguageUseCase } from "../src/application/use-cases/manage-language.use-case";
+import { ManageTranslationUseCase } from "../src/application/use-cases/manage-translation.use-case";
+import { TranslateTextUseCase } from "../src/application/use-cases/translate-text.use-case";
 
 async function seedData() {
   console.log("🌱 Starting Translation Service data seeding...");
 
   const app = await NestFactory.createApplicationContext(AppModule);
-  const translationService = app.get(TranslationService);
+  const manageLanguageUseCase = app.get(ManageLanguageUseCase);
+  const manageTranslationUseCase = app.get(ManageTranslationUseCase);
+  const translateTextUseCase = app.get(TranslateTextUseCase);
 
   try {
     // Clear existing data
@@ -93,7 +97,7 @@ async function seedData() {
     const createdLanguages = [];
     for (const languageData of sampleLanguages) {
       try {
-        const language = await translationService.createLanguage(languageData);
+        const language = await manageLanguageUseCase.create(languageData);
         createdLanguages.push(language);
         console.log(`✅ Created language: ${language.name} (${language.code})`);
       } catch (error) {
@@ -317,7 +321,7 @@ async function seedData() {
     for (const translationData of sampleTranslations) {
       try {
         const translation =
-          await translationService.createTranslation(translationData);
+          await manageTranslationUseCase.create(translationData);
         console.log(
           `✅ Created translation: "${translation.originalText}" → "${translation.translatedText}"`
         );
@@ -332,15 +336,15 @@ async function seedData() {
     }
 
     // Get total counts
-    const languageCount = await translationService.getLanguageCount();
-    const translationCount = await translationService.getTranslationCount();
+    const languageCount = await manageLanguageUseCase.getCount();
+    const translationCount = await manageTranslationUseCase.getCount();
     console.log(`📊 Total languages in database: ${languageCount.count}`);
     console.log(`📊 Total translations in database: ${translationCount.count}`);
 
     // Test translation
     console.log("🧮 Testing translation...");
     try {
-      const testTranslation = await translationService.translateText({
+      const testTranslation = await translateTextUseCase.execute({
         text: "Welcome",
         targetLanguage: "es",
         context: { category: "ui", module: "auth", component: "message" },
@@ -362,10 +366,3 @@ async function seedData() {
 
 // Run seeding
 seedData().catch(console.error);
-
-
-
-
-
-
-

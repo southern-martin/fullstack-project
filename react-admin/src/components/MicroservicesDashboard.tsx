@@ -170,7 +170,7 @@ const MicroservicesDashboard: React.FC = () => {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">
-                                    {isLoading ? '...' : stat.value.toLocaleString()}
+                                    {isLoading ? '...' : (stat.value || 0).toLocaleString()}
                                 </div>
                                 <p className="text-xs text-muted-foreground">
                                     Total {stat.title.toLowerCase()}

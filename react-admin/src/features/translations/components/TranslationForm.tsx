@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import Button from '../../../shared/components/ui/Button';
 import { Language, Translation } from '../services/translationService';
@@ -8,6 +8,7 @@ interface TranslationFormProps {
     languages: Language[];
     onSubmit: (data: any) => void;
     onCancel: () => void;
+    onFooterReady?: (footer: React.ReactNode) => void;
 }
 
 const TranslationForm: React.FC<TranslationFormProps> = ({
@@ -15,21 +16,30 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
     languages,
     onSubmit,
     onCancel,
+    onFooterReady,
 }) => {
     const [formData, setFormData] = useState({
         key: translation?.key || '',
-        originalText: translation?.originalText || '',
-        translatedText: translation?.translatedText || '',
+        value: translation?.value || '',
         languageId: translation?.languageId?.toString() || '',
-        context: typeof translation?.context === 'string' ? translation.context : '',
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    // Use ref to access current form data without causing re-renders
+    const formDataRef = useRef(formData);
+    formDataRef.current = formData;
 
-        if (!formData.key.trim() || !formData.originalText.trim() || !formData.translatedText.trim() || !formData.languageId) {
+    // Use ref to track if footer has been passed to parent
+    const footerPassedRef = useRef(false);
+
+    const handleSubmit = useCallback(async (e?: React.FormEvent) => {
+        if (e) {
+            e.preventDefault();
+        }
+
+        const currentFormData = formDataRef.current;
+        if (!currentFormData.key.trim() || !currentFormData.value.trim() || !currentFormData.languageId) {
             toast.error('Please fill in all required fields');
             return;
         }
@@ -37,15 +47,15 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
         try {
             setIsSubmitting(true);
             await onSubmit({
-                ...formData,
-                languageId: parseInt(formData.languageId),
+                ...currentFormData,
+                languageId: parseInt(currentFormData.languageId),
             });
         } catch (error) {
             // Error handling is done in parent component
         } finally {
             setIsSubmitting(false);
         }
-    };
+    }, [onSubmit]);
 
     const handleChange = (field: string, value: string) => {
         setFormData(prev => ({
@@ -53,6 +63,43 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
             [field]: value,
         }));
     };
+
+    // Memoize footer to prevent infinite re-renders
+    const footer = useMemo(() => (
+        <div className="flex justify-end space-x-3">
+            <Button
+                type="button"
+                variant="secondary"
+                onClick={onCancel}
+                disabled={isSubmitting}
+            >
+                Cancel
+            </Button>
+            <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex items-center space-x-2"
+                onClick={handleSubmit}
+            >
+                {isSubmitting ? (
+                    <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span>Saving...</span>
+                    </>
+                ) : (
+                    <span>{translation ? 'Update Translation' : 'Create Translation'}</span>
+                )}
+            </Button>
+        </div>
+    ), [onCancel, isSubmitting, handleSubmit, translation]);
+
+    // Pass footer to parent component only once when component mounts
+    useEffect(() => {
+        if (onFooterReady && !footerPassedRef.current) {
+            onFooterReady(footer);
+            footerPassedRef.current = true;
+        }
+    }, [onFooterReady, footer]);
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6 p-6">
@@ -88,85 +135,30 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
                         <option value="">Select a language</option>
                         {languages.map((language) => (
                             <option key={language.id} value={language.id}>
-                                {language.metadata?.flag} {language.name} ({language.code})
+                                🌐 {language.name} ({language.code})
                             </option>
                         ))}
                     </select>
                 </div>
 
-                {/* Original Text */}
+                {/* Translation Value */}
                 <div>
-                    <label htmlFor="originalText" className="block text-sm font-medium text-gray-700 mb-2">
-                        Original Text *
+                    <label htmlFor="value" className="block text-sm font-medium text-gray-700 mb-2">
+                        Translation Value *
                     </label>
                     <textarea
-                        id="originalText"
-                        value={formData.originalText}
-                        onChange={(e) => handleChange('originalText', e.target.value)}
+                        id="value"
+                        value={formData.value}
+                        onChange={(e) => handleChange('value', e.target.value)}
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Enter the original text..."
+                        placeholder="Enter the translation value..."
                         required
-                    />
-                </div>
-
-                {/* Translated Text */}
-                <div>
-                    <label htmlFor="translatedText" className="block text-sm font-medium text-gray-700 mb-2">
-                        Translated Text *
-                    </label>
-                    <textarea
-                        id="translatedText"
-                        value={formData.translatedText}
-                        onChange={(e) => handleChange('translatedText', e.target.value)}
-                        rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Enter the translated text..."
-                        required
-                    />
-                </div>
-
-                {/* Context */}
-                <div>
-                    <label htmlFor="context" className="block text-sm font-medium text-gray-700 mb-2">
-                        Context
-                    </label>
-                    <input
-                        type="text"
-                        id="context"
-                        value={formData.context}
-                        onChange={(e) => handleChange('context', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="e.g., ui, email, notification"
                     />
                 </div>
             </div>
 
-            {/* Form Actions */}
-            <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={onCancel}
-                    disabled={isSubmitting}
-                >
-                    Cancel
-                </Button>
-                <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="flex items-center space-x-2"
-                >
-                    {isSubmitting ? (
-                        <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                            <span>Saving...</span>
-                        </>
-                    ) : (
-                        <span>{translation ? 'Update Translation' : 'Create Translation'}</span>
-                    )}
-                </Button>
-            </div>
+            {/* Form Actions - Footer will be rendered in Modal footer */}
         </form>
     );
 };

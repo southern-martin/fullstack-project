@@ -5,51 +5,17 @@ export interface Language {
   code: string;
   name: string;
   nativeName: string;
+  isRTL: boolean;
   isActive: boolean;
-  isDefault: boolean;
-  metadata: {
-    flag?: string;
-    direction?: 'ltr' | 'rtl';
-    region?: string;
-    currency?: string;
-    dateFormat?: string;
-  };
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface Translation {
   id: number;
   key: string;
-  originalText: string;
-  translatedText: string;
   languageId: number;
-  language: {
-    id: number;
-    code: string;
-    name: string;
-    nativeName: string;
-    isActive: boolean;
-    isDefault: boolean;
-    metadata: {
-      flag?: string;
-      direction?: 'ltr' | 'rtl';
-      region?: string;
-      currency?: string;
-      dateFormat?: string;
-    };
-  };
-  context: {
-    category?: string;
-    module?: string;
-    component?: string;
-    field?: string;
-  };
-  isApproved: boolean;
-  approvedBy?: string;
-  approvedAt?: string;
-  usageCount: number;
-  lastUsedAt?: string;
+  languageCode: string;
+  value: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -58,56 +24,30 @@ export interface CreateLanguageDto {
   code: string;
   name: string;
   nativeName?: string;
+  isRTL?: boolean;
   isActive?: boolean;
-  isDefault?: boolean;
-  metadata?: {
-    flag?: string;
-    direction?: 'ltr' | 'rtl';
-    region?: string;
-    currency?: string;
-    dateFormat?: string;
-  };
 }
 
 export interface UpdateLanguageDto {
   code?: string;
   name?: string;
   nativeName?: string;
+  isRTL?: boolean;
   isActive?: boolean;
-  isDefault?: boolean;
-  metadata?: {
-    flag?: string;
-    direction?: 'ltr' | 'rtl';
-    region?: string;
-    currency?: string;
-    dateFormat?: string;
-  };
 }
 
 export interface CreateTranslationDto {
-  originalText: string;
-  translatedText: string;
+  key: string;
   languageId: number;
-  context?: {
-    category?: string;
-    module?: string;
-    component?: string;
-    field?: string;
-  };
-  isApproved?: boolean;
+  value: string;
+  isActive?: boolean;
 }
 
 export interface UpdateTranslationDto {
-  originalText?: string;
-  translatedText?: string;
+  key?: string;
   languageId?: number;
-  context?: {
-    category?: string;
-    module?: string;
-    component?: string;
-    field?: string;
-  };
-  isApproved?: boolean;
+  value?: string;
+  isActive?: boolean;
 }
 
 export interface TranslateTextDto {
@@ -135,7 +75,7 @@ class TranslationService {
   async getLanguages(): Promise<Language[]> {
     try {
       const response = await translationApiClient.getLanguages();
-      return response.data;
+      return response.data.data || response.data;
     } catch (error) {
       console.error('Error fetching languages:', error);
       throw error;
@@ -145,7 +85,7 @@ class TranslationService {
   async getActiveLanguages(): Promise<Language[]> {
     try {
       const response = await translationApiClient.getActiveLanguages();
-      return response.data;
+      return response.data.data || response.data;
     } catch (error) {
       console.error('Error fetching active languages:', error);
       throw error;
@@ -155,7 +95,7 @@ class TranslationService {
   async getLanguage(id: number): Promise<Language> {
     try {
       const response = await translationApiClient.getLanguage(id);
-      return response.data;
+      return response.data.data || response.data;
     } catch (error) {
       console.error(`Error fetching language ${id}:`, error);
       throw error;
@@ -165,7 +105,7 @@ class TranslationService {
   async getLanguageByCode(code: string): Promise<Language> {
     try {
       const response = await translationApiClient.getLanguageByCode(code);
-      return response.data;
+      return response.data.data || response.data;
     } catch (error) {
       console.error(`Error fetching language by code ${code}:`, error);
       throw error;

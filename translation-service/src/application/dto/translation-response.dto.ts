@@ -1,4 +1,5 @@
 import { Expose } from "class-transformer";
+import { LanguageValue } from "../../domain/entities/language-value.entity";
 
 export class TranslationResponseDto {
   @Expose()
@@ -51,11 +52,29 @@ export class TranslationResponseDto {
 
   @Expose()
   updatedAt: Date;
+
+  static fromDomain(languageValue: LanguageValue): TranslationResponseDto {
+    const dto = new TranslationResponseDto();
+    dto.id = languageValue.id;
+    dto.key = languageValue.key;
+    dto.originalText = languageValue.originalText;
+    dto.translatedText = languageValue.translatedText;
+    dto.languageId = languageValue.languageId;
+    dto.language = languageValue.language
+      ? {
+          id: languageValue.language.id,
+          code: languageValue.language.code,
+          name: languageValue.language.name,
+        }
+      : null;
+    dto.context = languageValue.context;
+    dto.isApproved = languageValue.isApproved;
+    dto.approvedBy = languageValue.approvedBy;
+    dto.approvedAt = languageValue.approvedAt;
+    dto.usageCount = languageValue.usageCount;
+    dto.lastUsedAt = languageValue.lastUsedAt;
+    dto.createdAt = languageValue.createdAt;
+    dto.updatedAt = languageValue.updatedAt;
+    return dto;
+  }
 }
-
-
-
-
-
-
-

@@ -1,22 +1,29 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { RoleController } from "./application/controllers/role.controller";
-import { UserController } from "./application/controllers/user.controller";
-import { RoleService } from "./application/services/role.service";
-import { UserService } from "./application/services/user.service";
-import { Role } from "./domain/entities/role.entity";
-import { User } from "./domain/entities/user.entity";
-import { HealthController } from "./health/health.controller";
-import { RoleRepository } from "./infrastructure/role.repository";
-import { UserRepository } from "./infrastructure/user.repository";
 
+// Clean Architecture Modules
+import { InterfacesModule } from "./interfaces/interfaces.module";
+
+// TypeORM Entities (Infrastructure Layer)
+import { UserTypeOrmEntity } from "./infrastructure/database/typeorm/entities/user.typeorm.entity";
+import { RoleTypeOrmEntity } from "./infrastructure/database/typeorm/entities/role.typeorm.entity";
+import { UserRoleTypeOrmEntity } from "./infrastructure/database/typeorm/entities/user-role.typeorm.entity";
+
+/**
+ * Main Application Module
+ * Follows Clean Architecture principles
+ * Orchestrates all layers through the Interfaces module
+ */
 @Module({
   imports: [
+    // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [".env.local", ".env"],
     }),
+
+    // Database
     TypeOrmModule.forRoot({
       type: "mysql",
       host: process.env.DB_HOST || "localhost",
@@ -24,24 +31,17 @@ import { UserRepository } from "./infrastructure/user.repository";
       username: process.env.DB_USERNAME || "root",
       password: process.env.DB_PASSWORD || "password",
       database: process.env.DB_DATABASE || "user_service_db",
-      entities: [User, Role],
+      entities: [UserTypeOrmEntity, RoleTypeOrmEntity, UserRoleTypeOrmEntity],
       synchronize: process.env.NODE_ENV !== "production",
       logging: process.env.NODE_ENV === "development",
+      migrations: ["dist/infrastructure/database/typeorm/migrations/*.js"],
+      migrationsRun: process.env.NODE_ENV === "production",
     }),
-    TypeOrmModule.forFeature([User, Role]),
+
+    // Clean Architecture Layers (only import Interfaces module)
+    InterfacesModule,
   ],
-  controllers: [UserController, RoleController, HealthController],
-  providers: [
-    UserService,
-    RoleService,
-    {
-      provide: "UserRepositoryInterface",
-      useClass: UserRepository,
-    },
-    {
-      provide: "RoleRepositoryInterface",
-      useClass: RoleRepository,
-    },
-  ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

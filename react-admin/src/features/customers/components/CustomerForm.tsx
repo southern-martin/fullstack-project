@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import Button from '../../../shared/components/ui/Button';
@@ -9,9 +9,10 @@ interface CustomerFormProps {
     customer?: Customer;
     onSubmit: (data: CreateCustomerRequest | UpdateCustomerRequest) => Promise<void>;
     onCancel: () => void;
+    onFooterReady?: (footer: React.ReactNode) => void;
 }
 
-const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCancel }) => {
+const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCancel, onFooterReady }) => {
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -21,6 +22,13 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCance
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Use ref to access current form data without causing re-renders
+    const formDataRef = useRef(formData);
+    formDataRef.current = formData;
+
+    // Use ref to track if footer has been passed to parent
+    const footerPassedRef = useRef(false);
 
     useEffect(() => {
         if (customer) {
@@ -45,24 +53,25 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCance
 
     const validateForm = useCallback((): boolean => {
         const newErrors: Record<string, string> = {};
+        const currentFormData = formDataRef.current;
 
-        if (!formData.firstName.trim()) {
+        if (!currentFormData.firstName.trim()) {
             newErrors.firstName = 'First name is required';
         }
 
-        if (!formData.lastName.trim()) {
+        if (!currentFormData.lastName.trim()) {
             newErrors.lastName = 'Last name is required';
         }
 
-        if (!formData.email.trim()) {
+        if (!currentFormData.email.trim()) {
             newErrors.email = 'Email is required';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(currentFormData.email)) {
             newErrors.email = 'Please enter a valid email address';
         }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
-    }, [formData]);
+    }, []);
 
     const handleSubmit = useCallback(async (e?: React.FormEvent) => {
         if (e) {
@@ -75,13 +84,14 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCance
 
         setIsSubmitting(true);
         try {
+            const currentFormData = formDataRef.current;
             const submitData = {
-                firstName: formData.firstName.trim(),
-                lastName: formData.lastName.trim(),
-                email: formData.email.trim(),
-                phone: formData.phone.trim() || undefined,
+                firstName: currentFormData.firstName.trim(),
+                lastName: currentFormData.lastName.trim(),
+                email: currentFormData.email.trim(),
+                phone: currentFormData.phone.trim() || undefined,
                 preferences: {
-                    company: formData.company.trim() || undefined
+                    company: currentFormData.company.trim() || undefined
                 }
             };
 
@@ -95,10 +105,10 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCance
         } finally {
             setIsSubmitting(false);
         }
-    }, [formData, validateForm]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [validateForm, onSubmit]);
 
-    // Render footer directly - no more onFooterRender pattern
-    const footer = (
+    // Memoize footer to prevent infinite re-renders
+    const footer = useMemo(() => (
         <div className="flex justify-end space-x-3">
             <Button
                 type="button"
@@ -122,7 +132,15 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCance
                 }
             </Button>
         </div>
-    );
+    ), [onCancel, isSubmitting, handleSubmit, customer]);
+
+    // Pass footer to parent component only once when component mounts
+    useEffect(() => {
+        if (onFooterReady && !footerPassedRef.current) {
+            onFooterReady(footer);
+            footerPassedRef.current = true;
+        }
+    }, [onFooterReady, footer]);
 
     return (
         <>
@@ -176,7 +194,6 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCance
                     />
                 </div>
             </div>
-            {footer}
         </>
     );
 };

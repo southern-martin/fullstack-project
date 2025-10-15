@@ -6,13 +6,22 @@ class CustomerApiClient {
   private client: AxiosInstance;
 
   constructor() {
-    this.client = axios.create({
-      baseURL: CUSTOMER_API_CONFIG.BASE_URL,
-      timeout: CUSTOMER_API_CONFIG.TIMEOUT,
-      headers: CUSTOMER_API_CONFIG.HEADERS,
-    });
+    try {
+      console.log('CustomerApiClient constructor called');
+      console.log('CUSTOMER_API_CONFIG:', CUSTOMER_API_CONFIG);
+      this.client = axios.create({
+        baseURL: CUSTOMER_API_CONFIG.BASE_URL,
+        timeout: CUSTOMER_API_CONFIG.TIMEOUT,
+        headers: CUSTOMER_API_CONFIG.HEADERS,
+      });
 
-    this.setupInterceptors();
+      this.setupInterceptors();
+      console.log('CustomerApiClient initialized successfully');
+    } catch (error) {
+      console.error('Error initializing CustomerApiClient:', error);
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+      throw error;
+    }
   }
 
   private setupInterceptors() {

@@ -1,17 +1,9 @@
 // Repositories
-export * from "./repositories/role.repository";
-export * from "./repositories/user.repository";
+export * from "./database/typeorm/repositories/role.repository";
+export * from "./database/typeorm/repositories/user.repository";
 
 // Database
 export * from "./database/database.module";
 
 // Strategies
-export * from "./strategies/jwt.strategy";
-
-
-
-
-
-
-
-
+// export * from "./strategies/jwt.strategy";

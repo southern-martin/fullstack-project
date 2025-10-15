@@ -1,0 +1,50 @@
+import { Module } from "@nestjs/common";
+
+// Use Cases
+import { CreateCarrierUseCase } from "./use-cases/create-carrier.use-case";
+import { DeleteCarrierUseCase } from "./use-cases/delete-carrier.use-case";
+import { GetCarrierUseCase } from "./use-cases/get-carrier.use-case";
+import { UpdateCarrierUseCase } from "./use-cases/update-carrier.use-case";
+
+// Domain Services
+import { CarrierDomainService } from "../domain/services/carrier.domain.service";
+
+// Repository Interfaces (will be implemented in infrastructure)
+
+// Infrastructure Implementations
+import { CarrierRepository } from "../infrastructure/database/typeorm/repositories/carrier.repository";
+
+/**
+ * Application Module
+ * Configures application layer dependencies
+ * Follows Clean Architecture principles
+ */
+@Module({
+  providers: [
+    // Domain Services
+    CarrierDomainService,
+
+    // Use Cases
+    CreateCarrierUseCase,
+    GetCarrierUseCase,
+    UpdateCarrierUseCase,
+    DeleteCarrierUseCase,
+
+    // Repository Implementations
+    {
+      provide: "CarrierRepositoryInterface",
+      useClass: CarrierRepository,
+    },
+  ],
+  exports: [
+    // Export use cases for controllers
+    CreateCarrierUseCase,
+    GetCarrierUseCase,
+    UpdateCarrierUseCase,
+    DeleteCarrierUseCase,
+
+    // Export domain services
+    CarrierDomainService,
+  ],
+})
+export class ApplicationModule {}

@@ -26,7 +26,24 @@ export interface AssignRolesRequest {
 }
 
 class UserApiService {
-  private readonly basePath = USERS_API_CONFIG.ENDPOINTS.LIST;
+  private readonly basePath: string;
+
+  constructor() {
+    try {
+      console.log('UserApiService constructor called');
+      console.log('USERS_API_CONFIG:', USERS_API_CONFIG);
+      console.log('USERS_API_CONFIG.ENDPOINTS:', USERS_API_CONFIG?.ENDPOINTS);
+      this.basePath = USERS_API_CONFIG?.ENDPOINTS?.LIST || '/users';
+      console.log('UserApiService initialized with basePath:', this.basePath);
+    } catch (error) {
+      console.error('Error initializing UserApiService:', error);
+      console.error(
+        'Error stack:',
+        error instanceof Error ? error.stack : 'No stack trace'
+      );
+      this.basePath = '/users'; // Fallback
+    }
+  }
 
   async getUsers(params?: PaginationParams): Promise<PaginatedResponse<User>> {
     const queryParams = new URLSearchParams();

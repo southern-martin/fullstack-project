@@ -1,4 +1,4 @@
-import { PaginatedResponse, PaginationParams } from '../../../shared/types';
+import { PaginationParams } from '../../../shared/types';
 import { apiClient } from '../../../shared/utils/api';
 import { CUSTOMERS_API_CONFIG } from '../config/customersApi';
 
@@ -71,11 +71,31 @@ export interface UpdateCustomerRequest {
 }
 
 class CustomerApiService {
-  private readonly basePath = CUSTOMERS_API_CONFIG.ENDPOINTS.LIST;
+  private readonly basePath: string;
 
-  async getCustomers(
-    params?: PaginationParams
-  ): Promise<PaginatedResponse<Customer>> {
+  constructor() {
+    try {
+      console.log('CustomerApiService constructor called');
+      console.log('CUSTOMERS_API_CONFIG:', CUSTOMERS_API_CONFIG);
+      this.basePath = CUSTOMERS_API_CONFIG?.ENDPOINTS?.LIST || '/customers';
+      console.log(
+        'CustomerApiService initialized with basePath:',
+        this.basePath
+      );
+    } catch (error) {
+      console.error('Error initializing CustomerApiService:', error);
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+      this.basePath = '/customers'; // Fallback
+    }
+  }
+
+  async getCustomers(params?: PaginationParams): Promise<{
+    customers: Customer[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
@@ -86,7 +106,13 @@ class CustomerApiService {
     const url = queryParams.toString()
       ? `${this.basePath}?${queryParams}`
       : this.basePath;
-    return apiClient.get<PaginatedResponse<Customer>>(url);
+    return apiClient.get<{
+      customers: Customer[];
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    }>(url);
   }
 
   async getCustomerById(id: number): Promise<Customer> {

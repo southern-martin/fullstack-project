@@ -166,8 +166,8 @@ const AddProduct: React.FC = () => {
                                     value={formData.name}
                                     onChange={handleInputChange}
                                     className={`w-full rounded-lg border px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${errors.name
-                                        ? 'border-red-500 dark:border-red-500'
-                                        : 'border-gray-200 dark:border-gray-600'
+                                            ? 'border-red-500 dark:border-red-500'
+                                            : 'border-gray-200 dark:border-gray-600'
                                         }`}
                                     placeholder="Enter product name"
                                 />
@@ -187,8 +187,8 @@ const AddProduct: React.FC = () => {
                                     onChange={handleInputChange}
                                     rows={4}
                                     className={`w-full rounded-lg border px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${errors.description
-                                        ? 'border-red-500 dark:border-red-500'
-                                        : 'border-gray-200 dark:border-gray-600'
+                                            ? 'border-red-500 dark:border-red-500'
+                                            : 'border-gray-200 dark:border-gray-600'
                                         }`}
                                     placeholder="Enter product description"
                                 />
@@ -208,8 +208,8 @@ const AddProduct: React.FC = () => {
                                         value={formData.category}
                                         onChange={handleInputChange}
                                         className={`w-full rounded-lg border px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${errors.category
-                                            ? 'border-red-500 dark:border-red-500'
-                                            : 'border-gray-200 dark:border-gray-600'
+                                                ? 'border-red-500 dark:border-red-500'
+                                                : 'border-gray-200 dark:border-gray-600'
                                             }`}
                                     >
                                         <option value="">Select category</option>
@@ -236,8 +236,8 @@ const AddProduct: React.FC = () => {
                                         step="0.01"
                                         min="0"
                                         className={`w-full rounded-lg border px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${errors.price
-                                            ? 'border-red-500 dark:border-red-500'
-                                            : 'border-gray-200 dark:border-gray-600'
+                                                ? 'border-red-500 dark:border-red-500'
+                                                : 'border-gray-200 dark:border-gray-600'
                                             }`}
                                         placeholder="0.00"
                                     />
@@ -260,8 +260,8 @@ const AddProduct: React.FC = () => {
                                         onChange={handleInputChange}
                                         min="0"
                                         className={`w-full rounded-lg border px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${errors.stock
-                                            ? 'border-red-500 dark:border-red-500'
-                                            : 'border-gray-200 dark:border-gray-600'
+                                                ? 'border-red-500 dark:border-red-500'
+                                                : 'border-gray-200 dark:border-gray-600'
                                             }`}
                                         placeholder="0"
                                     />

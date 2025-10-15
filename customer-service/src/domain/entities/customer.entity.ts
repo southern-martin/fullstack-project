@@ -1,61 +1,48 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
-
-@Entity("customers")
 export class Customer {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  @Column({ unique: true })
+  id?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
   email: string;
-
-  @Column()
   firstName: string;
-
-  @Column()
   lastName: string;
-
-  @Column({ nullable: true })
-  phone: string;
-
-  @Column({ default: true })
+  phone?: string;
   isActive: boolean;
-
-  @Column({ type: "date", nullable: true })
-  dateOfBirth: Date;
-
-  @Column({ type: "json", nullable: true })
-  address: {
+  dateOfBirth?: Date;
+  address?: {
     street: string;
     city: string;
     state: string;
     zipCode: string;
     country: string;
   };
-
-  @Column({ type: "json", nullable: true })
-  preferences: {
+  preferences?: {
     company?: string;
     industry?: string;
     preferredContact?: string;
     newsletter?: boolean;
   };
+
+  constructor(data: Partial<Customer> = {}) {
+    this.id = data.id;
+    this.createdAt = data.createdAt;
+    this.updatedAt = data.updatedAt;
+    this.email = data.email || "";
+    this.firstName = data.firstName || "";
+    this.lastName = data.lastName || "";
+    this.phone = data.phone;
+    this.isActive = data.isActive ?? true;
+    this.dateOfBirth = data.dateOfBirth;
+    this.address = data.address;
+    this.preferences = data.preferences;
+  }
+
+  normalizeEmail() {
+    if (this.email) {
+      this.email = this.email.toLowerCase().trim();
+    }
+  }
+
+  get fullName(): string {
+    return `${this.firstName} ${this.lastName}`.trim();
+  }
 }
-
-
-
-
-
-
-
