@@ -1,18 +1,17 @@
-import React, { useState } from 'react';
 import {
-    MagnifyingGlassIcon,
-    FunnelIcon,
-    PlusIcon,
     CheckCircleIcon,
     ClockIcon,
     ExclamationTriangleIcon,
-    UserIcon,
-    CalendarIcon,
-    TagIcon,
     EyeIcon,
+    FunnelIcon,
+    MagnifyingGlassIcon,
     PencilIcon,
+    PlusIcon,
+    TagIcon,
     TrashIcon,
+    XCircleIcon
 } from '@heroicons/react/24/outline';
+import React, { useState } from 'react';
 
 interface Task {
     id: string;
@@ -102,7 +101,7 @@ const TaskList: React.FC = () => {
     ];
 
     const filteredTasks = mockTasks.filter(task => {
-        const matchesSearch = 
+        const matchesSearch =
             task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
             task.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -179,7 +178,7 @@ const TaskList: React.FC = () => {
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Task List</h2>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Manage and track all your tasks</p>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                     <button className="flex items-center space-x-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
                         <PlusIcon className="h-4 w-4" />
@@ -277,19 +276,19 @@ const TaskList: React.FC = () => {
                                 className="w-full rounded-lg border border-gray-200 bg-gray-50 pl-10 pr-4 py-2 text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                             />
                         </div>
-                        
+
                         <button
                             onClick={() => setShowFilters(!showFilters)}
                             className={`flex items-center space-x-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${showFilters || statusFilter !== 'all' || priorityFilter !== 'all'
                                 ? 'bg-blue-600 text-white'
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-                            }`}
+                                }`}
                         >
                             <FunnelIcon className="h-4 w-4" />
                             <span>Filters</span>
                         </button>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
                         <span className="text-sm text-gray-600 dark:text-gray-400">
                             {filteredTasks.length} tasks
@@ -315,7 +314,7 @@ const TaskList: React.FC = () => {
                                     <option value="cancelled">Cancelled</option>
                                 </select>
                             </div>
-                            
+
                             <div>
                                 <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Priority</label>
                                 <select
@@ -405,8 +404,8 @@ const TaskList: React.FC = () => {
                                     <td className="whitespace-nowrap px-6 py-4">
                                         <div className="flex items-center">
                                             <div className="w-16 bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                                                <div 
-                                                    className="bg-blue-600 h-2 rounded-full" 
+                                                <div
+                                                    className="bg-blue-600 h-2 rounded-full"
                                                     style={{ width: `${task.progress}%` }}
                                                 ></div>
                                             </div>

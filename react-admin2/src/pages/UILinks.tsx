@@ -1,4 +1,4 @@
-import { ArrowRightIcon, ArrowTopRightOnSquareIcon, ExternalLinkIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import React from 'react';
 
 const UILinks: React.FC = () => {
@@ -116,7 +116,7 @@ const UILinks: React.FC = () => {
                                 <h4 className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Icon on Left</h4>
                                 <div className="space-y-2">
                                     <a href="#" className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline transition-colors">
-                                        <ExternalLinkIcon className="h-4 w-4" />
+                                        <ArrowTopRightOnSquareIcon className="h-4 w-4" />
                                         <span>External Link</span>
                                     </a>
                                     <a href="#" className="inline-flex items-center space-x-2 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 hover:underline transition-colors">
@@ -276,14 +276,14 @@ const UILinks: React.FC = () => {
                                         className="inline-flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
                                     >
                                         <span>Download PDF</span>
-                                        <ExternalLinkIcon className="h-4 w-4" />
+                                        <ArrowTopRightOnSquareIcon className="h-4 w-4" />
                                     </a>
                                     <a
                                         href="#"
                                         className="inline-flex items-center space-x-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
                                     >
                                         <span>Download ZIP</span>
-                                        <ExternalLinkIcon className="h-4 w-4" />
+                                        <ArrowTopRightOnSquareIcon className="h-4 w-4" />
                                     </a>
                                 </div>
                             </div>

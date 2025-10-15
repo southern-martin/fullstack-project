@@ -43,12 +43,18 @@ import BasicTables from './pages/BasicTables';
 import DataTables from './pages/DataTables';
 
 // Pages section
+import ApiKeys from './pages/ApiKeys';
+import BlankPage from './pages/BlankPage';
 import ComingSoon from './pages/ComingSoon';
 import Error404 from './pages/Error404';
 import Error500 from './pages/Error500';
+import Error503 from './pages/Error503';
 import FAQ from './pages/FAQ';
 import FileManager from './pages/FileManager';
+import Integrations from './pages/Integrations';
+import Maintenance from './pages/Maintenance';
 import PricingTables from './pages/PricingTables';
+import Success from './pages/Success';
 
 // Support section
 import SupportChat from './pages/SupportChat';
@@ -56,6 +62,7 @@ import SupportTicketList from './pages/SupportTicketList';
 import SupportTicketReply from './pages/SupportTicketReply';
 
 // Charts section
+import AreaChart from './pages/AreaChart';
 import BarChart from './pages/BarChart';
 import LineChart from './pages/LineChart';
 import PieChart from './pages/PieChart';
@@ -73,6 +80,16 @@ import UIDropdowns from './pages/UIDropdowns';
 import UIImages from './pages/UIImages';
 import UILinks from './pages/UILinks';
 import UIList from './pages/UIList';
+import UIModals from './pages/UIModals';
+import UINotifications from './pages/UINotifications';
+import UIPagination from './pages/UIPagination';
+import UIPopovers from './pages/UIPopovers';
+import UIProgressBars from './pages/UIProgressBars';
+import UIRibbons from './pages/UIRibbons';
+import UISpinners from './pages/UISpinners';
+import UITabs from './pages/UITabs';
+import UITooltips from './pages/UITooltips';
+import UIVideos from './pages/UIVideos';
 
 // Authentication pages
 import AuthResetPassword from './pages/AuthResetPassword';
@@ -133,9 +150,15 @@ function App() {
               <Route path="pages/files" element={<FileManager />} />
               <Route path="pages/pricing" element={<PricingTables />} />
               <Route path="pages/faq" element={<FAQ />} />
+              <Route path="pages/api-keys" element={<ApiKeys />} />
+              <Route path="pages/integrations" element={<Integrations />} />
+              <Route path="pages/blank" element={<BlankPage />} />
               <Route path="pages/404" element={<Error404 />} />
               <Route path="pages/500" element={<Error500 />} />
+              <Route path="pages/503" element={<Error503 />} />
               <Route path="pages/coming-soon" element={<ComingSoon />} />
+              <Route path="pages/maintenance" element={<Maintenance />} />
+              <Route path="pages/success" element={<Success />} />
 
               {/* Support Routes */}
               <Route path="support/chat" element={<SupportChat />} />
@@ -149,6 +172,7 @@ function App() {
               <Route path="charts/line" element={<LineChart />} />
               <Route path="charts/bar" element={<BarChart />} />
               <Route path="charts/pie" element={<PieChart />} />
+              <Route path="charts/area" element={<AreaChart />} />
 
               {/* UI Elements Routes */}
               <Route path="ui/alerts" element={<UIAlerts />} />
@@ -163,6 +187,16 @@ function App() {
               <Route path="ui/images" element={<UIImages />} />
               <Route path="ui/links" element={<UILinks />} />
               <Route path="ui/list" element={<UIList />} />
+              <Route path="ui/modals" element={<UIModals />} />
+              <Route path="ui/notifications" element={<UINotifications />} />
+              <Route path="ui/pagination" element={<UIPagination />} />
+              <Route path="ui/popovers" element={<UIPopovers />} />
+              <Route path="ui/progress" element={<UIProgressBars />} />
+              <Route path="ui/ribbons" element={<UIRibbons />} />
+              <Route path="ui/spinners" element={<UISpinners />} />
+              <Route path="ui/tabs" element={<UITabs />} />
+              <Route path="ui/tooltips" element={<UITooltips />} />
+              <Route path="ui/videos" element={<UIVideos />} />
 
               {/* E-commerce Routes */}
               <Route path="products" element={<Products />} />
