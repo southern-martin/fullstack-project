@@ -1,22 +1,15 @@
 // Enterprise-grade service layer for API communication
 
-import { 
-  ApiResponse, 
-  QueryParams, 
-  User, 
-  Product, 
-  Order, 
-  Customer,
-  PaginationMeta 
-} from '../types';
-import { 
-  IBaseService, 
-  IUserService, 
-  IProductService, 
-  IOrderService, 
-  ICustomerService 
-} from '../interfaces';
-import { API_CONFIG } from '../constants';
+import { API_CONFIG } from "../constants";
+import {
+  IBaseService,
+  ICustomerService,
+  IOrderService,
+  IProductService,
+  IUserService,
+  QueryParams,
+} from "../interfaces";
+import { ApiResponse, Customer, Order, Product, User } from "../types";
 
 // Base HTTP client for enterprise-grade API communication
 class HttpClient {
@@ -40,7 +33,7 @@ class HttpClient {
     const config: RequestInit = {
       ...options,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...this.getAuthHeaders(),
         ...options.headers,
       },
@@ -67,8 +60,8 @@ class HttpClient {
         const data = await response.json();
         return data;
       } catch (error) {
-        lastError = error instanceof Error ? error : new Error('Unknown error');
-        
+        lastError = error instanceof Error ? error : new Error("Unknown error");
+
         if (attempt < this.retries) {
           await this.delay(this.retryDelay * Math.pow(2, attempt));
         }
@@ -79,51 +72,54 @@ class HttpClient {
   }
 
   private getAuthHeaders(): Record<string, string> {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem("auth_token");
     return token ? { Authorization: `Bearer ${token}` } : {};
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  async get<T>(endpoint: string, params?: QueryParams): Promise<ApiResponse<T>> {
+  async get<T>(
+    endpoint: string,
+    params?: QueryParams
+  ): Promise<ApiResponse<T>> {
     const url = params ? this.buildUrlWithParams(endpoint, params) : endpoint;
-    return this.request<T>(url, { method: 'GET' });
+    return this.request<T>(url, { method: "GET" });
   }
 
   async post<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
-      method: 'POST',
+      method: "POST",
       body: data ? JSON.stringify(data) : undefined,
     });
   }
 
   async put<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
-      method: 'PUT',
+      method: "PUT",
       body: data ? JSON.stringify(data) : undefined,
     });
   }
 
   async patch<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
-      method: 'PATCH',
+      method: "PATCH",
       body: data ? JSON.stringify(data) : undefined,
     });
   }
 
   async delete<T>(endpoint: string): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+    return this.request<T>(endpoint, { method: "DELETE" });
   }
 
   private buildUrlWithParams(endpoint: string, params: QueryParams): string {
     const url = new URL(endpoint, this.baseURL);
-    
+
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         if (Array.isArray(value)) {
-          value.forEach(v => url.searchParams.append(key, String(v)));
+          value.forEach((v) => url.searchParams.append(key, String(v)));
         } else {
           url.searchParams.append(key, String(value));
         }
@@ -181,12 +177,22 @@ class UserService extends BaseService<User> implements IUserService {
     return httpClient.get<User>(`${this.endpoint}/email/${email}`);
   }
 
-  async updatePassword(id: string | number, password: string): Promise<ApiResponse<void>> {
-    return httpClient.patch<void>(`${this.endpoint}/${id}/password`, { password });
+  async updatePassword(
+    id: string | number,
+    password: string
+  ): Promise<ApiResponse<void>> {
+    return httpClient.patch<void>(`${this.endpoint}/${id}/password`, {
+      password,
+    });
   }
 
-  async updatePermissions(id: string | number, permissions: string[]): Promise<ApiResponse<void>> {
-    return httpClient.patch<void>(`${this.endpoint}/${id}/permissions`, { permissions });
+  async updatePermissions(
+    id: string | number,
+    permissions: string[]
+  ): Promise<ApiResponse<void>> {
+    return httpClient.patch<void>(`${this.endpoint}/${id}/permissions`, {
+      permissions,
+    });
   }
 
   async getAuditLogs(id: string | number): Promise<ApiResponse<any[]>> {
@@ -208,16 +214,27 @@ class ProductService extends BaseService<Product> implements IProductService {
     return httpClient.get<Product[]>(`${this.endpoint}/status/${status}`);
   }
 
-  async updateStock(id: string | number, quantity: number): Promise<ApiResponse<Product>> {
-    return httpClient.patch<Product>(`${this.endpoint}/${id}/stock`, { quantity });
+  async updateStock(
+    id: string | number,
+    quantity: number
+  ): Promise<ApiResponse<Product>> {
+    return httpClient.patch<Product>(`${this.endpoint}/${id}/stock`, {
+      quantity,
+    });
   }
 
   async getLowStock(threshold: number = 10): Promise<ApiResponse<Product[]>> {
-    return httpClient.get<Product[]>(`${this.endpoint}/low-stock`, { threshold });
+    return httpClient.get<Product[]>(`${this.endpoint}/low-stock`, {
+      filters: { threshold },
+    });
   }
 
-  async bulkUpdate(products: Partial<Product>[]): Promise<ApiResponse<Product[]>> {
-    return httpClient.post<Product[]>(`${this.endpoint}/bulk-update`, { products });
+  async bulkUpdate(
+    products: Partial<Product>[]
+  ): Promise<ApiResponse<Product[]>> {
+    return httpClient.post<Product[]>(`${this.endpoint}/bulk-update`, {
+      products,
+    });
   }
 }
 
@@ -235,26 +252,34 @@ class OrderService extends BaseService<Order> implements IOrderService {
     return httpClient.get<Order[]>(`${this.endpoint}/status/${status}`);
   }
 
-  async updateStatus(id: string | number, status: string): Promise<ApiResponse<Order>> {
+  async updateStatus(
+    id: string | number,
+    status: string
+  ): Promise<ApiResponse<Order>> {
     return httpClient.patch<Order>(`${this.endpoint}/${id}/status`, { status });
   }
 
   async getRevenueStats(period: string): Promise<ApiResponse<any>> {
-    return httpClient.get<any>(`${this.endpoint}/revenue-stats`, { period });
+    return httpClient.get<any>(`${this.endpoint}/revenue-stats`, {
+      filters: { period },
+    });
   }
 
   async exportOrders(filters: any): Promise<Blob> {
-    const response = await fetch(`${API_CONFIG.BASE_URL}${this.endpoint}/export`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...httpClient['getAuthHeaders'](),
-      },
-      body: JSON.stringify(filters),
-    });
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}${this.endpoint}/export`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...httpClient["getAuthHeaders"](),
+        },
+        body: JSON.stringify(filters),
+      }
+    );
 
     if (!response.ok) {
-      throw new Error('Failed to export orders');
+      throw new Error("Failed to export orders");
     }
 
     return response.blob();
@@ -262,7 +287,10 @@ class OrderService extends BaseService<Order> implements IOrderService {
 }
 
 // Customer service implementation
-class CustomerService extends BaseService<Customer> implements ICustomerService {
+class CustomerService
+  extends BaseService<Customer>
+  implements ICustomerService
+{
   constructor() {
     super(API_CONFIG.ENDPOINTS.CUSTOMERS.BASE);
   }
@@ -275,8 +303,14 @@ class CustomerService extends BaseService<Customer> implements ICustomerService 
     return httpClient.get<any>(`${this.endpoint}/${customerId}/loyalty-stats`);
   }
 
-  async updatePreferences(customerId: string, preferences: any): Promise<ApiResponse<Customer>> {
-    return httpClient.patch<Customer>(`${this.endpoint}/${customerId}/preferences`, preferences);
+  async updatePreferences(
+    customerId: string,
+    preferences: any
+  ): Promise<ApiResponse<Customer>> {
+    return httpClient.patch<Customer>(
+      `${this.endpoint}/${customerId}/preferences`,
+      preferences
+    );
   }
 
   async getOrderHistory(customerId: string): Promise<ApiResponse<Order[]>> {
@@ -297,17 +331,20 @@ class AnalyticsService {
   }
 
   async exportReport(type: string, filters: any): Promise<Blob> {
-    const response = await fetch(`${API_CONFIG.BASE_URL}${this.endpoint}/export/${type}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...httpClient['getAuthHeaders'](),
-      },
-      body: JSON.stringify(filters),
-    });
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}${this.endpoint}/export/${type}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...httpClient["getAuthHeaders"](),
+        },
+        body: JSON.stringify(filters),
+      }
+    );
 
     if (!response.ok) {
-      throw new Error('Failed to export report');
+      throw new Error("Failed to export report");
     }
 
     return response.blob();
@@ -339,7 +376,10 @@ class NotificationService {
 class AuthService {
   private endpoint = API_CONFIG.ENDPOINTS.AUTH;
 
-  async login(email: string, password: string): Promise<ApiResponse<{ user: User; token: string }>> {
+  async login(
+    email: string,
+    password: string
+  ): Promise<ApiResponse<{ user: User; token: string }>> {
     return httpClient.post<{ user: User; token: string }>(this.endpoint.LOGIN, {
       email,
       password,
@@ -354,16 +394,27 @@ class AuthService {
     return httpClient.post<{ token: string }>(this.endpoint.REFRESH);
   }
 
-  async register(userData: Partial<User>): Promise<ApiResponse<{ user: User; token: string }>> {
-    return httpClient.post<{ user: User; token: string }>(this.endpoint.REGISTER, userData);
+  async register(
+    userData: Partial<User>
+  ): Promise<ApiResponse<{ user: User; token: string }>> {
+    return httpClient.post<{ user: User; token: string }>(
+      this.endpoint.REGISTER,
+      userData
+    );
   }
 
   async forgotPassword(email: string): Promise<ApiResponse<void>> {
     return httpClient.post<void>(this.endpoint.FORGOT_PASSWORD, { email });
   }
 
-  async resetPassword(token: string, password: string): Promise<ApiResponse<void>> {
-    return httpClient.post<void>(this.endpoint.RESET_PASSWORD, { token, password });
+  async resetPassword(
+    token: string,
+    password: string
+  ): Promise<ApiResponse<void>> {
+    return httpClient.post<void>(this.endpoint.RESET_PASSWORD, {
+      token,
+      password,
+    });
   }
 
   async verifyEmail(token: string): Promise<ApiResponse<void>> {
