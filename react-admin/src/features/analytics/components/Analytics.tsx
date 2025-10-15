@@ -8,6 +8,21 @@ import {
     UsersIcon
 } from '@heroicons/react/24/outline';
 import React, { useCallback, useEffect, useState } from 'react';
+import {
+    Area,
+    AreaChart,
+    Bar,
+    BarChart,
+    Cell,
+    Line,
+    LineChart,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis
+} from 'recharts';
 
 import Button from '../../../shared/components/ui/Button';
 import Card from '../../../shared/components/ui/Card';
@@ -46,6 +61,31 @@ const Analytics: React.FC = () => {
     const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
     const [loading, setLoading] = useState(true);
     const [dateRange, setDateRange] = useState('7d');
+
+    // Chart data
+    const performanceData = [
+        { name: 'Jan', users: 400, customers: 240, orders: 1200, revenue: 24000 },
+        { name: 'Feb', users: 300, customers: 139, orders: 980, revenue: 22100 },
+        { name: 'Mar', users: 200, customers: 980, orders: 1100, revenue: 22900 },
+        { name: 'Apr', users: 278, customers: 390, orders: 1300, revenue: 20000 },
+        { name: 'May', users: 189, customers: 480, orders: 1400, revenue: 21800 },
+        { name: 'Jun', users: 239, customers: 380, orders: 1500, revenue: 25000 },
+        { name: 'Jul', users: 349, customers: 430, orders: 1600, revenue: 28000 },
+    ];
+
+    const userGrowthData = [
+        { name: 'Week 1', users: 120, customers: 80, carriers: 5 },
+        { name: 'Week 2', users: 190, customers: 120, carriers: 8 },
+        { name: 'Week 3', users: 300, customers: 200, carriers: 12 },
+        { name: 'Week 4', users: 500, customers: 350, carriers: 18 },
+    ];
+
+    const activityDistribution = [
+        { name: 'Users', value: 35, color: '#3B82F6' },
+        { name: 'Customers', value: 45, color: '#10B981' },
+        { name: 'Carriers', value: 15, color: '#8B5CF6' },
+        { name: 'Orders', value: 5, color: '#F59E0B' },
+    ];
 
     // Load analytics data
     const loadAnalyticsData = useCallback(async () => {
@@ -246,23 +286,171 @@ const Analytics: React.FC = () => {
                 </Card>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Charts Section */}
+            {/* Performance Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                {/* Performance Overview Chart */}
                 <Card>
                     <div className="p-6">
                         <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
                             <ChartBarIcon className="h-5 w-5 mr-2" />
-                            {'Performance Overview'}
+                            Performance Overview
                         </h3>
-                        <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-                            <div className="text-center">
-                                <ChartBarIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                                <p className="text-gray-500">{'Charts will be implemented here'}</p>
-                                <p className="text-sm text-gray-400">{'Integration with charting library needed'}</p>
-                            </div>
+                        <div className="h-80">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={performanceData}>
+                                    <XAxis dataKey="name" />
+                                    <YAxis />
+                                    <Tooltip
+                                        formatter={(value, name) => [
+                                            typeof value === 'number' ? value.toLocaleString() : value,
+                                            name === 'revenue' ? 'Revenue ($)' : name
+                                        ]}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="users"
+                                        stackId="1"
+                                        stroke="#3B82F6"
+                                        fill="#3B82F6"
+                                        fillOpacity={0.6}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="customers"
+                                        stackId="1"
+                                        stroke="#10B981"
+                                        fill="#10B981"
+                                        fillOpacity={0.6}
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
                         </div>
                     </div>
                 </Card>
+
+                {/* Activity Distribution */}
+                <Card>
+                    <div className="p-6">
+                        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                            <EyeIcon className="h-5 w-5 mr-2" />
+                            Activity Distribution
+                        </h3>
+                        <div className="h-80">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={activityDistribution}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={60}
+                                        outerRadius={120}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        {activityDistribution.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip formatter={(value) => [`${value}%`, 'Percentage']} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                        <div className="mt-4 grid grid-cols-2 gap-2">
+                            {activityDistribution.map((item, index) => (
+                                <div key={index} className="flex items-center">
+                                    <div
+                                        className="w-3 h-3 rounded-full mr-2"
+                                        style={{ backgroundColor: item.color }}
+                                    ></div>
+                                    <span className="text-sm text-gray-600">{item.name}: {item.value}%</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </Card>
+            </div>
+
+            {/* Additional Charts Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                {/* User Growth Chart */}
+                <Card>
+                    <div className="p-6">
+                        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                            <UsersIcon className="h-5 w-5 mr-2" />
+                            User Growth Trend
+                        </h3>
+                        <div className="h-80">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={userGrowthData}>
+                                    <XAxis dataKey="name" />
+                                    <YAxis />
+                                    <Tooltip formatter={(value) => [value.toLocaleString(), 'Count']} />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="users"
+                                        stroke="#3B82F6"
+                                        strokeWidth={3}
+                                        dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
+                                    />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="customers"
+                                        stroke="#10B981"
+                                        strokeWidth={3}
+                                        dot={{ fill: '#10B981', strokeWidth: 2, r: 4 }}
+                                    />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="carriers"
+                                        stroke="#8B5CF6"
+                                        strokeWidth={3}
+                                        dot={{ fill: '#8B5CF6', strokeWidth: 2, r: 4 }}
+                                    />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                </Card>
+
+                {/* Revenue Chart */}
+                <Card>
+                    <div className="p-6">
+                        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                            <CurrencyDollarIcon className="h-5 w-5 mr-2" />
+                            Revenue & Orders
+                        </h3>
+                        <div className="h-80">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={performanceData}>
+                                    <XAxis dataKey="name" />
+                                    <YAxis yAxisId="left" />
+                                    <YAxis yAxisId="right" orientation="right" />
+                                    <Tooltip
+                                        formatter={(value, name) => [
+                                            name === 'revenue' ? `$${value.toLocaleString()}` : value.toLocaleString(),
+                                            name === 'revenue' ? 'Revenue' : 'Orders'
+                                        ]}
+                                    />
+                                    <Bar
+                                        yAxisId="left"
+                                        dataKey="orders"
+                                        fill="#F59E0B"
+                                        radius={[4, 4, 0, 0]}
+                                    />
+                                    <Bar
+                                        yAxisId="right"
+                                        dataKey="revenue"
+                                        fill="#10B981"
+                                        radius={[4, 4, 0, 0]}
+                                    />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                </Card>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
                 {/* Recent Activity */}
                 <Card>
