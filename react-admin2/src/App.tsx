@@ -54,7 +54,6 @@ import PricingTables from './pages/PricingTables';
 import SupportChat from './pages/SupportChat';
 import SupportTicketList from './pages/SupportTicketList';
 import SupportTicketReply from './pages/SupportTicketReply';
-import SupportTickets from './pages/SupportTickets';
 
 // Charts section
 import BarChart from './pages/BarChart';
@@ -76,10 +75,15 @@ import UILinks from './pages/UILinks';
 import UIList from './pages/UIList';
 
 // Authentication pages
+import AuthResetPassword from './pages/AuthResetPassword';
 import AuthSignIn from './pages/AuthSignIn';
 import AuthSignUp from './pages/AuthSignUp';
-import AuthResetPassword from './pages/AuthResetPassword';
 import AuthTwoStepVerification from './pages/AuthTwoStepVerification';
+
+// Support pages
+import SupportDetails from './pages/SupportDetails';
+import SupportEmail from './pages/SupportEmail';
+import SupportInbox from './pages/SupportInbox';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -135,7 +139,9 @@ function App() {
 
               {/* Support Routes */}
               <Route path="support/chat" element={<SupportChat />} />
-              <Route path="support/tickets" element={<SupportTickets />} />
+              <Route path="support/email" element={<SupportEmail />} />
+              <Route path="support/tickets" element={<SupportInbox />} />
+              <Route path="support/tickets/:id" element={<SupportDetails />} />
               <Route path="support/tickets/list" element={<SupportTicketList />} />
               <Route path="support/tickets/reply" element={<SupportTicketReply />} />
 
