@@ -54,7 +54,6 @@ import PricingTables from './pages/PricingTables';
 import SupportChat from './pages/SupportChat';
 import SupportTicketList from './pages/SupportTicketList';
 import SupportTicketReply from './pages/SupportTicketReply';
-import SupportTickets from './pages/SupportTickets';
 
 // Charts section
 import BarChart from './pages/BarChart';
@@ -82,9 +81,9 @@ import AuthSignUp from './pages/AuthSignUp';
 import AuthTwoStepVerification from './pages/AuthTwoStepVerification';
 
 // Support pages
+import SupportDetails from './pages/SupportDetails';
 import SupportEmail from './pages/SupportEmail';
 import SupportInbox from './pages/SupportInbox';
-import SupportDetails from './pages/SupportDetails';
 
 // Create a client
 const queryClient = new QueryClient();
