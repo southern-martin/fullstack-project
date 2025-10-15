@@ -72,7 +72,7 @@ const Profile: React.FC = () => {
         lastName: 'Doe',
         email: 'john.doe@example.com',
         phone: '+1 (555) 123-4567',
-        avatar: '/images/avatar-1.png',
+        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
         bio: 'Full-stack developer with 5+ years of experience in React, Node.js, and cloud technologies. Passionate about creating scalable and user-friendly applications.',
         location: 'San Francisco, CA',
         website: 'https://johndoe.dev',
