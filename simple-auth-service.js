@@ -199,3 +199,4 @@ process.on('SIGTERM', () => {
     console.log('\n🛑 Shutting down Simple Auth Service...');
     process.exit(0);
 });
+
