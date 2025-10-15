@@ -43,7 +43,13 @@ const Translations: React.FC = () => {
         limit: 100,
     });
 
-    const { data: languages = [] } = useLanguages();
+    const { data: languagesData = [] } = useLanguages();
+    const languages = Array.isArray(languagesData) ? languagesData : [];
+
+    // Debug logging to help identify the issue
+    if (languagesData && !Array.isArray(languagesData)) {
+        console.warn('Languages data is not an array:', languagesData);
+    }
 
     const createTranslationMutation = useCreateTranslation();
     const updateTranslationMutation = useUpdateTranslation();

@@ -68,20 +68,28 @@ class TranslationService {
   async getLanguages(): Promise<Language[]> {
     try {
       const response = await translationApiClient.getLanguages();
-      return response.data.data || response.data;
+      // The API returns { languages: [...], total: ..., page: ..., limit: ..., totalPages: ... }
+      return (
+        response.data.languages || response.data.data || response.data || []
+      );
     } catch (error) {
       console.error('Error fetching languages:', error);
-      throw error;
+      // Return empty array on error to prevent crashes
+      return [];
     }
   }
 
   async getActiveLanguages(): Promise<Language[]> {
     try {
       const response = await translationApiClient.getActiveLanguages();
-      return response.data.data || response.data;
+      // The API returns { languages: [...], total: ..., page: ..., limit: ..., totalPages: ... }
+      return (
+        response.data.languages || response.data.data || response.data || []
+      );
     } catch (error) {
       console.error('Error fetching active languages:', error);
-      throw error;
+      // Return empty array on error to prevent crashes
+      return [];
     }
   }
 
