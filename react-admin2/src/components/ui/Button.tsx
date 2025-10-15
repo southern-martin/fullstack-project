@@ -1,8 +1,8 @@
 // Enterprise-grade Button component with proper abstractions
 
 import React, { forwardRef } from 'react';
-import { BaseComponentProps, useBaseComponent } from './BaseComponent';
 import { performanceUtils } from '../../utils';
+import { BaseComponentProps, useBaseComponent } from './BaseComponent';
 
 // Button-specific props interface
 export interface ButtonProps extends BaseComponentProps {
@@ -222,4 +222,3 @@ ButtonGroup.displayName = 'ButtonGroup';
 
 // Export components and types
 export default Button;
-export type { ButtonProps, ButtonGroupProps };

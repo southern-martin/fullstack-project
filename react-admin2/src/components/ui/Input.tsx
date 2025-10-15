@@ -1,8 +1,8 @@
 // Enterprise-grade Input component with proper abstractions
 
-import React, { forwardRef, useState, useCallback } from 'react';
-import { BaseComponentProps, useBaseComponent } from './BaseComponent';
+import React, { forwardRef, useCallback, useState } from 'react';
 import { validationUtils } from '../../utils';
+import { BaseComponentProps, useBaseComponent } from './BaseComponent';
 
 // Input-specific props interface
 export interface InputProps extends Omit<BaseComponentProps, 'onClick'> {
@@ -147,7 +147,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     // Handle input change
     const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = event.target.value;
-      
+
       if (value === undefined) {
         setInternalValue(newValue);
       }
@@ -164,7 +164,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     // Handle blur
     const handleBlur = useCallback((event: React.FocusEvent<HTMLInputElement>) => {
       setIsFocused(false);
-      
+
       // Validate on blur
       if (validation) {
         const error = validateInput(currentValue);
@@ -337,4 +337,3 @@ Input.displayName = 'Input';
 
 // Export component and types
 export default Input;
-export type { InputProps };

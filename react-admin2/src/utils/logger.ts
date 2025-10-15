@@ -1,7 +1,7 @@
 // Enterprise-grade logging system
 
-import { ILogger } from '../interfaces';
-import { config } from '../config';
+import { config } from "../config";
+import { ILogger } from "../interfaces";
 
 // Log levels
 export enum LogLevel {
@@ -32,17 +32,22 @@ class ConsoleLogger implements ILogger {
 
   constructor() {
     this.logLevel = this.getLogLevel();
-    this.isDevelopment = process.env.NODE_ENV === 'development';
+    this.isDevelopment = process.env.NODE_ENV === "development";
   }
 
   private getLogLevel(): LogLevel {
-    const level = config.get('logging.level', 'info');
+    const level = config.get("logging.level", "info");
     switch (level.toLowerCase()) {
-      case 'debug': return LogLevel.DEBUG;
-      case 'info': return LogLevel.INFO;
-      case 'warn': return LogLevel.WARN;
-      case 'error': return LogLevel.ERROR;
-      default: return LogLevel.INFO;
+      case "debug":
+        return LogLevel.DEBUG;
+      case "info":
+        return LogLevel.INFO;
+      case "warn":
+        return LogLevel.WARN;
+      case "error":
+        return LogLevel.ERROR;
+      default:
+        return LogLevel.INFO;
     }
   }
 
@@ -53,9 +58,9 @@ class ConsoleLogger implements ILogger {
   private formatMessage(entry: LogEntry): string {
     const timestamp = new Date(entry.timestamp).toISOString();
     const level = LogLevel[entry.level];
-    const meta = entry.meta ? ` ${JSON.stringify(entry.meta)}` : '';
-    const error = entry.error ? ` Error: ${entry.error.message}` : '';
-    
+    const meta = entry.meta ? ` ${JSON.stringify(entry.meta)}` : "";
+    const error = entry.error ? ` Error: ${entry.error.message}` : "";
+
     return `[${timestamp}] ${level}: ${entry.message}${meta}${error}`;
   }
 
@@ -80,7 +85,7 @@ class ConsoleLogger implements ILogger {
   private getCurrentUserId(): string | undefined {
     // Get from auth context or localStorage
     try {
-      const user = localStorage.getItem('user');
+      const user = localStorage.getItem("user");
       return user ? JSON.parse(user).id : undefined;
     } catch {
       return undefined;
@@ -90,7 +95,7 @@ class ConsoleLogger implements ILogger {
   private getCurrentSessionId(): string | undefined {
     // Get from session storage or generate
     try {
-      return sessionStorage.getItem('sessionId') || undefined;
+      return sessionStorage.getItem("sessionId") || undefined;
     } catch {
       return undefined;
     }
@@ -132,19 +137,19 @@ class ConsoleLogger implements ILogger {
 
   private async sendToRemoteLogger(entry: LogEntry): Promise<void> {
     try {
-      const loggingEndpoint = config.get('logging.endpoint');
+      const loggingEndpoint = config.get("logging.endpoint");
       if (!loggingEndpoint) return;
 
       await fetch(loggingEndpoint, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(entry),
       });
     } catch (error) {
       // Don't log logging errors to avoid infinite loops
-      console.error('Failed to send log to remote service:', error);
+      console.error("Failed to send log to remote service:", error);
     }
   }
 
@@ -174,9 +179,9 @@ class RemoteLogger implements ILogger {
   private flushTimer: NodeJS.Timeout | null = null;
 
   constructor() {
-    this.endpoint = config.get('logging.endpoint', '/api/logs');
-    this.batchSize = config.get('logging.batchSize', 10);
-    this.flushInterval = config.get('logging.flushInterval', 5000);
+    this.endpoint = config.get("logging.endpoint", "/api/logs");
+    this.batchSize = config.get("logging.batchSize", 10);
+    this.flushInterval = config.get("logging.flushInterval", 5000);
     this.startFlushTimer();
   }
 
@@ -190,25 +195,25 @@ class RemoteLogger implements ILogger {
     if (this.logQueue.length === 0) return;
 
     const logs = this.logQueue.splice(0, this.batchSize);
-    
+
     try {
       await fetch(this.endpoint, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ logs }),
       });
     } catch (error) {
       // Re-queue logs on failure
       this.logQueue.unshift(...logs);
-      console.error('Failed to send logs to remote service:', error);
+      console.error("Failed to send logs to remote service:", error);
     }
   }
 
   private addToQueue(entry: LogEntry): void {
     this.logQueue.push(entry);
-    
+
     if (this.logQueue.length >= this.batchSize) {
       this.flush();
     }
@@ -247,11 +252,13 @@ class RemoteLogger implements ILogger {
       level: LogLevel.ERROR,
       message,
       meta,
-      error: error ? {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-      } as any : undefined,
+      error: error
+        ? ({
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+          } as any)
+        : undefined,
     });
   }
 
@@ -304,14 +311,16 @@ const logger = new CompositeLogger();
 
 // Performance monitoring utilities
 export const performanceLogger = {
-  startTimer: (name: string): () => void => {
+  startTimer: (name: string): (() => void) => {
     const startTime = performance.now();
     logger.debug(`Performance timer started: ${name}`);
-    
+
     return () => {
       const endTime = performance.now();
       const duration = endTime - startTime;
-      logger.info(`Performance timer ended: ${name}`, { duration: `${duration.toFixed(2)}ms` });
+      logger.info(`Performance timer ended: ${name}`, {
+        duration: `${duration.toFixed(2)}ms`,
+      });
     };
   },
 
@@ -339,21 +348,21 @@ export const performanceLogger = {
 // Error boundary logger
 export const errorLogger = {
   logError: (error: Error, errorInfo?: any): void => {
-    logger.error('React Error Boundary caught an error', error, {
+    logger.error("React Error Boundary caught an error", error, {
       componentStack: errorInfo?.componentStack,
       errorBoundary: errorInfo?.errorBoundary,
     });
   },
 
   logUnhandledRejection: (event: PromiseRejectionEvent): void => {
-    logger.error('Unhandled promise rejection', event.reason, {
-      type: 'unhandledRejection',
+    logger.error("Unhandled promise rejection", event.reason, {
+      type: "unhandledRejection",
     });
   },
 
   logUncaughtError: (event: ErrorEvent): void => {
-    logger.error('Uncaught error', new Error(event.message), {
-      type: 'uncaughtError',
+    logger.error("Uncaught error", new Error(event.message), {
+      type: "uncaughtError",
       filename: event.filename,
       lineno: event.lineno,
       colno: event.colno,
@@ -362,12 +371,15 @@ export const errorLogger = {
 };
 
 // Initialize global error handlers
-if (typeof window !== 'undefined') {
-  window.addEventListener('unhandledrejection', errorLogger.logUnhandledRejection);
-  window.addEventListener('error', errorLogger.logUncaughtError);
+if (typeof window !== "undefined") {
+  window.addEventListener(
+    "unhandledrejection",
+    errorLogger.logUnhandledRejection
+  );
+  window.addEventListener("error", errorLogger.logUncaughtError);
 }
 
 // Export logger and utilities
-export { logger, LogLevel };
+export { logger };
 export type { LogEntry };
 export default logger;

@@ -1,22 +1,15 @@
 // Enterprise-grade custom hooks for business logic separation
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  ApiResponse, 
-  PaginationMeta, 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  IUseApiOptions,
+  IUseApiResult,
+  IUsePaginationOptions,
+  IUsePaginationResult,
   QueryParams,
-  User,
-  Product,
-  Order,
-  Customer
-} from '../types';
-import { 
-  IUseApiOptions, 
-  IUseApiResult, 
-  IUsePaginationOptions, 
-  IUsePaginationResult 
-} from '../interfaces';
+} from "../interfaces";
+import { ApiResponse, User } from "../types";
 
 // Generic API hook for data fetching
 export const useApi = <T = any>(
@@ -48,10 +41,10 @@ export const useApi = <T = any>(
         setData(response.data);
         onSuccess?.(response.data);
       } else {
-        throw new Error(response.message || 'API request failed');
+        throw new Error(response.message || "API request failed");
       }
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Unknown error');
+      const error = err instanceof Error ? err : new Error("Unknown error");
       setError(error);
       onError?.(error);
     } finally {
@@ -77,12 +70,10 @@ export const useApi = <T = any>(
 };
 
 // Pagination hook
-export const usePagination = (options: IUsePaginationOptions = {}): IUsePaginationResult => {
-  const {
-    initialPage = 1,
-    initialLimit = 10,
-    total = 0,
-  } = options;
+export const usePagination = (
+  options: IUsePaginationOptions = {}
+): IUsePaginationResult => {
+  const { initialPage = 1, initialLimit = 10, total = 0 } = options;
 
   const [page, setPage] = useState(initialPage);
   const [limit, setLimit] = useState(initialLimit);
@@ -91,21 +82,24 @@ export const usePagination = (options: IUsePaginationOptions = {}): IUsePaginati
   const hasNext = useMemo(() => page < totalPages, [page, totalPages]);
   const hasPrev = useMemo(() => page > 1, [page]);
 
-  const goToPage = useCallback((newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setPage(newPage);
-    }
-  }, [totalPages]);
+  const goToPage = useCallback(
+    (newPage: number) => {
+      if (newPage >= 1 && newPage <= totalPages) {
+        setPage(newPage);
+      }
+    },
+    [totalPages]
+  );
 
   const nextPage = useCallback(() => {
     if (hasNext) {
-      setPage(prev => prev + 1);
+      setPage((prev) => prev + 1);
     }
   }, [hasNext]);
 
   const prevPage = useCallback(() => {
     if (hasPrev) {
-      setPage(prev => prev - 1);
+      setPage((prev) => prev - 1);
     }
   }, [hasPrev]);
 
@@ -160,15 +154,19 @@ export const useLocalStorage = <T>(
     }
   });
 
-  const setValue = useCallback((value: T | ((val: T) => T)) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(`Error setting localStorage key "${key}":`, error);
-    }
-  }, [key, storedValue]);
+  const setValue = useCallback(
+    (value: T | ((val: T) => T)) => {
+      try {
+        const valueToStore =
+          value instanceof Function ? value(storedValue) : value;
+        setStoredValue(valueToStore);
+        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+      } catch (error) {
+        console.error(`Error setting localStorage key "${key}":`, error);
+      }
+    },
+    [key, storedValue]
+  );
 
   return [storedValue, setValue];
 };
@@ -188,27 +186,31 @@ export const useSessionStorage = <T>(
     }
   });
 
-  const setValue = useCallback((value: T | ((val: T) => T)) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      window.sessionStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(`Error setting sessionStorage key "${key}":`, error);
-    }
-  }, [key, storedValue]);
+  const setValue = useCallback(
+    (value: T | ((val: T) => T)) => {
+      try {
+        const valueToStore =
+          value instanceof Function ? value(storedValue) : value;
+        setStoredValue(valueToStore);
+        window.sessionStorage.setItem(key, JSON.stringify(valueToStore));
+      } catch (error) {
+        console.error(`Error setting sessionStorage key "${key}":`, error);
+      }
+    },
+    [key, storedValue]
+  );
 
   return [storedValue, setValue];
 };
 
 // Previous value hook
 export const usePrevious = <T>(value: T): T | undefined => {
-  const ref = useRef<T>();
-  
+  const ref = useRef<T | undefined>(undefined);
+
   useEffect(() => {
     ref.current = value;
   });
-  
+
   return ref.current;
 };
 
@@ -224,9 +226,9 @@ export const useClickOutside = (
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [ref, callback]);
 };
@@ -241,12 +243,9 @@ export const useIntersectionObserver = (
   useEffect(() => {
     if (!ref.current) return;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsIntersecting(entry.isIntersecting);
-      },
-      options
-    );
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsIntersecting(entry.isIntersecting);
+    }, options);
 
     observer.observe(ref.current);
 
@@ -269,16 +268,19 @@ export const useMediaQuery = (query: string): boolean => {
     }
 
     const listener = () => setMatches(media.matches);
-    media.addEventListener('change', listener);
+    media.addEventListener("change", listener);
 
-    return () => media.removeEventListener('change', listener);
+    return () => media.removeEventListener("change", listener);
   }, [matches, query]);
 
   return matches;
 };
 
 // Copy to clipboard hook
-export const useCopyToClipboard = (): [boolean, (text: string) => Promise<void>] => {
+export const useCopyToClipboard = (): [
+  boolean,
+  (text: string) => Promise<void>
+] => {
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = useCallback(async (text: string) => {
@@ -287,7 +289,7 @@ export const useCopyToClipboard = (): [boolean, (text: string) => Promise<void>]
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error('Failed to copy text: ', error);
+      console.error("Failed to copy text: ", error);
     }
   }, []);
 
@@ -302,12 +304,12 @@ export const useOnlineStatus = (): boolean => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
@@ -329,8 +331,8 @@ export const useWindowSize = (): { width: number; height: number } => {
       });
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return windowSize;
@@ -342,38 +344,48 @@ export const useFormValidation = <T extends Record<string, any>>(
   validationRules: Record<keyof T, any>
 ) => {
   const [values, setValues] = useState<T>(initialValues);
-  const [errors, setErrors] = useState<Record<keyof T, string>>({} as Record<keyof T, string>);
-  const [touched, setTouched] = useState<Record<keyof T, boolean>>({} as Record<keyof T, boolean>);
+  const [errors, setErrors] = useState<Record<keyof T, string>>(
+    {} as Record<keyof T, string>
+  );
+  const [touched, setTouched] = useState<Record<keyof T, boolean>>(
+    {} as Record<keyof T, boolean>
+  );
 
-  const setValue = useCallback((field: keyof T, value: any) => {
-    setValues(prev => ({ ...prev, [field]: value }));
-    
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  }, [errors]);
+  const setValue = useCallback(
+    (field: keyof T, value: any) => {
+      setValues((prev) => ({ ...prev, [field]: value }));
+
+      // Clear error when user starts typing
+      if (errors[field]) {
+        setErrors((prev) => ({ ...prev, [field]: "" }));
+      }
+    },
+    [errors]
+  );
 
   const setFieldTouched = useCallback((field: keyof T) => {
-    setTouched(prev => ({ ...prev, [field]: true }));
+    setTouched((prev) => ({ ...prev, [field]: true }));
   }, []);
 
-  const validateField = useCallback((field: keyof T) => {
-    const rules = validationRules[field];
-    if (!rules) return true;
+  const validateField = useCallback(
+    (field: keyof T) => {
+      const rules = validationRules[field];
+      if (!rules) return true;
 
-    const value = values[field];
-    const error = rules.validate(value, values);
-    
-    setErrors(prev => ({ ...prev, [field]: error }));
-    return !error;
-  }, [values, validationRules]);
+      const value = values[field];
+      const error = rules.validate(value, values);
+
+      setErrors((prev) => ({ ...prev, [field]: error }));
+      return !error;
+    },
+    [values, validationRules]
+  );
 
   const validateForm = useCallback(() => {
     const newErrors = {} as Record<keyof T, string>;
     let isValid = true;
 
-    Object.keys(validationRules).forEach(field => {
+    Object.keys(validationRules).forEach((field) => {
       const fieldKey = field as keyof T;
       const rules = validationRules[fieldKey];
       if (rules) {
@@ -411,10 +423,10 @@ export const useFormValidation = <T extends Record<string, any>>(
 // Business logic hooks for specific entities
 export const useUsers = (params?: QueryParams) => {
   return useQuery({
-    queryKey: ['users', params],
+    queryKey: ["users", params],
     queryFn: async () => {
       // Implementation would call actual API
-      const response = await fetch('/api/users');
+      const response = await fetch("/api/users");
       return response.json();
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -423,10 +435,10 @@ export const useUsers = (params?: QueryParams) => {
 
 export const useProducts = (params?: QueryParams) => {
   return useQuery({
-    queryKey: ['products', params],
+    queryKey: ["products", params],
     queryFn: async () => {
       // Implementation would call actual API
-      const response = await fetch('/api/products');
+      const response = await fetch("/api/products");
       return response.json();
     },
     staleTime: 5 * 60 * 1000,
@@ -435,10 +447,10 @@ export const useProducts = (params?: QueryParams) => {
 
 export const useOrders = (params?: QueryParams) => {
   return useQuery({
-    queryKey: ['orders', params],
+    queryKey: ["orders", params],
     queryFn: async () => {
       // Implementation would call actual API
-      const response = await fetch('/api/orders');
+      const response = await fetch("/api/orders");
       return response.json();
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
@@ -447,10 +459,10 @@ export const useOrders = (params?: QueryParams) => {
 
 export const useCustomers = (params?: QueryParams) => {
   return useQuery({
-    queryKey: ['customers', params],
+    queryKey: ["customers", params],
     queryFn: async () => {
       // Implementation would call actual API
-      const response = await fetch('/api/customers');
+      const response = await fetch("/api/customers");
       return response.json();
     },
     staleTime: 5 * 60 * 1000,
@@ -460,53 +472,53 @@ export const useCustomers = (params?: QueryParams) => {
 // Mutation hooks for data modification
 export const useCreateUser = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (userData: Partial<User>) => {
-      const response = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
       });
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
   });
 };
 
 export const useUpdateUser = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<User> }) => {
       const response = await fetch(`/api/users/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
       return response.json();
     },
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      queryClient.invalidateQueries({ queryKey: ['users', id] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["users", id] });
     },
   });
 };
 
 export const useDeleteUser = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/users/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
   });
 };
