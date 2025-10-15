@@ -34,6 +34,10 @@ import FormWizards from './pages/FormWizards';
 // Profile
 import Profile from './pages/Profile';
 
+// Task pages
+import TaskList from './pages/TaskList';
+import TaskKanban from './pages/TaskKanban';
+
 // Table pages
 import BasicTables from './pages/BasicTables';
 import DataTables from './pages/DataTables';
@@ -42,6 +46,9 @@ import DataTables from './pages/DataTables';
 import FAQ from './pages/FAQ';
 import FileManager from './pages/FileManager';
 import PricingTables from './pages/PricingTables';
+import Error404 from './pages/Error404';
+import Error500 from './pages/Error500';
+import ComingSoon from './pages/ComingSoon';
 
 // Support section
 import SupportChat from './pages/SupportChat';
@@ -58,6 +65,9 @@ import PieChart from './pages/PieChart';
 import UIAlerts from './pages/UIAlerts';
 import UIButtons from './pages/UIButtons';
 import UICards from './pages/UICards';
+import UIAvatars from './pages/UIAvatars';
+import UIBadge from './pages/UIBadge';
+import UIBreadcrumb from './pages/UIBreadcrumb';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -92,17 +102,24 @@ function App() {
               <Route path="forms/wizards" element={<FormWizards />} />
               <Route path="forms/validation" element={<FormValidation />} />
 
-              {/* Profile */}
-              <Route path="profile" element={<Profile />} />
+                    {/* Profile */}
+                    <Route path="profile" element={<Profile />} />
+
+                    {/* Task Routes */}
+                    <Route path="tasks/list" element={<TaskList />} />
+                    <Route path="tasks/kanban" element={<TaskKanban />} />
 
               {/* Table Routes */}
               <Route path="tables/basic" element={<BasicTables />} />
               <Route path="tables/data" element={<DataTables />} />
 
-              {/* Pages Routes */}
-              <Route path="pages/files" element={<FileManager />} />
-              <Route path="pages/pricing" element={<PricingTables />} />
-              <Route path="pages/faq" element={<FAQ />} />
+                    {/* Pages Routes */}
+                    <Route path="pages/files" element={<FileManager />} />
+                    <Route path="pages/pricing" element={<PricingTables />} />
+                    <Route path="pages/faq" element={<FAQ />} />
+                    <Route path="pages/404" element={<Error404 />} />
+                    <Route path="pages/500" element={<Error500 />} />
+                    <Route path="pages/coming-soon" element={<ComingSoon />} />
 
               {/* Support Routes */}
               <Route path="support/chat" element={<SupportChat />} />
@@ -115,10 +132,13 @@ function App() {
               <Route path="charts/bar" element={<BarChart />} />
               <Route path="charts/pie" element={<PieChart />} />
 
-              {/* UI Elements Routes */}
-              <Route path="ui/alerts" element={<UIAlerts />} />
-              <Route path="ui/buttons" element={<UIButtons />} />
-              <Route path="ui/cards" element={<UICards />} />
+                    {/* UI Elements Routes */}
+                    <Route path="ui/alerts" element={<UIAlerts />} />
+                    <Route path="ui/buttons" element={<UIButtons />} />
+                    <Route path="ui/cards" element={<UICards />} />
+                    <Route path="ui/avatars" element={<UIAvatars />} />
+                    <Route path="ui/badge" element={<UIBadge />} />
+                    <Route path="ui/breadcrumb" element={<UIBreadcrumb />} />
 
               {/* E-commerce Routes */}
               <Route path="products" element={<Products />} />
