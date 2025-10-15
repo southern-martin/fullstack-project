@@ -1,5 +1,5 @@
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, PauseIcon, PlayIcon, StopIcon } from '@heroicons/react/24/outline';
 import React, { useState } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, ChevronDownIcon, PlayIcon, PauseIcon, StopIcon } from '@heroicons/react/24/outline';
 
 const UIButtonGroup: React.FC = () => {
     const [selectedOption, setSelectedOption] = useState('option1');
@@ -151,15 +151,13 @@ const UIButtonGroup: React.FC = () => {
                                         <button
                                             key={option}
                                             onClick={() => setSelectedOption(option)}
-                                            className={`px-4 py-2 font-medium border ${
-                                                selectedOption === option
+                                            className={`px-4 py-2 font-medium border ${selectedOption === option
                                                     ? 'bg-blue-600 text-white border-blue-600'
                                                     : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700'
-                                            } ${
-                                                index === 0 ? 'rounded-l-md border-r-0' :
-                                                index === 2 ? 'rounded-r-md border-l-0' :
-                                                'border-r-0 border-l-0'
-                                            } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors`}
+                                                } ${index === 0 ? 'rounded-l-md border-r-0' :
+                                                    index === 2 ? 'rounded-r-md border-l-0' :
+                                                        'border-r-0 border-l-0'
+                                                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors`}
                                         >
                                             Option {index + 1}
                                         </button>
@@ -173,11 +171,10 @@ const UIButtonGroup: React.FC = () => {
                                     {['Bold', 'Italic', 'Underline'].map((style, index) => (
                                         <button
                                             key={style}
-                                            className={`px-4 py-2 font-medium border ${
-                                                index === 0 ? 'rounded-l-md border-r-0' :
-                                                index === 2 ? 'rounded-r-md border-l-0' :
-                                                'border-r-0 border-l-0'
-                                            } bg-white text-gray-700 border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors`}
+                                            className={`px-4 py-2 font-medium border ${index === 0 ? 'rounded-l-md border-r-0' :
+                                                    index === 2 ? 'rounded-r-md border-l-0' :
+                                                        'border-r-0 border-l-0'
+                                                } bg-white text-gray-700 border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors`}
                                         >
                                             {style}
                                         </button>
@@ -246,11 +243,10 @@ const UIButtonGroup: React.FC = () => {
                                     {['Grid', 'List', 'Card'].map((view, index) => (
                                         <button
                                             key={view}
-                                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                                                index === 0
+                                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${index === 0
                                                     ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-white'
                                                     : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
-                                            }`}
+                                                }`}
                                         >
                                             {view}
                                         </button>
@@ -264,11 +260,10 @@ const UIButtonGroup: React.FC = () => {
                                     {['Newest', 'Popular', 'Trending'].map((sort, index) => (
                                         <button
                                             key={sort}
-                                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                                                index === 1
+                                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${index === 1
                                                     ? 'bg-blue-600 text-white shadow-sm'
                                                     : 'text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300'
-                                            }`}
+                                                }`}
                                         >
                                             {sort}
                                         </button>

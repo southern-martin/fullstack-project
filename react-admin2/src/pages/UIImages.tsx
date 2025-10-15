@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { MagnifyingGlassIcon, HeartIcon, ShareIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, HeartIcon, MagnifyingGlassIcon, ShareIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
+import React, { useState } from 'react';
 
 const UIImages: React.FC = () => {
     const [likedImages, setLikedImages] = useState<Set<number>>(new Set());

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon, PlayIcon, PauseIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, ChevronRightIcon, PauseIcon, PlayIcon } from '@heroicons/react/24/outline';
+import React, { useEffect, useState } from 'react';
 
 const UICarousel: React.FC = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -112,7 +112,7 @@ const UICarousel: React.FC = () => {
                     <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
                         <div className="relative max-w-4xl mx-auto">
                             <div className="relative overflow-hidden rounded-lg">
-                                <div 
+                                <div
                                     className="flex transition-transform duration-500 ease-in-out"
                                     style={{ transform: `translateX(-${currentSlide * 100}%)` }}
                                 >
@@ -149,11 +149,10 @@ const UICarousel: React.FC = () => {
                                     <button
                                         key={index}
                                         onClick={() => goToSlide(index)}
-                                        className={`w-3 h-3 rounded-full transition-colors ${
-                                            index === currentSlide
+                                        className={`w-3 h-3 rounded-full transition-colors ${index === currentSlide
                                                 ? 'bg-blue-600'
                                                 : 'bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500'
-                                        }`}
+                                            }`}
                                     />
                                 ))}
                             </div>
@@ -191,7 +190,7 @@ const UICarousel: React.FC = () => {
 
                         <div className="relative max-w-4xl mx-auto">
                             <div className="relative overflow-hidden rounded-lg">
-                                <div 
+                                <div
                                     className="flex transition-transform duration-500 ease-in-out"
                                     style={{ transform: `translateX(-${currentSlide * 100}%)` }}
                                 >
@@ -221,11 +220,10 @@ const UICarousel: React.FC = () => {
                                     <button
                                         key={index}
                                         onClick={() => goToSlide(index)}
-                                        className={`w-3 h-3 rounded-full transition-colors ${
-                                            index === currentSlide
+                                        className={`w-3 h-3 rounded-full transition-colors ${index === currentSlide
                                                 ? 'bg-blue-600'
                                                 : 'bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500'
-                                        }`}
+                                            }`}
                                     />
                                 ))}
                             </div>
@@ -239,7 +237,7 @@ const UICarousel: React.FC = () => {
                     <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
                         <div className="relative max-w-4xl mx-auto">
                             <div className="relative overflow-hidden rounded-lg">
-                                <div 
+                                <div
                                     className="flex transition-transform duration-500 ease-in-out"
                                     style={{ transform: `translateX(-${currentSlide2 * 25}%)` }}
                                 >
@@ -335,11 +333,10 @@ const UICarousel: React.FC = () => {
                                     <button
                                         key={slide.id}
                                         onClick={() => goToSlide(index)}
-                                        className={`flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-colors ${
-                                            index === currentSlide
+                                        className={`flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-colors ${index === currentSlide
                                                 ? 'border-blue-600'
                                                 : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-                                        }`}
+                                            }`}
                                     >
                                         <img
                                             src={slide.image}
