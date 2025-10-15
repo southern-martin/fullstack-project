@@ -1,6 +1,6 @@
+import { ArrowLeftIcon, CheckCircleIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { EnvelopeIcon, ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 const AuthResetPassword: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -10,7 +10,7 @@ const AuthResetPassword: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        
+
         // Simulate API call
         setTimeout(() => {
             setIsLoading(false);
@@ -46,7 +46,7 @@ const AuthResetPassword: React.FC = () => {
                                 Email sent successfully
                             </h3>
                             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                We've sent a password reset link to <strong>{email}</strong>. 
+                                We've sent a password reset link to <strong>{email}</strong>.
                                 Please check your email and click the link to reset your password.
                             </p>
                             <div className="mt-6 space-y-4">
