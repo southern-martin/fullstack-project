@@ -1,3 +1,115 @@
+#!/bin/bash
+
+# Extract TailAdmin Theme Script
+# This script will extract the complete theme from the TailAdmin demo
+
+set -e
+
+echo "🎨 Extracting TailAdmin Theme..."
+echo "================================="
+
+cd react-admin2
+
+# Create the exact HTML structure from the demo
+echo "📝 Creating exact HTML structure..."
+
+# Update public/index.html with the exact TailAdmin structure
+cat > public/index.html << 'EOF'
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>eCommerce Dashboard | TailAdmin - Tailwind CSS Admin Dashboard Template</title>
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: '#eff6ff',
+                100: '#dbeafe',
+                200: '#bfdbfe',
+                300: '#93c5fd',
+                400: '#60a5fa',
+                500: '#3b82f6',
+                600: '#2563eb',
+                700: '#1d4ed8',
+                800: '#1e40af',
+                900: '#1e3a8a',
+              },
+              brand: {
+                500: '#3b82f6',
+              },
+              success: {
+                50: '#f0fdf4',
+                500: '#22c55e',
+                600: '#16a34a',
+              },
+              error: {
+                50: '#fef2f2',
+                500: '#ef4444',
+                600: '#dc2626',
+              },
+              meta: {
+                1: '#dc2626',
+                2: '#059669',
+                3: '#d97706',
+                4: '#7c3aed',
+              },
+              stroke: '#e2e8f0',
+              strokedark: '#2e2e2e',
+              boxdark: '#24303f',
+              bodydark: '#aeb7c0',
+              bodydark1: '#d1d5db',
+              bodydark2: '#9ca3af',
+            },
+            fontFamily: {
+              sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            },
+            fontSize: {
+              'xs': ['0.75rem', { lineHeight: '1rem' }],
+              'sm': ['0.875rem', { lineHeight: '1.25rem' }],
+              'base': ['1rem', { lineHeight: '1.5rem' }],
+              'lg': ['1.125rem', { lineHeight: '1.75rem' }],
+              'xl': ['1.25rem', { lineHeight: '1.75rem' }],
+              '2xl': ['1.5rem', { lineHeight: '2rem' }],
+              '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
+              '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
+            },
+            fontWeight: {
+              'normal': '400',
+              'medium': '500',
+              'semibold': '600',
+              'bold': '700',
+            },
+          },
+        },
+      }
+    </script>
+    
+    <!-- Alpine.js for interactivity -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
+EOF
+
+# Create the exact CSS from TailAdmin demo
+echo "🎨 Creating exact TailAdmin CSS..."
+
+cat > src/index.css << 'EOF'
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* TailAdmin Exact Theme */
@@ -13,25 +125,9 @@ body {
   line-height: 1.5;
   color: #1f2937;
   background-color: #f9fafb;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.dark {
-  background-color: #111827;
-  color: #f9fafb;
 }
 
 .dark body {
-  background-color: #111827;
-  color: #f9fafb;
-}
-
-/* Ensure dark mode is applied to the root */
-html.dark {
-  background-color: #111827;
-}
-
-html.dark body {
   background-color: #111827;
   color: #f9fafb;
 }
@@ -40,15 +136,9 @@ html.dark body {
 .sidebar {
   background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
   border-right: 1px solid #e5e7eb;
-  transition: all 0.3s ease;
 }
 
 .dark .sidebar {
-  background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
-  border-right: 1px solid #374151;
-}
-
-html.dark .sidebar {
   background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
   border-right: 1px solid #374151;
 }
@@ -58,15 +148,9 @@ html.dark .sidebar {
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid #e5e7eb;
-  transition: all 0.3s ease;
 }
 
 .dark .header {
-  background: rgba(31, 41, 55, 0.8);
-  border-bottom: 1px solid #374151;
-}
-
-html.dark .header {
   background: rgba(31, 41, 55, 0.8);
   border-bottom: 1px solid #374151;
 }
@@ -77,42 +161,11 @@ html.dark .header {
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  transition: all 0.3s ease;
 }
 
 .dark .card {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid #374151;
-}
-
-html.dark .card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid #374151;
-}
-
-/* Dark theme for all Tailwind components */
-html.dark .bg-white {
-  background-color: rgba(255, 255, 255, 0.03) !important;
-}
-
-html.dark .border-gray-200 {
-  border-color: #374151 !important;
-}
-
-html.dark .text-gray-900 {
-  color: #f9fafb !important;
-}
-
-html.dark .text-gray-600 {
-  color: #d1d5db !important;
-}
-
-html.dark .text-gray-500 {
-  color: #9ca3af !important;
-}
-
-html.dark .text-gray-400 {
-  color: #6b7280 !important;
 }
 
 /* Button Styles */
@@ -314,3 +367,11 @@ html.dark .text-gray-400 {
 .dark ::-webkit-scrollbar-thumb:hover {
   background: #64748b;
 }
+EOF
+
+echo "✅ TailAdmin theme extracted successfully!"
+echo "📁 Files created:"
+echo "   - public/index.html (exact TailAdmin structure)"
+echo "   - src/index.css (exact TailAdmin styles)"
+echo ""
+echo "🎯 Ready to create pixel-perfect TailAdmin clone!"

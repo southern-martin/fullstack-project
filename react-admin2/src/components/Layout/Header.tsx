@@ -12,11 +12,17 @@ import {
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+    darkMode: boolean;
+    setDarkMode: (darkMode: boolean) => void;
+    sidebarToggle: boolean;
+    setSidebarToggle: (toggle: boolean) => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ darkMode, setDarkMode, sidebarToggle, setSidebarToggle }) => {
     const navigate = useNavigate();
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
-    const [darkMode, setDarkMode] = useState(false);
     const userMenuRef = useRef<HTMLDivElement>(null);
     const notificationRef = useRef<HTMLDivElement>(null);
 
@@ -25,10 +31,8 @@ const Header: React.FC = () => {
         { id: 2, message: 'User Alena Franci requests permission to changeProject - Nganter App Project', time: '8 min ago', unread: true },
         { id: 3, message: 'User Jocelyn Kenter requests permission to changeProject - Nganter App Project', time: '15 min ago', unread: true },
         { id: 4, message: 'User Brandon Philips requests permission to changeProject - Nganter App Project', time: '1 hr ago', unread: true },
-        { id: 5, message: 'User Terry Franci requests permission to changeProject - Nganter App Project', time: '5 min ago', unread: false },
-        { id: 6, message: 'User Alena Franci requests permission to changeProject - Nganter App Project', time: '8 min ago', unread: false },
-        { id: 7, message: 'User Jocelyn Kenter requests permission to changeProject - Nganter App Project', time: '15 min ago', unread: false },
-        { id: 8, message: 'User Brandon Philips requests permission to changeProject - Nganter App Project', time: '1 hr ago', unread: false },
+        { id: 5, message: 'New order received from Tech Solutions Inc', time: '2 hr ago', unread: false },
+        { id: 6, message: 'Payment processed for Invoice #INV-003', time: '3 hr ago', unread: false },
     ];
 
     const unreadCount = notifications.filter(n => n.unread).length;
@@ -67,17 +71,29 @@ const Header: React.FC = () => {
         }
     };
 
+    const handleNotificationClick = (notificationId: number) => {
+        // Mark notification as read
+        console.log('Notification clicked:', notificationId);
+        setShowNotifications(false);
+    };
+
+    const handleViewAllNotifications = () => {
+        console.log('View all notifications');
+        setShowNotifications(false);
+    };
+
     const toggleDarkMode = () => {
         setDarkMode(!darkMode);
-        // Toggle dark mode on document
-        document.documentElement.classList.toggle('dark');
     };
 
     return (
         <header className="header sticky top-0 z-999 flex w-full bg-white drop-shadow-1 dark:bg-gray-800 dark:drop-shadow-none">
             <div className="flex flex-grow items-center justify-between px-4 py-3 shadow-2 md:px-6 2xl:px-11">
                 <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
-                    <button className="z-99999 flex items-center justify-center rounded-lg border border-gray-200 bg-white p-2 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 lg:hidden">
+                    <button
+                        onClick={() => setSidebarToggle(!sidebarToggle)}
+                        className="z-99999 flex items-center justify-center rounded-lg border border-gray-200 bg-white p-2 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 lg:hidden"
+                    >
                         <Bars3Icon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                     </button>
                 </div>
@@ -90,7 +106,7 @@ const Header: React.FC = () => {
                         <input
                             type="text"
                             placeholder="⌘ K"
-                            className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-10 pr-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent xl:w-125 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-10 pr-4 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent xl:w-125 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         />
                     </div>
                 </div>
@@ -127,31 +143,49 @@ const Header: React.FC = () => {
 
                             {/* Notifications dropdown */}
                             {showNotifications && (
-                                <div className="absolute -right-27 mt-2.5 flex h-90 w-75 flex-col rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-600 dark:bg-gray-800 sm:right-0 sm:w-80">
-                                    <div className="px-4.5 py-3">
-                                        <h5 className="text-sm font-medium text-bodydark2">Notification</h5>
+                                <div className="absolute right-0 mt-2.5 flex max-h-96 w-80 flex-col rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-600 dark:bg-gray-800">
+                                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                                        <h5 className="text-sm font-medium text-gray-900 dark:text-white">Notifications</h5>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">{unreadCount} unread</p>
                                     </div>
-                                    <ul className="flex h-auto flex-col overflow-y-auto">
-                                        {notifications.map((notification) => (
-                                            <li key={notification.id}>
-                                                <div className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4">
-                                                    <p className="text-sm">
-                                                        <span className="text-black dark:text-white">
-                                                            {notification.message}
-                                                        </span>
-                                                    </p>
-                                                    <p className="text-xs">{notification.time}</p>
-                                                </div>
-                                            </li>
-                                        ))}
-                                        <li>
-                                            <div className="px-4.5 py-3">
-                                                <button className="text-sm text-primary hover:text-opacity-80">
-                                                    View All Notification
-                                                </button>
+                                    <div className="flex-1 overflow-y-auto">
+                                        {notifications.length > 0 ? (
+                                            <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+                                                {notifications.map((notification) => (
+                                                    <li key={notification.id}>
+                                                        <button
+                                                            onClick={() => handleNotificationClick(notification.id)}
+                                                            className={`w-full px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 text-left ${notification.unread ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                                                        >
+                                                            <div className="flex items-start space-x-3">
+                                                                <div className={`flex-shrink-0 w-2 h-2 rounded-full mt-2 ${notification.unread ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}></div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="text-sm text-gray-900 dark:text-white leading-5">
+                                                                        {notification.message}
+                                                                    </p>
+                                                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                                        {notification.time}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <div className="px-4 py-8 text-center">
+                                                <p className="text-sm text-gray-500 dark:text-gray-400">No notifications</p>
                                             </div>
-                                        </li>
-                                    </ul>
+                                        )}
+                                    </div>
+                                    <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
+                                        <button
+                                            onClick={handleViewAllNotifications}
+                                            className="w-full text-center text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+                                        >
+                                            View All Notifications
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -163,13 +197,13 @@ const Header: React.FC = () => {
                                 className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
                             >
                                 <span className="hidden text-right lg:block">
-                                    <span className="block text-sm font-semibold text-gray-900 dark:text-white">
+                                    <span className="block text-xs font-semibold text-gray-900 dark:text-white">
                                         Musharof
                                     </span>
                                     <span className="block text-xs text-gray-500 dark:text-gray-400">Musharof Chowdhury</span>
                                 </span>
                                 <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
-                                    <span className="text-white text-sm font-semibold">M</span>
+                                    <span className="text-white text-xs font-semibold">M</span>
                                 </div>
                                 <ChevronDownIcon className="w-4 h-4 text-gray-400" />
                             </button>
@@ -177,40 +211,40 @@ const Header: React.FC = () => {
                             {/* User dropdown */}
                             {showUserMenu && (
                                 <div className="absolute right-0 mt-4 flex w-62.5 flex-col rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-600 dark:bg-gray-800">
-                                    <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
+                                    <ul className="flex flex-col gap-4 border-b border-stroke px-6 py-6 dark:border-strokedark">
                                         <li>
                                             <button
                                                 onClick={() => handleUserMenuAction('profile')}
-                                                className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+                                                className="flex items-center gap-3.5 text-xs font-medium duration-300 ease-in-out hover:text-primary"
                                             >
-                                                <UserIcon className="w-5 h-5" />
+                                                <UserIcon className="w-4 h-4" />
                                                 Edit profile
                                             </button>
                                         </li>
                                         <li>
                                             <button
                                                 onClick={() => handleUserMenuAction('settings')}
-                                                className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+                                                className="flex items-center gap-3.5 text-xs font-medium duration-300 ease-in-out hover:text-primary"
                                             >
-                                                <CogIcon className="w-5 h-5" />
+                                                <CogIcon className="w-4 h-4" />
                                                 Account settings
                                             </button>
                                         </li>
                                         <li>
                                             <button
                                                 onClick={() => handleUserMenuAction('support')}
-                                                className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+                                                className="flex items-center gap-3.5 text-xs font-medium duration-300 ease-in-out hover:text-primary"
                                             >
-                                                <BellIcon className="w-5 h-5" />
+                                                <BellIcon className="w-4 h-4" />
                                                 Support
                                             </button>
                                         </li>
                                     </ul>
                                     <button
                                         onClick={() => handleUserMenuAction('logout')}
-                                        className="flex items-center gap-3.5 py-4 px-6 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+                                        className="flex items-center gap-3.5 py-3 px-6 text-xs font-medium duration-300 ease-in-out hover:text-primary"
                                     >
-                                        <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                                        <ArrowRightOnRectangleIcon className="w-4 h-4" />
                                         Sign out
                                     </button>
                                 </div>
