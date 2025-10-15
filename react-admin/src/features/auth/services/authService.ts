@@ -92,7 +92,14 @@ class AuthService {
   }
 
   async getProfile(): Promise<User> {
-    return authApiClient.get<User>(AUTH_API_CONFIG.ENDPOINTS.PROFILE);
+    const response = await authApiClient.get<{
+      success: boolean;
+      data: {
+        user: User;
+      };
+    }>(AUTH_API_CONFIG.ENDPOINTS.PROFILE);
+
+    return response.data.user;
   }
 
   getStoredToken(): string | null {

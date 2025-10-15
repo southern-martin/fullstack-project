@@ -1,3 +1,4 @@
+import { PaginatedResponse } from '../../../shared/types';
 import { translationApiClient } from '../../../shared/utils/translationApi';
 
 export interface Language {
@@ -60,14 +61,6 @@ export interface TranslateTextDto {
     component?: string;
     field?: string;
   };
-}
-
-export interface PaginatedResponse<T> {
-  translations: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
 }
 
 class TranslationService {

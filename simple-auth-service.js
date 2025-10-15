@@ -89,7 +89,7 @@ app.post('/auth/login', (req, res) => {
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             },
-            token: token,
+            accessToken: token,
             expiresIn: '24h'
         }
     });
@@ -143,7 +143,7 @@ app.post('/auth/register', (req, res) => {
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             },
-            token: token,
+            accessToken: token,
             expiresIn: '24h'
         }
     });
@@ -188,6 +188,104 @@ app.post('/auth/validate', (req, res) => {
     });
 });
 
+// Profile endpoint (get user profile from token)
+app.get('/auth/profile', (req, res) => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({
+            success: false,
+            message: 'Authorization header required'
+        });
+    }
+
+    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+
+    // Mock token validation
+    if (token.startsWith('mock-jwt-token-')) {
+        const userId = token.split('-')[3];
+        const user = users.find(u => u.id == userId);
+
+        if (user) {
+            return res.json({
+                success: true,
+                data: {
+                    user: {
+                        id: user.id,
+                        email: user.email,
+                        name: user.name,
+                        role: user.role,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    }
+                }
+            });
+        }
+    }
+
+    res.status(401).json({
+        success: false,
+        message: 'Invalid token'
+    });
+});
+
+// Refresh token endpoint
+app.post('/auth/refresh', (req, res) => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({
+            success: false,
+            message: 'Authorization header required'
+        });
+    }
+
+    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+
+    // Mock token validation
+    if (token.startsWith('mock-jwt-token-')) {
+        const userId = token.split('-')[3];
+        const user = users.find(u => u.id == userId);
+
+        if (user) {
+            // Generate new token
+            const newToken = `mock-jwt-token-${user.id}-${Date.now()}`;
+
+            return res.json({
+                success: true,
+                message: 'Token refreshed successfully',
+                data: {
+                    user: {
+                        id: user.id,
+                        email: user.email,
+                        name: user.name,
+                        role: user.role,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    },
+                    accessToken: newToken,
+                    expiresIn: '24h'
+                }
+            });
+        }
+    }
+
+    res.status(401).json({
+        success: false,
+        message: 'Invalid token'
+    });
+});
+
+// Logout endpoint
+app.post('/auth/logout', (req, res) => {
+    // In a real app, you might want to blacklist the token
+    // For this mock service, we just return success
+    res.json({
+        success: true,
+        message: 'Logged out successfully'
+    });
+});
+
 // Start server
 app.listen(PORT, () => {
     console.log(`🚀 Simple Auth Service running on http://localhost:${PORT}`);
@@ -196,6 +294,9 @@ app.listen(PORT, () => {
     console.log(`   POST /auth/login`);
     console.log(`   POST /auth/register`);
     console.log(`   POST /auth/validate`);
+    console.log(`   GET  /auth/profile`);
+    console.log(`   POST /auth/refresh`);
+    console.log(`   POST /auth/logout`);
     console.log(`\n👤 Test users:`);
     console.log(`   admin@example.com / admin123`);
     console.log(`   user@example.com / user123`);

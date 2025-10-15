@@ -317,7 +317,7 @@ const Translations: React.FC = () => {
                 </div>
                 <div className="flex space-x-3">
                     <Button
-                        onClick={() => refresh()}
+                        onClick={() => refetch()}
                         variant="secondary"
                         size="sm"
                         disabled={loading}
@@ -368,7 +368,7 @@ const Translations: React.FC = () => {
                     config={tableConfig}
                     data={translations}
                     loading={loading}
-                    error={error || undefined}
+                    error={error?.message || undefined}
                 />
             </Card>
 
@@ -472,7 +472,7 @@ const Translations: React.FC = () => {
                 >
                     <LanguageManagement
                         onClose={() => setShowLanguageModal(false)}
-                        onLanguageChange={loadLanguages}
+                        onLanguageChange={() => refetch()}
                     />
                 </Modal>
             )}

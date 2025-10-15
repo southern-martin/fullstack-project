@@ -19,6 +19,7 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [isInitialized, setIsInitialized] = useState(false);
+    const [hasAttemptedRefresh, setHasAttemptedRefresh] = useState(false);
 
     // TanStack Query hooks
     const { data: user, isLoading: profileLoading, error: profileError } = useAuthProfile();
@@ -35,6 +36,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             if (token && authService.isTokenValid()) {
                 // Token exists and is valid, profile will be fetched by useAuthProfile
                 setIsInitialized(true);
+            } else if (token && !authService.isTokenValid() && !hasAttemptedRefresh) {
+                // Token is expired, try to refresh once
+                setHasAttemptedRefresh(true);
+                refreshTokenMutation.mutate();
+                setIsInitialized(true);
             } else {
                 // No valid token, user is not authenticated
                 setIsInitialized(true);
@@ -42,17 +48,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         };
 
         initializeAuth();
-    }, []);
-
-    // Handle token refresh
-    useEffect(() => {
-        const token = authService.getStoredToken();
-
-        if (token && !authService.isTokenValid()) {
-            // Token is expired, try to refresh
-            refreshTokenMutation.mutate();
-        }
-    }, [refreshTokenMutation]);
+    }, [hasAttemptedRefresh, refreshTokenMutation]);
 
     // Determine authentication state
     const isAuthenticated = !!user && !profileError;
@@ -69,6 +65,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         login: async (credentials) => {
             try {
                 await loginMutation.mutateAsync(credentials);
+                setHasAttemptedRefresh(false); // Reset refresh attempt flag on successful login
             } catch (error) {
                 throw error;
             }
@@ -76,6 +73,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         register: async (data) => {
             try {
                 await registerMutation.mutateAsync(data);
+                setHasAttemptedRefresh(false); // Reset refresh attempt flag on successful register
             } catch (error) {
                 throw error;
             }
@@ -83,9 +81,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         logout: async () => {
             try {
                 await logoutMutation.mutateAsync();
+                setHasAttemptedRefresh(false); // Reset refresh attempt flag on logout
             } catch (error) {
                 // Even if logout fails on server, clear local state
                 authService.logout();
+                setHasAttemptedRefresh(false);
             }
         },
         refreshToken: async () => {
