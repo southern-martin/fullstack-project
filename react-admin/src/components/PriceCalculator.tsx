@@ -75,9 +75,9 @@ const PriceCalculator: React.FC = () => {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Input Form */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-                <div className="p-6 border-b border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center">
                         <Calculator className="h-5 w-5 mr-2" />
                         Price Calculator
                     </h3>
@@ -221,9 +221,9 @@ const PriceCalculator: React.FC = () => {
             </div>
 
             {/* Results */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-                <div className="p-6 border-b border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900">Price Calculation Result</h3>
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Price Calculation Result</h3>
                 </div>
                 <div className="p-6">
                     {calculation ? (
