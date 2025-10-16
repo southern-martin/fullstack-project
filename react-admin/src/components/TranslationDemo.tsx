@@ -1,6 +1,7 @@
 import { Check, Copy, Globe, Loader2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Language, translationService } from '../features/translations/services/translationService';
+import { getLanguageFlag } from '../shared/utils/languageFlags';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -137,7 +138,7 @@ const TranslationDemo: React.FC = () => {
                                 {languages.map((language) => (
                                     <SelectItem key={language.id} value={language.code}>
                                         <div className="flex items-center space-x-2">
-                                            <span>🌐</span>
+                                            <span>{getLanguageFlag(language.code)}</span>
                                             <span>{language.name}</span>
                                             <span className="text-muted-foreground">({language.code})</span>
                                         </div>
