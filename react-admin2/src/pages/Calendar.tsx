@@ -142,6 +142,61 @@ const Calendar: React.FC = () => {
         });
     };
 
+    const getWeekDates = (date: Date) => {
+        const startOfWeek = new Date(date);
+        const day = startOfWeek.getDay();
+        const diff = startOfWeek.getDate() - day;
+        startOfWeek.setDate(diff);
+
+        const weekDates = [];
+        for (let i = 0; i < 7; i++) {
+            const weekDate = new Date(startOfWeek);
+            weekDate.setDate(startOfWeek.getDate() + i);
+            weekDates.push(weekDate);
+        }
+        return weekDates;
+    };
+
+    const getEventsForWeek = (weekDates: Date[]) => {
+        return events.filter(event => {
+            const eventDate = new Date(event.start);
+            return weekDates.some(weekDate =>
+                eventDate.toDateString() === weekDate.toDateString()
+            );
+        });
+    };
+
+    const getEventsForDay = (date: Date) => {
+        return events.filter(event => {
+            const eventDate = new Date(event.start);
+            return eventDate.toDateString() === date.toDateString();
+        });
+    };
+
+    const navigateWeek = (direction: 'prev' | 'next') => {
+        setCurrentDate(prev => {
+            const newDate = new Date(prev);
+            if (direction === 'prev') {
+                newDate.setDate(prev.getDate() - 7);
+            } else {
+                newDate.setDate(prev.getDate() + 7);
+            }
+            return newDate;
+        });
+    };
+
+    const navigateDay = (direction: 'prev' | 'next') => {
+        setCurrentDate(prev => {
+            const newDate = new Date(prev);
+            if (direction === 'prev') {
+                newDate.setDate(prev.getDate() - 1);
+            } else {
+                newDate.setDate(prev.getDate() + 1);
+            }
+            return newDate;
+        });
+    };
+
     const navigateMonth = (direction: 'prev' | 'next') => {
         setCurrentDate(prev => {
             const newDate = new Date(prev);
@@ -267,18 +322,37 @@ const Calendar: React.FC = () => {
                     {/* Navigation */}
                     <div className="flex items-center gap-4">
                         <button
-                            onClick={() => navigateMonth('prev')}
+                            onClick={() => {
+                                if (view === 'month') navigateMonth('prev');
+                                else if (view === 'week') navigateWeek('prev');
+                                else navigateDay('prev');
+                            }}
                             className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600"
                         >
                             <ChevronLeftIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                         </button>
 
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                            {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+                            {view === 'month' && `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`}
+                            {view === 'week' && (() => {
+                                const weekDates = getWeekDates(currentDate);
+                                const startDate = weekDates[0];
+                                const endDate = weekDates[6];
+                                if (startDate.getMonth() === endDate.getMonth()) {
+                                    return `${monthNames[startDate.getMonth()]} ${startDate.getDate()}-${endDate.getDate()}, ${startDate.getFullYear()}`;
+                                } else {
+                                    return `${startDate.getDate()} ${monthNames[startDate.getMonth()]} - ${endDate.getDate()} ${monthNames[endDate.getMonth()]}, ${startDate.getFullYear()}`;
+                                }
+                            })()}
+                            {view === 'day' && `${currentDate.getDate()} ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`}
                         </h3>
 
                         <button
-                            onClick={() => navigateMonth('next')}
+                            onClick={() => {
+                                if (view === 'month') navigateMonth('next');
+                                else if (view === 'week') navigateWeek('next');
+                                else navigateDay('next');
+                            }}
                             className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600"
                         >
                             <ChevronRightIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
@@ -292,8 +366,8 @@ const Calendar: React.FC = () => {
                                 key={viewType}
                                 onClick={() => setView(viewType)}
                                 className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${view === viewType
-                                        ? 'bg-primary-500 text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                                    ? 'bg-primary-500 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                                     }`}
                             >
                                 {viewType.charAt(0).toUpperCase() + viewType.slice(1)}
@@ -305,74 +379,205 @@ const Calendar: React.FC = () => {
 
             {/* Calendar Grid */}
             <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-                {/* Day Headers */}
-                <div className="grid grid-cols-7 border-b border-gray-200 dark:border-gray-700">
-                    {dayNames.map((day) => (
-                        <div
-                            key={day}
-                            className="p-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400"
-                        >
-                            {day}
+                {view === 'month' && (
+                    <>
+                        {/* Day Headers */}
+                        <div className="grid grid-cols-7 border-b border-gray-200 dark:border-gray-700">
+                            {dayNames.map((day) => (
+                                <div
+                                    key={day}
+                                    className="p-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400"
+                                >
+                                    {day}
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
 
-                {/* Calendar Days */}
-                <div className="grid grid-cols-7">
-                    {days.map((day, index) => {
-                        const isCurrentMonth = day !== null;
-                        const isToday = day && day.toDateString() === new Date().toDateString();
-                        const isSelected = day && selectedDate && day.toDateString() === selectedDate.toDateString();
-                        const dayEvents = day ? getEventsForDate(day) : [];
+                        {/* Calendar Days */}
+                        <div className="grid grid-cols-7">
+                            {days.map((day, index) => {
+                                const isCurrentMonth = day !== null;
+                                const isToday = day && day.toDateString() === new Date().toDateString();
+                                const isSelected = day && selectedDate && day.toDateString() === selectedDate.toDateString();
+                                const dayEvents = day ? getEventsForDate(day) : [];
 
-                        return (
-                            <div
-                                key={index}
-                                className={`min-h-[120px] border-r border-b border-gray-200 p-2 dark:border-gray-700 ${isCurrentMonth ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'
-                                    } ${isToday ? 'bg-blue-50 dark:bg-blue-900/20' : ''} ${isSelected ? 'bg-blue-100 dark:bg-blue-900/30' : ''
-                                    } hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors`}
-                                onClick={() => day && handleDateClick(day)}
-                            >
-                                {day && (
-                                    <>
-                                        <div
-                                            className={`text-sm font-medium mb-1 ${isCurrentMonth
-                                                    ? isToday
-                                                        ? 'text-blue-600 dark:text-blue-400'
-                                                        : 'text-gray-900 dark:text-white'
-                                                    : 'text-gray-400 dark:text-gray-500'
-                                                }`}
-                                        >
-                                            {day.getDate()}
-                                        </div>
-
-                                        {/* Events */}
-                                        <div className="space-y-1">
-                                            {dayEvents.slice(0, 3).map((event) => (
+                                return (
+                                    <div
+                                        key={index}
+                                        className={`min-h-[120px] border-r border-b border-gray-200 p-2 dark:border-gray-700 ${isCurrentMonth ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'
+                                            } ${isToday ? 'bg-blue-50 dark:bg-blue-900/20' : ''} ${isSelected ? 'bg-blue-100 dark:bg-blue-900/30' : ''
+                                            } hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors`}
+                                        onClick={() => day && handleDateClick(day)}
+                                    >
+                                        {day && (
+                                            <>
                                                 <div
-                                                    key={event.id}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleEventClick(event);
-                                                    }}
-                                                    className={`${event.color} text-white text-xs p-1 rounded cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1`}
+                                                    className={`text-sm font-medium mb-1 ${isCurrentMonth
+                                                        ? isToday
+                                                            ? 'text-blue-600 dark:text-blue-400'
+                                                            : 'text-gray-900 dark:text-white'
+                                                        : 'text-gray-400 dark:text-gray-500'
+                                                        }`}
                                                 >
-                                                    {getEventTypeIcon(event.type)}
-                                                    <span className="truncate">{event.title}</span>
+                                                    {day.getDate()}
                                                 </div>
-                                            ))}
-                                            {dayEvents.length > 3 && (
-                                                <div className="text-xs text-gray-500 dark:text-gray-400">
-                                                    +{dayEvents.length - 3} more
+
+                                                {/* Events */}
+                                                <div className="space-y-1">
+                                                    {dayEvents.slice(0, 3).map((event) => (
+                                                        <div
+                                                            key={event.id}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleEventClick(event);
+                                                            }}
+                                                            className={`${event.color} text-white text-xs p-1 rounded cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1`}
+                                                        >
+                                                            {getEventTypeIcon(event.type)}
+                                                            <span className="truncate">{event.title}</span>
+                                                        </div>
+                                                    ))}
+                                                    {dayEvents.length > 3 && (
+                                                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                                                            +{dayEvents.length - 3} more
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            )}
+                                            </>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </>
+                )}
+
+                {view === 'week' && (() => {
+                    const weekDates = getWeekDates(currentDate);
+                    const weekEvents = getEventsForWeek(weekDates);
+
+                    return (
+                        <>
+                            {/* Day Headers */}
+                            <div className="grid grid-cols-7 border-b border-gray-200 dark:border-gray-700">
+                                {weekDates.map((date, index) => {
+                                    const isToday = date.toDateString() === new Date().toDateString();
+                                    return (
+                                        <div
+                                            key={index}
+                                            className={`p-3 text-center border-r border-gray-200 dark:border-gray-700 ${isToday ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                                        >
+                                            <div className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                {dayNames[date.getDay()]}
+                                            </div>
+                                            <div className={`text-lg font-semibold ${isToday ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+                                                {date.getDate()}
+                                            </div>
                                         </div>
-                                    </>
-                                )}
+                                    );
+                                })}
                             </div>
-                        );
-                    })}
-                </div>
+
+                            {/* Week View - Time Slots */}
+                            <div className="grid grid-cols-7">
+                                {weekDates.map((date, index) => {
+                                    const isToday = date.toDateString() === new Date().toDateString();
+                                    const dayEvents = getEventsForDate(date);
+
+                                    return (
+                                        <div
+                                            key={index}
+                                            className={`min-h-[400px] border-r border-gray-200 p-2 dark:border-gray-700 ${isToday ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-800'}`}
+                                        >
+                                            <div className="space-y-1">
+                                                {dayEvents.map((event) => (
+                                                    <div
+                                                        key={event.id}
+                                                        onClick={() => handleEventClick(event)}
+                                                        className={`${event.color} text-white text-xs p-2 rounded cursor-pointer hover:opacity-80 transition-opacity`}
+                                                    >
+                                                        <div className="font-medium truncate">{event.title}</div>
+                                                        <div className="text-xs opacity-90">
+                                                            {formatTime(event.start)} - {formatTime(event.end)}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </>
+                    );
+                })()}
+
+                {view === 'day' && (() => {
+                    const dayEvents = getEventsForDay(currentDate);
+                    const isToday = currentDate.toDateString() === new Date().toDateString();
+
+                    return (
+                        <>
+                            {/* Day Header */}
+                            <div className={`p-4 border-b border-gray-200 dark:border-gray-700 ${isToday ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}>
+                                <div className="text-center">
+                                    <div className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                        {dayNames[currentDate.getDay()]}
+                                    </div>
+                                    <div className={`text-2xl font-bold ${isToday ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+                                        {currentDate.getDate()}
+                                    </div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                                        {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Day View - Time Slots */}
+                            <div className="p-4">
+                                <div className="space-y-3">
+                                    {dayEvents.length > 0 ? (
+                                        dayEvents.map((event) => (
+                                            <div
+                                                key={event.id}
+                                                onClick={() => handleEventClick(event)}
+                                                className={`${event.color} text-white p-4 rounded-lg cursor-pointer hover:opacity-90 transition-opacity`}
+                                            >
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="font-semibold">{event.title}</div>
+                                                    <div className="text-sm opacity-90">
+                                                        {formatTime(event.start)} - {formatTime(event.end)}
+                                                    </div>
+                                                </div>
+                                                {event.description && (
+                                                    <div className="text-sm opacity-90 mb-2">{event.description}</div>
+                                                )}
+                                                {event.location && (
+                                                    <div className="text-sm opacity-90">📍 {event.location}</div>
+                                                )}
+                                                {event.attendees && event.attendees.length > 0 && (
+                                                    <div className="text-sm opacity-90 mt-2">
+                                                        👥 {event.attendees.join(', ')}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                                            <CalendarIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                                            <p>No events scheduled for this day</p>
+                                            <button
+                                                onClick={() => handleDateClick(currentDate)}
+                                                className="mt-2 text-blue-600 dark:text-blue-400 hover:underline"
+                                            >
+                                                Add an event
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </>
+                    );
+                })()}
             </div>
 
             {/* Event Modal */}
@@ -535,8 +740,8 @@ const Calendar: React.FC = () => {
                                                 }
                                             }}
                                             className={`h-8 w-8 rounded-full ${color} ${(editingEvent?.color || newEvent.color) === color
-                                                    ? 'ring-2 ring-gray-400'
-                                                    : ''
+                                                ? 'ring-2 ring-gray-400'
+                                                : ''
                                                 }`}
                                         />
                                     ))}

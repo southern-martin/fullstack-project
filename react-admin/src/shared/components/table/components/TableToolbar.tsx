@@ -68,25 +68,25 @@ export const TableToolbar: React.FC<TableToolbarProps> = ({
     };
 
     return (
-        <div className="bg-white border-b border-gray-200 p-4">
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
             <div className="flex items-center justify-between">
                 {/* Left side - Search and Filters */}
                 <div className="flex items-center space-x-4">
                     {/* Search */}
                     {showSearch && (
                         <div className="relative">
-                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                             <input
                                 type="text"
                                 value={localSearchTerm}
                                 onChange={(e) => handleSearch(e.target.value)}
                                 placeholder='Search users...'
-                                className="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-64 pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                             />
                             {localSearchTerm && (
                                 <button
                                     onClick={() => handleSearch('')}
-                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                                 >
                                     <XMarkIcon className="h-4 w-4" />
                                 </button>
@@ -99,14 +99,14 @@ export const TableToolbar: React.FC<TableToolbarProps> = ({
                         <button
                             onClick={() => setShowAdvancedFilters(true)}
                             className={`flex items-center space-x-2 px-3 py-2 rounded-lg border transition-colors ${activeFilters.length > 0 || localSearchTerm
-                                ? 'border-blue-300 bg-blue-50 text-blue-700'
-                                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                                ? 'border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
+                                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                                 }`}
                         >
                             <FunnelIcon className="h-4 w-4" />
                             <span>Filters</span>
                             {(activeFilters.length > 0 || localSearchTerm) && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400">
                                     {activeFilters.length + (localSearchTerm ? 1 : 0)}
                                 </span>
                             )}
@@ -117,7 +117,7 @@ export const TableToolbar: React.FC<TableToolbarProps> = ({
                     {(activeFilters.length > 0 || localSearchTerm) && (
                         <button
                             onClick={handleClearAllFilters}
-                            className="text-sm text-gray-500 hover:text-gray-700"
+                            className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                         >
                             Clear all
                         </button>
@@ -132,29 +132,29 @@ export const TableToolbar: React.FC<TableToolbarProps> = ({
                     {/* Export */}
                     {showExport && onExport && (
                         <div className="relative group">
-                            <button className="flex items-center space-x-2 px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button className="flex items-center space-x-2 px-3 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400">
                                 <ArrowDownTrayIcon className="h-4 w-4" />
                                 <span>Export</span>
                             </button>
 
                             {/* Export Dropdown */}
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
                                 <div className="py-1">
                                     <button
                                         onClick={() => handleExport('csv')}
-                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                                     >
                                         Export as CSV
                                     </button>
                                     <button
                                         onClick={() => handleExport('excel')}
-                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                                     >
                                         Export as Excel
                                     </button>
                                     <button
                                         onClick={() => handleExport('pdf')}
-                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                                     >
                                         Export as PDF
                                     </button>
@@ -167,7 +167,7 @@ export const TableToolbar: React.FC<TableToolbarProps> = ({
                     {showSettings && (
                         <button
                             onClick={() => setShowTableSettings(true)}
-                            className="flex items-center space-x-2 px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="flex items-center space-x-2 px-3 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                         >
                             <AdjustmentsHorizontalIcon className="h-4 w-4" />
                             <span>Settings</span>

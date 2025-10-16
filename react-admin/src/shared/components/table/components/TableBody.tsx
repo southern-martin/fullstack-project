@@ -18,7 +18,7 @@ export const TableBody = () => {
     const paginatedData = displayData.slice(startIndex, endIndex);
 
     return (
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
             {paginatedData.map((row: any, index: number) => (
                 <TableRow
                     key={(row as any).id || index}

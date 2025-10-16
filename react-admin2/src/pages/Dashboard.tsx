@@ -1,6 +1,7 @@
 import {
     ArrowDownIcon,
     ArrowUpIcon,
+    CubeIcon,
     ShoppingBagIcon,
     UserGroupIcon
 } from '@heroicons/react/24/outline';
@@ -24,6 +25,13 @@ const Dashboard: React.FC = () => {
             changeType: 'increase',
             icon: ShoppingBagIcon,
         },
+        {
+            name: 'Products',
+            value: '1,247',
+            change: '7.23%',
+            changeType: 'increase',
+            icon: CubeIcon,
+        },
     ];
 
     const recentOrders = [
@@ -35,7 +43,7 @@ const Dashboard: React.FC = () => {
             price: '$2399.00',
             status: 'Delivered',
             statusColor: 'text-green-600',
-            image: '/assets/images/product/product-01.jpg',
+            image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
         },
         {
             id: 2,
@@ -45,7 +53,7 @@ const Dashboard: React.FC = () => {
             price: '$879.00',
             status: 'Pending',
             statusColor: 'text-yellow-600',
-            image: '/assets/images/product/product-02.jpg',
+            image: 'https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
         },
         {
             id: 3,
@@ -55,7 +63,7 @@ const Dashboard: React.FC = () => {
             price: '$1869.00',
             status: 'Delivered',
             statusColor: 'text-green-600',
-            image: '/assets/images/product/product-03.jpg',
+            image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
         },
         {
             id: 4,
@@ -65,7 +73,7 @@ const Dashboard: React.FC = () => {
             price: '$1699.00',
             status: 'Canceled',
             statusColor: 'text-red-600',
-            image: '/assets/images/product/product-04.jpg',
+            image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
         },
         {
             id: 5,
@@ -75,7 +83,7 @@ const Dashboard: React.FC = () => {
             price: '$240.00',
             status: 'Delivered',
             statusColor: 'text-green-600',
-            image: '/assets/images/product/product-05.jpg',
+            image: 'https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
         },
     ];
 
@@ -99,7 +107,7 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 md:gap-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 md:gap-6">
                 {stats.map((stat, index) => {
                     const Icon = stat.icon;
                     return (
@@ -353,18 +361,12 @@ const Dashboard: React.FC = () => {
                                     <tr key={order.id} className="border-b border-stroke dark:border-strokedark">
                                         <td className="px-4 py-3 xl:pl-6">
                                             <div className="flex items-center gap-3">
-                                                <div className="h-10 w-10 product-image-container bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                                                <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
                                                     <img
                                                         src={order.image}
                                                         alt={order.product}
-                                                        className="w-full h-full object-cover product-image"
-                                                        onError={(e) => {
-                                                            const target = e.target as HTMLImageElement;
-                                                            target.style.display = 'none';
-                                                            target.nextElementSibling?.classList.remove('hidden');
-                                                        }}
+                                                        className="h-full w-full object-cover"
                                                     />
-                                                    <span className="text-sm hidden">📱</span>
                                                 </div>
                                                 <div>
                                                     <p className="text-xs font-medium text-black dark:text-white">{order.product}</p>

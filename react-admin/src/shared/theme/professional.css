@@ -149,6 +149,11 @@ body {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.dark .professional-card {
+  background: linear-gradient(145deg, var(--color-neutral-800) 0%, var(--color-neutral-900) 100%);
+  border: 1px solid var(--color-neutral-700);
+}
+
 .professional-card:hover {
   box-shadow: var(--shadow-lg);
 }
@@ -215,9 +220,19 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
+.dark .professional-btn-secondary {
+  background: linear-gradient(145deg, var(--color-neutral-700) 0%, var(--color-neutral-800) 100%);
+  color: var(--color-neutral-100);
+  border: 1px solid var(--color-neutral-600);
+}
+
 .professional-btn-secondary:hover {
   background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
   box-shadow: var(--shadow-md);
+}
+
+.dark .professional-btn-secondary:hover {
+  background: linear-gradient(145deg, var(--color-neutral-600) 0%, var(--color-neutral-700) 100%);
 }
 
 .professional-btn-secondary:focus {
@@ -274,8 +289,12 @@ body {
 
 /* Professional Sidebar Styles */
 .professional-sidebar {
-  background: linear-gradient(180deg, var(--color-neutral-800) 0%, var(--color-neutral-900) 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   box-shadow: var(--shadow-xl);
+}
+
+.dark .professional-sidebar {
+  background: linear-gradient(180deg, var(--color-neutral-800) 0%, var(--color-neutral-900) 100%);
 }
 
 .professional-sidebar .nav-item {
@@ -284,6 +303,21 @@ body {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  color: var(--color-text-secondary);
+}
+
+.professional-sidebar .nav-item:hover {
+  color: var(--color-text-primary);
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.dark .professional-sidebar .nav-item {
+  color: var(--color-neutral-300);
+}
+
+.dark .professional-sidebar .nav-item:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .professional-sidebar .nav-item::before {
@@ -304,6 +338,7 @@ body {
 .professional-sidebar .nav-item.active {
   background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-600) 100%);
   box-shadow: var(--shadow-md);
+  color: white;
 }
 
 /* Professional Header Styles */
@@ -312,6 +347,26 @@ body {
   border-bottom: 1px solid var(--color-border-light);
   box-shadow: var(--shadow-sm);
   backdrop-filter: blur(10px);
+}
+
+.dark .professional-header {
+  background: linear-gradient(145deg, var(--color-neutral-800) 0%, var(--color-neutral-900) 100%);
+  border-bottom: 1px solid var(--color-neutral-700);
+}
+
+/* Header search input styling */
+.professional-header input[type="search"] {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.professional-header input[type="search"]:focus {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Professional Modal Styles */

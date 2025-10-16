@@ -4,7 +4,7 @@ import { Carrier, carrierService } from '../features/carriers/services/carrierSe
 import { PriceCalculation, pricingService } from '../features/pricing/services/pricingService';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+// Removed Card import - using custom styled divs instead
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -75,14 +75,14 @@ const PriceCalculator: React.FC = () => {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Input Form */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center">
                         <Calculator className="h-5 w-5 mr-2" />
                         Price Calculator
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+                    </h3>
+                </div>
+                <div className="p-6 space-y-4">
                     {/* Carrier Selection */}
                     <div className="space-y-2">
                         <Label htmlFor="carrier">Carrier *</Label>
@@ -217,15 +217,15 @@ const PriceCalculator: React.FC = () => {
                             </>
                         )}
                     </Button>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
 
             {/* Results */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Price Calculation Result</CardTitle>
-                </CardHeader>
-                <CardContent>
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Price Calculation Result</h3>
+                </div>
+                <div className="p-6">
                     {calculation ? (
                         <div className="space-y-4">
                             {/* Total Price */}
@@ -317,8 +317,8 @@ const PriceCalculator: React.FC = () => {
                             Enter the details above and click "Calculate Price" to see the result
                         </div>
                     )}
-                </CardContent>
-            </Card>
+                </div>
+            </div>
         </div>
     );
 };

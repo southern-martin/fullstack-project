@@ -92,7 +92,14 @@ class AuthService {
   }
 
   async getProfile(): Promise<User> {
-    return authApiClient.get<User>(AUTH_API_CONFIG.ENDPOINTS.PROFILE);
+    const response = await authApiClient.get<{
+      success: boolean;
+      data: {
+        user: User;
+      };
+    }>(AUTH_API_CONFIG.ENDPOINTS.PROFILE);
+
+    return response.data.user;
   }
 
   getStoredToken(): string | null {
@@ -115,7 +122,7 @@ class AuthService {
 
   async healthCheck(): Promise<boolean> {
     try {
-      await authApiClient.get('/auth/health');
+      await authApiClient.get('/health');
       return true;
     } catch (error) {
       console.error('Auth service health check failed:', error);

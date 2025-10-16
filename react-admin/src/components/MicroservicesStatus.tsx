@@ -8,7 +8,6 @@ import { translationService } from '../features/translations/services/translatio
 import { userService } from '../features/users/services/userService';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 interface ServiceStatus {
     name: string;
@@ -110,23 +109,25 @@ const MicroservicesStatus: React.FC = () => {
     const totalCount = services.length;
 
     return (
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-2xl font-bold">Microservices Status</CardTitle>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={checkAllServices}
-                    disabled={isRefreshing}
-                >
-                    <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-                    Refresh
-                </Button>
-            </CardHeader>
-            <CardContent>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex flex-row items-center justify-between">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Microservices Status</h2>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={checkAllServices}
+                        disabled={isRefreshing}
+                    >
+                        <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                        Refresh
+                    </Button>
+                </div>
+            </div>
+            <div className="p-6">
                 <div className="mb-4">
                     <div className="flex items-center space-x-2">
-                        <span className="text-sm font-medium">Overall Status:</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Overall Status:</span>
                         <Badge variant={healthyCount === totalCount ? "default" : "destructive"}>
                             {healthyCount}/{totalCount} Services Healthy
                         </Badge>
@@ -135,13 +136,13 @@ const MicroservicesStatus: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {services.map((service) => (
-                        <Card key={service.name} className="p-4">
+                        <div key={service.name} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow duration-200 dark:bg-gray-700 dark:border-gray-600">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
                                     {getStatusIcon(service.status)}
                                     <div>
-                                        <h3 className="font-semibold">{service.name}</h3>
-                                        <p className="text-sm text-gray-500">Port {service.port}</p>
+                                        <h3 className="font-semibold text-gray-900 dark:text-gray-100">{service.name}</h3>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">Port {service.port}</p>
                                     </div>
                                 </div>
                                 {getStatusBadge(service.status)}
@@ -156,11 +157,11 @@ const MicroservicesStatus: React.FC = () => {
                             <div className="mt-2 text-xs text-gray-500">
                                 Last checked: {service.lastChecked.toLocaleTimeString()}
                             </div>
-                        </Card>
+                        </div>
                     ))}
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 };
 

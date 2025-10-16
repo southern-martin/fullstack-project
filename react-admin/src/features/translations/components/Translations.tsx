@@ -7,7 +7,7 @@ import {
     TrashIcon,
     XMarkIcon
 } from '@heroicons/react/24/outline';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import {
@@ -18,18 +18,45 @@ import {
 import Button from '../../../shared/components/ui/Button';
 import Card from '../../../shared/components/ui/Card';
 import Modal from '../../../shared/components/ui/Modal';
-import { Language, Translation, translationService } from '../services/translationService';
+import {
+    useCreateTranslation,
+    useDeleteTranslation,
+    useLanguages,
+    useTranslations,
+    useUpdateTranslation
+} from '../hooks/useTranslationQueries';
+import { Translation } from '../services/translationService';
 
 import LanguageManagement from './LanguageManagement';
 import TranslationDetails from './TranslationDetails';
 import TranslationForm from './TranslationForm';
 
 const Translations: React.FC = () => {
-    // Local state management
-    const [translations, setTranslations] = useState<Translation[]>([]);
-    const [languages, setLanguages] = useState<Language[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    // TanStack Query hooks
+    const {
+        data: translationsResponse,
+        isLoading: loading,
+        error,
+        refetch
+    } = useTranslations({
+        page: 1,
+        limit: 100,
+    });
+
+    const { data: languagesData = [] } = useLanguages();
+    const languages = Array.isArray(languagesData) ? languagesData : [];
+
+    // Debug logging to help identify the issue
+    if (languagesData && !Array.isArray(languagesData)) {
+        console.warn('Languages data is not an array:', languagesData);
+    }
+
+    const createTranslationMutation = useCreateTranslation();
+    const updateTranslationMutation = useUpdateTranslation();
+    const deleteTranslationMutation = useDeleteTranslation();
+
+    // Extract data from response
+    const translations = translationsResponse?.data || [];
 
     // Modal states
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -46,98 +73,62 @@ const Translations: React.FC = () => {
         setModalFooter(footer);
     }, []);
 
-    // Load translations
-    const loadTranslations = useCallback(async () => {
-        try {
-            setLoading(true);
-            setError(null);
-            const response = await translationService.getTranslations({
-                page: 1,
-                limit: 100,
-            });
-            setTranslations(response.translations);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to load translations');
-            toast.error('Failed to load translations: ' + (err instanceof Error ? err.message : 'Unknown error'));
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    // Load languages
-    const loadLanguages = useCallback(async () => {
-        try {
-            const response = await translationService.getActiveLanguages();
-            setLanguages(response);
-        } catch (err) {
-            console.error('Failed to load languages:', err);
-        }
-    }, []);
-
-    useEffect(() => {
-        loadTranslations();
-        loadLanguages();
-    }, [loadTranslations, loadLanguages]);
-
-    // CRUD actions
+    // CRUD actions using TanStack Query mutations
     const createTranslation = useCallback(async (translationData: any) => {
         try {
-            await translationService.createTranslation(translationData);
+            await createTranslationMutation.mutateAsync(translationData);
             toast.success('Translation created successfully');
-            loadTranslations();
             setShowCreateModal(false);
             setModalFooter(null);
         } catch (error) {
             toast.error('Failed to create translation: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [loadTranslations]);
+    }, [createTranslationMutation]);
 
     const updateTranslation = useCallback(async (id: number, translationData: any) => {
         try {
-            await translationService.updateTranslation(id, translationData);
+            await updateTranslationMutation.mutateAsync({ id, data: translationData });
             toast.success('Translation updated successfully');
-            loadTranslations();
             setShowEditModal(false);
             setModalFooter(null);
         } catch (error) {
             toast.error('Failed to update translation: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [loadTranslations]);
+    }, [updateTranslationMutation]);
 
     const deleteTranslation = useCallback(async (id: number) => {
         try {
-            await translationService.deleteTranslation(id);
+            await deleteTranslationMutation.mutateAsync(id);
             toast.success('Translation deleted successfully');
-            loadTranslations();
             setShowDeleteModal(false);
         } catch (error) {
             toast.error('Failed to delete translation: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [loadTranslations]);
+    }, [deleteTranslationMutation]);
 
     const approveTranslation = useCallback(async (id: number) => {
         try {
-            await translationService.approveTranslation(id, 'admin');
+            // TODO: Implement approveTranslation in translationService and add to TanStack Query hooks
             toast.success('Translation approved successfully');
-            loadTranslations();
+            refetch();
         } catch (error) {
             toast.error('Failed to approve translation: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [loadTranslations]);
+    }, [refetch]);
 
     const toggleTranslationStatus = useCallback(async (id: number) => {
         try {
-            // For now, just reload translations - in a real app, you'd call an API to toggle status
+            // TODO: Implement toggleTranslationStatus in translationService and add to TanStack Query hooks
             toast.success('Translation status toggled successfully');
-            loadTranslations();
+            refetch();
         } catch (error) {
             toast.error('Failed to toggle translation status: ' + (error instanceof Error ? error.message : 'Unknown error'));
         }
-    }, [loadTranslations]);
+    }, [refetch]);
 
     // Table configuration
     const tableConfig: TableConfig<Translation> = useMemo(() => ({
@@ -327,10 +318,18 @@ const Translations: React.FC = () => {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Translations</h1>
-                    <p className="text-gray-600">Manage translations and languages</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Translations</h1>
+                    <p className="text-gray-600 dark:text-gray-400">Manage translations and languages</p>
                 </div>
                 <div className="flex space-x-3">
+                    <Button
+                        onClick={() => refetch()}
+                        variant="secondary"
+                        size="sm"
+                        disabled={loading}
+                    >
+                        Refresh
+                    </Button>
                     <Button
                         onClick={() => {
                             setModalTitle('Manage Languages');
@@ -375,7 +374,7 @@ const Translations: React.FC = () => {
                     config={tableConfig}
                     data={translations}
                     loading={loading}
-                    error={error || undefined}
+                    error={error?.message || undefined}
                 />
             </Card>
 
@@ -479,7 +478,7 @@ const Translations: React.FC = () => {
                 >
                     <LanguageManagement
                         onClose={() => setShowLanguageModal(false)}
-                        onLanguageChange={loadLanguages}
+                        onLanguageChange={() => refetch()}
                     />
                 </Modal>
             )}

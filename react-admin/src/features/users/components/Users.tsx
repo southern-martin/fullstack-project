@@ -19,49 +19,51 @@ import Modal from '../../../shared/components/ui/Modal';
 import { ServerPagination } from '../../../shared/components/ui/ServerPagination';
 import { ServerSearch } from '../../../shared/components/ui/ServerSearch';
 import { ServerSorting, SortOption } from '../../../shared/components/ui/ServerSorting';
-import { useServerPagination } from '../../../shared/hooks/useServerPagination';
-import { User } from '../../../shared/types';
-import { CreateUserRequest, UpdateUserRequest, userApiService } from '../services/userApiService';
+import { CreateUserData, UpdateUserData, User } from '../../../shared/types';
+import {
+    useCreateUser,
+    useDeleteUser,
+    useUpdateUser,
+    useUsers
+} from '../hooks/useUserQueries';
 
 import UserDetails from './UserDetails';
 import UserForm from './UserForm';
 
 const Users: React.FC = () => {
-    // Memoize the fetch function to prevent infinite loops
-    const fetchUsers = useCallback(
-        (params: any) => userApiService.getUsers(params),
-        []
-    );
+    // Local state for pagination and search
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [sortBy, setSortBy] = useState('createdAt');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-    // Server-side pagination
+    // TanStack Query hooks
     const {
-        data: users,
-        loading,
+        data: usersResponse,
+        isLoading: loading,
         error,
-        currentPage,
-        pageSize,
-        total,
-        totalPages,
-        hasNextPage,
-        hasPreviousPage,
-        startIndex,
-        endIndex,
-        searchTerm,
-        sortBy,
+        refetch: refresh
+    } = useUsers({
+        page: currentPage,
+        limit: pageSize,
+        search: searchTerm || undefined,
+        sortBy: sortBy || undefined,
         sortOrder,
-        goToPage,
-        changePageSize,
-        setSearch,
-        setSorting,
-        refresh,
-    } = useServerPagination<User>({
-        fetchFunction: fetchUsers,
-        initialPage: 1,
-        initialPageSize: 10,
-        initialSearch: '',
-        initialSortBy: 'createdAt',
-        initialSortOrder: 'desc',
     });
+
+    const createUserMutation = useCreateUser();
+    const updateUserMutation = useUpdateUser();
+    const deleteUserMutation = useDeleteUser();
+
+    // Extract data from response
+    const users = usersResponse?.data || [];
+    const total = usersResponse?.total || 0;
+    const totalPages = usersResponse?.totalPages || 0;
+    const hasNextPage = currentPage < totalPages;
+    const hasPreviousPage = currentPage > 1;
+    const startIndex = total > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+    const endIndex = Math.min(currentPage * pageSize, total);
 
     // Modal states
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -86,54 +88,76 @@ const Users: React.FC = () => {
         { key: 'isActive', label: 'Status', defaultOrder: 'asc' },
     ], []);
 
-    // CRUD actions
-    const createUser = useCallback(async (userData: CreateUserRequest) => {
+    // CRUD actions using TanStack Query mutations
+    const createUser = useCallback(async (userData: CreateUserData) => {
         try {
-            await userApiService.createUser(userData);
+            await createUserMutation.mutateAsync(userData);
             toast.success('User created successfully');
-            refresh();
             setShowCreateModal(false);
             setModalFooter(null);
         } catch (error) {
             toast.error('Failed to create user: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [refresh]);
+    }, [createUserMutation]);
 
-    const updateUser = useCallback(async (id: number, userData: UpdateUserRequest) => {
+    const updateUser = useCallback(async (id: number, userData: UpdateUserData) => {
         try {
-            await userApiService.updateUser(id, userData);
+            await updateUserMutation.mutateAsync({ id, data: userData });
             toast.success('User updated successfully');
-            refresh();
             setShowEditModal(false);
             setModalFooter(null);
         } catch (error) {
             toast.error('Failed to update user: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [refresh]);
+    }, [updateUserMutation]);
 
     const deleteUser = useCallback(async (id: number) => {
         try {
-            await userApiService.deleteUser(id);
+            await deleteUserMutation.mutateAsync(id);
             toast.success('User deleted successfully');
-            refresh();
             setShowDeleteModal(false);
         } catch (error) {
             toast.error('Failed to delete user: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [refresh]);
+    }, [deleteUserMutation]);
 
     const toggleUserStatus = useCallback(async (id: number, status: boolean) => {
         try {
-            await userApiService.updateUser(id, { isActive: status });
+            await updateUserMutation.mutateAsync({ id, data: { isActive: status } });
             toast.success(status ? 'User activated' : 'User deactivated');
-            refresh();
         } catch (error) {
             toast.error('Failed to toggle user status: ' + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
+    }, [updateUserMutation]);
+
+    // Pagination and search handlers
+    const goToPage = useCallback((page: number) => {
+        setCurrentPage(page);
+    }, []);
+
+    const changePageSize = useCallback((newPageSize: number) => {
+        setPageSize(newPageSize);
+        setCurrentPage(1); // Reset to first page when changing page size
+    }, []);
+
+    const setSearch = useCallback((search: string) => {
+        setSearchTerm(search);
+        setCurrentPage(1); // Reset to first page when searching
+    }, []);
+
+    const setSorting = useCallback((sort: string, order: 'asc' | 'desc') => {
+        setSortBy(sort);
+        setSortOrder(order);
+        setCurrentPage(1); // Reset to first page when sorting
+    }, []);
+
+    // Refresh handler for the refresh button
+    const handleRefresh = useCallback(() => {
+        refresh();
     }, [refresh]);
 
     // Table configuration
@@ -145,14 +169,14 @@ const Users: React.FC = () => {
                 sortable: true,
                 render: (user: User) => (
                     <div className="flex items-center">
-                        <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                            <span className="text-sm font-medium text-gray-600">
+                        <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
                                 {user.firstName?.charAt(0).toUpperCase()}
                             </span>
                         </div>
                         <div className="ml-3">
-                            <div className="text-sm font-medium text-gray-900">{user.firstName} {user.lastName}</div>
-                            <div className="text-sm text-gray-500">{user.email}</div>
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.firstName} {user.lastName}</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
                         </div>
                     </div>
                 ),
@@ -162,7 +186,7 @@ const Users: React.FC = () => {
                 label: 'Email',
                 sortable: true,
                 render: (email: string, user: User) => (
-                    <span className="text-sm text-gray-900">{email}</span>
+                    <span className="text-sm text-gray-900 dark:text-gray-100">{email}</span>
                 ),
             },
             {
@@ -174,7 +198,7 @@ const Users: React.FC = () => {
                         {roles?.map((role: any) => (
                             <span
                                 key={role?.id || Math.random()}
-                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400"
                             >
                                 {role?.name || 'Unknown'}
                             </span>
@@ -188,8 +212,8 @@ const Users: React.FC = () => {
                 sortable: true,
                 render: (isActive: boolean) => (
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isActive
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400'
+                        : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400'
                         }`}>
                         {isActive ? 'Active' : 'Inactive'}
                     </span>
@@ -200,7 +224,7 @@ const Users: React.FC = () => {
                 label: 'Created',
                 sortable: true,
                 render: (date: string) => (
-                    <span className="text-sm text-gray-900">
+                    <span className="text-sm text-gray-900 dark:text-gray-100">
                         {new Date(date).toLocaleDateString()}
                     </span>
                 ),
@@ -292,8 +316,8 @@ const Users: React.FC = () => {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Users</h1>
-                    <p className="text-gray-600">Manage your user database</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Users</h1>
+                    <p className="text-gray-600 dark:text-gray-400">Manage your user database</p>
                 </div>
                 <Button
                     onClick={() => {
@@ -311,7 +335,7 @@ const Users: React.FC = () => {
             {/* Table with Server-Side Controls */}
             <Card>
                 {/* Server-Side Search and Sorting Controls */}
-                <div className="p-4 border-b border-gray-200 bg-gray-50">
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center flex-1">
                             <ServerSearch
@@ -339,7 +363,7 @@ const Users: React.FC = () => {
                                 Export CSV
                             </Button>
                             <Button
-                                onClick={refresh}
+                                onClick={handleRefresh}
                                 variant="secondary"
                                 size="sm"
                                 disabled={loading}
@@ -355,11 +379,11 @@ const Users: React.FC = () => {
                     config={tableConfig}
                     data={users}
                     loading={loading}
-                    error={error || undefined}
+                    error={error?.message || undefined}
                 />
 
                 {/* Server-Side Pagination */}
-                <div className="p-4 border-t border-gray-200 bg-gray-50">
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                     <ServerPagination
                         currentPage={currentPage}
                         pageSize={pageSize}
@@ -394,7 +418,7 @@ const Users: React.FC = () => {
                     footer={modalFooter}
                 >
                     <UserForm
-                        onSubmit={(userData) => createUser(userData as CreateUserRequest)}
+                        onSubmit={(userData) => createUser(userData as CreateUserData)}
                         onCancel={() => {
                             setShowCreateModal(false);
                             setModalFooter(null);
@@ -417,7 +441,7 @@ const Users: React.FC = () => {
                 >
                     <UserForm
                         user={selectedUser}
-                        onSubmit={(userData) => updateUser(selectedUser.id, userData)}
+                        onSubmit={(userData) => updateUser(selectedUser.id, userData as UpdateUserData)}
                         onCancel={() => {
                             setShowEditModal(false);
                             setModalFooter(null);

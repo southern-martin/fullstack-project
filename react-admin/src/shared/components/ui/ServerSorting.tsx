@@ -64,7 +64,7 @@ export const ServerSorting: React.FC<ServerSortingProps> = ({
 
     return (
         <div className={`flex items-center gap-2 ${className}`}>
-            <label htmlFor="sort-by" className="text-sm text-gray-700 whitespace-nowrap">
+            <label htmlFor="sort-by" className="text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">
                 Sort by:
             </label>
 
@@ -74,7 +74,7 @@ export const ServerSorting: React.FC<ServerSortingProps> = ({
                     value={sortBy}
                     onChange={handleSortByChange}
                     disabled={loading}
-                    className={`rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed ${selectClassName}`}
+                    className={`rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed ${selectClassName}`}
                 >
                     <option value="">{placeholder}</option>
                     {sortOptions.map((option) => (
@@ -89,7 +89,7 @@ export const ServerSorting: React.FC<ServerSortingProps> = ({
                         type="button"
                         onClick={handleSortOrderToggle}
                         disabled={loading}
-                        className="p-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none focus:text-gray-600 dark:focus:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label={`Sort ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
                     >
                         {getSortIcon()}

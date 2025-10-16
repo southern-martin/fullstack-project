@@ -34,7 +34,7 @@ const Products: React.FC = () => {
             price: 2399.00,
             stock: 15,
             status: 'active',
-            image: '/assets/images/product/product-01.jpg',
+            image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
             description: 'Apple MacBook Pro 13-inch with M2 chip',
             createdAt: '2024-01-15',
         },
@@ -45,7 +45,7 @@ const Products: React.FC = () => {
             price: 879.00,
             stock: 8,
             status: 'active',
-            image: '/assets/images/product/product-02.jpg',
+            image: 'https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
             description: 'Apple Watch Ultra with titanium case',
             createdAt: '2024-01-14',
         },
@@ -56,7 +56,7 @@ const Products: React.FC = () => {
             price: 1869.00,
             stock: 22,
             status: 'active',
-            image: '/assets/images/product/product-03.jpg',
+            image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
             description: 'iPhone 15 Pro Max with A17 Pro chip',
             createdAt: '2024-01-13',
         },
@@ -67,7 +67,7 @@ const Products: React.FC = () => {
             price: 1699.00,
             stock: 0,
             status: 'inactive',
-            image: '/assets/images/product/product-04.jpg',
+            image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
             description: 'iPad Pro 3rd generation with M2 chip',
             createdAt: '2024-01-12',
         },
@@ -78,9 +78,42 @@ const Products: React.FC = () => {
             price: 240.00,
             stock: 45,
             status: 'active',
-            image: '/assets/images/product/product-05.jpg',
+            image: 'https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
             description: 'AirPods Pro 2nd generation with USB-C',
             createdAt: '2024-01-11',
+        },
+        {
+            id: 6,
+            name: 'Samsung Galaxy S24 Ultra',
+            category: 'SmartPhone',
+            price: 1299.00,
+            stock: 18,
+            status: 'active',
+            image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+            description: 'Samsung Galaxy S24 Ultra with S Pen',
+            createdAt: '2024-01-10',
+        },
+        {
+            id: 7,
+            name: 'Dell XPS 15',
+            category: 'Laptop',
+            price: 1899.00,
+            stock: 12,
+            status: 'active',
+            image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+            description: 'Dell XPS 15 with Intel i7 processor',
+            createdAt: '2024-01-09',
+        },
+        {
+            id: 8,
+            name: 'Sony WH-1000XM5',
+            category: 'Accessories',
+            price: 399.00,
+            stock: 25,
+            status: 'active',
+            image: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
+            description: 'Sony WH-1000XM5 noise-canceling headphones',
+            createdAt: '2024-01-08',
         },
     ];
 
@@ -271,18 +304,12 @@ const Products: React.FC = () => {
                                 <tr key={product.id} className="border-b border-stroke dark:border-strokedark">
                                     <td className="px-4 py-3 xl:pl-6">
                                         <div className="flex items-center gap-3">
-                                            <div className="h-10 w-10 product-image-container bg-gray-100 dark:bg-gray-800 flex items-center justify-center rounded-lg">
+                                            <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
                                                 <img
                                                     src={product.image}
                                                     alt={product.name}
-                                                    className="w-full h-full object-cover product-image rounded-lg"
-                                                    onError={(e) => {
-                                                        const target = e.target as HTMLImageElement;
-                                                        target.style.display = 'none';
-                                                        target.nextElementSibling?.classList.remove('hidden');
-                                                    }}
+                                                    className="h-full w-full object-cover"
                                                 />
-                                                <span className="text-sm hidden">📱</span>
                                             </div>
                                             <div>
                                                 <p className="text-xs font-medium text-black dark:text-white">{product.name}</p>
@@ -301,8 +328,8 @@ const Products: React.FC = () => {
                                     </td>
                                     <td className="px-4 py-3">
                                         <span className={`inline-flex rounded-full bg-opacity-10 px-2 py-1 text-xs font-medium ${product.status === 'active'
-                                                ? 'bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-500'
-                                                : 'bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-500'
+                                            ? 'bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-500'
+                                            : 'bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-500'
                                             }`}>
                                             {product.status}
                                         </span>

@@ -202,8 +202,12 @@ const Header: React.FC<HeaderProps> = ({ darkMode, setDarkMode, sidebarToggle, s
                                     </span>
                                     <span className="block text-xs text-gray-500 dark:text-gray-400">Musharof Chowdhury</span>
                                 </span>
-                                <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
-                                    <span className="text-white text-xs font-semibold">M</span>
+                                <div className="h-8 w-8 rounded-full overflow-hidden">
+                                    <img
+                                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                                        alt="Profile"
+                                        className="h-full w-full object-cover"
+                                    />
                                 </div>
                                 <ChevronDownIcon className="w-4 h-4 text-gray-400" />
                             </button>

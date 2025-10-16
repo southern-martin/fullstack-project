@@ -21,6 +21,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuthContext } from '../../../app/providers/AuthProvider';
 import { useTheme } from '../../../app/providers/ThemeProvider';
 import { ROUTES } from '../../../config/api';
+import ThemeToggle from '../ThemeToggle';
 
 interface NavigationProps {
     isOpen: boolean;
@@ -143,12 +144,12 @@ const Navigation: React.FC<NavigationProps> = ({ isOpen, onToggle }) => {
                                             key={item.name}
                                             to={item.href}
                                             className={`nav-item group flex items-center px-3 py-3 text-sm font-medium transition-all duration-300 ${item.current
-                                                ? 'active text-white'
-                                                : 'text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10'
+                                                ? 'active'
+                                                : ''
                                                 }`}
                                         >
                                             <Icon
-                                                className={`mr-3 flex-shrink-0 h-5 w-5 transition-colors duration-200 ${item.current ? 'text-white' : 'text-gray-400 group-hover:text-white'
+                                                className={`mr-3 flex-shrink-0 h-5 w-5 transition-colors duration-200 ${item.current ? 'text-white' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-white'
                                                     }`}
                                                 aria-hidden="true"
                                             />
@@ -160,20 +161,20 @@ const Navigation: React.FC<NavigationProps> = ({ isOpen, onToggle }) => {
                         </div>
 
                         {/* User profile */}
-                        <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
+                        <div className="flex-shrink-0 flex border-t border-gray-200 dark:border-gray-700 p-4">
                             <div className="flex items-center w-full">
                                 <div className="flex-shrink-0">
-                                    <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
-                                        <span className="text-sm font-medium text-gray-700">
+                                    <div className="h-8 w-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                             {user?.firstName?.charAt(0) || 'U'}
                                         </span>
                                     </div>
                                 </div>
                                 <div className="ml-3 flex-1">
-                                    <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
                                         {user?.firstName} {user?.lastName}
                                     </p>
-                                    <p className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
+                                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">
                                         {user?.email}
                                     </p>
                                 </div>
@@ -181,7 +182,7 @@ const Navigation: React.FC<NavigationProps> = ({ isOpen, onToggle }) => {
                                     {/* Theme toggle */}
                                     <button
                                         onClick={toggleTheme}
-                                        className="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="p-1 rounded-full text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
                                     >
                                         {theme === 'light' ? (
@@ -195,17 +196,17 @@ const Navigation: React.FC<NavigationProps> = ({ isOpen, onToggle }) => {
                                     <div className="relative">
                                         <button
                                             onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                            className="flex-shrink-0 p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            className="flex-shrink-0 p-1 rounded-full text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         >
                                             <UserCircleIcon className="h-5 w-5" />
                                         </button>
 
                                         {/* Profile dropdown */}
                                         {isProfileOpen && (
-                                            <div className="absolute right-0 bottom-full mb-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                                            <div className="absolute right-0 bottom-full mb-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 border border-gray-200 dark:border-gray-700">
                                                 <button
                                                     onClick={handleLogout}
-                                                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                                                 >
                                                     <ArrowRightOnRectangleIcon className="h-4 w-4 mr-2" />
                                                     Sign out
@@ -288,6 +289,7 @@ const Navigation: React.FC<NavigationProps> = ({ isOpen, onToggle }) => {
                                         </p>
                                     </div>
                                     <div className="flex items-center space-x-2">
+                                        <ThemeToggle size="sm" />
                                         <button
                                             onClick={handleLogout}
                                             className="flex-shrink-0 p-1 rounded-full text-gray-400 hover:text-gray-500"
