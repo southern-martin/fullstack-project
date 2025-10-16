@@ -25,22 +25,22 @@ export const TableHeader = () => {
 
     const getSortClassName = (key: string) => {
         if (state.sorting.sortBy !== key) {
-            return 'text-gray-400';
+            return 'text-gray-400 dark:text-gray-500';
         }
-        return 'text-blue-600';
+        return 'text-blue-600 dark:text-blue-400';
     };
 
     return (
-        <thead className="bg-gray-50">
+        <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
                 {/* Selection column */}
                 {config.selection?.enabled && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
                         <input
                             type="checkbox"
                             checked={state.selection.selectAll}
                             onChange={(e) => actions.handleSelectAll(e.target.checked)}
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700 dark:text-blue-400"
                             aria-label="Select all rows"
                         />
                     </th>
@@ -55,10 +55,10 @@ export const TableHeader = () => {
                         <th
                             key={String(column.key)}
                             className={`
-                px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider
+                px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider
                 ${column.headerClassName || ''}
-                ${isSortable ? 'cursor-pointer hover:bg-gray-100 select-none' : ''}
-                ${isCurrentlySorted ? 'bg-gray-100' : ''}
+                ${isSortable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none' : ''}
+                ${isCurrentlySorted ? 'bg-gray-100 dark:bg-gray-700' : ''}
               `}
                             style={{
                                 width: column.width,
@@ -93,7 +93,7 @@ export const TableHeader = () => {
 
                 {/* Actions column */}
                 {config.actions && config.actions.some(action => action.type === 'row') && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">
                         Actions
                     </th>
                 )}

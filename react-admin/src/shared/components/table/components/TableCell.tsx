@@ -25,14 +25,14 @@ export const TableCell: React.FC<TableCellProps> = ({
 
         // Default rendering based on value type
         if (rawValue === null || rawValue === undefined) {
-            return <span className="text-gray-400">-</span>;
+            return <span className="text-gray-400 dark:text-gray-500">-</span>;
         }
 
         if (typeof rawValue === 'boolean') {
             return (
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${rawValue
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
+                    ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400'
+                    : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400'
                     }`}>
                     {rawValue ? 'Yes' : 'No'}
                 </span>
@@ -43,7 +43,7 @@ export const TableCell: React.FC<TableCellProps> = ({
             // Handle arrays (like roles)
             if (Array.isArray(rawValue)) {
                 if (rawValue.length === 0) {
-                    return <span className="text-gray-400">None</span>;
+                    return <span className="text-gray-400 dark:text-gray-500">None</span>;
                 }
 
                 return (
@@ -51,7 +51,7 @@ export const TableCell: React.FC<TableCellProps> = ({
                         {rawValue.map((item, itemIndex) => (
                             <span
                                 key={itemIndex}
-                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400"
                             >
                                 {typeof item === 'object' ? item.name || item.label || JSON.stringify(item) : String(item)}
                             </span>
@@ -62,7 +62,7 @@ export const TableCell: React.FC<TableCellProps> = ({
 
             // Handle objects
             return (
-                <span className="text-sm text-gray-900">
+                <span className="text-sm text-gray-900 dark:text-gray-100">
                     {rawValue.name || rawValue.label || rawValue.title || JSON.stringify(rawValue)}
                 </span>
             );
@@ -72,7 +72,7 @@ export const TableCell: React.FC<TableCellProps> = ({
         if (rawValue instanceof Date || (typeof rawValue === 'string' && !isNaN(Date.parse(rawValue)))) {
             const date = new Date(rawValue);
             return (
-                <span className="text-sm text-gray-900">
+                <span className="text-sm text-gray-900 dark:text-gray-100">
                     {date.toLocaleDateString()}
                 </span>
             );
@@ -81,7 +81,7 @@ export const TableCell: React.FC<TableCellProps> = ({
         // Handle numbers
         if (typeof rawValue === 'number') {
             return (
-                <span className="text-sm text-gray-900 font-mono">
+                <span className="text-sm text-gray-900 dark:text-gray-100 font-mono">
                     {rawValue.toLocaleString()}
                 </span>
             );
@@ -89,7 +89,7 @@ export const TableCell: React.FC<TableCellProps> = ({
 
         // Handle strings
         return (
-            <span className="text-sm text-gray-900">
+            <span className="text-sm text-gray-900 dark:text-gray-100">
                 {String(rawValue)}
             </span>
         );
