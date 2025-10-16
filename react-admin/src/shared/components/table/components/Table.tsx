@@ -89,8 +89,8 @@ const TableInternal = <T = any>({
             <div className={`table-container ${className}`}>
                 <div className="table-loading">
                     <div className="flex justify-center items-center py-12">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                        <span className="ml-2 text-gray-500">Loading...</span>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400"></div>
+                        <span className="ml-2 text-gray-500 dark:text-gray-400">Loading...</span>
                     </div>
                 </div>
             </div>
@@ -103,7 +103,7 @@ const TableInternal = <T = any>({
             <div className={`table-container ${className}`}>
                 <div className="table-error">
                     <div className="flex justify-center items-center py-12">
-                        <div className="text-red-500 text-center">
+                        <div className="text-red-500 dark:text-red-400 text-center">
                             <div className="text-lg font-medium mb-2">Error</div>
                             <div className="text-sm">{currentError}</div>
                         </div>
@@ -119,7 +119,7 @@ const TableInternal = <T = any>({
             <div className={`table-container ${className}`}>
                 <div className="table-empty">
                     <div className="flex justify-center items-center py-12">
-                        <div className="text-gray-500 text-center">
+                        <div className="text-gray-500 dark:text-gray-400 text-center">
                             <div className="text-lg font-medium mb-2">
                                 {config.emptyMessage || 'No data available'}
                             </div>
@@ -149,7 +149,7 @@ const TableInternal = <T = any>({
 
             {/* Table */}
             <div className="table-wrapper overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <TableHeader />
                     <TableBody />
                 </table>
