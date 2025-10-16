@@ -27,9 +27,9 @@ export const FormField: React.FC<FormFieldProps> = ({
 }) => {
     return (
         <div className={className}>
-            <label htmlFor={name} className="block text-sm font-medium text-gray-700">
+            <label htmlFor={name} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {label}
-                {required && <span className="text-red-500 ml-1">*</span>}
+                {required && <span className="text-red-500 dark:text-red-400 ml-1">*</span>}
             </label>
             <input
                 type={type}
@@ -39,12 +39,12 @@ export const FormField: React.FC<FormFieldProps> = ({
                 onChange={onChange}
                 placeholder={placeholder}
                 disabled={disabled}
-                className={`mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 sm:text-sm ${error
-                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                    : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                className={`mt-1 block w-full border rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 sm:text-sm ${error
+                    ? 'border-red-300 dark:border-red-600 focus:ring-red-500 dark:focus:ring-red-400 focus:border-red-500 dark:focus:border-red-400'
+                    : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400'
                     }`}
             />
-            {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+            {error && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>}
         </div>
     );
 };
@@ -76,9 +76,9 @@ export const SelectField: React.FC<SelectFieldProps> = ({
 }) => {
     return (
         <div className={className}>
-            <label htmlFor={name} className="block text-sm font-medium text-gray-700">
+            <label htmlFor={name} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {label}
-                {required && <span className="text-red-500 ml-1">*</span>}
+                {required && <span className="text-red-500 dark:text-red-400 ml-1">*</span>}
             </label>
             <select
                 name={name}
@@ -87,9 +87,9 @@ export const SelectField: React.FC<SelectFieldProps> = ({
                 onChange={onChange}
                 disabled={disabled}
                 multiple={multiple}
-                className={`mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 sm:text-sm ${error
-                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                    : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                className={`mt-1 block w-full border rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 sm:text-sm ${error
+                    ? 'border-red-300 dark:border-red-600 focus:ring-red-500 dark:focus:ring-red-400 focus:border-red-500 dark:focus:border-red-400'
+                    : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400'
                     }`}
             >
                 {options.map((option) => (
@@ -98,7 +98,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({
                     </option>
                 ))}
             </select>
-            {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+            {error && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>}
         </div>
     );
 };
@@ -129,13 +129,13 @@ export const CheckboxField: React.FC<CheckboxFieldProps> = ({
                     type="checkbox"
                     checked={checked}
                     onChange={onChange}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
                 />
-                <label htmlFor={name} className="ml-2 block text-sm text-gray-900">
+                <label htmlFor={name} className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
                     {label}
                 </label>
             </div>
-            {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+            {error && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>}
         </div>
     );
 };

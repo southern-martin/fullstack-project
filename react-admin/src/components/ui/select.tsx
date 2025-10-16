@@ -60,7 +60,7 @@ const SelectTrigger: React.FC<SelectTriggerProps> = ({ children, isOpen, onToggl
         <button
             type="button"
             onClick={onToggle}
-            className="flex h-10 w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-10 w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-400 dark:focus:border-blue-400"
         >
             {children}
         </button>
@@ -72,7 +72,7 @@ interface SelectValueProps {
 }
 
 const SelectValue: React.FC<SelectValueProps> = ({ placeholder }) => {
-    return <span className="text-gray-500">{placeholder}</span>;
+    return <span className="text-gray-500 dark:text-gray-400">{placeholder}</span>;
 };
 
 interface SelectContentProps {
@@ -82,7 +82,7 @@ interface SelectContentProps {
 
 const SelectContent: React.FC<SelectContentProps> = ({ children, onSelect }) => {
     return (
-        <div className="absolute top-full z-50 w-full mt-1 bg-white text-gray-900 border border-gray-300 rounded-md shadow-md">
+        <div className="absolute top-full z-50 w-full mt-1 bg-white text-gray-900 border border-gray-300 rounded-md shadow-md dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600">
             {React.Children.map(children, (child) => {
                 if (React.isValidElement(child) && child.type === SelectItem) {
                     return React.cloneElement(child as React.ReactElement<any>, { onSelect });
@@ -104,7 +104,7 @@ const SelectItem: React.FC<SelectItemProps> = ({ value, children, onSelect }) =>
         <button
             type="button"
             onClick={() => onSelect?.(value)}
-            className="w-full px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-100 focus:bg-gray-100"
+            className="w-full px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-100 focus:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-700 dark:focus:bg-gray-700"
         >
             {children}
         </button>

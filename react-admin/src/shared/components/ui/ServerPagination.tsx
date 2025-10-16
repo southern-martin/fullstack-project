@@ -124,7 +124,7 @@ export const ServerPagination: React.FC<ServerPaginationProps> = ({
             {/* Total info and page size selector */}
             <div className="flex flex-col sm:flex-row items-center gap-4">
                 {showTotalInfo && (
-                    <div className="text-sm text-gray-700">
+                    <div className="text-sm text-gray-700 dark:text-gray-300">
                         {loading ? (
                             <span className="animate-pulse">Loading...</span>
                         ) : (
@@ -139,7 +139,7 @@ export const ServerPagination: React.FC<ServerPaginationProps> = ({
 
                 {showPageSizeSelector && (
                     <div className="flex items-center gap-2">
-                        <label htmlFor="page-size" className="text-sm text-gray-700">
+                        <label htmlFor="page-size" className="text-sm text-gray-700 dark:text-gray-300">
                             Show:
                         </label>
                         <select
@@ -147,7 +147,7 @@ export const ServerPagination: React.FC<ServerPaginationProps> = ({
                             value={pageSize}
                             onChange={handlePageSizeChange}
                             disabled={loading}
-                            className="rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {pageSizeOptions.map((size) => (
                                 <option key={size} value={size}>
@@ -155,7 +155,7 @@ export const ServerPagination: React.FC<ServerPaginationProps> = ({
                                 </option>
                             ))}
                         </select>
-                        <span className="text-sm text-gray-700">per page</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">per page</span>
                     </div>
                 )}
             </div>
@@ -167,7 +167,7 @@ export const ServerPagination: React.FC<ServerPaginationProps> = ({
                     <button
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={!hasPreviousPage || loading}
-                        className="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-l-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label="Previous page"
                     >
                         <ChevronLeftIcon className="h-4 w-4" />
@@ -177,7 +177,7 @@ export const ServerPagination: React.FC<ServerPaginationProps> = ({
                     {showPageNumbers && pageNumbers.map((page, index) => (
                         <React.Fragment key={index}>
                             {page === '...' ? (
-                                <span className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300">
+                                <span className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                                     ...
                                 </span>
                             ) : (
@@ -185,9 +185,9 @@ export const ServerPagination: React.FC<ServerPaginationProps> = ({
                                     onClick={() => handlePageChange(page as number)}
                                     disabled={loading}
                                     className={`relative inline-flex items-center px-4 py-2 text-sm font-medium border ${page === currentPage
-                                        ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                                        } focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed`}
+                                        ? 'z-10 bg-blue-50 dark:bg-blue-900/20 border-blue-500 dark:border-blue-400 text-blue-600 dark:text-blue-400'
+                                        : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                        } focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 disabled:opacity-50 disabled:cursor-not-allowed`}
                                     aria-label={`Go to page ${page}`}
                                     aria-current={page === currentPage ? 'page' : undefined}
                                 >
@@ -201,7 +201,7 @@ export const ServerPagination: React.FC<ServerPaginationProps> = ({
                     <button
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={!hasNextPage || loading}
-                        className="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-r-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label="Next page"
                     >
                         <ChevronRightIcon className="h-4 w-4" />
