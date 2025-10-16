@@ -10,12 +10,14 @@ import { toast } from 'react-hot-toast';
 
 import {
     Table,
-    TableConfig,
-    TableToolbar
+    TableConfig
 } from '../../../shared/components/table';
 import Button from '../../../shared/components/ui/Button';
 import Card from '../../../shared/components/ui/Card';
 import Modal from '../../../shared/components/ui/Modal';
+import { ServerPagination } from '../../../shared/components/ui/ServerPagination';
+import { ServerSearch } from '../../../shared/components/ui/ServerSearch';
+import { ServerSorting, SortOption } from '../../../shared/components/ui/ServerSorting';
 import {
     useCarriers,
     useCreateCarrier,
@@ -28,6 +30,13 @@ import CarrierDetails from './CarrierDetails';
 import CarrierForm from './CarrierForm';
 
 const Carriers: React.FC = () => {
+    // Local state for pagination and search
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [sortBy, setSortBy] = useState('createdAt');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
     // TanStack Query hooks
     const {
         data: carriersResponse,
@@ -35,8 +44,11 @@ const Carriers: React.FC = () => {
         error,
         refetch: refresh
     } = useCarriers({
-        page: 1,
-        limit: 100, // Maximum allowed by backend
+        page: currentPage,
+        limit: pageSize,
+        search: searchTerm || undefined,
+        sortBy: sortBy,
+        sortOrder: sortOrder,
     });
 
     const createCarrierMutation = useCreateCarrier();
@@ -45,6 +57,12 @@ const Carriers: React.FC = () => {
 
     // Extract data from response
     const carriers = carriersResponse?.carriers || [];
+    const total = carriersResponse?.total || 0;
+    const totalPages = carriersResponse?.totalPages || 0;
+    const hasNextPage = currentPage < totalPages;
+    const hasPreviousPage = currentPage > 1;
+    const startIndex = total > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+    const endIndex = Math.min(currentPage * pageSize, total);
 
     // Modal states
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -96,6 +114,41 @@ const Carriers: React.FC = () => {
         }
     }, [deleteCarrierMutation]);
 
+    // Helper functions for search, sorting, and pagination
+    const setSearch = useCallback((search: string) => {
+        setSearchTerm(search);
+        setCurrentPage(1); // Reset to first page when searching
+    }, []);
+
+    const setSorting = useCallback((sort: string, order: 'asc' | 'desc') => {
+        setSortBy(sort);
+        setSortOrder(order);
+        setCurrentPage(1); // Reset to first page when sorting
+    }, []);
+
+    const goToPage = useCallback((page: number) => {
+        setCurrentPage(page);
+    }, []);
+
+    const changePageSize = useCallback((newPageSize: number) => {
+        setPageSize(newPageSize);
+        setCurrentPage(1); // Reset to first page when changing page size
+    }, []);
+
+    // Refresh handler for the refresh button
+    const handleRefresh = useCallback(() => {
+        refresh();
+    }, [refresh]);
+
+    // Sort options for the sorting component
+    const sortOptions: SortOption[] = [
+        { key: 'name', label: 'Name', defaultOrder: 'asc' },
+        { key: 'contactEmail', label: 'Email', defaultOrder: 'asc' },
+        { key: 'contactPhone', label: 'Phone', defaultOrder: 'asc' },
+        { key: 'isActive', label: 'Status', defaultOrder: 'desc' },
+        { key: 'createdAt', label: 'Created Date', defaultOrder: 'desc' },
+    ];
+
     // Table configuration
     const tableConfig: TableConfig<Carrier> = useMemo(() => ({
         columns: [
@@ -105,12 +158,12 @@ const Carriers: React.FC = () => {
                 sortable: true,
                 render: (carrier: Carrier) => (
                     <div className="flex items-center">
-                        <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                            <TruckIcon className="h-4 w-4 text-blue-600" />
+                        <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
+                            <TruckIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div className="ml-3">
-                            <div className="text-sm font-medium text-gray-900">{carrier.name}</div>
-                            <div className="text-sm text-gray-500">{carrier.contactEmail}</div>
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{carrier.name}</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">{carrier.contactEmail}</div>
                         </div>
                     </div>
                 ),
@@ -120,7 +173,7 @@ const Carriers: React.FC = () => {
                 label: 'Phone',
                 sortable: true,
                 render: (phone: string) => (
-                    <span className="text-sm text-gray-900">{phone || '-'}</span>
+                    <span className="text-sm text-gray-900 dark:text-gray-100">{phone || '-'}</span>
                 ),
             },
             {
@@ -128,7 +181,7 @@ const Carriers: React.FC = () => {
                 label: 'Code',
                 sortable: true,
                 render: (metadata: any) => (
-                    <span className="text-sm text-gray-900">{metadata?.code || '-'}</span>
+                    <span className="text-sm text-gray-900 dark:text-gray-100">{metadata?.code || '-'}</span>
                 ),
             },
             {
@@ -136,7 +189,7 @@ const Carriers: React.FC = () => {
                 label: 'Description',
                 sortable: true,
                 render: (description: string) => (
-                    <span className="text-sm text-gray-900">{description || '-'}</span>
+                    <span className="text-sm text-gray-900 dark:text-gray-100">{description || '-'}</span>
                 ),
             },
             {
@@ -145,8 +198,8 @@ const Carriers: React.FC = () => {
                 sortable: true,
                 render: (isActive: boolean) => (
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isActive
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400'
+                        : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400'
                         }`}>
                         {isActive ? 'Active' : 'Inactive'}
                     </span>
@@ -157,25 +210,15 @@ const Carriers: React.FC = () => {
                 label: 'Created',
                 sortable: true,
                 render: (date: string) => (
-                    <span className="text-sm text-gray-900">
+                    <span className="text-sm text-gray-900 dark:text-gray-100">
                         {new Date(date).toLocaleDateString()}
                     </span>
                 ),
             },
         ],
-        pagination: {
-            pageSize: 10,
-            pageSizeOptions: [5, 10, 25, 50],
-            showTotal: true,
-            showPageSize: true,
-        },
-        sorting: {
-            defaultSort: { key: 'createdAt', direction: 'desc' },
-        },
-        filtering: {
-            globalSearch: true,
-            searchPlaceholder: 'Search carriers...',
-        },
+        // pagination: undefined, // Disable client-side pagination since we're using server-side
+        // sorting: undefined, // Disable client-side sorting since we're using server-side
+        // filtering: undefined, // Disable client-side filtering since we're using server-side
         selection: {
             enabled: true,
             multiSelect: true,
@@ -222,31 +265,7 @@ const Carriers: React.FC = () => {
         emptyMessage: 'No carriers found',
     }), []);
 
-    // Filter options for the toolbar
-    const filterOptions = [
-        {
-            key: 'isActive',
-            label: 'Status',
-            type: 'select' as const,
-            options: [
-                { label: 'All', value: '' },
-                { label: 'Active', value: 'true' },
-                { label: 'Inactive', value: 'false' },
-            ],
-        },
-        {
-            key: 'code',
-            label: 'Code',
-            type: 'text' as const,
-            placeholder: 'Filter by code...',
-        },
-        {
-            key: 'description',
-            label: 'Description',
-            type: 'text' as const,
-            placeholder: 'Filter by description...',
-        },
-    ];
+    // Note: Filtering is now handled server-side through search and sorting
 
     // Export function
     const handleExport = useCallback(async (format: 'csv' | 'excel' | 'pdf') => {
@@ -267,53 +286,89 @@ const Carriers: React.FC = () => {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">{'Carriers'}</h1>
-                    <p className="text-gray-600">{'Manage your carrier partners'}</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{'Carriers'}</h1>
+                    <p className="text-gray-600 dark:text-gray-400">{'Manage your carrier partners'}</p>
                 </div>
-                <div className="flex items-center space-x-3">
-                    <Button
-                        onClick={() => {
-                            setModalTitle('Create New Carrier');
-                            setModalFooter(null);
-                            setShowCreateModal(true);
-                        }}
-                        className="flex items-center space-x-2"
-                    >
-                        <PlusIcon className="h-4 w-4" />
-                        {'Add Carrier'}
-                    </Button>
-                    <Button
-                        onClick={() => refresh()}
-                        variant="secondary"
-                        size="sm"
-                        disabled={loading}
-                    >
-                        Refresh
-                    </Button>
-                </div>
+                <Button
+                    onClick={() => {
+                        setModalTitle('Create New Carrier');
+                        setModalFooter(null);
+                        setShowCreateModal(true);
+                    }}
+                    className="flex items-center space-x-2"
+                >
+                    <PlusIcon className="h-4 w-4" />
+                    {'Add Carrier'}
+                </Button>
             </div>
 
-            {/* Table with Toolbar */}
+            {/* Table with Server-Side Controls */}
             <Card>
-                <TableToolbar
-                    onExport={handleExport}
-                    filters={filterOptions}
-                    onFilterChange={() => { }} // TODO: Implement filtering
-                    onSearchChange={() => { }} // TODO: Implement search
-                    searchTerm=""
-                    activeFilters={[]}
-                    onClearAllFilters={() => { }} // TODO: Implement clear filters
-                    showSearch={true}
-                    showFilters={true}
-                    showExport={true}
-                    showSettings={true}
-                />
+                {/* Server-Side Search and Sorting Controls */}
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center flex-1">
+                            <ServerSearch
+                                searchTerm={searchTerm}
+                                onSearchChange={setSearch}
+                                loading={loading}
+                                placeholder="Search carriers by name, email, or code..."
+                                className="w-full sm:w-80"
+                            />
+                            <ServerSorting
+                                sortBy={sortBy}
+                                sortOrder={sortOrder}
+                                onSortChange={setSorting}
+                                sortOptions={sortOptions}
+                                loading={loading}
+                            />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                onClick={() => handleExport('csv')}
+                                variant="secondary"
+                                size="sm"
+                                disabled={loading}
+                            >
+                                Export CSV
+                            </Button>
+                            <Button
+                                onClick={handleRefresh}
+                                variant="secondary"
+                                size="sm"
+                                disabled={loading}
+                            >
+                                Refresh
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Table */}
                 <Table
                     config={tableConfig}
                     data={carriers}
                     loading={loading}
                     error={error?.message || undefined}
                 />
+
+                {/* Server-Side Pagination */}
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                    <ServerPagination
+                        currentPage={currentPage}
+                        pageSize={pageSize}
+                        total={total}
+                        totalPages={totalPages}
+                        hasNextPage={hasNextPage}
+                        hasPreviousPage={hasPreviousPage}
+                        startIndex={startIndex}
+                        endIndex={endIndex}
+                        loading={loading}
+                        pageSizeOptions={[5, 10, 25, 50, 100]}
+                        onPageChange={goToPage}
+                        onPageSizeChange={changePageSize}
+                    />
+                </div>
             </Card>
 
             {/* Modals */}
@@ -384,7 +439,7 @@ const Carriers: React.FC = () => {
                     size="md"
                 >
                     <div className="p-6">
-                        <p className="text-gray-600 mb-4">
+                        <p className="text-gray-600 dark:text-gray-400 mb-4">
                             {'Are you sure you want to delete this carrier? This action cannot be undone.'}
                         </p>
                         <div className="flex justify-end space-x-3">

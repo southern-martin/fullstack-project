@@ -9,8 +9,8 @@ import { LoginCredentials } from '../types';
 const LoginForm: React.FC = () => {
     const { login, isLoading, error, clearError, isAuthenticated } = useAuthContext();
     const [formData, setFormData] = useState<LoginCredentials>({
-        email: '',
-        password: '',
+        email: 'admin@example.com',
+        password: 'admin123',
     });
     const [validationErrors, setValidationErrors] = useState<Partial<LoginCredentials>>({});
 
@@ -54,19 +54,19 @@ const LoginForm: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-6">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-6">
             <div className="max-w-md w-full space-y-8">
                 <div>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100">
                         Sign in to your account
                     </h2>
-                    <p className="mt-2 text-center text-sm text-gray-600">
+                    <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
                         Enter your credentials to access the admin dashboard
                     </p>
                 </div>
                 <Card className="mt-8 space-y-6">
                     {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded">
                             {error}
                         </div>
                     )}
