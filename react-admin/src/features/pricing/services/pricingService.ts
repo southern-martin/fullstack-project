@@ -1,4 +1,4 @@
-import { pricingApiClient } from '../../../shared/utils/pricingApi';
+import { apiClient } from '../../../shared/utils/api';
 
 export interface PricingRule {
   id: number;
@@ -205,7 +205,7 @@ class PricingService {
     search?: string;
   }): Promise<PaginatedResponse<PricingRule>> {
     try {
-      const response = await pricingApiClient.getPricingRules(params);
+      const response = await apiClient.getPricingRules(params);
       return response.data;
     } catch (error) {
       console.error('Error fetching pricing rules:', error);
@@ -215,7 +215,7 @@ class PricingService {
 
   async getPricingRule(id: number): Promise<PricingRule> {
     try {
-      const response = await pricingApiClient.getPricingRule(id);
+      const response = await apiClient.getPricingRule(id);
       return response.data;
     } catch (error) {
       console.error(`Error fetching pricing rule ${id}:`, error);
@@ -225,7 +225,7 @@ class PricingService {
 
   async createPricingRule(data: CreatePricingRuleDto): Promise<PricingRule> {
     try {
-      const response = await pricingApiClient.createPricingRule(data);
+      const response = await apiClient.createPricingRule(data);
       return response.data;
     } catch (error) {
       console.error('Error creating pricing rule:', error);
@@ -238,7 +238,7 @@ class PricingService {
     data: UpdatePricingRuleDto
   ): Promise<PricingRule> {
     try {
-      const response = await pricingApiClient.updatePricingRule(id, data);
+      const response = await apiClient.updatePricingRule(id, data);
       return response.data;
     } catch (error) {
       console.error(`Error updating pricing rule ${id}:`, error);
@@ -248,7 +248,7 @@ class PricingService {
 
   async deletePricingRule(id: number): Promise<void> {
     try {
-      await pricingApiClient.deletePricingRule(id);
+      await apiClient.deletePricingRule(id);
     } catch (error) {
       console.error(`Error deleting pricing rule ${id}:`, error);
       throw error;
@@ -257,7 +257,7 @@ class PricingService {
 
   async getPricingRuleCount(): Promise<{ count: number }> {
     try {
-      const response = await pricingApiClient.getPricingRuleCount();
+      const response = await apiClient.getPricingRuleCount();
       return response.data;
     } catch (error) {
       console.error('Error fetching pricing rule count:', error);
@@ -268,7 +268,7 @@ class PricingService {
   // Price Calculation
   async calculatePrice(data: CalculatePriceDto): Promise<PriceCalculation> {
     try {
-      const response = await pricingApiClient.calculatePrice(data);
+      const response = await apiClient.calculatePrice(data);
       return response.data;
     } catch (error) {
       console.error('Error calculating price:', error);
@@ -283,9 +283,7 @@ class PricingService {
     search?: string;
   }): Promise<PaginatedCalculationResponse<PriceCalculation>> {
     try {
-      const response = await pricingApiClient.getPriceCalculationHistory(
-        params
-      );
+      const response = await apiClient.getPriceCalculationHistory(params);
       return response.data;
     } catch (error) {
       console.error('Error fetching price calculation history:', error);
@@ -295,7 +293,7 @@ class PricingService {
 
   async getPriceCalculationCount(): Promise<{ count: number }> {
     try {
-      const response = await pricingApiClient.getPriceCalculationCount();
+      const response = await apiClient.getPriceCalculationCount();
       return response.data;
     } catch (error) {
       console.error('Error fetching price calculation count:', error);
@@ -306,7 +304,7 @@ class PricingService {
   // Health check
   async healthCheck(): Promise<boolean> {
     try {
-      await pricingApiClient.healthCheck();
+      await apiClient.healthCheck();
       return true;
     } catch (error) {
       console.error('Pricing service health check failed:', error);
@@ -317,10 +315,3 @@ class PricingService {
 
 export const pricingService = new PricingService();
 export default pricingService;
-
-
-
-
-
-
-

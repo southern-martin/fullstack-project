@@ -1,10 +1,10 @@
-import { authApiClient } from '../../../shared/utils/authApi';
+import { apiClient } from '../../../shared/utils/api';
 import { AUTH_API_CONFIG } from '../config/authApi';
 import { AuthResponse, LoginCredentials, RegisterData, User } from '../types';
 
 class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await authApiClient.post<{
+    const response = await apiClient.post<{
       success: boolean;
       data: {
         user: any;
@@ -30,7 +30,7 @@ class AuthService {
   }
 
   async register(data: RegisterData): Promise<AuthResponse> {
-    const response = await authApiClient.post<{
+    const response = await apiClient.post<{
       success: boolean;
       data: {
         user: any;
@@ -56,7 +56,7 @@ class AuthService {
   }
 
   async refreshToken(): Promise<AuthResponse> {
-    const response = await authApiClient.post<{
+    const response = await apiClient.post<{
       success: boolean;
       data: {
         user: any;
@@ -83,7 +83,7 @@ class AuthService {
 
   async logout(): Promise<void> {
     try {
-      await authApiClient.post(AUTH_API_CONFIG.ENDPOINTS.LOGOUT);
+      await apiClient.post(AUTH_API_CONFIG.ENDPOINTS.LOGOUT);
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
@@ -92,7 +92,7 @@ class AuthService {
   }
 
   async getProfile(): Promise<User> {
-    const response = await authApiClient.get<{
+    const response = await apiClient.get<{
       success: boolean;
       data: {
         user: User;
@@ -122,7 +122,7 @@ class AuthService {
 
   async healthCheck(): Promise<boolean> {
     try {
-      await authApiClient.get('/health');
+      await apiClient.get('/health');
       return true;
     } catch (error) {
       console.error('Auth service health check failed:', error);

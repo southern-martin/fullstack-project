@@ -1,5 +1,5 @@
 import { PaginatedResponse } from '../../../shared/types';
-import { customerApiClient } from '../../../shared/utils/customerApi';
+import { apiClient } from '../../../shared/utils/api';
 
 export interface Customer {
   id: number;
@@ -75,7 +75,7 @@ class CustomerService {
     search?: string;
   }): Promise<PaginatedResponse<Customer>> {
     try {
-      const response = await customerApiClient.getCustomers(params);
+      const response = await apiClient.getCustomers(params);
       // Transform the API response to match shared PaginatedResponse format
       return {
         data: response.data.customers,
@@ -92,7 +92,7 @@ class CustomerService {
 
   async getCustomer(id: number): Promise<Customer> {
     try {
-      const response = await customerApiClient.getCustomer(id);
+      const response = await apiClient.getCustomer(id);
       return response.data;
     } catch (error) {
       console.error(`Error fetching customer ${id}:`, error);
@@ -102,7 +102,7 @@ class CustomerService {
 
   async createCustomer(data: CreateCustomerDto): Promise<Customer> {
     try {
-      const response = await customerApiClient.createCustomer(data);
+      const response = await apiClient.createCustomer(data);
       return response.data;
     } catch (error) {
       console.error('Error creating customer:', error);
@@ -112,7 +112,7 @@ class CustomerService {
 
   async updateCustomer(id: number, data: UpdateCustomerDto): Promise<Customer> {
     try {
-      const response = await customerApiClient.updateCustomer(id, data);
+      const response = await apiClient.updateCustomer(id, data);
       return response.data;
     } catch (error) {
       console.error(`Error updating customer ${id}:`, error);
@@ -122,7 +122,7 @@ class CustomerService {
 
   async deleteCustomer(id: number): Promise<void> {
     try {
-      await customerApiClient.deleteCustomer(id);
+      await apiClient.deleteCustomer(id);
     } catch (error) {
       console.error(`Error deleting customer ${id}:`, error);
       throw error;
@@ -131,7 +131,7 @@ class CustomerService {
 
   async getCustomerCount(): Promise<{ count: number }> {
     try {
-      const response = await customerApiClient.getCustomerCount();
+      const response = await apiClient.getCustomerCount();
       return response.data;
     } catch (error) {
       console.error('Error fetching customer count:', error);
@@ -142,7 +142,7 @@ class CustomerService {
   // Address operations
   async getCustomerAddresses(customerId: number): Promise<CustomerAddress[]> {
     try {
-      const response = await customerApiClient.getCustomerAddresses(customerId);
+      const response = await apiClient.getCustomerAddresses(customerId);
       return response.data;
     } catch (error) {
       console.error(
@@ -158,10 +158,7 @@ class CustomerService {
     data: CreateAddressDto
   ): Promise<CustomerAddress> {
     try {
-      const response = await customerApiClient.addCustomerAddress(
-        customerId,
-        data
-      );
+      const response = await apiClient.addCustomerAddress(customerId, data);
       return response.data;
     } catch (error) {
       console.error(`Error adding address for customer ${customerId}:`, error);
@@ -175,7 +172,7 @@ class CustomerService {
     data: UpdateAddressDto
   ): Promise<CustomerAddress> {
     try {
-      const response = await customerApiClient.updateCustomerAddress(
+      const response = await apiClient.updateCustomerAddress(
         customerId,
         addressId,
         data
@@ -195,7 +192,7 @@ class CustomerService {
     addressId: number
   ): Promise<void> {
     try {
-      await customerApiClient.deleteCustomerAddress(customerId, addressId);
+      await apiClient.deleteCustomerAddress(customerId, addressId);
     } catch (error) {
       console.error(
         `Error deleting address ${addressId} for customer ${customerId}:`,
@@ -208,7 +205,7 @@ class CustomerService {
   // Health check
   async healthCheck(): Promise<boolean> {
     try {
-      await customerApiClient.healthCheck();
+      await apiClient.healthCheck();
       return true;
     } catch (error) {
       console.error('Customer service health check failed:', error);

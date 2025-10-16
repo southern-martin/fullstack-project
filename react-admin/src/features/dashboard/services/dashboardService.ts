@@ -1,6 +1,5 @@
 import { User } from '../../../shared/types';
-import { carrierApiClient } from '../../../shared/utils/carrierApi';
-import { customerApiClient } from '../../../shared/utils/customerApi';
+import { apiClient } from '../../../shared/utils/api';
 import { userApiService } from '../../users/services/userApiService';
 
 export interface DashboardStats {
@@ -25,8 +24,8 @@ class DashboardService {
       const [usersResponse, customersResponse, carriersResponse] =
         await Promise.allSettled([
           userApiService.getUsers({ page: 1, limit: 1 }),
-          customerApiClient.getCustomers({ page: 1, limit: 1 }),
-          carrierApiClient.getCarriers({ page: 1, limit: 1 }),
+          apiClient.getCustomers({ page: 1, limit: 1 }),
+          apiClient.getCarriers({ page: 1, limit: 1 }),
         ]);
 
       console.log('DashboardService: API responses received:', {
