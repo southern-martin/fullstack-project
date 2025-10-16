@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useLanguage } from '../../app/providers/LanguageProvider';
 import { Language, translationService } from '../../features/translations/services/translationService';
+import { getLanguageFlag } from '../utils/languageFlags';
 
 interface LanguageSwitcherProps {
     onLanguageChange?: (language: Language) => void;
@@ -57,8 +58,8 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     if (loading) {
         return (
             <div className={`flex items-center space-x-2 ${className}`}>
-                <GlobeAltIcon className="h-5 w-5 text-gray-400" />
-                <span className="text-sm text-gray-400">Loading...</span>
+                <GlobeAltIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                <span className="text-sm text-gray-400 dark:text-gray-500">Loading...</span>
             </div>
         );
     }
@@ -73,8 +74,8 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     if (!currentLanguage) {
         return (
             <div className={`flex items-center space-x-2 ${className}`}>
-                <GlobeAltIcon className="h-5 w-5 text-gray-400" />
-                <span className="text-sm text-gray-400">No languages available</span>
+                <GlobeAltIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                <span className="text-sm text-gray-400 dark:text-gray-500">No languages available</span>
             </div>
         );
     }
@@ -83,11 +84,10 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         <div className={`relative ${className}`}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors"
                 aria-label="Select language"
             >
-                <GlobeAltIcon className="h-4 w-4" />
-                <span className="text-lg">🌐</span>
+                <span className="text-lg">{getLanguageFlag(currentLanguage.code)}</span>
                 <span className="hidden sm:inline">{currentLanguage.name}</span>
                 <ChevronDownIcon className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -101,9 +101,9 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
                     />
 
                     {/* Dropdown */}
-                    <div className="absolute right-0 z-20 mt-2 w-56 bg-white border border-gray-200 rounded-md shadow-lg">
+                    <div className="absolute right-0 z-20 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
                         <div className="py-1">
-                            <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                            <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">
                                 Select Language
                             </div>
 
@@ -111,21 +111,21 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
                                 <button
                                     key={language.id}
                                     onClick={() => handleLanguageChange(language)}
-                                    className={`w-full flex items-center space-x-3 px-4 py-2 text-sm text-left hover:bg-gray-50 transition-colors ${currentLanguage.id === language.id ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                                    className={`w-full flex items-center space-x-3 px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${currentLanguage.id === language.id ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
                                         }`}
                                 >
-                                    <span className="text-lg">🌐</span>
+                                    <span className="text-lg">{getLanguageFlag(language.code)}</span>
                                     <div className="flex-1">
                                         <div className="font-medium">{language.name}</div>
-                                        <div className="text-xs text-gray-500">{language.nativeName}</div>
+                                        <div className="text-xs text-gray-500 dark:text-gray-400">{language.nativeName}</div>
                                     </div>
                                     {language.code === 'en' && (
-                                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                                        <span className="text-xs bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400 px-2 py-0.5 rounded-full">
                                             Default
                                         </span>
                                     )}
                                     {currentLanguage.id === language.id && (
-                                        <span className="text-blue-600">
+                                        <span className="text-blue-600 dark:text-blue-400">
                                             ✓
                                         </span>
                                     )}
@@ -134,7 +134,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
                         </div>
 
                         {/* Footer */}
-                        <div className="px-4 py-2 text-xs text-gray-500 border-t border-gray-100">
+                        <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-700">
                             Language settings are saved locally
                         </div>
                     </div>

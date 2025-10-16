@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import Button from '../../../shared/components/ui/Button';
+import { getLanguageFlag } from '../../../shared/utils/languageFlags';
 import { Language, Translation } from '../services/translationService';
 
 interface TranslationFormProps {
@@ -106,7 +107,7 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
             <div className="grid grid-cols-1 gap-6">
                 {/* Translation Key */}
                 <div>
-                    <label htmlFor="key" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="key" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Translation Key *
                     </label>
                     <input
@@ -114,7 +115,7 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
                         id="key"
                         value={formData.key}
                         onChange={(e) => handleChange('key', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
                         placeholder="e.g., welcome.message"
                         required
                     />
@@ -122,20 +123,20 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
 
                 {/* Language Selection */}
                 <div>
-                    <label htmlFor="languageId" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="languageId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Language *
                     </label>
                     <select
                         id="languageId"
                         value={formData.languageId}
                         onChange={(e) => handleChange('languageId', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
                         required
                     >
                         <option value="">Select a language</option>
                         {languages.map((language) => (
                             <option key={language.id} value={language.id}>
-                                🌐 {language.name} ({language.code})
+                                {getLanguageFlag(language.code)} {language.name} ({language.code})
                             </option>
                         ))}
                     </select>
@@ -143,7 +144,7 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
 
                 {/* Translation Value */}
                 <div>
-                    <label htmlFor="value" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="value" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Translation Value *
                     </label>
                     <textarea
@@ -151,7 +152,7 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
                         value={formData.value}
                         onChange={(e) => handleChange('value', e.target.value)}
                         rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
                         placeholder="Enter the translation value..."
                         required
                     />
