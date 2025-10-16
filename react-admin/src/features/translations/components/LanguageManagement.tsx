@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import Button from '../../../shared/components/ui/Button';
 import Modal from '../../../shared/components/ui/Modal';
+import { getLanguageFlag } from '../../../shared/utils/languageFlags';
 import { Language, translationService } from '../services/translationService';
 
 interface LanguageManagementProps {
@@ -121,33 +122,33 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
                     {languages.map((language) => (
                         <div
                             key={language.id}
-                            className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
+                            className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
                         >
                             <div className="flex items-center space-x-3">
-                                <span className="text-2xl">🌐</span>
+                                <span className="text-2xl">{getLanguageFlag(language.code)}</span>
                                 <div>
                                     <div className="flex items-center space-x-2">
-                                        <span className="font-medium text-gray-900">
+                                        <span className="font-medium text-gray-900 dark:text-gray-100">
                                             {language.name}
                                         </span>
-                                        <span className="text-sm text-gray-500">
+                                        <span className="text-sm text-gray-500 dark:text-gray-400">
                                             ({language.code})
                                         </span>
                                         {language.code === 'en' && (
-                                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400">
                                                 Default
                                             </span>
                                         )}
                                     </div>
-                                    <div className="text-sm text-gray-500">
+                                    <div className="text-sm text-gray-500 dark:text-gray-400">
                                         {language.nativeName}
                                     </div>
                                 </div>
                             </div>
                             <div className="flex items-center space-x-2">
                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${language.isActive
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-red-100 text-red-800'
+                                    ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400'
+                                    : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400'
                                     }`}>
                                     {language.isActive ? 'Active' : 'Inactive'}
                                 </span>
