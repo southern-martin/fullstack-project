@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
+import ThemeToggle from '../ThemeToggle';
 import Navigation from './Navigation';
 
 const Layout: React.FC = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
-        <div className="h-screen flex overflow-hidden" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+        <div className="h-screen flex overflow-hidden bg-gray-50 dark:bg-gray-900">
             {/* Navigation */}
             <Navigation isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
 
             {/* Main content */}
             <div className="flex flex-col w-0 flex-1 overflow-hidden">
                 {/* Top bar */}
-                <div className="professional-header relative z-10 flex-shrink-0 flex h-16">
+                <div className="professional-header relative z-10 flex-shrink-0 flex h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                     <button
                         type="button"
-                        className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 lg:hidden"
+                        className="px-4 border-r border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 lg:hidden"
                         onClick={() => setSidebarOpen(true)}
                     >
                         <span className="sr-only">Open sidebar</span>
@@ -40,7 +41,7 @@ const Layout: React.FC = () => {
                     <div className="flex-1 px-4 flex justify-between">
                         <div className="flex-1 flex">
                             <div className="w-full flex md:ml-0">
-                                <div className="relative w-full text-gray-400 focus-within:text-gray-600">
+                                <div className="relative w-full text-gray-400 focus-within:text-gray-600 dark:text-gray-500 dark:focus-within:text-gray-300 bg-transparent">
                                     <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none">
                                         <svg
                                             className="h-5 w-5"
@@ -58,21 +59,24 @@ const Layout: React.FC = () => {
                                     </div>
                                     <input
                                         id="search-field"
-                                        className="block w-full h-full pl-8 pr-3 py-2 border-transparent text-gray-900 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-0 focus:border-transparent"
+                                        className="block w-full h-full pl-8 pr-3 py-2 border-0 bg-transparent text-gray-900 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-0 focus:border-0 focus:shadow-none dark:text-gray-100 dark:placeholder-gray-400"
                                         placeholder="Search..."
                                         type="search"
                                         name="search"
+                                        style={{ outline: 'none', boxShadow: 'none' }}
                                     />
                                 </div>
                             </div>
                         </div>
 
                         <div className="ml-4 flex items-center md:ml-6 space-x-4">
+                            {/* Theme Toggle */}
+                            <ThemeToggle size="sm" />
 
                             {/* Notifications */}
                             <button
                                 type="button"
-                                className="bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                className="bg-white dark:bg-gray-800 p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:text-gray-500 dark:hover:text-gray-300"
                             >
                                 <span className="sr-only">View notifications</span>
                                 <svg
@@ -94,7 +98,7 @@ const Layout: React.FC = () => {
 
                             {/* Profile dropdown */}
                             <div className="relative">
-                                <div className="max-w-xs bg-white flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <div className="max-w-xs bg-white dark:bg-gray-800 flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                     <span className="sr-only">Open user menu</span>
                                     <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
                                         <span className="text-sm font-medium text-gray-700">U</span>
