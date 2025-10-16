@@ -169,14 +169,14 @@ const Customers: React.FC = () => {
                 sortable: true,
                 render: (firstName: string, customer: Customer) => (
                     <div className="flex items-center">
-                        <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                            <span className="text-sm font-medium text-gray-600">
+                        <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
                                 {firstName?.charAt(0).toUpperCase()}
                             </span>
                         </div>
                         <div className="ml-3">
-                            <div className="text-sm font-medium text-gray-900">{customer.firstName} {customer.lastName}</div>
-                            <div className="text-sm text-gray-500">{customer.email}</div>
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{customer.firstName} {customer.lastName}</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">{customer.email}</div>
                         </div>
                     </div>
                 ),
@@ -186,7 +186,7 @@ const Customers: React.FC = () => {
                 label: 'Phone',
                 sortable: true,
                 render: (phone: string) => (
-                    <span className="text-sm text-gray-900">{phone || '-'}</span>
+                    <span className="text-sm text-gray-900 dark:text-gray-100">{phone || '-'}</span>
                 ),
             },
             {
@@ -194,7 +194,7 @@ const Customers: React.FC = () => {
                 label: 'Company',
                 sortable: true,
                 render: (preferences: any) => (
-                    <span className="text-sm text-gray-900">{preferences?.company || '-'}</span>
+                    <span className="text-sm text-gray-900 dark:text-gray-100">{preferences?.company || '-'}</span>
                 ),
             },
             {
@@ -203,8 +203,8 @@ const Customers: React.FC = () => {
                 sortable: true,
                 render: (isActive: boolean) => (
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isActive
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400'
+                        : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400'
                         }`}>
                         {isActive ? 'Active' : 'Inactive'}
                     </span>
@@ -215,7 +215,7 @@ const Customers: React.FC = () => {
                 label: 'Created',
                 sortable: true,
                 render: (date: string) => (
-                    <span className="text-sm text-gray-900">
+                    <span className="text-sm text-gray-900 dark:text-gray-100">
                         {new Date(date).toLocaleDateString()}
                     </span>
                 ),
@@ -307,8 +307,8 @@ const Customers: React.FC = () => {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">{'Customers'}</h1>
-                    <p className="text-gray-600">{'Manage your customer database'}</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{'Customers'}</h1>
+                    <p className="text-gray-600 dark:text-gray-400">{'Manage your customer database'}</p>
                 </div>
                 <Button
                     onClick={() => {
@@ -326,7 +326,7 @@ const Customers: React.FC = () => {
             {/* Table with Server-Side Controls */}
             <Card>
                 {/* Server-Side Search and Sorting Controls */}
-                <div className="p-4 border-b border-gray-200 bg-gray-50">
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center flex-1">
                             <ServerSearch
@@ -374,7 +374,7 @@ const Customers: React.FC = () => {
                 />
 
                 {/* Server-Side Pagination */}
-                <div className="p-4 border-t border-gray-200 bg-gray-50">
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                     <ServerPagination
                         currentPage={currentPage}
                         pageSize={pageSize}

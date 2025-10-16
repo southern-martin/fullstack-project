@@ -169,14 +169,14 @@ const Users: React.FC = () => {
                 sortable: true,
                 render: (user: User) => (
                     <div className="flex items-center">
-                        <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                            <span className="text-sm font-medium text-gray-600">
+                        <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
                                 {user.firstName?.charAt(0).toUpperCase()}
                             </span>
                         </div>
                         <div className="ml-3">
-                            <div className="text-sm font-medium text-gray-900">{user.firstName} {user.lastName}</div>
-                            <div className="text-sm text-gray-500">{user.email}</div>
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.firstName} {user.lastName}</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
                         </div>
                     </div>
                 ),
@@ -186,7 +186,7 @@ const Users: React.FC = () => {
                 label: 'Email',
                 sortable: true,
                 render: (email: string, user: User) => (
-                    <span className="text-sm text-gray-900">{email}</span>
+                    <span className="text-sm text-gray-900 dark:text-gray-100">{email}</span>
                 ),
             },
             {
@@ -198,7 +198,7 @@ const Users: React.FC = () => {
                         {roles?.map((role: any) => (
                             <span
                                 key={role?.id || Math.random()}
-                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400"
                             >
                                 {role?.name || 'Unknown'}
                             </span>
@@ -212,8 +212,8 @@ const Users: React.FC = () => {
                 sortable: true,
                 render: (isActive: boolean) => (
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isActive
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400'
+                        : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400'
                         }`}>
                         {isActive ? 'Active' : 'Inactive'}
                     </span>
@@ -224,7 +224,7 @@ const Users: React.FC = () => {
                 label: 'Created',
                 sortable: true,
                 render: (date: string) => (
-                    <span className="text-sm text-gray-900">
+                    <span className="text-sm text-gray-900 dark:text-gray-100">
                         {new Date(date).toLocaleDateString()}
                     </span>
                 ),
@@ -316,8 +316,8 @@ const Users: React.FC = () => {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Users</h1>
-                    <p className="text-gray-600">Manage your user database</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Users</h1>
+                    <p className="text-gray-600 dark:text-gray-400">Manage your user database</p>
                 </div>
                 <Button
                     onClick={() => {
@@ -335,7 +335,7 @@ const Users: React.FC = () => {
             {/* Table with Server-Side Controls */}
             <Card>
                 {/* Server-Side Search and Sorting Controls */}
-                <div className="p-4 border-b border-gray-200 bg-gray-50">
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center flex-1">
                             <ServerSearch
@@ -383,7 +383,7 @@ const Users: React.FC = () => {
                 />
 
                 {/* Server-Side Pagination */}
-                <div className="p-4 border-t border-gray-200 bg-gray-50">
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                     <ServerPagination
                         currentPage={currentPage}
                         pageSize={pageSize}
