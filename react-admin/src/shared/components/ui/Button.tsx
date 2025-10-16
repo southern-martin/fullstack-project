@@ -23,8 +23,8 @@ const Button: React.FC<ButtonProps> = ({
     const variantStyles = {
         primary: 'professional-btn-primary',
         secondary: 'professional-btn-secondary',
-        danger: 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 focus:ring-red-500 shadow-md hover:shadow-lg',
-        success: 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 focus:ring-green-500 shadow-md hover:shadow-lg',
+        danger: 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 focus:ring-red-500 shadow-md hover:shadow-lg dark:from-red-600 dark:to-red-700 dark:hover:from-red-700 dark:hover:to-red-800',
+        success: 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 focus:ring-green-500 shadow-md hover:shadow-lg dark:from-green-600 dark:to-green-700 dark:hover:from-green-700 dark:hover:to-green-800',
     };
 
     const sizeStyles = {
