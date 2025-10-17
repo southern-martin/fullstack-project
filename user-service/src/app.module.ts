@@ -8,7 +8,6 @@ import { InterfacesModule } from "./interfaces/interfaces.module";
 // TypeORM Entities (Infrastructure Layer)
 import { UserTypeOrmEntity } from "./infrastructure/database/typeorm/entities/user.typeorm.entity";
 import { RoleTypeOrmEntity } from "./infrastructure/database/typeorm/entities/role.typeorm.entity";
-import { UserRoleTypeOrmEntity } from "./infrastructure/database/typeorm/entities/user-role.typeorm.entity";
 
 /**
  * Main Application Module
@@ -31,8 +30,8 @@ import { UserRoleTypeOrmEntity } from "./infrastructure/database/typeorm/entitie
       username: process.env.DB_USERNAME || "root",
       password: process.env.DB_PASSWORD || "password",
       database: process.env.DB_DATABASE || "user_service_db",
-      entities: [UserTypeOrmEntity, RoleTypeOrmEntity, UserRoleTypeOrmEntity],
-      synchronize: process.env.NODE_ENV !== "production",
+      entities: [UserTypeOrmEntity, RoleTypeOrmEntity],
+      synchronize: false, // Disabled to prevent schema conflicts - use migrations instead
       logging: process.env.NODE_ENV === "development",
       migrations: ["dist/infrastructure/database/typeorm/migrations/*.js"],
       migrationsRun: process.env.NODE_ENV === "production",

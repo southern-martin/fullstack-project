@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
@@ -12,7 +13,10 @@ import { RoleRepositoryInterface } from "../../domain/repositories/role.reposito
  */
 @Injectable()
 export class DeleteRoleUseCase {
-  constructor(private readonly roleRepository: RoleRepositoryInterface) {}
+  constructor(
+    @Inject('RoleRepositoryInterface')
+    private readonly roleRepository: RoleRepositoryInterface
+  ) {}
 
   /**
    * Executes the delete role use case

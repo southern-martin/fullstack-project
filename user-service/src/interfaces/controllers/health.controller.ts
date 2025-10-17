@@ -7,7 +7,7 @@ import { RoleRepositoryInterface } from '../../domain/repositories/role.reposito
  * Interface adapter for health check requests
  * Follows Clean Architecture principles by using repository interfaces
  */
-@Controller("api/v1/health")
+@Controller("health")
 export class HealthController {
   constructor(
     @Inject('UserRepositoryInterface')

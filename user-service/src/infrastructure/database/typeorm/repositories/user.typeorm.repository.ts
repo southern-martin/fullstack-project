@@ -28,7 +28,7 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
   async findById(id: number): Promise<User | null> {
     const entity = await this.userRepository.findOne({
       where: { id },
-      relations: ["userRoles", "userRoles.role"],
+      relations: ["roles"],
     });
     return entity ? this.toDomainEntity(entity) : null;
   }
@@ -36,7 +36,7 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
   async findByEmail(email: string): Promise<User | null> {
     const entity = await this.userRepository.findOne({
       where: { email: email.toLowerCase() },
-      relations: ["userRoles", "userRoles.role"],
+      relations: ["roles"],
     });
     return entity ? this.toDomainEntity(entity) : null;
   }
@@ -47,7 +47,7 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
     const [entities, total] = await this.userRepository.findAndCount({
       skip: (paginationDto.page - 1) * paginationDto.limit,
       take: paginationDto.limit,
-      relations: ["userRoles", "userRoles.role"],
+      relations: ["roles"],
       order: { createdAt: "DESC" },
     });
 
@@ -60,7 +60,7 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
   async findActive(): Promise<User[]> {
     const entities = await this.userRepository.find({
       where: { isActive: true },
-      relations: ["userRoles", "userRoles.role"],
+      relations: ["roles"],
       order: { createdAt: "DESC" },
     });
 
@@ -74,8 +74,7 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
     const queryBuilder = this.userRepository.createQueryBuilder("user");
 
     queryBuilder
-      .leftJoinAndSelect("user.userRoles", "userRoles")
-      .leftJoinAndSelect("userRoles.role", "role")
+      .leftJoinAndSelect("user.roles", "role")
       .where(
         "(user.firstName LIKE :searchTerm OR user.lastName LIKE :searchTerm OR user.email LIKE :searchTerm)",
         { searchTerm: `%${searchTerm}%` }
@@ -97,7 +96,7 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
     await this.userRepository.update(id, this.toTypeOrmEntity(user as User));
     const updatedEntity = await this.userRepository.findOne({
       where: { id },
-      relations: ["userRoles", "userRoles.role"],
+      relations: ["roles"],
     });
     return this.toDomainEntity(updatedEntity);
   }
@@ -128,7 +127,7 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
       where: {
         createdAt: Between(startDate, endDate),
       },
-      relations: ["userRoles", "userRoles.role"],
+      relations: ["roles"],
       order: { createdAt: "DESC" },
     });
 
@@ -139,8 +138,7 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
     const queryBuilder = this.userRepository.createQueryBuilder("user");
 
     queryBuilder
-      .leftJoinAndSelect("user.userRoles", "userRoles")
-      .leftJoinAndSelect("userRoles.role", "role")
+      .leftJoinAndSelect("user.roles", "role")
       .where("role.name = :roleName", { roleName });
 
     const entities = await queryBuilder.getMany();
@@ -156,14 +154,10 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
       lastName: user.lastName,
       password: user.password,
       isActive: user.isActive,
-      dateOfBirth: user.dateOfBirth,
       phone: user.phone,
-      address: user.address,
-      preferences: user.preferences,
       lastLoginAt: user.lastLoginAt,
-      emailVerifiedAt: user.emailVerifiedAt,
+      passwordChangedAt: user.passwordChangedAt,
       isEmailVerified: user.isEmailVerified,
-      metadata: user.metadata,
     };
   }
 
@@ -175,20 +169,16 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
     user.lastName = entity.lastName;
     user.password = entity.password;
     user.isActive = entity.isActive;
-    user.dateOfBirth = entity.dateOfBirth;
     user.phone = entity.phone;
-    user.address = entity.address;
-    user.preferences = entity.preferences;
     user.lastLoginAt = entity.lastLoginAt;
-    user.emailVerifiedAt = entity.emailVerifiedAt;
+    user.passwordChangedAt = entity.passwordChangedAt;
     user.isEmailVerified = entity.isEmailVerified;
-    user.metadata = entity.metadata;
     user.createdAt = entity.createdAt;
     user.updatedAt = entity.updatedAt;
 
     // Map roles if they exist
-    if (entity.userRoles) {
-      user.roles = entity.userRoles.map((userRole) => userRole.role);
+    if (entity.roles) {
+      user.roles = entity.roles;
     }
 
     return user;
@@ -201,8 +191,7 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
   ): Promise<{ users: User[]; total: number }> {
     const queryBuilder = this.userRepository
       .createQueryBuilder("user")
-      .leftJoinAndSelect("user.userRoles", "userRole")
-      .leftJoinAndSelect("userRole.role", "role");
+      .leftJoinAndSelect("user.roles", "role");
 
     if (search) {
       queryBuilder.where(

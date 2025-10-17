@@ -1,48 +1,37 @@
-import { BaseEntity, Column, Entity, Index, OneToMany } from "typeorm";
-import { UserRoleTypeOrmEntity } from "./user-role.typeorm.entity";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
 
 /**
- * Role TypeORM Entity
- *
- * This entity represents the database table structure for roles.
- * It's separate from the domain entity to maintain Clean Architecture principles.
+ * TypeORM Role Entity
+ * Infrastructure layer - database representation
+ * Maps to domain Role entity
+ * MUST match Auth Service entity structure (shared database)
  */
 @Entity("roles")
-@Index(["name"], { unique: true })
-@Index(["isActive"])
-@Index(["createdAt"])
-export class RoleTypeOrmEntity extends BaseEntity {
-  @Column({ primary: true, generated: true })
+export class RoleTypeOrmEntity {
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  createdAt: Date;
-
-  @Column({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
-  updatedAt: Date;
-  @Column({ unique: true, length: 100 })
+  @Column({ unique: true })
   name: string;
 
-  @Column({ type: "text", nullable: true })
+  @Column({ nullable: true })
   description: string;
 
-  @Column({ default: true })
-  isActive: boolean;
-
-  @Column({ type: "json", nullable: true })
+  @Column("json", { nullable: true })
   permissions: string[];
 
-  @Column({ type: "int", default: 0 })
-  priority: number;
+  @Column({ default: true, name: 'is_active' })
+  isActive: boolean;
 
-  @Column({ type: "json", nullable: true })
-  metadata: Record<string, any>;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-  // Relations
-  @OneToMany(() => UserRoleTypeOrmEntity, (userRole) => userRole.role)
-  userRoles: UserRoleTypeOrmEntity[];
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }

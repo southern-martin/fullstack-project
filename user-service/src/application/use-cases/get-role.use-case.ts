@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
 import { RoleResponseDto } from "../dto/role-response.dto";
 
@@ -9,7 +9,10 @@ import { RoleResponseDto } from "../dto/role-response.dto";
  */
 @Injectable()
 export class GetRoleUseCase {
-  constructor(private readonly roleRepository: RoleRepositoryInterface) {}
+  constructor(
+    @Inject('RoleRepositoryInterface')
+    private readonly roleRepository: RoleRepositoryInterface
+  ) {}
 
   /**
    * Executes the get role by ID use case
