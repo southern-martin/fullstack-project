@@ -1,0 +1,350 @@
+name: southern-martin
+
+services:
+  # ===========================================
+  # SHARED INFRASTRUCTURE
+  # ===========================================
+  
+  # Shared MySQL Database (Auth + User Services)
+  shared-mysql:
+    image: mysql:8.0
+    container_name: southern-martin-shared-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: shared_root_password_2024
+      MYSQL_DATABASE: shared_user_db
+      MYSQL_USER: shared_user
+      MYSQL_PASSWORD: shared_password_2024
+    ports:
+      - "3306:3306"
+    volumes:
+      - southern_martin_shared_mysql_data:/var/lib/mysql
+    networks:
+      - southern-martin-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pshared_root_password_2024"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
+
+  # Shared Redis Cache (All Services)
+  shared-redis:
+    image: redis:7-alpine
+    container_name: southern-martin-shared-redis
+    restart: unless-stopped
+    command: redis-server --requirepass shared_redis_password_2024
+    ports:
+      - "6379:6379"
+    volumes:
+      - southern_martin_shared_redis_data:/data
+    networks:
+      - southern-martin-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "shared_redis_password_2024", "ping"]
+      timeout: 10s
+      retries: 5
+      interval: 10s
+
+  # ===========================================
+  # BUSINESS SERVICE DATABASES
+  # ===========================================
+
+  # Customer Service Database
+  customer-service-db:
+    image: mysql:8.0
+    container_name: southern-martin-customer-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: customer_root_password_2024
+      MYSQL_DATABASE: customer_service_db
+      MYSQL_USER: customer_user
+      MYSQL_PASSWORD: customer_password_2024
+    ports:
+      - "3309:3306"
+    volumes:
+      - southern_martin_customer_db_data:/var/lib/mysql
+    networks:
+      - southern-martin-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pcustomer_root_password_2024"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+
+  # Carrier Service Database
+  carrier-service-db:
+    image: mysql:8.0
+    container_name: southern-martin-carrier-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: carrier_root_password_2024
+      MYSQL_DATABASE: carrier_service_db
+      MYSQL_USER: carrier_user
+      MYSQL_PASSWORD: carrier_password_2024
+    ports:
+      - "3310:3306"
+    volumes:
+      - southern_martin_carrier_db_data:/var/lib/mysql
+    networks:
+      - southern-martin-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pcarrier_root_password_2024"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+
+  # Pricing Service Database
+  pricing-service-db:
+    image: mysql:8.0
+    container_name: southern-martin-pricing-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: pricing_root_password_2024
+      MYSQL_DATABASE: pricing_service_db
+      MYSQL_USER: pricing_user
+      MYSQL_PASSWORD: pricing_password_2024
+    ports:
+      - "3311:3306"
+    volumes:
+      - southern_martin_pricing_db_data:/var/lib/mysql
+    networks:
+      - southern-martin-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppricing_root_password_2024"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+
+  # ===========================================
+  # APPLICATION SERVICES
+  # ===========================================
+
+  # Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    container_name: southern-martin-auth-service
+    restart: unless-stopped
+    environment:
+      # Database Configuration
+      DB_HOST: southern-martin-shared-mysql
+      DB_PORT: 3306
+      DB_USERNAME: shared_user
+      DB_PASSWORD: shared_password_2024
+      DB_NAME: shared_user_db
+      
+      # JWT Configuration
+      JWT_SECRET: your-super-secret-jwt-key-for-auth-service-change-this-in-production
+      JWT_EXPIRES_IN: 24h
+      
+      # Service Configuration
+      PORT: 3001
+      NODE_ENV: development
+      FRONTEND_URL: http://localhost:3000
+      DB_SYNCHRONIZE: true
+      
+      # Redis Configuration
+      REDIS_HOST: southern-martin-shared-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: shared_redis_password_2024
+      REDIS_KEY_PREFIX: auth
+    ports:
+      - "3001:3001"
+    depends_on:
+      shared-mysql:
+        condition: service_healthy
+      shared-redis:
+        condition: service_healthy
+    networks:
+      - southern-martin-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/v1/auth/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # User Service
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    container_name: southern-martin-user-service
+    restart: unless-stopped
+    environment:
+      # Database Configuration (shares with Auth Service)
+      DB_HOST: southern-martin-shared-mysql
+      DB_PORT: 3306
+      DB_USERNAME: shared_user
+      DB_PASSWORD: shared_password_2024
+      DB_NAME: shared_user_db
+      
+      # Service Configuration
+      PORT: 3003
+      NODE_ENV: development
+      
+      # Redis Configuration
+      REDIS_HOST: southern-martin-shared-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: shared_redis_password_2024
+      REDIS_KEY_PREFIX: user
+    ports:
+      - "3003:3003"
+    depends_on:
+      shared-mysql:
+        condition: service_healthy
+      shared-redis:
+        condition: service_healthy
+    networks:
+      - southern-martin-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Customer Service
+  customer-service:
+    build:
+      context: .
+      dockerfile: customer-service/Dockerfile
+    container_name: southern-martin-customer-service
+    restart: unless-stopped
+    environment:
+      # Database Configuration
+      DB_HOST: southern-martin-customer-db
+      DB_PORT: 3306
+      DB_USERNAME: customer_user
+      DB_PASSWORD: customer_password_2024
+      DB_NAME: customer_service_db
+      
+      # Service Configuration
+      PORT: 3004
+      NODE_ENV: development
+      
+      # Redis Configuration
+      REDIS_HOST: southern-martin-shared-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: shared_redis_password_2024
+      REDIS_KEY_PREFIX: customer
+    ports:
+      - "3004:3004"
+    depends_on:
+      customer-service-db:
+        condition: service_healthy
+      shared-redis:
+        condition: service_healthy
+    networks:
+      - southern-martin-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Carrier Service
+  carrier-service:
+    build:
+      context: .
+      dockerfile: carrier-service/Dockerfile
+    container_name: southern-martin-carrier-service
+    restart: unless-stopped
+    environment:
+      # Database Configuration
+      DB_HOST: southern-martin-carrier-db
+      DB_PORT: 3306
+      DB_USERNAME: carrier_user
+      DB_PASSWORD: carrier_password_2024
+      DB_NAME: carrier_service_db
+      
+      # Service Configuration
+      PORT: 3005
+      NODE_ENV: development
+      
+      # Redis Configuration
+      REDIS_HOST: southern-martin-shared-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: shared_redis_password_2024
+      REDIS_KEY_PREFIX: carrier
+    ports:
+      - "3005:3005"
+    depends_on:
+      carrier-service-db:
+        condition: service_healthy
+      shared-redis:
+        condition: service_healthy
+    networks:
+      - southern-martin-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Pricing Service
+  pricing-service:
+    build:
+      context: .
+      dockerfile: pricing-service/Dockerfile
+    container_name: southern-martin-pricing-service
+    restart: unless-stopped
+    environment:
+      # Database Configuration
+      DB_HOST: southern-martin-pricing-db
+      DB_PORT: 3306
+      DB_USERNAME: pricing_user
+      DB_PASSWORD: pricing_password_2024
+      DB_NAME: pricing_service_db
+      
+      # Service Configuration
+      PORT: 3006
+      NODE_ENV: development
+      
+      # Redis Configuration
+      REDIS_HOST: southern-martin-shared-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: shared_redis_password_2024
+      REDIS_KEY_PREFIX: pricing
+    ports:
+      - "3006:3006"
+    depends_on:
+      pricing-service-db:
+        condition: service_healthy
+      shared-redis:
+        condition: service_healthy
+    networks:
+      - southern-martin-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# ===========================================
+# NETWORKS
+# ===========================================
+networks:
+  southern-martin-network:
+    name: southern-martin-network
+    driver: bridge
+
+# ===========================================
+# VOLUMES
+# ===========================================
+volumes:
+  southern_martin_shared_mysql_data:
+    name: southern_martin_shared_mysql_data
+  southern_martin_shared_redis_data:
+    name: southern_martin_shared_redis_data
+  southern_martin_customer_db_data:
+    name: southern_martin_customer_db_data
+  southern_martin_carrier_db_data:
+    name: southern_martin_carrier_db_data
+  southern_martin_pricing_db_data:
+    name: southern_martin_pricing_db_data
