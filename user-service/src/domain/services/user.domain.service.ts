@@ -1,12 +1,11 @@
-import { Injectable } from "@nestjs/common";
 import { Role } from "../entities/role.entity";
 import { User } from "../entities/user.entity";
 
 /**
  * Domain service for user business logic
  * Contains pure business rules without infrastructure concerns
+ * Note: No framework dependencies - pure domain logic
  */
-@Injectable()
 export class UserDomainService {
   /**
    * Validates user creation data
