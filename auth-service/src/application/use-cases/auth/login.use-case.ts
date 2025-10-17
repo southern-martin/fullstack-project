@@ -5,6 +5,9 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
+import { EventBusInterface } from "../../../domain/events/event-bus.interface";
+import { LoginFailedEvent } from "../../../domain/events/login-failed.event";
+import { UserLoggedInEvent } from "../../../domain/events/user-logged-in.event";
 import { UserRepositoryInterface } from "../../../domain/repositories/user.repository.interface";
 import { AuthDomainService } from "../../../domain/services/auth.domain.service";
 import { UserDomainService } from "../../../domain/services/user.domain.service";
@@ -24,7 +27,9 @@ export class LoginUseCase {
     private readonly userRepository: UserRepositoryInterface,
     private readonly authDomainService: AuthDomainService,
     private readonly userDomainService: UserDomainService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    @Inject("EventBusInterface")
+    private readonly eventBus: EventBusInterface
   ) {}
 
   /**
@@ -39,11 +44,27 @@ export class LoginUseCase {
     // 2. Find user by email
     const user = await this.userRepository.findByEmail(loginDto.email);
     if (!user) {
+      // Publish LoginFailedEvent for security monitoring
+      await this.eventBus.publish(
+        new LoginFailedEvent(
+          loginDto.email,
+          "User not found",
+          undefined, // IP address - can be passed from controller if needed
+          undefined  // User agent - can be passed from controller if needed
+        )
+      );
       throw new UnauthorizedException("Invalid credentials");
     }
 
     // 3. Check if user can authenticate (business rules)
     if (!this.authDomainService.canUserAuthenticate(user)) {
+      // Publish LoginFailedEvent for security monitoring
+      await this.eventBus.publish(
+        new LoginFailedEvent(
+          loginDto.email,
+          "Account is inactive or email not verified"
+        )
+      );
       throw new UnauthorizedException(
         "Account is inactive or email not verified"
       );
@@ -55,6 +76,13 @@ export class LoginUseCase {
       loginDto.password
     );
     if (!isPasswordValid) {
+      // Publish LoginFailedEvent for security monitoring
+      await this.eventBus.publish(
+        new LoginFailedEvent(
+          loginDto.email,
+          "Invalid password"
+        )
+      );
       // Note: Failed login attempts tracking not available with current schema
       console.warn('Failed login attempt tracking disabled due to simplified schema');
       throw new UnauthorizedException("Invalid credentials");
@@ -73,10 +101,21 @@ export class LoginUseCase {
     // 7. Update last login
     await this.userRepository.updateLastLogin(user.id);
 
-    // 8. Generate JWT token
+    // 8. Publish UserLoggedInEvent
+    await this.eventBus.publish(
+      new UserLoggedInEvent(
+        user.id,
+        user.email,
+        undefined, // IP address - can be passed from controller if needed
+        undefined, // User agent - can be passed from controller if needed
+        new Date()
+      )
+    );
+
+    // 9. Generate JWT token
     const token = await this.generateToken(user);
 
-    // 9. Return response
+    // 10. Return response
     return {
       access_token: token,
       token: token,

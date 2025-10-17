@@ -9,12 +9,19 @@ import { UserTypeOrmEntity } from "./database/typeorm/entities/user.typeorm.enti
 import { RoleRepository } from "./database/typeorm/repositories/role.repository";
 import { UserRepository } from "./database/typeorm/repositories/user.repository";
 
+// Event Bus
+import { InMemoryEventBus } from "./events/in-memory-event-bus";
+
 // Repository Interfaces
 
 /**
  * Infrastructure Module
  * Configures infrastructure layer dependencies
  * Follows Clean Architecture principles
+ * 
+ * Provides:
+ * - Database repositories (User, Role)
+ * - Event bus for domain events
  */
 @Module({
   imports: [TypeOrmModule.forFeature([UserTypeOrmEntity, RoleTypeOrmEntity])],
@@ -28,11 +35,18 @@ import { UserRepository } from "./database/typeorm/repositories/user.repository"
       provide: "RoleRepositoryInterface",
       useClass: RoleRepository,
     },
+    // Event Bus Implementation
+    {
+      provide: "EventBusInterface",
+      useClass: InMemoryEventBus,
+    },
   ],
   exports: [
     // Export repository implementations
     "UserRepositoryInterface",
     "RoleRepositoryInterface",
+    // Export event bus
+    "EventBusInterface",
   ],
 })
 export class InfrastructureModule {}

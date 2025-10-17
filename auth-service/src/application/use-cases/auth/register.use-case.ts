@@ -6,6 +6,8 @@ import {
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { User } from "../../../domain/entities/user.entity";
+import { EventBusInterface } from "../../../domain/events/event-bus.interface";
+import { UserRegisteredEvent } from "../../../domain/events/user-registered.event";
 import { RoleRepositoryInterface } from "../../../domain/repositories/role.repository.interface";
 import { UserRepositoryInterface } from "../../../domain/repositories/user.repository.interface";
 import { AuthDomainService } from "../../../domain/services/auth.domain.service";
@@ -28,7 +30,9 @@ export class RegisterUseCase {
     private readonly roleRepository: RoleRepositoryInterface,
     private readonly authDomainService: AuthDomainService,
     private readonly userDomainService: UserDomainService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    @Inject("EventBusInterface")
+    private readonly eventBus: EventBusInterface
   ) {}
 
   /**
@@ -74,10 +78,22 @@ export class RegisterUseCase {
     // 5. Create user in repository
     const newUser = await this.userRepository.create(userData);
 
-    // 6. Generate JWT token
+    // 6. Publish UserRegisteredEvent
+    await this.eventBus.publish(
+      new UserRegisteredEvent(
+        newUser.id,
+        newUser.email,
+        newUser.firstName,
+        newUser.lastName,
+        undefined, // IP address - can be passed from controller if needed
+        new Date()
+      )
+    );
+
+    // 7. Generate JWT token
     const token = await this.generateToken(newUser);
 
-    // 7. Return response
+    // 8. Return response
     return {
       access_token: token,
       token: token,
