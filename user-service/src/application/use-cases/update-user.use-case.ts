@@ -1,11 +1,13 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ValidationException } from "@shared/infrastructure";
-import * as bcrypt from "bcrypt";
+import { EventBusInterface } from "../../domain/events/event-bus.interface";
+import { UserUpdatedEvent } from "../../domain/events/user-updated.event";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
 import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
 import { UserDomainService } from "../../domain/services/user.domain.service";
 import { UpdateUserDto } from "../dto/update-user.dto";
 import { UserResponseDto } from "../dto/user-response.dto";
+import { PasswordService } from "../services/password.service";
 
 /**
  * Update User Use Case
@@ -19,7 +21,11 @@ export class UpdateUserUseCase {
     private readonly userRepository: UserRepositoryInterface,
     @Inject('RoleRepositoryInterface')
     private readonly roleRepository: RoleRepositoryInterface,
-    private readonly userDomainService: UserDomainService
+    @Inject('UserDomainService')
+    private readonly userDomainService: UserDomainService,
+    private readonly passwordService: PasswordService,
+    @Inject('EventBusInterface')
+    private readonly eventBus: EventBusInterface
   ) {}
 
   /**
@@ -134,9 +140,9 @@ export class UpdateUserUseCase {
     if (updateData.preferences !== undefined)
       userUpdateData.preferences = updateData.preferences;
 
-    // Hash password if provided
+    // Hash password if provided using PasswordService
     if (updateData.password) {
-      userUpdateData.password = await bcrypt.hash(updateData.password, 10);
+      userUpdateData.password = await this.passwordService.hashPassword(updateData.password);
     }
 
     // dateOfBirth is already converted to Date above
@@ -156,7 +162,16 @@ export class UpdateUserUseCase {
     // 8. Update user in repository
     const updatedUser = await this.userRepository.update(id, userUpdateData);
 
-    // 8. Return response
+    // 9. Publish domain event
+    const previousData = {
+      email: existingUser.email,
+      firstName: existingUser.firstName,
+      lastName: existingUser.lastName,
+      isActive: existingUser.isActive,
+    };
+    await this.eventBus.publish(new UserUpdatedEvent(updatedUser, previousData));
+
+    // 10. Return response
     return this.mapToResponseDto(updatedUser);
   }
 

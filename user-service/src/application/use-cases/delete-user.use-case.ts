@@ -4,6 +4,8 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { EventBusInterface } from "../../domain/events/event-bus.interface";
+import { UserDeletedEvent } from "../../domain/events/user-deleted.event";
 import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
 import { UserDomainService } from "../../domain/services/user.domain.service";
 
@@ -17,7 +19,10 @@ export class DeleteUserUseCase {
   constructor(
     @Inject('UserRepositoryInterface')
     private readonly userRepository: UserRepositoryInterface,
-    private readonly userDomainService: UserDomainService
+    @Inject('UserDomainService')
+    private readonly userDomainService: UserDomainService,
+    @Inject('EventBusInterface')
+    private readonly eventBus: EventBusInterface
   ) {}
 
   /**
@@ -40,7 +45,13 @@ export class DeleteUserUseCase {
       throw new BadRequestException("Cannot delete user with associated data");
     }
 
-    // 3. Delete user from repository
+    // 3. Store user info for event
+    const userEmail = existingUser.email;
+
+    // 4. Delete user from repository
     await this.userRepository.delete(id);
+
+    // 5. Publish domain event
+    await this.eventBus.publish(new UserDeletedEvent(id, userEmail));
   }
 }
