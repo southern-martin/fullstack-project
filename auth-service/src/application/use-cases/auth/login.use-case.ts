@@ -55,20 +55,20 @@ export class LoginUseCase {
       loginDto.password
     );
     if (!isPasswordValid) {
-      // Update failed login attempts
-      await this.userRepository.incrementFailedLoginAttempts(user.id);
+      // Note: Failed login attempts tracking not available with current schema
+      console.warn('Failed login attempt tracking disabled due to simplified schema');
       throw new UnauthorizedException("Invalid credentials");
     }
 
-    // 5. Check if account is locked
-    if (this.authDomainService.isAccountLocked(user.failedLoginAttempts || 0)) {
-      throw new UnauthorizedException(
-        "Account is locked due to too many failed attempts"
-      );
-    }
+    // Account locking feature disabled with simplified schema
+    // if (this.authDomainService.isAccountLocked(user.failedLoginAttempts || 0)) {
+    //   throw new UnauthorizedException(
+    //     "Account is locked due to too many failed attempts"
+    //   );
+    // }
 
-    // 6. Reset failed login attempts on successful login
-    await this.userRepository.resetFailedLoginAttempts(user.id);
+    // Failed login attempts reset not available with current schema
+    // await this.userRepository.resetFailedLoginAttempts(user.id);
 
     // 7. Update last login
     await this.userRepository.updateLastLogin(user.id);
@@ -141,19 +141,13 @@ export class LoginUseCase {
     return {
       id: user.id,
       email: user.email,
-      password: user.password,
       firstName: user.firstName,
       lastName: user.lastName,
       phone: user.phone,
       isActive: user.isActive,
       isEmailVerified: user.isEmailVerified,
-      dateOfBirth: user.dateOfBirth,
-      address: user.address,
-      preferences: user.preferences,
       lastLoginAt: user.lastLoginAt,
       passwordChangedAt: user.passwordChangedAt,
-      emailVerifiedAt: user.emailVerifiedAt,
-      metadata: user.metadata,
       roles:
         user.roles?.map((role: any) => ({
           id: role.id,
