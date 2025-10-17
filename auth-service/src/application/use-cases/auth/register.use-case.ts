@@ -128,19 +128,13 @@ export class RegisterUseCase {
     return {
       id: user.id,
       email: user.email,
-      password: user.password,
       firstName: user.firstName,
       lastName: user.lastName,
       phone: user.phone,
       isActive: user.isActive,
       isEmailVerified: user.isEmailVerified,
-      dateOfBirth: user.dateOfBirth,
-      address: user.address,
-      preferences: user.preferences,
       lastLoginAt: user.lastLoginAt,
       passwordChangedAt: user.passwordChangedAt,
-      emailVerifiedAt: user.emailVerifiedAt,
-      metadata: user.metadata,
       roles:
         user.roles?.map((role: any) => ({
           id: role.id,
