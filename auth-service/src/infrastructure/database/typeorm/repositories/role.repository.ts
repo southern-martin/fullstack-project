@@ -144,9 +144,6 @@ export class RoleRepository implements RoleRepositoryInterface {
       description: entity.description,
       isActive: entity.isActive,
       permissions: entity.permissions,
-      metadata: entity.metadata,
-      priority: entity.priority,
-      users: entity.users,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     });
@@ -159,9 +156,6 @@ export class RoleRepository implements RoleRepositoryInterface {
     entity.description = role.description;
     entity.isActive = role.isActive;
     entity.permissions = role.permissions || [];
-    entity.metadata = role.metadata;
-    entity.priority = role.priority;
-    entity.users = role.users;
     entity.createdAt = role.createdAt;
     entity.updatedAt = role.updatedAt;
     return entity;

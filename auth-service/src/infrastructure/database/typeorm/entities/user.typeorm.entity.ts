@@ -16,7 +16,6 @@ import { RoleTypeOrmEntity } from "./role.typeorm.entity";
  * Maps to domain User entity
  */
 @Entity("users")
-@Index(["email"], { unique: true })
 export class UserTypeOrmEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -27,65 +26,38 @@ export class UserTypeOrmEntity {
   @Column()
   password: string;
 
-  @Column()
+  @Column({ name: 'first_name' })
   firstName: string;
 
-  @Column()
+  @Column({ name: 'last_name' })
   lastName: string;
 
   @Column({ nullable: true })
   phone: string;
 
-  @Column({ default: true })
+  @Column({ default: true, name: 'is_active' })
   isActive: boolean;
 
-  @Column({ default: false })
+  @Column({ default: false, name: 'is_email_verified' })
   isEmailVerified: boolean;
 
-  @Column({ default: 0 })
-  failedLoginAttempts: number;
-
-  @Column({ nullable: true })
-  lastFailedLoginAt: Date;
-
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'last_login_at' })
   lastLoginAt: Date;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'password_changed_at' })
   passwordChangedAt: Date;
-
-  @Column({ nullable: true })
-  dateOfBirth: Date;
-
-  @Column({ type: "json", nullable: true })
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
-
-  @Column({ type: "json", nullable: true })
-  preferences: Record<string, any>;
-
-  @Column({ nullable: true })
-  emailVerifiedAt: Date;
-
-  @Column({ type: "json", nullable: true })
-  metadata: Record<string, any>;
 
   @ManyToMany(() => RoleTypeOrmEntity, { eager: true })
   @JoinTable({
     name: "user_roles",
-    joinColumn: { name: "userId", referencedColumnName: "id" },
-    inverseJoinColumn: { name: "roleId", referencedColumnName: "id" },
+    joinColumn: { name: "user_id", referencedColumnName: "id" },
+    inverseJoinColumn: { name: "role_id", referencedColumnName: "id" },
   })
   roles: RoleTypeOrmEntity[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

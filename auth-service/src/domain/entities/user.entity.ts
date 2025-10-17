@@ -11,21 +11,8 @@ export class User {
   phone?: string;
   isActive: boolean;
   isEmailVerified: boolean;
-  dateOfBirth?: Date;
-  address?: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
-  preferences?: Record<string, any>;
   lastLoginAt?: Date;
   passwordChangedAt?: Date;
-  emailVerifiedAt?: Date;
-  metadata?: Record<string, any>;
-  failedLoginAttempts?: number;
-  lastFailedLoginAt?: Date;
   roles: Role[];
 
   constructor(data: Partial<User> = {}) {
@@ -39,15 +26,8 @@ export class User {
     this.phone = data.phone;
     this.isActive = data.isActive ?? true;
     this.isEmailVerified = data.isEmailVerified ?? false;
-    this.dateOfBirth = data.dateOfBirth;
-    this.address = data.address;
-    this.preferences = data.preferences;
     this.lastLoginAt = data.lastLoginAt;
     this.passwordChangedAt = data.passwordChangedAt;
-    this.emailVerifiedAt = data.emailVerifiedAt;
-    this.metadata = data.metadata;
-    this.failedLoginAttempts = data.failedLoginAttempts || 0;
-    this.lastFailedLoginAt = data.lastFailedLoginAt;
     this.roles = data.roles || [];
   }
 

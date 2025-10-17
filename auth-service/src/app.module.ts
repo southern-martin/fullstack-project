@@ -26,14 +26,14 @@ import { UserTypeOrmEntity } from "./infrastructure/database/typeorm/entities/us
 
     // Database
     TypeOrmModule.forRoot({
-      type: "postgres",
+      type: "mysql",
       host: process.env.DB_HOST || "localhost",
-      port: parseInt(process.env.DB_PORT) || 5432,
-      username: process.env.DB_USERNAME || "postgres",
-      password: process.env.DB_PASSWORD || "password",
-      database: process.env.DB_DATABASE || "auth_service_db",
+      port: parseInt(process.env.DB_PORT) || 3306,
+      username: process.env.DB_USERNAME || "shared_user",
+      password: process.env.DB_PASSWORD || "shared_password_2024",
+      database: process.env.DB_NAME || "shared_user_db",
       entities: [UserTypeOrmEntity, RoleTypeOrmEntity],
-      synchronize: process.env.NODE_ENV !== "production",
+      synchronize: process.env.DB_SYNCHRONIZE === 'true' || false,
       logging: process.env.NODE_ENV === "development",
     }),
 

@@ -4,13 +4,13 @@ services:
   # Auth Service (using shared database)
   auth-service:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: auth-service/Dockerfile
     container_name: southern-martin-auth-app
     restart: unless-stopped
     environment:
       # Shared Database Configuration (same as User Service)
-      DB_HOST: shared-user-db
+      DB_HOST: shared-mysql
       DB_PORT: 3306
       DB_USERNAME: shared_user
       DB_PASSWORD: shared_password_2024
@@ -32,11 +32,6 @@ services:
       REDIS_KEY_PREFIX: auth
     ports:
       - "3001:3001"
-    depends_on:
-      shared-user-db:
-        condition: service_healthy
-      shared-redis:
-        condition: service_healthy
     networks:
       - shared-services-network
     healthcheck:

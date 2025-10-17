@@ -11,11 +11,11 @@ import { ValidateTokenUseCase } from "./use-cases/auth/validate-token.use-case";
 import { AuthDomainService } from "../domain/services/auth.domain.service";
 import { UserDomainService } from "../domain/services/user.domain.service";
 
-// Repository Interfaces (will be implemented in infrastructure)
+// Infrastructure Module
+import { InfrastructureModule } from "../infrastructure/infrastructure.module";
 
-// Infrastructure Implementations
-import { RoleRepository } from "../infrastructure/database/typeorm/repositories/role.repository";
-import { UserRepository } from "../infrastructure/database/typeorm/repositories/user.repository";
+// JWT Strategy
+import { JwtStrategy } from "../infrastructure/auth/jwt.strategy";
 
 /**
  * Application Module
@@ -29,8 +29,13 @@ import { UserRepository } from "../infrastructure/database/typeorm/repositories/
       secret: process.env.JWT_SECRET || "your-secret-key",
       signOptions: { expiresIn: "1h" },
     }),
+    // Import infrastructure module for repository implementations
+    InfrastructureModule,
   ],
   providers: [
+    // JWT Strategy
+    JwtStrategy,
+
     // Domain Services
     AuthDomainService,
     UserDomainService,
@@ -39,16 +44,6 @@ import { UserRepository } from "../infrastructure/database/typeorm/repositories/
     LoginUseCase,
     RegisterUseCase,
     ValidateTokenUseCase,
-
-    // Repository Implementations
-    {
-      provide: "UserRepositoryInterface",
-      useClass: UserRepository,
-    },
-    {
-      provide: "RoleRepositoryInterface",
-      useClass: RoleRepository,
-    },
   ],
   exports: [
     // Export use cases for controllers
