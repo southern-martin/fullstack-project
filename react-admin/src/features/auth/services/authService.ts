@@ -5,20 +5,17 @@ import { AuthResponse, LoginCredentials, RegisterData, User } from '../types';
 class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const response = await apiClient.post<{
-      success: boolean;
-      data: {
-        user: any;
-        accessToken: string;
-        expiresIn: string;
-      };
-      message: string;
+      user: any;
+      access_token: string;
+      token: string;
+      expiresIn: string;
     }>(AUTH_API_CONFIG.ENDPOINTS.LOGIN, credentials);
 
     // Transform the response to match the expected AuthResponse format
     const authResponse: AuthResponse = {
-      user: response.data.user,
-      token: response.data.accessToken,
-      expiresIn: response.data.expiresIn,
+      user: response.user,
+      token: response.token || response.access_token,
+      expiresIn: response.expiresIn,
     };
 
     // Store token in localStorage
@@ -31,20 +28,17 @@ class AuthService {
 
   async register(data: RegisterData): Promise<AuthResponse> {
     const response = await apiClient.post<{
-      success: boolean;
-      data: {
-        user: any;
-        accessToken: string;
-        expiresIn: string;
-      };
-      message: string;
+      user: any;
+      access_token: string;
+      token: string;
+      expiresIn: string;
     }>(AUTH_API_CONFIG.ENDPOINTS.REGISTER, data);
 
     // Transform the response to match the expected AuthResponse format
     const authResponse: AuthResponse = {
-      user: response.data.user,
-      token: response.data.accessToken,
-      expiresIn: response.data.expiresIn,
+      user: response.user,
+      token: response.token || response.access_token,
+      expiresIn: response.expiresIn,
     };
 
     // Store token in localStorage
@@ -57,20 +51,17 @@ class AuthService {
 
   async refreshToken(): Promise<AuthResponse> {
     const response = await apiClient.post<{
-      success: boolean;
-      data: {
-        user: any;
-        accessToken: string;
-        expiresIn: string;
-      };
-      message: string;
+      user: any;
+      access_token: string;
+      token: string;
+      expiresIn: string;
     }>(AUTH_API_CONFIG.ENDPOINTS.REFRESH);
 
     // Transform the response to match the expected AuthResponse format
     const authResponse: AuthResponse = {
-      user: response.data.user,
-      token: response.data.accessToken,
-      expiresIn: response.data.expiresIn,
+      user: response.user,
+      token: response.token || response.access_token,
+      expiresIn: response.expiresIn,
     };
 
     // Update token in localStorage
@@ -92,14 +83,8 @@ class AuthService {
   }
 
   async getProfile(): Promise<User> {
-    const response = await apiClient.get<{
-      success: boolean;
-      data: {
-        user: User;
-      };
-    }>(AUTH_API_CONFIG.ENDPOINTS.PROFILE);
-
-    return response.data.user;
+    const response = await apiClient.get<User>(AUTH_API_CONFIG.ENDPOINTS.PROFILE);
+    return response;
   }
 
   getStoredToken(): string | null {

@@ -1,5 +1,5 @@
 import { PaginatedResponse } from '../../../shared/types';
-import { apiClient } from '../../../shared/utils/api';
+import { translationApiClient } from './translationApiClient';
 
 export interface Language {
   id: number;
@@ -67,7 +67,7 @@ class TranslationService {
   // Language Management
   async getLanguages(): Promise<Language[]> {
     try {
-      const response = await apiClient.getLanguages();
+      const response = await translationApiClient.getLanguages();
       // The API returns { languages: [...], total: ..., page: ..., limit: ..., totalPages: ... }
       return (
         response.data.languages || response.data.data || response.data || []
@@ -81,7 +81,7 @@ class TranslationService {
 
   async getActiveLanguages(): Promise<Language[]> {
     try {
-      const response = await apiClient.getActiveLanguages();
+      const response = await translationApiClient.getActiveLanguages();
       // The API returns { languages: [...], total: ..., page: ..., limit: ..., totalPages: ... }
       return (
         response.data.languages || response.data.data || response.data || []
@@ -95,7 +95,7 @@ class TranslationService {
 
   async getLanguage(id: number): Promise<Language> {
     try {
-      const response = await apiClient.getLanguage(id);
+      const response = await translationApiClient.getLanguage(id);
       return response.data.data || response.data;
     } catch (error) {
       console.error(`Error fetching language ${id}:`, error);
@@ -105,7 +105,7 @@ class TranslationService {
 
   async getLanguageByCode(code: string): Promise<Language> {
     try {
-      const response = await apiClient.getLanguageByCode(code);
+      const response = await translationApiClient.getLanguageByCode(code);
       return response.data.data || response.data;
     } catch (error) {
       console.error(`Error fetching language by code ${code}:`, error);
@@ -115,7 +115,7 @@ class TranslationService {
 
   async createLanguage(data: CreateLanguageDto): Promise<Language> {
     try {
-      const response = await apiClient.createLanguage(data);
+      const response = await translationApiClient.createLanguage(data);
       return response.data;
     } catch (error) {
       console.error('Error creating language:', error);
@@ -125,7 +125,7 @@ class TranslationService {
 
   async updateLanguage(id: number, data: UpdateLanguageDto): Promise<Language> {
     try {
-      const response = await apiClient.updateLanguage(id, data);
+      const response = await translationApiClient.updateLanguage(id, data);
       return response.data;
     } catch (error) {
       console.error(`Error updating language ${id}:`, error);
@@ -135,7 +135,7 @@ class TranslationService {
 
   async deleteLanguage(id: number): Promise<void> {
     try {
-      await apiClient.deleteLanguage(id);
+      await translationApiClient.deleteLanguage(id);
     } catch (error) {
       console.error(`Error deleting language ${id}:`, error);
       throw error;
@@ -144,7 +144,7 @@ class TranslationService {
 
   async getLanguageCount(): Promise<{ count: number }> {
     try {
-      const response = await apiClient.getLanguageCount();
+      const response = await translationApiClient.getLanguageCount();
       return response.data;
     } catch (error) {
       console.error('Error fetching language count:', error);
@@ -159,7 +159,7 @@ class TranslationService {
     search?: string;
   }): Promise<PaginatedResponse<Translation>> {
     try {
-      const response = await apiClient.getTranslations(params);
+      const response = await translationApiClient.getTranslations(params);
       return response.data;
     } catch (error) {
       console.error('Error fetching translations:', error);
@@ -169,7 +169,7 @@ class TranslationService {
 
   async getTranslation(id: number): Promise<Translation> {
     try {
-      const response = await apiClient.getTranslation(id);
+      const response = await translationApiClient.getTranslation(id);
       return response.data;
     } catch (error) {
       console.error(`Error fetching translation ${id}:`, error);
@@ -179,7 +179,7 @@ class TranslationService {
 
   async createTranslation(data: CreateTranslationDto): Promise<Translation> {
     try {
-      const response = await apiClient.createTranslation(data);
+      const response = await translationApiClient.createTranslation(data);
       return response.data;
     } catch (error) {
       console.error('Error creating translation:', error);
@@ -192,7 +192,7 @@ class TranslationService {
     data: UpdateTranslationDto
   ): Promise<Translation> {
     try {
-      const response = await apiClient.updateTranslation(id, data);
+      const response = await translationApiClient.updateTranslation(id, data);
       return response.data;
     } catch (error) {
       console.error(`Error updating translation ${id}:`, error);
@@ -202,7 +202,7 @@ class TranslationService {
 
   async deleteTranslation(id: number): Promise<void> {
     try {
-      await apiClient.deleteTranslation(id);
+      await translationApiClient.deleteTranslation(id);
     } catch (error) {
       console.error(`Error deleting translation ${id}:`, error);
       throw error;
@@ -211,7 +211,7 @@ class TranslationService {
 
   async getTranslationCount(): Promise<{ count: number }> {
     try {
-      const response = await apiClient.getTranslationCount();
+      const response = await translationApiClient.getTranslationCount();
       return response.data;
     } catch (error) {
       console.error('Error fetching translation count:', error);
@@ -221,7 +221,7 @@ class TranslationService {
 
   async getPendingApprovals(): Promise<Translation[]> {
     try {
-      const response = await apiClient.getPendingApprovals();
+      const response = await translationApiClient.getPendingApprovals();
       return response.data;
     } catch (error) {
       console.error('Error fetching pending approvals:', error);
@@ -234,7 +234,10 @@ class TranslationService {
     approvedBy: string
   ): Promise<Translation> {
     try {
-      const response = await apiClient.approveTranslation(id, approvedBy);
+      const response = await translationApiClient.approveTranslation(
+        id,
+        approvedBy
+      );
       return response.data;
     } catch (error) {
       console.error(`Error approving translation ${id}:`, error);
@@ -248,7 +251,7 @@ class TranslationService {
     fromCache: boolean;
   }> {
     try {
-      const response = await apiClient.translateText(data);
+      const response = await translationApiClient.translateText(data);
       return response.data;
     } catch (error) {
       console.error('Error translating text:', error);
@@ -268,7 +271,7 @@ class TranslationService {
     }[];
   }> {
     try {
-      const response = await apiClient.translateBatch(data);
+      const response = await translationApiClient.translateBatch(data);
       return response.data;
     } catch (error) {
       console.error('Error translating batch:', error);
@@ -279,7 +282,7 @@ class TranslationService {
   // Health check
   async healthCheck(): Promise<boolean> {
     try {
-      await apiClient.healthCheck();
+      await translationApiClient.healthCheck();
       return true;
     } catch (error) {
       console.error('Translation service health check failed:', error);

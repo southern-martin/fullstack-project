@@ -10,7 +10,7 @@ const LoginForm: React.FC = () => {
     const { login, isLoading, error, clearError, isAuthenticated } = useAuthContext();
     const [formData, setFormData] = useState<LoginCredentials>({
         email: 'admin@example.com',
-        password: 'admin123',
+        password: 'Admin123!',
     });
     const [validationErrors, setValidationErrors] = useState<Partial<LoginCredentials>>({});
 

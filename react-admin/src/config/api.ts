@@ -1,6 +1,6 @@
 // Service-specific API configurations
 export const AUTH_API_CONFIG = {
-  BASE_URL: process.env.REACT_APP_AUTH_API_URL || 'http://localhost:3001',
+  BASE_URL: (process.env.REACT_APP_AUTH_API_URL || 'http://localhost:3001') + '/api/v1',
   HEADERS: {
     'Content-Type': 'application/json',
     'Accept-Language': 'en',
@@ -63,7 +63,8 @@ export const TRANSLATION_API_CONFIG = {
 } as const;
 
 // Default API config (for backward compatibility)
-export const SHARED_API_CONFIG = USER_API_CONFIG;
+// IMPORTANT: Auth requests should go to AUTH_API_CONFIG, not USER_API_CONFIG
+export const SHARED_API_CONFIG = AUTH_API_CONFIG;
 
 export const ROUTES = {
   HOME: '/',

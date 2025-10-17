@@ -1,5 +1,4 @@
-import { apiClient } from '../../../shared/utils/api';
-import { CARRIERS_API_CONFIG } from '../config/carriersApi';
+import { carrierApiClient } from './carrierApiClient';
 
 export interface Carrier {
   id: number;
@@ -79,17 +78,7 @@ class CarrierService {
     search?: string;
   }): Promise<PaginatedResponse<Carrier>> {
     try {
-      const queryParams = new URLSearchParams();
-      if (params?.page) queryParams.append('page', params.page.toString());
-      if (params?.limit) queryParams.append('limit', params.limit.toString());
-      if (params?.search) queryParams.append('search', params.search);
-
-      const endpoint = `${CARRIERS_API_CONFIG.ENDPOINTS.LIST}${
-        queryParams.toString() ? `?${queryParams.toString()}` : ''
-      }`;
-      const response = await apiClient.get<PaginatedResponse<Carrier>>(
-        endpoint
-      );
+      const response = await carrierApiClient.getCarriers(params);
       return response;
     } catch (error) {
       console.error('Error fetching carriers:', error);
@@ -99,9 +88,7 @@ class CarrierService {
 
   async getCarrier(id: number): Promise<Carrier> {
     try {
-      const response = await apiClient.get<Carrier>(
-        CARRIERS_API_CONFIG.ENDPOINTS.UPDATE(id)
-      );
+      const response = await carrierApiClient.getCarrier(id);
       return response;
     } catch (error) {
       console.error(`Error fetching carrier ${id}:`, error);
@@ -111,10 +98,7 @@ class CarrierService {
 
   async createCarrier(data: CreateCarrierDto): Promise<Carrier> {
     try {
-      const response = await apiClient.post<Carrier>(
-        CARRIERS_API_CONFIG.ENDPOINTS.CREATE,
-        data
-      );
+      const response = await carrierApiClient.createCarrier(data);
       return response;
     } catch (error) {
       console.error('Error creating carrier:', error);
@@ -124,10 +108,7 @@ class CarrierService {
 
   async updateCarrier(id: number, data: UpdateCarrierDto): Promise<Carrier> {
     try {
-      const response = await apiClient.patch<Carrier>(
-        CARRIERS_API_CONFIG.ENDPOINTS.UPDATE(id),
-        data
-      );
+      const response = await carrierApiClient.updateCarrier(id, data);
       return response;
     } catch (error) {
       console.error(`Error updating carrier ${id}:`, error);
@@ -137,7 +118,7 @@ class CarrierService {
 
   async deleteCarrier(id: number): Promise<void> {
     try {
-      await apiClient.delete(CARRIERS_API_CONFIG.ENDPOINTS.DELETE(id));
+      await carrierApiClient.deleteCarrier(id);
     } catch (error) {
       console.error(`Error deleting carrier ${id}:`, error);
       throw error;
@@ -146,9 +127,7 @@ class CarrierService {
 
   async getCarrierCount(): Promise<{ count: number }> {
     try {
-      const response = await apiClient.get<{ count: number }>(
-        '/carriers/count'
-      );
+      const response = await carrierApiClient.getCarrierCount();
       return response;
     } catch (error) {
       console.error('Error fetching carrier count:', error);
@@ -158,9 +137,7 @@ class CarrierService {
 
   async getActiveCarriers(): Promise<Carrier[]> {
     try {
-      const response = await apiClient.get<Carrier[]>(
-        CARRIERS_API_CONFIG.ENDPOINTS.ACTIVE
-      );
+      const response = await carrierApiClient.getActiveCarriers();
       return response;
     } catch (error) {
       console.error('Error fetching active carriers:', error);
@@ -170,9 +147,7 @@ class CarrierService {
 
   async getCarrierByName(name: string): Promise<Carrier> {
     try {
-      const response = await apiClient.get<Carrier>(
-        `/carriers/name/${encodeURIComponent(name)}`
-      );
+      const response = await carrierApiClient.getCarrierByName(name);
       return response;
     } catch (error) {
       console.error(`Error fetching carrier by name ${name}:`, error);
@@ -183,7 +158,7 @@ class CarrierService {
   // Health check
   async healthCheck(): Promise<boolean> {
     try {
-      await apiClient.get('/health');
+      await carrierApiClient.healthCheck();
       return true;
     } catch (error) {
       console.error('Carrier service health check failed:', error);
