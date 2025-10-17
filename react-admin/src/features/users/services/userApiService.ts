@@ -3,8 +3,8 @@ import {
   PaginationParams,
   User,
 } from '../../../shared/types';
-import { apiClient } from '../../../shared/utils/api';
 import { USERS_API_CONFIG } from '../config/usersApi';
+import { userApiClient } from './userApiClient';
 
 export interface CreateUserRequest {
   email: string;
@@ -60,7 +60,7 @@ class UserApiService {
 
     // User Service returns {users: User[], total: number}
     // Frontend expects {data: User[], total: number, page: number, limit: number, totalPages: number}
-    const response = await apiClient.get<{ users: User[]; total: number }>(url);
+    const response = await userApiClient.get<{ users: User[]; total: number }>(url);
 
     const page = params?.page || 1;
     const limit = params?.limit || 10;
@@ -76,49 +76,49 @@ class UserApiService {
   }
 
   async getUserById(id: number): Promise<User> {
-    return apiClient.get<User>(`${this.basePath}/${id}`);
+    return userApiClient.get<User>(`${this.basePath}/${id}`);
   }
 
   async getUserByEmail(email: string): Promise<User> {
-    return apiClient.get<User>(USERS_API_CONFIG.ENDPOINTS.BY_EMAIL(email));
+    return userApiClient.get<User>(USERS_API_CONFIG.ENDPOINTS.BY_EMAIL(email));
   }
 
   async createUser(userData: CreateUserRequest): Promise<User> {
-    return apiClient.post<User>(USERS_API_CONFIG.ENDPOINTS.CREATE, userData);
+    return userApiClient.post<User>(USERS_API_CONFIG.ENDPOINTS.CREATE, userData);
   }
 
   async updateUser(id: number, userData: UpdateUserRequest): Promise<User> {
-    return apiClient.patch<User>(
+    return userApiClient.patch<User>(
       USERS_API_CONFIG.ENDPOINTS.UPDATE(id),
       userData
     );
   }
 
   async deleteUser(id: number): Promise<void> {
-    return apiClient.delete<void>(USERS_API_CONFIG.ENDPOINTS.DELETE(id));
+    return userApiClient.delete<void>(USERS_API_CONFIG.ENDPOINTS.DELETE(id));
   }
 
   async assignRoles(id: number, roles: AssignRolesRequest): Promise<User> {
-    return apiClient.patch<User>(
+    return userApiClient.patch<User>(
       USERS_API_CONFIG.ENDPOINTS.ASSIGN_ROLES(id),
       roles
     );
   }
 
   async getActiveUsers(): Promise<User[]> {
-    return apiClient.get<User[]>(USERS_API_CONFIG.ENDPOINTS.ACTIVE);
+    return userApiClient.get<User[]>(USERS_API_CONFIG.ENDPOINTS.ACTIVE);
   }
 
   async getUserCount(): Promise<{ count: number }> {
-    return apiClient.get<{ count: number }>(USERS_API_CONFIG.ENDPOINTS.COUNT);
+    return userApiClient.get<{ count: number }>(USERS_API_CONFIG.ENDPOINTS.COUNT);
   }
 
   async getUsersByRole(roleName: string): Promise<User[]> {
-    return apiClient.get<User[]>(USERS_API_CONFIG.ENDPOINTS.BY_ROLE(roleName));
+    return userApiClient.get<User[]>(USERS_API_CONFIG.ENDPOINTS.BY_ROLE(roleName));
   }
 
   async checkUserExists(email: string): Promise<{ exists: boolean }> {
-    return apiClient.get<{ exists: boolean }>(
+    return userApiClient.get<{ exists: boolean }>(
       USERS_API_CONFIG.ENDPOINTS.EXISTS(email)
     );
   }
