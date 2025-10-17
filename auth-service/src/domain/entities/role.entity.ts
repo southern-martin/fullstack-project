@@ -6,9 +6,6 @@ export class Role {
   description?: string;
   isActive: boolean;
   permissions?: string[];
-  metadata?: Record<string, any>;
-  priority?: number;
-  users?: any[];
 
   constructor(data: Partial<Role> = {}) {
     this.id = data.id;
@@ -18,8 +15,5 @@ export class Role {
     this.description = data.description;
     this.isActive = data.isActive ?? true;
     this.permissions = data.permissions;
-    this.metadata = data.metadata;
-    this.priority = data.priority;
-    this.users = data.users;
   }
 }

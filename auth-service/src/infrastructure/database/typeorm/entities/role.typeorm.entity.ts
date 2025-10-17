@@ -13,7 +13,6 @@ import {
  * Maps to domain Role entity
  */
 @Entity("roles")
-@Index(["name"], { unique: true })
 export class RoleTypeOrmEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -24,24 +23,15 @@ export class RoleTypeOrmEntity {
   @Column({ nullable: true })
   description: string;
 
-  @Column("simple-array", { default: "" })
+  @Column("json", { nullable: true })
   permissions: string[];
 
-  @Column({ default: true })
+  @Column({ default: true, name: 'is_active' })
   isActive: boolean;
 
-  @Column({ type: "json", nullable: true })
-  metadata: Record<string, any>;
-
-  @Column({ nullable: true })
-  priority: number;
-
-  @Column({ type: "json", nullable: true })
-  users: any[];
-
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

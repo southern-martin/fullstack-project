@@ -24,6 +24,8 @@ export interface UserRepositoryInterface {
     search?: string
   ): Promise<{ users: User[]; total: number }>;
   validatePassword(userId: number, password: string): Promise<boolean>;
+  // Note: The following methods are placeholders for future functionality
+  // when the database schema supports failed login attempt tracking
   incrementFailedLoginAttempts(userId: number): Promise<void>;
   resetFailedLoginAttempts(userId: number): Promise<void>;
   updateLastLogin(userId: number): Promise<void>;
