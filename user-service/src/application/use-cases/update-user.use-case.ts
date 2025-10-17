@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ValidationException } from "@shared/infrastructure";
 import * as bcrypt from "bcrypt";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
@@ -15,7 +15,9 @@ import { UserResponseDto } from "../dto/user-response.dto";
 @Injectable()
 export class UpdateUserUseCase {
   constructor(
+    @Inject('UserRepositoryInterface')
     private readonly userRepository: UserRepositoryInterface,
+    @Inject('RoleRepositoryInterface')
     private readonly roleRepository: RoleRepositoryInterface,
     private readonly userDomainService: UserDomainService
   ) {}

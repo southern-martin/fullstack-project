@@ -1,75 +1,63 @@
-import { BaseEntity, Column, Entity, Index, OneToMany } from "typeorm";
-import { UserRoleTypeOrmEntity } from "./user-role.typeorm.entity";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
+import { RoleTypeOrmEntity } from "./role.typeorm.entity";
 
 /**
- * User TypeORM Entity
- *
- * This entity represents the database table structure for users.
- * It's separate from the domain entity to maintain Clean Architecture principles.
+ * TypeORM User Entity
+ * Infrastructure layer - database representation
+ * Maps to domain User entity
+ * MUST match Auth Service entity structure (shared database)
  */
 @Entity("users")
-@Index(["email"], { unique: true })
-@Index(["isActive"])
-@Index(["createdAt"])
-export class UserTypeOrmEntity extends BaseEntity {
-  @Column({ primary: true, generated: true })
+export class UserTypeOrmEntity {
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  createdAt: Date;
-
-  @Column({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
-  updatedAt: Date;
-  @Column({ unique: true, length: 255 })
+  @Column({ unique: true })
   email: string;
 
-  @Column({ length: 100 })
-  firstName: string;
-
-  @Column({ length: 100 })
-  lastName: string;
-
-  @Column({ length: 255, nullable: true })
+  @Column()
   password: string;
 
-  @Column({ default: true })
-  isActive: boolean;
+  @Column({ name: 'first_name' })
+  firstName: string;
 
-  @Column({ type: "date", nullable: true })
-  dateOfBirth: Date;
+  @Column({ name: 'last_name' })
+  lastName: string;
 
-  @Column({ length: 20, nullable: true })
+  @Column({ nullable: true })
   phone: string;
 
-  @Column({ type: "json", nullable: true })
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
+  @Column({ default: true, name: 'is_active' })
+  isActive: boolean;
 
-  @Column({ type: "json", nullable: true })
-  preferences: Record<string, any>;
-
-  @Column({ type: "timestamp", nullable: true })
-  lastLoginAt: Date;
-
-  @Column({ type: "timestamp", nullable: true })
-  emailVerifiedAt: Date;
-
-  @Column({ default: false })
+  @Column({ default: false, name: 'is_email_verified' })
   isEmailVerified: boolean;
 
-  @Column({ type: "json", nullable: true })
-  metadata: Record<string, any>;
+  @Column({ nullable: true, name: 'last_login_at' })
+  lastLoginAt: Date;
 
-  // Relations
-  @OneToMany(() => UserRoleTypeOrmEntity, (userRole) => userRole.user)
-  userRoles: UserRoleTypeOrmEntity[];
+  @Column({ nullable: true, name: 'password_changed_at' })
+  passwordChangedAt: Date;
+
+  @ManyToMany(() => RoleTypeOrmEntity, { eager: true })
+  @JoinTable({
+    name: "user_roles",
+    joinColumn: { name: "user_id", referencedColumnName: "id" },
+    inverseJoinColumn: { name: "role_id", referencedColumnName: "id" },
+  })
+  roles: RoleTypeOrmEntity[];
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }

@@ -13,6 +13,9 @@ import { UpdateUserUseCase } from "./use-cases/update-user.use-case";
 // Domain Services
 import { UserDomainService } from "../domain/services/user.domain.service";
 
+// Infrastructure
+import { InfrastructureModule } from "../infrastructure/infrastructure.module";
+
 /**
  * Application Module
  * Configures application layer dependencies
@@ -21,6 +24,7 @@ import { UserDomainService } from "../domain/services/user.domain.service";
  * Note: Repository implementations are provided by the Infrastructure Module
  */
 @Module({
+  imports: [InfrastructureModule],
   providers: [
     // Domain Services
     UserDomainService,

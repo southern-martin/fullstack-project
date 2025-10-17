@@ -28,7 +28,6 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
   async findById(id: number): Promise<Role | null> {
     const entity = await this.roleRepository.findOne({
       where: { id },
-      relations: ["userRoles", "userRoles.user"],
     });
     return entity ? this.toDomainEntity(entity) : null;
   }
@@ -36,19 +35,20 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
   async findByName(name: string): Promise<Role | null> {
     const entity = await this.roleRepository.findOne({
       where: { name },
-      relations: ["userRoles", "userRoles.user"],
     });
     return entity ? this.toDomainEntity(entity) : null;
   }
 
   async findAll(
-    paginationDto: PaginationDto
+    paginationDto?: PaginationDto
   ): Promise<{ roles: Role[]; total: number }> {
+    const page = paginationDto?.page || 1;
+    const limit = paginationDto?.limit || 100;
+    
     const [entities, total] = await this.roleRepository.findAndCount({
-      skip: (paginationDto.page - 1) * paginationDto.limit,
-      take: paginationDto.limit,
-      relations: ["userRoles", "userRoles.user"],
-      order: { priority: "DESC", createdAt: "DESC" },
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { createdAt: "DESC" },
     });
 
     return {
@@ -60,8 +60,7 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
   async findActive(): Promise<Role[]> {
     const entities = await this.roleRepository.find({
       where: { isActive: true },
-      relations: ["userRoles", "userRoles.user"],
-      order: { priority: "DESC", createdAt: "DESC" },
+      order: { createdAt: "DESC" },
     });
 
     return entities.map((entity) => this.toDomainEntity(entity));
@@ -74,8 +73,6 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
     const queryBuilder = this.roleRepository.createQueryBuilder("role");
 
     queryBuilder
-      .leftJoinAndSelect("role.userRoles", "userRoles")
-      .leftJoinAndSelect("userRoles.user", "user")
       .where(
         "(role.name LIKE :searchTerm OR role.description LIKE :searchTerm)",
         { searchTerm: `%${searchTerm}%` }
@@ -84,8 +81,7 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
     const [entities, total] = await queryBuilder
       .skip((paginationDto.page - 1) * paginationDto.limit)
       .take(paginationDto.limit)
-      .orderBy("role.priority", "DESC")
-      .addOrderBy("role.createdAt", "DESC")
+      .orderBy("role.createdAt", "DESC")
       .getManyAndCount();
 
     return {
@@ -98,7 +94,6 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
     await this.roleRepository.update(id, this.toTypeOrmEntity(role as Role));
     const updatedEntity = await this.roleRepository.findOne({
       where: { id },
-      relations: ["userRoles", "userRoles.user"],
     });
     return this.toDomainEntity(updatedEntity);
   }
@@ -129,24 +124,7 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
       where: {
         createdAt: Between(startDate, endDate),
       },
-      relations: ["userRoles", "userRoles.user"],
-      order: { priority: "DESC", createdAt: "DESC" },
-    });
-
-    return entities.map((entity) => this.toDomainEntity(entity));
-  }
-
-  async findByPriorityRange(
-    minPriority: number,
-    maxPriority: number
-  ): Promise<Role[]> {
-    const entities = await this.roleRepository.find({
-      where: {
-        priority: Between(minPriority, maxPriority),
-        isActive: true,
-      },
-      relations: ["userRoles", "userRoles.user"],
-      order: { priority: "DESC", createdAt: "DESC" },
+      order: { createdAt: "DESC" },
     });
 
     return entities.map((entity) => this.toDomainEntity(entity));
@@ -160,8 +138,6 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
       description: role.description,
       isActive: role.isActive,
       permissions: role.permissions,
-      priority: role.priority,
-      metadata: role.metadata,
     };
   }
 
@@ -172,15 +148,8 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
     role.description = entity.description;
     role.isActive = entity.isActive;
     role.permissions = entity.permissions;
-    role.priority = entity.priority;
-    role.metadata = entity.metadata;
     role.createdAt = entity.createdAt;
     role.updatedAt = entity.updatedAt;
-
-    // Map users if they exist
-    if (entity.userRoles) {
-      role.users = entity.userRoles.map((userRole) => userRole.user);
-    }
 
     return role;
   }

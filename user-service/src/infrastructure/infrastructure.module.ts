@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserTypeOrmEntity } from './database/typeorm/entities/user.typeorm.entity';
 import { RoleTypeOrmEntity } from './database/typeorm/entities/role.typeorm.entity';
-import { UserRoleTypeOrmEntity } from './database/typeorm/entities/user-role.typeorm.entity';
 import { UserTypeOrmRepository } from './database/typeorm/repositories/user.typeorm.repository';
 import { RoleTypeOrmRepository } from './database/typeorm/repositories/role.typeorm.repository';
 
@@ -19,7 +18,6 @@ import { RoleTypeOrmRepository } from './database/typeorm/repositories/role.type
     TypeOrmModule.forFeature([
       UserTypeOrmEntity,
       RoleTypeOrmEntity,
-      UserRoleTypeOrmEntity,
     ]),
   ],
   providers: [
