@@ -13,6 +13,9 @@ import { UpdateUserUseCase } from "./use-cases/update-user.use-case";
 // Domain Services
 import { UserDomainService } from "../domain/services/user.domain.service";
 
+// Application Services
+import { PasswordService } from "./services/password.service";
+
 // Infrastructure
 import { InfrastructureModule } from "../infrastructure/infrastructure.module";
 
@@ -26,8 +29,14 @@ import { InfrastructureModule } from "../infrastructure/infrastructure.module";
 @Module({
   imports: [InfrastructureModule],
   providers: [
-    // Domain Services
-    UserDomainService,
+    // Domain Services - provide with token for @Inject consistency
+    {
+      provide: 'UserDomainService',
+      useClass: UserDomainService,
+    },
+
+    // Application Services
+    PasswordService,
 
     // Use Cases
     CreateUserUseCase,
@@ -51,7 +60,10 @@ import { InfrastructureModule } from "../infrastructure/infrastructure.module";
     DeleteRoleUseCase,
 
     // Export domain services
-    UserDomainService,
+    'UserDomainService',
+    
+    // Export application services
+    PasswordService,
   ],
 })
 export class ApplicationModule {}

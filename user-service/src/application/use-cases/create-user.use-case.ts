@@ -1,12 +1,14 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { ValidationException } from "@shared/infrastructure";
-import * as bcrypt from "bcrypt";
 import { User } from "../../domain/entities/user.entity";
+import { EventBusInterface } from "../../domain/events/event-bus.interface";
+import { UserCreatedEvent } from "../../domain/events/user-created.event";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
 import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
 import { UserDomainService } from "../../domain/services/user.domain.service";
 import { CreateUserDto } from "../dto/create-user.dto";
 import { UserResponseDto } from "../dto/user-response.dto";
+import { PasswordService } from "../services/password.service";
 
 /**
  * Create User Use Case
@@ -20,7 +22,11 @@ export class CreateUserUseCase {
     private readonly userRepository: UserRepositoryInterface,
     @Inject("RoleRepositoryInterface")
     private readonly roleRepository: RoleRepositoryInterface,
-    private readonly userDomainService: UserDomainService
+    @Inject("UserDomainService")
+    private readonly userDomainService: UserDomainService,
+    private readonly passwordService: PasswordService,
+    @Inject("EventBusInterface")
+    private readonly eventBus: EventBusInterface
   ) {}
 
   /**
@@ -95,8 +101,8 @@ export class CreateUserUseCase {
       }
     }
 
-    // 5. Hash password
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    // 5. Hash password using PasswordService
+    const hashedPassword = await this.passwordService.hashPassword(createUserDto.password);
 
     // 6. Get roles if provided
     let roles = [];
@@ -127,7 +133,10 @@ export class CreateUserUseCase {
     // 8. Save user in repository
     const savedUser = await this.userRepository.create(user);
 
-    // 9. Return response
+    // 9. Publish domain event
+    await this.eventBus.publish(new UserCreatedEvent(savedUser));
+
+    // 10. Return response
     return this.mapToResponseDto(savedUser);
   }
 
