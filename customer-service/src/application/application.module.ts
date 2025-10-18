@@ -13,6 +13,7 @@ import { CustomerDomainService } from "../domain/services/customer.domain.servic
 
 // Infrastructure Implementations
 import { CustomerRepository } from "../infrastructure/database/typeorm/repositories/customer.repository";
+import { RedisEventBus } from "../infrastructure/events/redis-event-bus";
 
 /**
  * Application Module
@@ -34,6 +35,12 @@ import { CustomerRepository } from "../infrastructure/database/typeorm/repositor
     {
       provide: "CustomerRepositoryInterface",
       useClass: CustomerRepository,
+    },
+
+    // Event Bus Implementation
+    {
+      provide: "EventBusInterface",
+      useClass: RedisEventBus,
     },
   ],
   exports: [
