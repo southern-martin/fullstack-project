@@ -5,10 +5,10 @@ import {
   Injectable,
 } from "@nestjs/common";
 import { Customer } from "../../domain/entities/customer.entity";
+import { CustomerCreatedEvent } from "../../domain/events/customer-created.event";
+import { EventBusInterface } from "../../domain/events/event-bus.interface";
 import { CustomerRepositoryInterface } from "../../domain/repositories/customer.repository.interface";
 import { CustomerDomainService } from "../../domain/services/customer.domain.service";
-import { EventBusInterface } from "../../domain/events/event-bus.interface";
-import { CustomerCreatedEvent } from "../../domain/events/customer-created.event";
 import { CreateCustomerDto } from "../dto/create-customer.dto";
 import { CustomerResponseDto } from "../dto/customer-response.dto";
 

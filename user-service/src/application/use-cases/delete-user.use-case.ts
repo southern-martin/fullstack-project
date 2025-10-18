@@ -17,11 +17,11 @@ import { UserDomainService } from "../../domain/services/user.domain.service";
 @Injectable()
 export class DeleteUserUseCase {
   constructor(
-    @Inject('UserRepositoryInterface')
+    @Inject("UserRepositoryInterface")
     private readonly userRepository: UserRepositoryInterface,
-    @Inject('UserDomainService')
+    @Inject("UserDomainService")
     private readonly userDomainService: UserDomainService,
-    @Inject('EventBusInterface')
+    @Inject("EventBusInterface")
     private readonly eventBus: EventBusInterface
   ) {}
 

@@ -17,14 +17,14 @@ import { PasswordService } from "../services/password.service";
 @Injectable()
 export class UpdateUserUseCase {
   constructor(
-    @Inject('UserRepositoryInterface')
+    @Inject("UserRepositoryInterface")
     private readonly userRepository: UserRepositoryInterface,
-    @Inject('RoleRepositoryInterface')
+    @Inject("RoleRepositoryInterface")
     private readonly roleRepository: RoleRepositoryInterface,
-    @Inject('UserDomainService')
+    @Inject("UserDomainService")
     private readonly userDomainService: UserDomainService,
     private readonly passwordService: PasswordService,
-    @Inject('EventBusInterface')
+    @Inject("EventBusInterface")
     private readonly eventBus: EventBusInterface
   ) {}
 
@@ -142,7 +142,9 @@ export class UpdateUserUseCase {
 
     // Hash password if provided using PasswordService
     if (updateData.password) {
-      userUpdateData.password = await this.passwordService.hashPassword(updateData.password);
+      userUpdateData.password = await this.passwordService.hashPassword(
+        updateData.password
+      );
     }
 
     // dateOfBirth is already converted to Date above
@@ -169,7 +171,9 @@ export class UpdateUserUseCase {
       lastName: existingUser.lastName,
       isActive: existingUser.isActive,
     };
-    await this.eventBus.publish(new UserUpdatedEvent(updatedUser, previousData));
+    await this.eventBus.publish(
+      new UserUpdatedEvent(updatedUser, previousData)
+    );
 
     // 10. Return response
     return this.mapToResponseDto(updatedUser);

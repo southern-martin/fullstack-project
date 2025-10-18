@@ -23,7 +23,7 @@ import { InfrastructureModule } from "../infrastructure/infrastructure.module";
  * Application Module
  * Configures application layer dependencies
  * Follows Clean Architecture principles
- * 
+ *
  * Note: Repository implementations are provided by the Infrastructure Module
  */
 @Module({
@@ -31,7 +31,7 @@ import { InfrastructureModule } from "../infrastructure/infrastructure.module";
   providers: [
     // Domain Services - provide with token for @Inject consistency
     {
-      provide: 'UserDomainService',
+      provide: "UserDomainService",
       useClass: UserDomainService,
     },
 
@@ -60,8 +60,8 @@ import { InfrastructureModule } from "../infrastructure/infrastructure.module";
     DeleteRoleUseCase,
 
     // Export domain services
-    'UserDomainService',
-    
+    "UserDomainService",
+
     // Export application services
     PasswordService,
   ],

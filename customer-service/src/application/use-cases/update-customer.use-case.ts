@@ -5,15 +5,14 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { CustomerRepositoryInterface } from "../../domain/repositories/customer.repository.interface";
-import { CustomerDomainService } from "../../domain/services/customer.domain.service";
-import { EventBusInterface } from "../../domain/events/event-bus.interface";
-import { CustomerUpdatedEvent } from "../../domain/events/customer-updated.event";
 import { CustomerActivatedEvent } from "../../domain/events/customer-activated.event";
 import { CustomerDeactivatedEvent } from "../../domain/events/customer-deactivated.event";
+import { CustomerUpdatedEvent } from "../../domain/events/customer-updated.event";
+import { EventBusInterface } from "../../domain/events/event-bus.interface";
+import { CustomerRepositoryInterface } from "../../domain/repositories/customer.repository.interface";
+import { CustomerDomainService } from "../../domain/services/customer.domain.service";
 import { CustomerResponseDto } from "../dto/customer-response.dto";
 import { UpdateCustomerDto } from "../dto/update-customer.dto";
-import { Customer } from "../../domain/entities/customer.entity";
 
 /**
  * Update Customer Use Case
@@ -120,7 +119,9 @@ export class UpdateCustomerUseCase {
       updateData.isActive !== existingCustomer.isActive
     ) {
       if (updateData.isActive) {
-        await this.eventBus.publish(new CustomerActivatedEvent(updatedCustomer));
+        await this.eventBus.publish(
+          new CustomerActivatedEvent(updatedCustomer)
+        );
       } else {
         await this.eventBus.publish(
           new CustomerDeactivatedEvent(updatedCustomer, "Updated by user")

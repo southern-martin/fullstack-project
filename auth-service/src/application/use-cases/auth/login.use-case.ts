@@ -50,7 +50,7 @@ export class LoginUseCase {
           loginDto.email,
           "User not found",
           undefined, // IP address - can be passed from controller if needed
-          undefined  // User agent - can be passed from controller if needed
+          undefined // User agent - can be passed from controller if needed
         )
       );
       throw new UnauthorizedException("Invalid credentials");
@@ -78,13 +78,12 @@ export class LoginUseCase {
     if (!isPasswordValid) {
       // Publish LoginFailedEvent for security monitoring
       await this.eventBus.publish(
-        new LoginFailedEvent(
-          loginDto.email,
-          "Invalid password"
-        )
+        new LoginFailedEvent(loginDto.email, "Invalid password")
       );
       // Note: Failed login attempts tracking not available with current schema
-      console.warn('Failed login attempt tracking disabled due to simplified schema');
+      console.warn(
+        "Failed login attempt tracking disabled due to simplified schema"
+      );
       throw new UnauthorizedException("Invalid credentials");
     }
 

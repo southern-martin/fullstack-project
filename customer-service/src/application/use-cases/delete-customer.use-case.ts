@@ -4,10 +4,10 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { CustomerDeletedEvent } from "../../domain/events/customer-deleted.event";
+import { EventBusInterface } from "../../domain/events/event-bus.interface";
 import { CustomerRepositoryInterface } from "../../domain/repositories/customer.repository.interface";
 import { CustomerDomainService } from "../../domain/services/customer.domain.service";
-import { EventBusInterface } from "../../domain/events/event-bus.interface";
-import { CustomerDeletedEvent } from "../../domain/events/customer-deleted.event";
 
 /**
  * Delete Customer Use Case
