@@ -21,7 +21,7 @@ services:
       - "3306:3306"
     volumes:
       - shared_user_db_data:/var/lib/mysql
-      - ./shared-database/init:/docker-entrypoint-initdb.d
+      # - ./shared-database/init:/docker-entrypoint-initdb.d  # Optional init scripts
     networks:
       - shared-services-network
     healthcheck:
@@ -41,7 +41,7 @@ services:
       - "6379:6379"
     volumes:
       - shared_redis_data:/data
-      - ./shared-redis/redis.conf:/usr/local/etc/redis/redis.conf
+      # - ./shared-redis/redis.conf:/usr/local/etc/redis/redis.conf  # Optional config file
     networks:
       - shared-services-network
     healthcheck:
@@ -58,8 +58,8 @@ services:
   # Auth Service
   auth-service:
     build:
-      context: ./auth-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: auth-service/Dockerfile
     container_name: auth-service
     restart: unless-stopped
     environment:
@@ -98,8 +98,8 @@ services:
   # User Service
   user-service:
     build:
-      context: ./user-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./user-service/Dockerfile.simple
     container_name: user-service
     restart: unless-stopped
     environment:

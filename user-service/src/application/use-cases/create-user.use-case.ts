@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { ValidationException } from "@shared/infrastructure";
+import { ValidationException } from "@fullstack-project/shared-infrastructure";
 import { User } from "../../domain/entities/user.entity";
 import { EventBusInterface } from "../../domain/events/event-bus.interface";
 import { UserCreatedEvent } from "../../domain/events/user-created.event";

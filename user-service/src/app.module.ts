@@ -31,7 +31,7 @@ import { RoleTypeOrmEntity } from "./infrastructure/database/typeorm/entities/ro
       password: process.env.DB_PASSWORD || "password",
       database: process.env.DB_DATABASE || "user_service_db",
       entities: [UserTypeOrmEntity, RoleTypeOrmEntity],
-      synchronize: false, // Disabled to prevent schema conflicts - use migrations instead
+      synchronize: true, // Temporarily enabled to auto-create tables
       logging: process.env.NODE_ENV === "development",
       migrations: ["dist/infrastructure/database/typeorm/migrations/*.js"],
       migrationsRun: process.env.NODE_ENV === "production",

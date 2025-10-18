@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { PaginationDto } from "@shared/infrastructure";
+import { PaginationDto } from "@fullstack-project/shared-infrastructure";
 import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
 import { UserResponseDto } from "../dto/user-response.dto";
 

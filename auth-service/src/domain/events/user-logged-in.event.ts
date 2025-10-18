@@ -1,4 +1,4 @@
-import { DomainEvent } from "@shared/infrastructure";
+import { DomainEvent } from "@fullstack-project/shared-infrastructure";
 
 /**
  * User Logged In Event

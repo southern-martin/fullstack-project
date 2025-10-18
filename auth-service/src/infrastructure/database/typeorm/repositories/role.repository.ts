@@ -2,7 +2,7 @@ import { Role } from "@/domain/entities/role.entity";
 import { RoleRepositoryInterface } from "@/domain/repositories/role.repository.interface";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { PaginationDto } from "@shared/infrastructure";
+import { PaginationDto } from "@fullstack-project/shared-infrastructure";
 import { Repository } from "typeorm";
 import { RoleTypeOrmEntity } from "../entities/role.typeorm.entity";
 
