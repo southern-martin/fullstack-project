@@ -2,6 +2,24 @@
 
 This document provides a comprehensive overview of the fullstack microservices architecture, including system design, data flow, and architectural decisions.
 
+## 📚 **Documentation Index**
+
+### **Core Architecture**
+- 📖 **[MICROSERVICES-ARCHITECTURE-GUIDELINES.md](./MICROSERVICES-ARCHITECTURE-GUIDELINES.md)** - Comprehensive architecture guidelines (current standard)
+- 📖 **[MICROSERVICE-ORIENTED-ARCHITECTURE.md](./MICROSERVICE-ORIENTED-ARCHITECTURE.md)** - Microservice-oriented architecture details
+- 📖 **[ACTUAL-PROJECT-STRUCTURE.md](./ACTUAL-PROJECT-STRUCTURE.md)** - Current project structure
+
+### **Data Flow**
+- 📊 **[MICROSERVICE-ORIENTED-DATA-FLOW.md](./MICROSERVICE-ORIENTED-DATA-FLOW.md)** - Service communication patterns
+- 📊 **[MICROSERVICE-ORIENTED-DATA-FLOW-DIAGRAM.md](./MICROSERVICE-ORIENTED-DATA-FLOW-DIAGRAM.md)** - Visual data flow diagrams
+
+### **Authentication Flow**
+- 🔐 **[login-flow-diagram.md](./login-flow-diagram.md)** - Login flow visualization
+- 🔐 **[login-flow-mermaid.md](./login-flow-mermaid.md)** - Mermaid diagrams for login
+- 🔐 **[login-function-call-chain.md](./login-function-call-chain.md)** - Login implementation details
+
+---
+
 ## 🎯 **Architecture Overview**
 
 ### **High-Level Architecture**
