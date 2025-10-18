@@ -1,4 +1,4 @@
-import { PaginationDto } from "@shared/infrastructure";
+import { PaginationDto } from "@fullstack-project/shared-infrastructure";
 import { Role } from "../entities/role.entity";
 
 export interface RoleRepositoryInterface {

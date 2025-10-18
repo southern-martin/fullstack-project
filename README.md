@@ -203,11 +203,33 @@ All services include health check endpoints:
 
 ## 📚 **Documentation**
 
-- **[Architecture Documentation](docs/architecture/README.md)** - System design and architecture
+### **🚀 Start Here - Git Flow**
+- **[⭐ Executive Summary](GIT-FLOW-EXECUTIVE-SUMMARY.md)** - **START HERE** - Overview, timeline, priorities
+- **[📋 Complete Strategy](GIT-FLOW-COMPLETE-STRATEGY.md)** - Full details, PR templates, all commands
+- **[🤖 Automated Script](scripts/git-flow-execute.sh)** - Execute with interactive prompts
+
+### **🐳 Docker Fix Documentation**
+Located in `docs/development/`:
+- **[📚 Index](docs/development/GIT-FLOW-INDEX.md)** - Navigation hub
+- **[⚡ Quick Reference](docs/development/QUICK-REFERENCE-DOCKER-FIX.md)** - Fast commands
+- **[🐳 Complete Details](docs/development/GIT-FLOW-DOCKER-SHARED-INFRASTRUCTURE-FIX.md)** - Full fix
+- **[� Auth Service](docs/development/GIT-FLOW-AUTH-SERVICE-DOCKER-FIX.md)** - Auth specific
+- **[👥 User Service](docs/development/GIT-FLOW-USER-SERVICE-DOCKER-FIX.md)** - User specific
+
+### **📖 Project Documentation**
+- **[Architecture](docs/architecture/README.md)** - System design and architecture
 - **[API Documentation](docs/api/README.md)** - API endpoints and usage
-- **[Deployment Guide](docs/deployment/README.md)** - Production deployment
-- **[Development Guide](docs/development/README.md)** - Development setup
-- **[Frontend Documentation](docs/frontend/README.md)** - React Admin setup
+- **[Deployment](docs/deployment/README.md)** - Production deployment
+- **[Development](docs/development/README.md)** - Development setup
+- **[Frontend](docs/frontend/README.md)** - React Admin setup
+
+### **✅ Features Ready to Merge**
+1. ✅ **Documentation Cleanup** - Organize and archive outdated docs
+2. ✅ **CMake Modernization** - Update build system for hybrid architecture
+3. ✅ **Customer Service Architecture** - Apply Clean Architecture guidelines
+4. ✅ **Docker Infrastructure Fix** - Fix shared infrastructure (CRITICAL)
+5. ⏳ **Carrier Service Architecture** - Pending implementation
+6. ⏳ **Pricing Service Architecture** - Pending implementation
 
 ## 🤝 **Contributing**
 

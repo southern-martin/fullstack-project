@@ -1,4 +1,4 @@
-import { DomainEvent } from "@shared/infrastructure";
+import { DomainEvent } from "@fullstack-project/shared-infrastructure";
 import { Role } from "../entities/role.entity";
 import { User } from "../entities/user.entity";
 

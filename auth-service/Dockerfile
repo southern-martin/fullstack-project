@@ -37,21 +37,21 @@ RUN addgroup -g 1001 -S nodejs && \
     adduser -S nestjs -u 1001
 
 # Set working directory
-WORKDIR /app
+WORKDIR /app/auth-service
 
-# Copy shared infrastructure (built version)
-COPY --from=builder /app/shared/infrastructure ./shared/infrastructure
+# Copy shared infrastructure to parent directory (for file: dependency resolution)
+COPY --from=builder /app/shared/infrastructure /app/shared/infrastructure
 
 # Copy package files
 COPY auth-service/package*.json ./
 
-# Install only production dependencies
+# Install only production dependencies (will create symlink to ../shared/infrastructure)
 RUN npm ci --only=production && npm cache clean --force
 
 # Copy built application from builder stage
 COPY --from=builder /app/auth-service/dist ./dist
 
-# Change ownership to app user
+# Change ownership to app user (auth-service and shared directories)
 RUN chown -R nestjs:nodejs /app
 USER nestjs
 
@@ -63,4 +63,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3001/api/v1/auth/health || exit 1
 
 # Start the application
-CMD ["node", "dist/auth-service/src/main.js"]
+CMD ["node", "dist/main.js"]

@@ -11,7 +11,7 @@ import {
   Post,
   Query,
 } from "@nestjs/common";
-import { PaginationDto } from "@shared/infrastructure";
+import { PaginationDto } from "@fullstack-project/shared-infrastructure";
 import { AssignRolesDto } from "../../application/dto/assign-roles.dto";
 import { CreateUserDto } from "../../application/dto/create-user.dto";
 import { UpdateUserDto } from "../../application/dto/update-user.dto";

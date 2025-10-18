@@ -25,7 +25,7 @@ make dev  # or check Makefile for specific targets
 ### Key Environment Files
 - Copy `.env.shared.example` → `.env` for Auth/User services (shared DB config)
 - Each service has specific port assignments (Auth:3001, User:3003, etc.)
-- Default login: `admin@example.com` / `admin123`
+- Default login: `admin@example.com` / `Admin123!`
 
 ## 🎯 Project-Specific Patterns
 

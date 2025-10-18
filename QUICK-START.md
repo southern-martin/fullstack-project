@@ -114,9 +114,9 @@ docker exec -it shared-user-database mysql -u shared_user -p shared_user_db
 
 ### **Default Data**
 The database comes pre-populated with:
-- **Default Admin User**: admin@example.com / admin123
-- **Default Roles**: admin, user, editor, viewer
-- **Sample Data**: Test users and configurations
+- **Default Admin User**: admin@example.com / Admin123!
+- **Default Roles**: admin, user, moderator
+- **Sample Data**: 400+ test users for testing pagination
 
 ## 🧪 **Testing the Setup**
 

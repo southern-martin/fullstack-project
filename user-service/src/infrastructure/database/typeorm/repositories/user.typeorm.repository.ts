@@ -2,7 +2,7 @@ import { User } from "@/domain/entities/user.entity";
 import { UserRepositoryInterface } from "@/domain/repositories/user.repository.interface";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { PaginationDto } from "@shared/infrastructure";
+import { PaginationDto } from "@fullstack-project/shared-infrastructure";
 import { Between, Repository } from "typeorm";
 import { UserTypeOrmEntity } from "../entities/user.typeorm.entity";
 

@@ -1,4 +1,4 @@
-import { DomainEvent } from "@shared/infrastructure";
+import { DomainEvent } from "@fullstack-project/shared-infrastructure";
 import { User } from "../entities/user.entity";
 
 export class UserUpdatedEvent extends DomainEvent {

@@ -47,7 +47,7 @@ async function seedData() {
     const users = [
       {
         email: "admin@example.com",
-        password: "Admin123",
+        password: "Admin123!",
         firstName: "Admin",
         lastName: "User",
         phone: "+1234567890",

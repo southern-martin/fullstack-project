@@ -78,7 +78,7 @@ DB_DATABASE=shared_user_db
 
 ### Default Admin User:
 - **Email**: admin@example.com
-- **Password**: admin123
+- **Password**: Admin123!
 - **Role**: admin
 
 ### Test the Setup:

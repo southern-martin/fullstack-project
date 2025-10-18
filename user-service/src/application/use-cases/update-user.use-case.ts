@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { ValidationException } from "@shared/infrastructure";
+import { ValidationException } from "@fullstack-project/shared-infrastructure";
 import { EventBusInterface } from "../../domain/events/event-bus.interface";
 import { UserUpdatedEvent } from "../../domain/events/user-updated.event";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";

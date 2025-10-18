@@ -1,4 +1,4 @@
-import { PaginationDto } from "@shared/infrastructure";
+import { PaginationDto } from "@fullstack-project/shared-infrastructure";
 import { User } from "../entities/user.entity";
 
 export interface UserRepositoryInterface {

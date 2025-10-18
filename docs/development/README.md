@@ -17,6 +17,13 @@ This directory contains all development-related documentation, including coding 
 - **[React Admin Git Flow](react-admin-gitflow.md)** - Git workflow for React frontend
 - **[Go API Git Flow](go-api-gitflow.md)** - Git workflow for Go backend
 
+### Docker & Infrastructure Git Flows (Oct 2025)
+- **[📚 Git Flow Index](GIT-FLOW-INDEX.md)** - START HERE: Complete documentation index
+- **[⚡ Quick Reference](QUICK-REFERENCE-DOCKER-FIX.md)** - Fast commands and credentials
+- **[📋 Complete Git Flow](GIT-FLOW-DOCKER-SHARED-INFRASTRUCTURE-FIX.md)** - Full technical details
+- **[🔐 Auth Service Flow](GIT-FLOW-AUTH-SERVICE-DOCKER-FIX.md)** - Auth Service specific changes
+- **[👥 User Service Flow](GIT-FLOW-USER-SERVICE-DOCKER-FIX.md)** - User Service specific changes
+
 ### Development Tools
 - **[Quick Fix](quick-fix.md)** - Common issues and quick solutions
 - **[Refactor Imports](refactor-imports.md)** - Import optimization guidelines
