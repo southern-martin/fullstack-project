@@ -1,12 +1,14 @@
 import {
+    CheckIcon,
+    ChevronDownIcon,
     EyeIcon,
     PencilIcon,
     PlusIcon,
     TrashIcon,
-    UserMinusIcon,
-    UserPlusIcon
+    XMarkIcon
 } from '@heroicons/react/24/outline';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { toast } from 'react-hot-toast';
 
 import {
@@ -29,6 +31,10 @@ import {
 
 import UserDetails from './UserDetails';
 import UserForm from './UserForm';
+
+// Constants
+const DROPDOWN_WIDTH = 192; // w-48 in pixels
+const DROPDOWN_OFFSET = 4; // gap between button and dropdown
 
 const Users: React.FC = () => {
     // Local state for pagination and search
@@ -57,7 +63,7 @@ const Users: React.FC = () => {
     const deleteUserMutation = useDeleteUser();
 
     // Extract data from response
-    const users = usersResponse?.data || [];
+    const users = useMemo(() => usersResponse?.data || [], [usersResponse?.data]);
     const total = usersResponse?.total || 0;
     const totalPages = usersResponse?.totalPages || 0;
     const hasNextPage = currentPage < totalPages;
@@ -73,6 +79,52 @@ const Users: React.FC = () => {
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [modalTitle, setModalTitle] = useState('');
     const [modalFooter, setModalFooter] = useState<React.ReactNode>(null);
+
+    // Dropdown state
+    const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
+    const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
+    const buttonRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
+
+    // Memoize the selected user for dropdown to avoid repeated lookups
+    const selectedDropdownUser = useMemo(() => {
+        if (openDropdownId === null) return null;
+        return users?.find(u => u.id === openDropdownId) || null;
+    }, [users, openDropdownId]);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (openDropdownId !== null) {
+                // Check if the click is on the dropdown itself
+                const target = event.target as Element;
+                const dropdown = document.querySelector('[data-dropdown-portal]');
+
+                if (dropdown && dropdown.contains(target)) {
+                    // Click is inside the dropdown, don't close it
+                    return;
+                }
+
+                // Check if click is on the trigger button
+                const button = buttonRefs.current[openDropdownId];
+                if (button && button.contains(target)) {
+                    // Click is on the trigger button, don't close it (button handles its own toggle)
+                    return;
+                }
+
+                // Click is outside, close the dropdown
+                setOpenDropdownId(null);
+                setDropdownPosition(null);
+            }
+        };
+
+        if (openDropdownId !== null) {
+            document.addEventListener('click', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, [openDropdownId]);
 
     // Handle footer from UserForm
     const handleFooterReady = useCallback((footer: React.ReactNode) => {
@@ -160,6 +212,38 @@ const Users: React.FC = () => {
         refresh();
     }, [refresh]);
 
+    // Dropdown action handlers
+    const handleViewUser = useCallback((user: User) => {
+        setSelectedUser(user);
+        setModalTitle('User Details');
+        setShowViewModal(true);
+        setOpenDropdownId(null);
+        setDropdownPosition(null);
+    }, []);
+
+    const handleEditUser = useCallback((user: User) => {
+        setSelectedUser(user);
+        setModalTitle('Edit User');
+        setModalFooter(null);
+        setShowEditModal(true);
+        setOpenDropdownId(null);
+        setDropdownPosition(null);
+    }, []);
+
+    const handleToggleUserStatus = useCallback((user: User) => {
+        toggleUserStatus(user.id, !user.isActive);
+        setOpenDropdownId(null);
+        setDropdownPosition(null);
+    }, [toggleUserStatus]);
+
+    const handleDeleteUser = useCallback((user: User) => {
+        setSelectedUser(user);
+        setModalTitle('Delete User');
+        setShowDeleteModal(true);
+        setOpenDropdownId(null);
+        setDropdownPosition(null);
+    }, []);
+
     // Table configuration
     const tableConfig: TableConfig<User> = useMemo(() => ({
         columns: [
@@ -229,6 +313,45 @@ const Users: React.FC = () => {
                     </span>
                 ),
             },
+            {
+                key: 'actions',
+                label: 'Actions',
+                sortable: false,
+                render: (_: any, user: User) => {
+                    const isOpen = openDropdownId === user.id;
+
+                    return (
+                        <div className="relative">
+                            <button
+                                ref={(el) => {
+                                    buttonRefs.current[user.id] = el;
+                                }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (isOpen) {
+                                        setOpenDropdownId(null);
+                                        setDropdownPosition(null);
+                                    } else {
+                                        const button = buttonRefs.current[user.id];
+                                        if (button) {
+                                            const rect = button.getBoundingClientRect();
+                                            setDropdownPosition({
+                                                top: rect.bottom + window.scrollY + DROPDOWN_OFFSET,
+                                                left: rect.right - DROPDOWN_WIDTH + window.scrollX,
+                                            });
+                                        }
+                                        setOpenDropdownId(user.id);
+                                    }
+                                }}
+                                className="inline-flex items-center justify-center w-8 h-8 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 rounded-md border border-gray-300 dark:border-gray-600"
+                                title="Actions"
+                            >
+                                <ChevronDownIcon className="h-4 w-4" />
+                            </button>
+                        </div>
+                    );
+                },
+            },
         ],
         // pagination: undefined, // Disable client-side pagination since we're using server-side
         // sorting: undefined, // Disable client-side sorting since we're using server-side
@@ -237,63 +360,8 @@ const Users: React.FC = () => {
             enabled: true,
             multiSelect: true,
         },
-        actions: [
-            {
-                type: 'row',
-                label: 'View',
-                icon: <EyeIcon className="h-4 w-4" />,
-                variant: 'secondary',
-                onClick: (data: User | User[]) => {
-                    const user = Array.isArray(data) ? data[0] : data;
-                    setSelectedUser(user);
-                    setModalTitle('User Details');
-                    setShowViewModal(true);
-                },
-            },
-            {
-                type: 'row',
-                label: 'Edit',
-                icon: <PencilIcon className="h-4 w-4" />,
-                variant: 'primary',
-                onClick: (data: User | User[]) => {
-                    const user = Array.isArray(data) ? data[0] : data;
-                    setSelectedUser(user);
-                    setModalTitle('Edit User');
-                    setModalFooter(null);
-                    setShowEditModal(true);
-                },
-            },
-            {
-                type: 'row',
-                label: (data: User | User[]) => {
-                    const user = Array.isArray(data) ? data[0] : data;
-                    return user.isActive ? 'Deactivate' : 'Activate';
-                },
-                icon: (data: User | User[]) => {
-                    const user = Array.isArray(data) ? data[0] : data;
-                    return user.isActive ? <UserMinusIcon className="h-4 w-4" /> : <UserPlusIcon className="h-4 w-4" />;
-                },
-                variant: 'secondary',
-                onClick: (data: User | User[]) => {
-                    const user = Array.isArray(data) ? data[0] : data;
-                    toggleUserStatus(user.id, !user.isActive);
-                },
-            },
-            {
-                type: 'row',
-                label: 'Delete',
-                icon: <TrashIcon className="h-4 w-4" />,
-                variant: 'danger',
-                onClick: (data: User | User[]) => {
-                    const user = Array.isArray(data) ? data[0] : data;
-                    setSelectedUser(user);
-                    setModalTitle('Delete User');
-                    setShowDeleteModal(true);
-                },
-            },
-        ],
         emptyMessage: 'No users found',
-    }), [toggleUserStatus]);
+    }), [openDropdownId]);
 
     // Note: Filtering is now handled server-side through search and sorting
 
@@ -492,6 +560,59 @@ const Users: React.FC = () => {
                         </div>
                     </div>
                 </Modal>
+            )}
+
+            {/* Dropdown Menu Portal */}
+            {openDropdownId !== null && dropdownPosition && selectedDropdownUser && createPortal(
+                <div
+                    data-dropdown-portal
+                    className="absolute z-50 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg"
+                    style={{
+                        top: `${dropdownPosition.top}px`,
+                        left: `${dropdownPosition.left}px`,
+                    }}
+                >
+                    <div className="py-1">
+                        <button
+                            onClick={() => handleViewUser(selectedDropdownUser)}
+                            className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                            <EyeIcon className="h-4 w-4 mr-3" />
+                            View Details
+                        </button>
+                        <button
+                            onClick={() => handleEditUser(selectedDropdownUser)}
+                            className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                            <PencilIcon className="h-4 w-4 mr-3" />
+                            Edit
+                        </button>
+                        <button
+                            onClick={() => handleToggleUserStatus(selectedDropdownUser)}
+                            className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                            {selectedDropdownUser.isActive ? (
+                                <>
+                                    <XMarkIcon className="h-4 w-4 mr-3" />
+                                    Deactivate
+                                </>
+                            ) : (
+                                <>
+                                    <CheckIcon className="h-4 w-4 mr-3" />
+                                    Activate
+                                </>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => handleDeleteUser(selectedDropdownUser)}
+                            className="w-full flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                            <TrashIcon className="h-4 w-4 mr-3" />
+                            Delete
+                        </button>
+                    </div>
+                </div>,
+                document.body
             )}
         </div>
     );
