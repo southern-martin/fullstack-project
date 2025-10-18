@@ -7,6 +7,8 @@ import {
 import { Customer } from "../../domain/entities/customer.entity";
 import { CustomerRepositoryInterface } from "../../domain/repositories/customer.repository.interface";
 import { CustomerDomainService } from "../../domain/services/customer.domain.service";
+import { EventBusInterface } from "../../domain/events/event-bus.interface";
+import { CustomerCreatedEvent } from "../../domain/events/customer-created.event";
 import { CreateCustomerDto } from "../dto/create-customer.dto";
 import { CustomerResponseDto } from "../dto/customer-response.dto";
 
@@ -20,7 +22,9 @@ export class CreateCustomerUseCase {
   constructor(
     @Inject("CustomerRepositoryInterface")
     private readonly customerRepository: CustomerRepositoryInterface,
-    private readonly customerDomainService: CustomerDomainService
+    private readonly customerDomainService: CustomerDomainService,
+    @Inject("EventBusInterface")
+    private readonly eventBus: EventBusInterface
   ) {}
 
   /**
@@ -76,7 +80,10 @@ export class CreateCustomerUseCase {
     // 5. Save customer in repository
     const savedCustomer = await this.customerRepository.create(customer);
 
-    // 6. Return response
+    // 6. Publish CustomerCreatedEvent
+    await this.eventBus.publish(new CustomerCreatedEvent(savedCustomer));
+
+    // 7. Return response
     return this.mapToResponseDto(savedCustomer);
   }
 

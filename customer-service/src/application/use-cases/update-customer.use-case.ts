@@ -7,8 +7,13 @@ import {
 } from "@nestjs/common";
 import { CustomerRepositoryInterface } from "../../domain/repositories/customer.repository.interface";
 import { CustomerDomainService } from "../../domain/services/customer.domain.service";
+import { EventBusInterface } from "../../domain/events/event-bus.interface";
+import { CustomerUpdatedEvent } from "../../domain/events/customer-updated.event";
+import { CustomerActivatedEvent } from "../../domain/events/customer-activated.event";
+import { CustomerDeactivatedEvent } from "../../domain/events/customer-deactivated.event";
 import { CustomerResponseDto } from "../dto/customer-response.dto";
 import { UpdateCustomerDto } from "../dto/update-customer.dto";
+import { Customer } from "../../domain/entities/customer.entity";
 
 /**
  * Update Customer Use Case
@@ -20,7 +25,9 @@ export class UpdateCustomerUseCase {
   constructor(
     @Inject("CustomerRepositoryInterface")
     private readonly customerRepository: CustomerRepositoryInterface,
-    private readonly customerDomainService: CustomerDomainService
+    private readonly customerDomainService: CustomerDomainService,
+    @Inject("EventBusInterface")
+    private readonly eventBus: EventBusInterface
   ) {}
 
   /**
@@ -102,7 +109,26 @@ export class UpdateCustomerUseCase {
       finalUpdateData
     );
 
-    // 8. Return response
+    // 8. Publish CustomerUpdatedEvent
+    await this.eventBus.publish(
+      new CustomerUpdatedEvent(updatedCustomer, existingCustomer)
+    );
+
+    // 9. Publish activation/deactivation events if isActive changed
+    if (
+      updateData.isActive !== undefined &&
+      updateData.isActive !== existingCustomer.isActive
+    ) {
+      if (updateData.isActive) {
+        await this.eventBus.publish(new CustomerActivatedEvent(updatedCustomer));
+      } else {
+        await this.eventBus.publish(
+          new CustomerDeactivatedEvent(updatedCustomer, "Updated by user")
+        );
+      }
+    }
+
+    // 10. Return response
     return this.mapToResponseDto(updatedCustomer);
   }
 

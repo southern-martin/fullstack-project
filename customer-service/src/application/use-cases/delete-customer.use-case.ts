@@ -6,6 +6,8 @@ import {
 } from "@nestjs/common";
 import { CustomerRepositoryInterface } from "../../domain/repositories/customer.repository.interface";
 import { CustomerDomainService } from "../../domain/services/customer.domain.service";
+import { EventBusInterface } from "../../domain/events/event-bus.interface";
+import { CustomerDeletedEvent } from "../../domain/events/customer-deleted.event";
 
 /**
  * Delete Customer Use Case
@@ -17,7 +19,9 @@ export class DeleteCustomerUseCase {
   constructor(
     @Inject("CustomerRepositoryInterface")
     private readonly customerRepository: CustomerRepositoryInterface,
-    private readonly customerDomainService: CustomerDomainService
+    private readonly customerDomainService: CustomerDomainService,
+    @Inject("EventBusInterface")
+    private readonly eventBus: EventBusInterface
   ) {}
 
   /**
@@ -49,5 +53,14 @@ export class DeleteCustomerUseCase {
 
     // 3. Delete customer from repository
     await this.customerRepository.delete(id);
+
+    // 4. Publish CustomerDeletedEvent
+    await this.eventBus.publish(
+      new CustomerDeletedEvent(
+        existingCustomer.id!,
+        existingCustomer.email,
+        existingCustomer.fullName
+      )
+    );
   }
 }
