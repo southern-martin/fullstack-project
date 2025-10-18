@@ -4,6 +4,8 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { CarrierDeletedEvent } from "../../domain/events/carrier-deleted.event";
+import { IEventBus } from "../../domain/events/event-bus.interface";
 import { CarrierRepositoryInterface } from "../../domain/repositories/carrier.repository.interface";
 import { CarrierDomainService } from "../../domain/services/carrier.domain.service";
 
@@ -17,7 +19,9 @@ export class DeleteCarrierUseCase {
   constructor(
     @Inject("CarrierRepositoryInterface")
     private readonly carrierRepository: CarrierRepositoryInterface,
-    private readonly carrierDomainService: CarrierDomainService
+    private readonly carrierDomainService: CarrierDomainService,
+    @Inject("IEventBus")
+    private readonly eventBus: IEventBus
   ) {}
 
   /**
@@ -49,5 +53,8 @@ export class DeleteCarrierUseCase {
 
     // 3. Delete carrier from repository
     await this.carrierRepository.delete(id);
+
+    // 4. Publish CarrierDeletedEvent
+    await this.eventBus.publish(new CarrierDeletedEvent(existingCarrier));
   }
 }
