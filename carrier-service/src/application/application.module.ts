@@ -13,6 +13,7 @@ import { CarrierDomainService } from "../domain/services/carrier.domain.service"
 
 // Infrastructure Implementations
 import { CarrierRepository } from "../infrastructure/database/typeorm/repositories/carrier.repository";
+import { RedisEventBus } from "../infrastructure/events/redis-event-bus";
 
 /**
  * Application Module
@@ -34,6 +35,12 @@ import { CarrierRepository } from "../infrastructure/database/typeorm/repositori
     {
       provide: "CarrierRepositoryInterface",
       useClass: CarrierRepository,
+    },
+
+    // Event Bus Implementation
+    {
+      provide: "IEventBus",
+      useClass: RedisEventBus,
     },
   ],
   exports: [

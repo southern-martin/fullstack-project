@@ -5,6 +5,12 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import {
+  CarrierActivatedEvent,
+  CarrierDeactivatedEvent,
+  CarrierUpdatedEvent,
+} from "../../domain/events";
+import { IEventBus } from "../../domain/events/event-bus.interface";
 import { CarrierRepositoryInterface } from "../../domain/repositories/carrier.repository.interface";
 import { CarrierDomainService } from "../../domain/services/carrier.domain.service";
 import { CarrierResponseDto } from "../dto/carrier-response.dto";
@@ -20,7 +26,9 @@ export class UpdateCarrierUseCase {
   constructor(
     @Inject("CarrierRepositoryInterface")
     private readonly carrierRepository: CarrierRepositoryInterface,
-    private readonly carrierDomainService: CarrierDomainService
+    private readonly carrierDomainService: CarrierDomainService,
+    @Inject("IEventBus")
+    private readonly eventBus: IEventBus
   ) {}
 
   /**
@@ -69,8 +77,12 @@ export class UpdateCarrierUseCase {
       }
     }
 
-    // 5. Prepare update data
+    // 5. Prepare update data and track status change
     const updateData: Partial<any> = {};
+    const previousData = { ...existingCarrier };
+    const isStatusChanging =
+      updateCarrierDto.isActive !== undefined &&
+      updateCarrierDto.isActive !== existingCarrier.isActive;
 
     if (updateCarrierDto.name !== undefined)
       updateData.name = updateCarrierDto.name;
@@ -88,7 +100,23 @@ export class UpdateCarrierUseCase {
     // 6. Update carrier in repository
     const updatedCarrier = await this.carrierRepository.update(id, updateData);
 
-    // 7. Return response
+    // 7. Publish CarrierUpdatedEvent
+    await this.eventBus.publish(
+      new CarrierUpdatedEvent(updatedCarrier, previousData)
+    );
+
+    // 8. Publish activation/deactivation events if status changed
+    if (isStatusChanging) {
+      if (updateCarrierDto.isActive) {
+        await this.eventBus.publish(new CarrierActivatedEvent(updatedCarrier));
+      } else {
+        await this.eventBus.publish(
+          new CarrierDeactivatedEvent(updatedCarrier)
+        );
+      }
+    }
+
+    // 9. Return response
     return this.mapToResponseDto(updatedCarrier);
   }
 

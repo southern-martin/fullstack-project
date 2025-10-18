@@ -5,6 +5,8 @@ import {
   Injectable,
 } from "@nestjs/common";
 import { Carrier } from "../../domain/entities/carrier.entity";
+import { CarrierCreatedEvent } from "../../domain/events/carrier-created.event";
+import { IEventBus } from "../../domain/events/event-bus.interface";
 import { CarrierRepositoryInterface } from "../../domain/repositories/carrier.repository.interface";
 import { CarrierDomainService } from "../../domain/services/carrier.domain.service";
 import { CarrierResponseDto } from "../dto/carrier-response.dto";
@@ -20,7 +22,9 @@ export class CreateCarrierUseCase {
   constructor(
     @Inject("CarrierRepositoryInterface")
     private readonly carrierRepository: CarrierRepositoryInterface,
-    private readonly carrierDomainService: CarrierDomainService
+    private readonly carrierDomainService: CarrierDomainService,
+    @Inject("IEventBus")
+    private readonly eventBus: IEventBus
   ) {}
 
   /**
@@ -69,7 +73,10 @@ export class CreateCarrierUseCase {
     // 5. Save carrier in repository
     const savedCarrier = await this.carrierRepository.create(carrier);
 
-    // 6. Return response
+    // 6. Publish CarrierCreatedEvent
+    await this.eventBus.publish(new CarrierCreatedEvent(savedCarrier));
+
+    // 7. Return response
     return this.mapToResponseDto(savedCarrier);
   }
 
