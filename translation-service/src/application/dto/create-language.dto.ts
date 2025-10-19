@@ -1,5 +1,5 @@
 import {
-  IsBoolean,
+  IsIn,
   IsObject,
   IsOptional,
   IsString,
@@ -16,20 +16,24 @@ export class CreateLanguageDto {
 
   @IsOptional()
   @IsString()
-  nativeName?: string;
+  localName?: string;
 
   @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
+  @IsString()
+  @IsIn(['active', 'inactive'])
+  status?: string; // 'active' or 'inactive'
 
   @IsOptional()
-  @IsBoolean()
+  @IsString()
+  flag?: string; // Extracted from metadata in old system
+
+  @IsOptional()
+  @IsString()
   isDefault?: boolean;
 
   @IsOptional()
   @IsObject()
   metadata?: {
-    flag?: string;
     direction?: "ltr" | "rtl";
     region?: string;
     currency?: string;

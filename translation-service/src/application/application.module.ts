@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { TypeOrmModule } from "@nestjs/typeorm";
 
 // Use Cases
 import { ManageLanguageUseCase } from "./use-cases/manage-language.use-case";
@@ -13,6 +14,8 @@ import { TranslationDomainService } from "../domain/services/translation.domain.
 // Infrastructure Implementations
 import { LanguageValueRepository } from "../infrastructure/database/typeorm/repositories/language-value.repository";
 import { LanguageRepository } from "../infrastructure/database/typeorm/repositories/language.repository";
+import { LanguageTypeOrmEntity } from "../infrastructure/database/typeorm/entities/language.typeorm.entity";
+import { LanguageValueTypeOrmEntity } from "../infrastructure/database/typeorm/entities/language-value.typeorm.entity";
 
 /**
  * Application Module
@@ -20,7 +23,10 @@ import { LanguageRepository } from "../infrastructure/database/typeorm/repositor
  * Follows Clean Architecture principles
  */
 @Module({
-  imports: [], // No external modules needed directly in application layer for now
+  imports: [
+    // Register TypeORM entities for dependency injection
+    TypeOrmModule.forFeature([LanguageTypeOrmEntity, LanguageValueTypeOrmEntity]),
+  ],
   providers: [
     // Domain Services
     TranslationDomainService,
@@ -48,6 +54,10 @@ import { LanguageRepository } from "../infrastructure/database/typeorm/repositor
 
     // Export domain services
     TranslationDomainService,
+
+    // Export repository interfaces for controllers if needed
+    "LanguageRepositoryInterface",
+    "LanguageValueRepositoryInterface",
   ],
 })
 export class ApplicationModule {}

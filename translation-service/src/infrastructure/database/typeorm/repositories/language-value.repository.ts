@@ -33,10 +33,10 @@ export class LanguageValueRepository
 
   async findByKeyAndLanguage(
     key: string,
-    languageId: number
+    languageCode: string
   ): Promise<LanguageValue | null> {
     const entity = await this.repository.findOne({
-      where: { key, languageId },
+      where: { key, languageCode },
     });
     return entity ? this.toDomainEntity(entity) : null;
   }
@@ -64,9 +64,9 @@ export class LanguageValueRepository
     return entities.map((entity) => this.toDomainEntity(entity));
   }
 
-  async findByLanguage(languageId: number): Promise<LanguageValue[]> {
+  async findByLanguage(languageCode: string): Promise<LanguageValue[]> {
     const entities = await this.repository.find({
-      where: { languageId },
+      where: { languageCode },
     });
     return entities.map((entity) => this.toDomainEntity(entity));
   }
@@ -101,13 +101,13 @@ export class LanguageValueRepository
     return this.repository.count();
   }
 
-  async countByLanguage(languageId: number): Promise<number> {
-    return this.repository.count({ where: { languageId } });
+  async countByLanguage(languageCode: string): Promise<number> {
+    return this.repository.count({ where: { languageCode } });
   }
 
-  async countApprovedByLanguage(languageId: number): Promise<number> {
+  async countApprovedByLanguage(languageCode: string): Promise<number> {
     return this.repository.count({
-      where: { languageId, isApproved: true },
+      where: { languageCode, isApproved: true },
     });
   }
 
@@ -126,8 +126,8 @@ export class LanguageValueRepository
   async search(query: string): Promise<LanguageValue[]> {
     const entities = await this.repository
       .createQueryBuilder("languageValue")
-      .where("languageValue.originalText ILIKE :query", { query: `%${query}%` })
-      .orWhere("languageValue.translatedText ILIKE :query", {
+      .where("languageValue.original ILIKE :query", { query: `%${query}%` })
+      .orWhere("languageValue.destination ILIKE :query", {
         query: `%${query}%`,
       })
       .orWhere("languageValue.key ILIKE :query", { query: `%${query}%` })
@@ -144,7 +144,7 @@ export class LanguageValueRepository
     // Apply search if provided
     if (pagination.search) {
       queryBuilder.where(
-        "languageValue.originalText ILIKE :search OR languageValue.translatedText ILIKE :search OR languageValue.key ILIKE :search",
+        "languageValue.original ILIKE :search OR languageValue.destination ILIKE :search OR languageValue.key ILIKE :search",
         { search: `%${pagination.search}%` }
       );
     }
@@ -181,9 +181,9 @@ export class LanguageValueRepository
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       key: entity.key,
-      originalText: entity.originalText,
-      translatedText: entity.translatedText,
-      languageId: entity.languageId,
+      original: entity.original,
+      destination: entity.destination,
+      languageCode: entity.languageCode,
       context: entity.context,
       isApproved: entity.isApproved,
       approvedBy: entity.approvedBy,
@@ -201,9 +201,9 @@ export class LanguageValueRepository
     entity.createdAt = languageValue.createdAt;
     entity.updatedAt = languageValue.updatedAt;
     entity.key = languageValue.key;
-    entity.originalText = languageValue.originalText;
-    entity.translatedText = languageValue.translatedText;
-    entity.languageId = languageValue.languageId;
+    entity.original = languageValue.original;
+    entity.destination = languageValue.destination;
+    entity.languageCode = languageValue.languageCode;
     entity.context = languageValue.context;
     entity.isApproved = languageValue.isApproved;
     entity.approvedBy = languageValue.approvedBy;

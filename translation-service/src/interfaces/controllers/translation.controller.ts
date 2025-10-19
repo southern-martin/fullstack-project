@@ -85,16 +85,16 @@ export class TranslationController {
   }
 
   /**
-   * Retrieves a language by ID.
-   * GET /translation/languages/:id
-   * @param id The ID of the language.
+   * Retrieves a language by code (primary key in old system).
+   * GET /translation/languages/:code
+   * @param code The language code.
    * @returns The language.
    */
-  @Get("languages/:id")
+  @Get("languages/:code")
   async findLanguageById(
-    @Param("id", ParseIntPipe) id: number
+    @Param("code") code: string
   ): Promise<LanguageResponseDto> {
-    return await this.manageLanguageUseCase.getById(id);
+    return await this.manageLanguageUseCase.getById(code);
   }
 
   /**
@@ -112,28 +112,28 @@ export class TranslationController {
 
   /**
    * Updates an existing language.
-   * PATCH /translation/languages/:id
-   * @param id The ID of the language to update.
+   * PATCH /translation/languages/:code
+   * @param code The language code (primary key).
    * @param updateLanguageDto The data for updating the language.
    * @returns The updated language.
    */
-  @Patch("languages/:id")
+  @Patch("languages/:code")
   async updateLanguage(
-    @Param("id", ParseIntPipe) id: number,
+    @Param("code") code: string,
     @Body() updateLanguageDto: UpdateLanguageDto
   ): Promise<LanguageResponseDto> {
-    return await this.manageLanguageUseCase.update(id, updateLanguageDto);
+    return await this.manageLanguageUseCase.update(code, updateLanguageDto);
   }
 
   /**
    * Deletes a language.
-   * DELETE /translation/languages/:id
-   * @param id The ID of the language to delete.
+   * DELETE /translation/languages/:code
+   * @param code The language code to delete.
    */
-  @Delete("languages/:id")
+  @Delete("languages/:code")
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteLanguage(@Param("id", ParseIntPipe) id: number): Promise<void> {
-    return await this.manageLanguageUseCase.delete(id);
+  async deleteLanguage(@Param("code") code: string): Promise<void> {
+    return await this.manageLanguageUseCase.delete(code);
   }
 
   // Translation Management

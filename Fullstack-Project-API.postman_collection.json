@@ -869,6 +869,75 @@
           "response": []
         },
         {
+          "name": "Translate Text",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Hello World\",\n  \"targetLanguage\": \"es\"\n}"
+            },
+            "url": {
+              "raw": "{{translation_service_url}}/translation/translate",
+              "host": ["{{translation_service_url}}"],
+              "path": ["translation", "translate"]
+            },
+            "description": "Translate text to target language using MD5 caching"
+          },
+          "response": []
+        },
+        {
+          "name": "Translate Text with Context",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Save\",\n  \"targetLanguage\": \"es\",\n  \"sourceLanguage\": \"en\",\n  \"context\": {\n    \"category\": \"ui\",\n    \"module\": \"customer-management\",\n    \"component\": \"save-button\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{translation_service_url}}/translation/translate",
+              "host": ["{{translation_service_url}}"],
+              "path": ["translation", "translate"]
+            },
+            "description": "Translate text with context metadata"
+          },
+          "response": []
+        },
+        {
+          "name": "Batch Translate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"texts\": [\"Hello\", \"Goodbye\", \"Thank you\"],\n  \"targetLanguage\": \"es\",\n  \"sourceLanguage\": \"en\"\n}"
+            },
+            "url": {
+              "raw": "{{translation_service_url}}/translation/translate/batch",
+              "host": ["{{translation_service_url}}"],
+              "path": ["translation", "translate", "batch"]
+            },
+            "description": "Translate multiple texts at once"
+          },
+          "response": []
+        },
+        {
           "name": "Get All Languages",
           "request": {
             "method": "GET",
@@ -879,11 +948,103 @@
               }
             ],
             "url": {
-              "raw": "{{translation_service_url}}/languages",
+              "raw": "{{translation_service_url}}/translation/languages",
               "host": ["{{translation_service_url}}"],
-              "path": ["languages"]
+              "path": ["translation", "languages"]
             },
             "description": "Get all available languages"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Language by Code",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{translation_service_url}}/translation/languages/en",
+              "host": ["{{translation_service_url}}"],
+              "path": ["translation", "languages", "en"]
+            },
+            "description": "Get language by code (not ID)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Language",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"pt\",\n  \"name\": \"Portuguese\",\n  \"localName\": \"Português\",\n  \"status\": \"active\",\n  \"flag\": \"🇵🇹\",\n  \"isDefault\": false,\n  \"metadata\": {\n    \"direction\": \"ltr\",\n    \"region\": \"PT\",\n    \"currency\": \"EUR\",\n    \"dateFormat\": \"DD/MM/YYYY\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{translation_service_url}}/translation/languages",
+              "host": ["{{translation_service_url}}"],
+              "path": ["translation", "languages"]
+            },
+            "description": "Create new language with localName, status, flag"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Language by Code",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"localName\": \"English (US)\",\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{translation_service_url}}/translation/languages/en",
+              "host": ["{{translation_service_url}}"],
+              "path": ["translation", "languages", "en"]
+            },
+            "description": "Update language by code (not ID)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Language by Code",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{translation_service_url}}/translation/languages/pt",
+              "host": ["{{translation_service_url}}"],
+              "path": ["translation", "languages", "pt"]
+            },
+            "description": "Delete language by code (not ID)"
           },
           "response": []
         },
@@ -898,9 +1059,9 @@
               }
             ],
             "url": {
-              "raw": "{{translation_service_url}}/translations?page=1&limit=10",
+              "raw": "{{translation_service_url}}/translation/translations?page=1&limit=10",
               "host": ["{{translation_service_url}}"],
-              "path": ["translations"],
+              "path": ["translation", "translations"],
               "query": [
                 {
                   "key": "page",
@@ -913,25 +1074,6 @@
               ]
             },
             "description": "Get paginated list of translations"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Translation by Key",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{translation_service_url}}/translations/welcome",
-              "host": ["{{translation_service_url}}"],
-              "path": ["translations", "welcome"]
-            },
-            "description": "Get translation by key"
           },
           "response": []
         },
@@ -951,21 +1093,21 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"key\": \"new_translation_key\",\n  \"translations\": {\n    \"en\": \"New Translation\",\n    \"es\": \"Nueva Traducción\",\n    \"fr\": \"Nouvelle Traduction\"\n  }\n}"
+              "raw": "{\n  \"original\": \"Welcome\",\n  \"destination\": \"Bienvenido\",\n  \"languageCode\": \"es\",\n  \"context\": {\n    \"category\": \"ui\",\n    \"module\": \"homepage\"\n  }\n}"
             },
             "url": {
-              "raw": "{{translation_service_url}}/translations",
+              "raw": "{{translation_service_url}}/translation/translations",
               "host": ["{{translation_service_url}}"],
-              "path": ["translations"]
+              "path": ["translation", "translations"]
             },
-            "description": "Create a new translation"
+            "description": "Create translation with original, destination, languageCode"
           },
           "response": []
         },
         {
-          "name": "Update Translation",
+          "name": "Update Translation by Key",
           "request": {
-            "method": "PUT",
+            "method": "PATCH",
             "header": [
               {
                 "key": "Content-Type",
@@ -978,19 +1120,19 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"key\": \"updated_translation_key\",\n  \"translations\": {\n    \"en\": \"Updated Translation\",\n    \"es\": \"Traducción Actualizada\",\n    \"fr\": \"Traduction Mise à Jour\"\n  }\n}"
+              "raw": "{\n  \"destination\": \"Hola Mundo\"\n}"
             },
             "url": {
-              "raw": "{{translation_service_url}}/translations/welcome",
+              "raw": "{{translation_service_url}}/translation/translations/abc123def456",
               "host": ["{{translation_service_url}}"],
-              "path": ["translations", "welcome"]
+              "path": ["translation", "translations", "abc123def456"]
             },
-            "description": "Update translation information"
+            "description": "Update translation by MD5 key"
           },
           "response": []
         },
         {
-          "name": "Delete Translation",
+          "name": "Delete Translation by Key",
           "request": {
             "method": "DELETE",
             "header": [
@@ -1000,16 +1142,30 @@
               }
             ],
             "url": {
-              "raw": "{{translation_service_url}}/translations/welcome",
+              "raw": "{{translation_service_url}}/translation/translations/abc123def456",
               "host": ["{{translation_service_url}}"],
-              "path": ["translations", "welcome"]
+              "path": ["translation", "translations", "abc123def456"]
             },
-            "description": "Delete a translation"
+            "description": "Delete translation by MD5 key"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Available Languages List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{translation_service_url}}/translation/available-languages",
+              "host": ["{{translation_service_url}}"],
+              "path": ["translation", "available-languages"]
+            },
+            "description": "Get list of all available language codes"
           },
           "response": []
         }
       ],
-      "description": "Translation service endpoints for multi-language support"
+      "description": "Translation service endpoints - Reverted to old PHP system with MD5 caching, string-based foreign keys, and fields: localName, status, original, destination, languageCode"
     }
   ],
   "event": [

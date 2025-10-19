@@ -16,7 +16,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "seed": "ts-node scripts/seed-data.ts",
+    "seed": "node scripts/seed-data.js",
     "seed:dev": "ts-node scripts/seed-data.ts --dev"
   },
   "dependencies": {
@@ -37,6 +37,7 @@
     "redis": "^4.6.10",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
+    "tsconfig-paths": "^4.1.0",
     "typeorm": "^0.3.17"
   },
   "devDependencies": {
@@ -59,7 +60,6 @@
     "ts-jest": "^29.1.0",
     "ts-loader": "^9.4.3",
     "ts-node": "^10.9.1",
-    "tsconfig-paths": "^4.1.0",
     "typescript": "^5.1.3"
   },
   "jest": {

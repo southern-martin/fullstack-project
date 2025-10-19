@@ -37,8 +37,8 @@ export class TranslationDomainService {
     }
 
     // Native name validation (optional)
-    if (languageData.nativeName && languageData.nativeName.trim().length < 2) {
-      errors.push("Native name must be at least 2 characters if provided");
+    if (languageData.localName && languageData.localName.trim().length < 2) {
+      errors.push("Local name must be at least 2 characters if provided");
     }
 
     return {
@@ -78,11 +78,11 @@ export class TranslationDomainService {
 
     // Native name validation
     if (
-      updateData.nativeName !== undefined &&
-      updateData.nativeName &&
-      updateData.nativeName.trim().length < 2
+      updateData.localName !== undefined &&
+      updateData.localName &&
+      updateData.localName.trim().length < 2
     ) {
-      errors.push("Native name must be at least 2 characters if provided");
+      errors.push("Local name must be at least 2 characters if provided");
     }
 
     return {
@@ -104,37 +104,37 @@ export class TranslationDomainService {
 
     // Original text validation
     if (
-      !translationData.originalText ||
-      translationData.originalText.trim().length === 0
+      !translationData.original ||
+      translationData.original.trim().length === 0
     ) {
       errors.push("Original text is required");
     }
 
     if (
-      translationData.originalText &&
-      translationData.originalText.length > 5000
+      translationData.original &&
+      translationData.original.length > 5000
     ) {
       errors.push("Original text must not exceed 5000 characters");
     }
 
     // Translated text validation
     if (
-      !translationData.translatedText ||
-      translationData.translatedText.trim().length === 0
+      !translationData.destination ||
+      translationData.destination.trim().length === 0
     ) {
       errors.push("Translated text is required");
     }
 
     if (
-      translationData.translatedText &&
-      translationData.translatedText.length > 5000
+      translationData.destination &&
+      translationData.destination.length > 5000
     ) {
       errors.push("Translated text must not exceed 5000 characters");
     }
 
-    // Language ID validation
-    if (!translationData.languageId || translationData.languageId <= 0) {
-      errors.push("Valid language ID is required");
+    // Language code validation (old system uses string code)
+    if (!translationData.languageCode || typeof translationData.languageCode !== 'string') {
+      errors.push("Valid language code is required");
     }
 
     return {
@@ -155,27 +155,27 @@ export class TranslationDomainService {
     const errors: string[] = [];
 
     // Original text validation
-    if (updateData.originalText !== undefined) {
+    if (updateData.original !== undefined) {
       if (
-        !updateData.originalText ||
-        updateData.originalText.trim().length === 0
+        !updateData.original ||
+        updateData.original.trim().length === 0
       ) {
         errors.push("Original text cannot be empty");
       }
-      if (updateData.originalText.length > 5000) {
+      if (updateData.original.length > 5000) {
         errors.push("Original text must not exceed 5000 characters");
       }
     }
 
     // Translated text validation
-    if (updateData.translatedText !== undefined) {
+    if (updateData.destination !== undefined) {
       if (
-        !updateData.translatedText ||
-        updateData.translatedText.trim().length === 0
+        !updateData.destination ||
+        updateData.destination.trim().length === 0
       ) {
         errors.push("Translated text cannot be empty");
       }
-      if (updateData.translatedText.length > 5000) {
+      if (updateData.destination.length > 5000) {
         errors.push("Translated text must not exceed 5000 characters");
       }
     }
@@ -190,18 +190,18 @@ export class TranslationDomainService {
    * Generates an MD5 key for translation caching.
    * Business rule: Key must be unique and consistent for the same text and language.
    * @param text The original text.
-   * @param languageId The language ID.
+   * @param languageCode The language code (e.g., 'en', 'es').
    * @returns MD5 hash key.
    */
-  generateTranslationKey(text: string, languageId: number): string {
+  generateTranslationKey(text: string, languageCode: string): string {
     if (!text || typeof text !== "string") {
       throw new Error("Text must be a non-empty string");
     }
-    if (!languageId || languageId <= 0) {
-      throw new Error("Valid language ID is required");
+    if (!languageCode || typeof languageCode !== "string") {
+      throw new Error("Valid language code is required");
     }
 
-    const keyData = `${text.trim()}_${languageId}`;
+    const keyData = `${text.trim()}_${languageCode}`;
     return this.createMD5Hash(keyData);
   }
 

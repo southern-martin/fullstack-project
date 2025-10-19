@@ -3,12 +3,12 @@ import { Language } from "../entities/language.entity";
 
 export interface LanguageRepositoryInterface {
   create(language: Language): Promise<Language>;
-  findById(id: number): Promise<Language | null>;
+  findById(code: string): Promise<Language | null>; // code is the primary key in old system
   findByCode(code: string): Promise<Language | null>;
   findDefault(): Promise<Language | null>;
   save(language: Language): Promise<Language>;
-  update(id: number, language: Partial<Language>): Promise<Language>;
-  findMany(ids: number[]): Promise<Language[]>;
+  update(code: string, language: Partial<Language>): Promise<Language>;
+  findMany(codes: string[]): Promise<Language[]>;
   findActive(): Promise<Language[]>;
   count(): Promise<number>;
   countActive(): Promise<number>;
@@ -17,5 +17,5 @@ export interface LanguageRepositoryInterface {
     languages: Language[];
     total: number;
   }>;
-  delete(id: number): Promise<void>;
+  delete(code: string): Promise<void>;
 }

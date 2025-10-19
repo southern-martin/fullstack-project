@@ -18,7 +18,7 @@
       "@/infrastructure/*": ["src/infrastructure/*"],
       "@/shared/*": ["src/shared/*"],
       "@/interfaces/*": ["src/interfaces/*"],
-      "@shared/infrastructure": ["../shared/infrastructure/src/index.ts"],
+      "@shared/infrastructure": ["../shared/infrastructure/src"],
       "@shared/infrastructure/*": ["../shared/infrastructure/src/*"]
     },
     "skipLibCheck": true,

@@ -1,14 +1,13 @@
 export class Language {
-  id?: number;
+  code: string; // Primary key - e.g., 'en', 'fr', 'es'
   createdAt?: Date;
   updatedAt?: Date;
-  code: string; // e.g., 'en', 'fr', 'es'
   name: string; // e.g., 'English', 'French', 'Spanish'
-  nativeName?: string; // e.g., 'English', 'Français', 'Español'
-  isActive: boolean;
+  localName?: string; // e.g., 'English', 'Français', 'Español'
+  flag?: string; // Flag emoji or URL
+  status: string; // 'active' or 'inactive'
   isDefault: boolean;
   metadata?: {
-    flag?: string; // Flag emoji or URL
     direction?: "ltr" | "rtl"; // Text direction
     region?: string; // e.g., 'US', 'FR', 'ES'
     currency?: string; // e.g., 'USD', 'EUR'
@@ -16,22 +15,26 @@ export class Language {
   };
 
   constructor(data: Partial<Language> = {}) {
-    this.id = data.id;
+    this.code = data.code || "";
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
-    this.code = data.code || "";
     this.name = data.name || "";
-    this.nativeName = data.nativeName;
-    this.isActive = data.isActive ?? true;
+    this.localName = data.localName;
+    this.flag = data.flag;
+    this.status = data.status || "active";
     this.isDefault = data.isDefault ?? false;
     this.metadata = data.metadata;
   }
 
   get displayName(): string {
-    return this.nativeName || this.name;
+    return this.localName || this.name;
   }
 
   get isRTL(): boolean {
     return this.metadata?.direction === "rtl";
+  }
+
+  get isActive(): boolean {
+    return this.status === "active";
   }
 }

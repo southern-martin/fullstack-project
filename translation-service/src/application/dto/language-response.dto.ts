@@ -3,26 +3,25 @@ import { Language } from "../../domain/entities/language.entity";
 
 export class LanguageResponseDto {
   @Expose()
-  id: number;
-
-  @Expose()
-  code: string;
+  code: string; // Primary key in old system (no separate id)
 
   @Expose()
   name: string;
 
   @Expose()
-  nativeName: string;
+  localName: string;
 
   @Expose()
-  isActive: boolean;
+  status: string; // 'active' or 'inactive'
+
+  @Expose()
+  flag: string; // Extracted from metadata
 
   @Expose()
   isDefault: boolean;
 
   @Expose()
   metadata: {
-    flag?: string;
     direction?: "ltr" | "rtl";
     region?: string;
     currency?: string;
@@ -35,13 +34,18 @@ export class LanguageResponseDto {
   @Expose()
   updatedAt: Date;
 
+  // Convenience getter for backward compatibility
+  get isActive(): boolean {
+    return this.status === 'active';
+  }
+
   static fromDomain(language: Language): LanguageResponseDto {
     const dto = new LanguageResponseDto();
-    dto.id = language.id;
     dto.code = language.code;
     dto.name = language.name;
-    dto.nativeName = language.nativeName;
-    dto.isActive = language.isActive;
+    dto.localName = language.localName;
+    dto.status = language.status;
+    dto.flag = language.flag;
     dto.isDefault = language.isDefault;
     dto.metadata = language.metadata;
     dto.createdAt = language.createdAt;

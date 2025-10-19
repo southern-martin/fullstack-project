@@ -7,7 +7,7 @@ export interface LanguageValueRepositoryInterface {
   findByKey(key: string): Promise<LanguageValue | null>;
   findByKeyAndLanguage(
     key: string,
-    languageId: number
+    languageCode: string
   ): Promise<LanguageValue | null>;
   save(languageValue: LanguageValue): Promise<LanguageValue>;
   update(
@@ -15,12 +15,12 @@ export interface LanguageValueRepositoryInterface {
     languageValue: Partial<LanguageValue>
   ): Promise<LanguageValue>;
   findMany(ids: number[]): Promise<LanguageValue[]>;
-  findByLanguage(languageId: number): Promise<LanguageValue[]>;
+  findByLanguage(languageCode: string): Promise<LanguageValue[]>;
   findByContext(context: any): Promise<LanguageValue[]>;
   findPendingApproval(): Promise<LanguageValue[]>;
   count(): Promise<number>;
-  countByLanguage(languageId: number): Promise<number>;
-  countApprovedByLanguage(languageId: number): Promise<number>;
+  countByLanguage(languageCode: string): Promise<number>;
+  countApprovedByLanguage(languageCode: string): Promise<number>;
   incrementUsageCount(id: number): Promise<void>;
   search(query: string): Promise<LanguageValue[]>;
   findPaginated(pagination: PaginationDto): Promise<{
