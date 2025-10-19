@@ -77,12 +77,13 @@ class CustomerService {
     try {
       const response = await customerApiClient.getCustomers(params);
       // Transform the API response to match shared PaginatedResponse format
+      // API client returns raw response, not wrapped in .data
       return {
-        data: response.data.customers,
-        total: response.data.total,
-        page: response.data.page,
-        limit: response.data.limit,
-        totalPages: response.data.totalPages,
+        data: response.customers,
+        total: response.total,
+        page: response.page,
+        limit: response.limit,
+        totalPages: response.totalPages,
       };
     } catch (error) {
       console.error('Error fetching customers:', error);
@@ -93,7 +94,8 @@ class CustomerService {
   async getCustomer(id: number): Promise<Customer> {
     try {
       const response = await customerApiClient.getCustomer(id);
-      return response.data;
+      // API client returns raw response object directly
+      return response;
     } catch (error) {
       console.error(`Error fetching customer ${id}:`, error);
       throw error;
@@ -103,7 +105,8 @@ class CustomerService {
   async createCustomer(data: CreateCustomerDto): Promise<Customer> {
     try {
       const response = await customerApiClient.createCustomer(data);
-      return response.data;
+      // API client returns raw response object directly
+      return response;
     } catch (error) {
       console.error('Error creating customer:', error);
       throw error;
@@ -113,7 +116,8 @@ class CustomerService {
   async updateCustomer(id: number, data: UpdateCustomerDto): Promise<Customer> {
     try {
       const response = await customerApiClient.updateCustomer(id, data);
-      return response.data;
+      // API client returns raw response object directly
+      return response;
     } catch (error) {
       console.error(`Error updating customer ${id}:`, error);
       throw error;
@@ -132,7 +136,8 @@ class CustomerService {
   async getCustomerCount(): Promise<{ count: number }> {
     try {
       const response = await customerApiClient.getCustomerCount();
-      return response.data;
+      // API client returns raw response object directly
+      return response;
     } catch (error) {
       console.error('Error fetching customer count:', error);
       throw error;
@@ -143,7 +148,8 @@ class CustomerService {
   async getCustomerAddresses(customerId: number): Promise<CustomerAddress[]> {
     try {
       const response = await customerApiClient.getCustomerAddresses(customerId);
-      return response.data;
+      // API client returns raw response object directly
+      return response;
     } catch (error) {
       console.error(
         `Error fetching addresses for customer ${customerId}:`,
@@ -162,7 +168,8 @@ class CustomerService {
         customerId,
         data
       );
-      return response.data;
+      // API client returns raw response object directly
+      return response;
     } catch (error) {
       console.error(`Error adding address for customer ${customerId}:`, error);
       throw error;
@@ -180,7 +187,8 @@ class CustomerService {
         addressId,
         data
       );
-      return response.data;
+      // API client returns raw response object directly
+      return response;
     } catch (error) {
       console.error(
         `Error updating address ${addressId} for customer ${customerId}:`,
