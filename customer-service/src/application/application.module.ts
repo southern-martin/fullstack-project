@@ -9,7 +9,8 @@ import { UpdateCustomerUseCase } from "./use-cases/update-customer.use-case";
 // Domain Services
 import { CustomerDomainService } from "../domain/services/customer.domain.service";
 
-// Repository Interfaces (will be implemented in infrastructure)
+// Infrastructure Modules
+import { DatabaseModule } from "../infrastructure/database/database.module";
 
 // Infrastructure Implementations
 import { CustomerRepository } from "../infrastructure/database/typeorm/repositories/customer.repository";
@@ -21,6 +22,7 @@ import { RedisEventBus } from "../infrastructure/events/redis-event-bus";
  * Follows Clean Architecture principles
  */
 @Module({
+  imports: [DatabaseModule],
   providers: [
     // Domain Services
     CustomerDomainService,
@@ -52,6 +54,9 @@ import { RedisEventBus } from "../infrastructure/events/redis-event-bus";
 
     // Export domain services
     CustomerDomainService,
+
+    // Export event bus for controllers
+    "EventBusInterface",
   ],
 })
 export class ApplicationModule {}

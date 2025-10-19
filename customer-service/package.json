@@ -17,7 +17,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed": "ts-node scripts/seed-data.ts",
-    "seed:dev": "ts-node scripts/seed-data.ts --dev"
+    "seed:dev": "ts-node scripts/seed-data.ts --dev",
+    "seed:customers:400": "ts-node scripts/seed-400-customers.ts"
   },
   "dependencies": {
     "@fullstack-project/shared-infrastructure": "file:../shared/infrastructure",

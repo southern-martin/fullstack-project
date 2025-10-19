@@ -5,9 +5,8 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 // Clean Architecture Modules
 import { ApplicationModule } from "./application/application.module";
 import { InterfacesModule } from "./interfaces/interfaces.module";
-
-// TypeORM Entities
-import { Customer } from "./domain/entities/customer.entity";
+import { DatabaseModule } from "./infrastructure/database/database.module";
+import { CustomerTypeOrmEntity } from "./infrastructure/database/typeorm/entities/customer.typeorm.entity";
 
 /**
  * Main Application Module
@@ -22,18 +21,21 @@ import { Customer } from "./domain/entities/customer.entity";
       envFilePath: [".env.local", ".env"],
     }),
 
-    // Database
+    // Database Connection
     TypeOrmModule.forRoot({
-      type: "postgres",
+      type: "mysql",
       host: process.env.DB_HOST || "localhost",
-      port: parseInt(process.env.DB_PORT) || 5432,
-      username: process.env.DB_USERNAME || "postgres",
+      port: parseInt(process.env.DB_PORT) || 3306,
+      username: process.env.DB_USERNAME || "root",
       password: process.env.DB_PASSWORD || "password",
-      database: process.env.DB_DATABASE || "customer_service_db",
-      entities: [Customer],
+      database: process.env.DB_NAME || "customer_service_db",
+      entities: [CustomerTypeOrmEntity],
       synchronize: process.env.NODE_ENV !== "production",
       logging: process.env.NODE_ENV === "development",
     }),
+
+    // Infrastructure Layer
+    DatabaseModule,
 
     // Clean Architecture Layers
     ApplicationModule,
