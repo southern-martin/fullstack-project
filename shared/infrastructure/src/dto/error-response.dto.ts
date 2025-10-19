@@ -183,11 +183,4 @@ export class ErrorResponseDto {
   getDetails(): Record<string, any> | undefined {
     return this.details;
   }
-
-  /**
-   * Convert to JSON
-   */
-  toJSON(): string {
-    return JSON.stringify(this);
-  }
 }

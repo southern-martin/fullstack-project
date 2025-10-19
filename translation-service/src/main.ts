@@ -4,6 +4,8 @@ import "tsconfig-paths/register";
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
+import { HttpExceptionFilter } from "@shared/infrastructure/filters/http-exception.filter";
+import { TransformInterceptor } from "@shared/infrastructure/interceptors/transform.interceptor";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -23,6 +25,12 @@ async function bootstrap() {
     })
   );
 
+  // Global exception filter - Standardizes all error responses
+  app.useGlobalFilters(new HttpExceptionFilter());
+
+  // Global transform interceptor - Wraps all successful responses
+  app.useGlobalInterceptors(new TransformInterceptor());
+
   // Global prefix
   app.setGlobalPrefix("api/v1");
 
@@ -33,6 +41,7 @@ async function bootstrap() {
     `🚀 Translation Service is running on: http://localhost:${port}/api/v1`
   );
   console.log(`📊 Health check: http://localhost:${port}/api/v1/health`);
+  console.log(`✅ API Standards: Global Exception Filter & Transform Interceptor enabled`);
 }
 
 bootstrap();
