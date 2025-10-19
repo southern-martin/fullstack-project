@@ -5,8 +5,9 @@ Updated the customer list component to use the same dropdown actions pattern as 
 
 ## Changes Made
 
-### File Modified
-- **react-admin/src/features/customers/components/Customers.tsx**
+### Files Modified
+1. **react-admin/src/features/customers/components/Customers.tsx** - Dropdown actions implementation
+2. **react-admin/src/features/customers/services/customerApiClient.ts** - Fixed HTTP method for update (PUT → PATCH)
 
 ### Implementation Details
 
@@ -75,6 +76,13 @@ Wrapped `customers` in useMemo to prevent unnecessary re-renders:
 const customers = useMemo(() => customersResponse?.data || [], [customersResponse?.data]);
 ```
 
+#### 9. **Bug Fix: HTTP Method Mismatch**
+Fixed `updateCustomer` method in `customerApiClient.ts`:
+- **Before**: `method: 'PUT'`
+- **After**: `method: 'PATCH'`
+- **Reason**: Customer Service controller uses `@Patch` decorator, not `@Put`
+- **Impact**: Update operations now work correctly (404 error resolved)
+
 ## Pattern Consistency
 
 ### Before
@@ -135,12 +143,14 @@ const customers = useMemo(() => customersResponse?.data || [], [customersRespons
 - [ ] Dropdown closes when clicking button again
 - [ ] View Details action opens modal correctly
 - [ ] Edit action opens modal with customer data
+- [ ] **Edit action saves changes successfully (PATCH method)**
 - [ ] Activate/Deactivate toggles status correctly
 - [ ] Delete action opens confirmation modal
 - [ ] Dropdown auto-closes after action
 - [ ] Positioning correct at all scroll positions
 - [ ] Dark mode rendering correct
 - [ ] No console errors
+- [ ] No 404 errors on update operations
 
 ## Next Steps
 

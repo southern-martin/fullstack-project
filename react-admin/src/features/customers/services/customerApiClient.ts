@@ -102,7 +102,7 @@ class CustomerApiClient {
 
   async updateCustomer(id: number, data: any): Promise<any> {
     return this.request<any>(`/customers/${id}`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
