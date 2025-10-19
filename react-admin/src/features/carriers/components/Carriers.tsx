@@ -1,11 +1,15 @@
 import {
+    CheckIcon,
+    ChevronDownIcon,
     EyeIcon,
     PencilIcon,
     PlusIcon,
     TrashIcon,
-    TruckIcon
+    TruckIcon,
+    XMarkIcon
 } from '@heroicons/react/24/outline';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { toast } from 'react-hot-toast';
 
 import {
@@ -30,6 +34,13 @@ import CarrierDetails from './CarrierDetails';
 import CarrierForm from './CarrierForm';
 
 const Carriers: React.FC = () => {
+    // Dropdown state
+    const DROPDOWN_WIDTH = 192; // w-48 in pixels
+    const DROPDOWN_OFFSET = 4; // gap between button and dropdown
+    const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
+    const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
+    const buttonRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
+
     // Local state for pagination and search
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
@@ -56,7 +67,7 @@ const Carriers: React.FC = () => {
     const deleteCarrierMutation = useDeleteCarrier();
 
     // Extract data from response
-    const carriers = carriersResponse?.carriers || [];
+    const carriers = useMemo(() => carriersResponse?.carriers || [], [carriersResponse?.carriers]);
     const total = carriersResponse?.total || 0;
     const totalPages = carriersResponse?.totalPages || 0;
     const hasNextPage = currentPage < totalPages;
@@ -72,6 +83,43 @@ const Carriers: React.FC = () => {
     const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
     const [modalTitle, setModalTitle] = useState('');
     const [modalFooter, setModalFooter] = useState<React.ReactNode>(null);
+
+    // Get the carrier associated with the currently open dropdown
+    const selectedDropdownCarrier = useMemo(() => {
+        if (openDropdownId === null) return null;
+        return carriers.find(carrier => carrier.id === openDropdownId) || null;
+    }, [openDropdownId, carriers]);
+
+    // Click outside handler for dropdown
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            
+            // Check if click is on dropdown portal
+            const isDropdownPortal = target.closest('[data-dropdown-portal]');
+            if (isDropdownPortal) return;
+
+            // Check if click is on the trigger button
+            if (openDropdownId !== null) {
+                const triggerButton = buttonRefs.current[openDropdownId];
+                if (triggerButton && triggerButton.contains(target)) return;
+            }
+
+            // Close dropdown if clicking outside
+            if (openDropdownId !== null) {
+                setOpenDropdownId(null);
+                setDropdownPosition(null);
+            }
+        };
+
+        if (openDropdownId !== null) {
+            document.addEventListener('click', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, [openDropdownId]);
 
     // Handle footer from CarrierForm
     const handleFooterReady = useCallback((footer: React.ReactNode) => {
@@ -113,6 +161,48 @@ const Carriers: React.FC = () => {
             throw error;
         }
     }, [deleteCarrierMutation]);
+
+    const toggleCarrierStatus = useCallback(async (id: number, status: boolean) => {
+        try {
+            await updateCarrierMutation.mutateAsync({ id, data: { isActive: status } });
+            toast.success(status ? 'Carrier activated' : 'Carrier deactivated');
+        } catch (error) {
+            toast.error('Failed to toggle carrier status: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            throw error;
+        }
+    }, [updateCarrierMutation]);
+
+    // Dropdown action handlers
+    const handleViewCarrier = useCallback((carrier: Carrier) => {
+        setSelectedCarrier(carrier);
+        setModalTitle('Carrier Details');
+        setShowViewModal(true);
+        setOpenDropdownId(null);
+        setDropdownPosition(null);
+    }, []);
+
+    const handleEditCarrier = useCallback((carrier: Carrier) => {
+        setSelectedCarrier(carrier);
+        setModalTitle('Edit Carrier');
+        setModalFooter(null);
+        setShowEditModal(true);
+        setOpenDropdownId(null);
+        setDropdownPosition(null);
+    }, []);
+
+    const handleToggleCarrierStatus = useCallback((carrier: Carrier) => {
+        toggleCarrierStatus(carrier.id, !carrier.isActive);
+        setOpenDropdownId(null);
+        setDropdownPosition(null);
+    }, [toggleCarrierStatus]);
+
+    const handleDeleteCarrier = useCallback((carrier: Carrier) => {
+        setSelectedCarrier(carrier);
+        setModalTitle('Delete Carrier');
+        setShowDeleteModal(true);
+        setOpenDropdownId(null);
+        setDropdownPosition(null);
+    }, []);
 
     // Helper functions for search, sorting, and pagination
     const setSearch = useCallback((search: string) => {
@@ -215,55 +305,52 @@ const Carriers: React.FC = () => {
                     </span>
                 ),
             },
+            {
+                key: 'actions',
+                label: 'Actions',
+                sortable: false,
+                render: (_: any, carrier: Carrier) => {
+                    const isOpen = openDropdownId === carrier.id;
+                    return (
+                        <div className="relative">
+                            <button
+                                ref={(el) => { buttonRefs.current[carrier.id] = el; }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (isOpen) {
+                                        setOpenDropdownId(null);
+                                        setDropdownPosition(null);
+                                    } else {
+                                        const button = buttonRefs.current[carrier.id];
+                                        if (button) {
+                                            const rect = button.getBoundingClientRect();
+                                            setDropdownPosition({
+                                                top: rect.bottom + window.scrollY + DROPDOWN_OFFSET,
+                                                left: rect.right - DROPDOWN_WIDTH + window.scrollX,
+                                            });
+                                        }
+                                        setOpenDropdownId(carrier.id);
+                                    }
+                                }}
+                                className={`p-2 rounded-md transition-colors ${isOpen
+                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                                    : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                                    }`}
+                                aria-label="Actions"
+                            >
+                                <ChevronDownIcon className="h-4 w-4" />
+                            </button>
+                        </div>
+                    );
+                }
+            },
         ],
-        // pagination: undefined, // Disable client-side pagination since we're using server-side
-        // sorting: undefined, // Disable client-side sorting since we're using server-side
-        // filtering: undefined, // Disable client-side filtering since we're using server-side
         selection: {
             enabled: true,
             multiSelect: true,
         },
-        actions: [
-            {
-                type: 'row',
-                label: 'View',
-                icon: <EyeIcon className="h-4 w-4" />,
-                variant: 'secondary',
-                onClick: (data: Carrier | Carrier[]) => {
-                    const carrier = Array.isArray(data) ? data[0] : data;
-                    setSelectedCarrier(carrier);
-                    setModalTitle('Carrier Details');
-                    setShowViewModal(true);
-                },
-            },
-            {
-                type: 'row',
-                label: 'Edit',
-                icon: <PencilIcon className="h-4 w-4" />,
-                variant: 'primary',
-                onClick: (data: Carrier | Carrier[]) => {
-                    const carrier = Array.isArray(data) ? data[0] : data;
-                    setSelectedCarrier(carrier);
-                    setModalTitle('Edit Carrier');
-                    setModalFooter(null);
-                    setShowEditModal(true);
-                },
-            },
-            {
-                type: 'row',
-                label: 'Delete',
-                icon: <TrashIcon className="h-4 w-4" />,
-                variant: 'danger',
-                onClick: (data: Carrier | Carrier[]) => {
-                    const carrier = Array.isArray(data) ? data[0] : data;
-                    setSelectedCarrier(carrier);
-                    setModalTitle('Delete Carrier');
-                    setShowDeleteModal(true);
-                },
-            },
-        ],
         emptyMessage: 'No carriers found',
-    }), []);
+    }), [openDropdownId, DROPDOWN_OFFSET, DROPDOWN_WIDTH]);
 
     // Note: Filtering is now handled server-side through search and sorting
 
@@ -458,6 +545,59 @@ const Carriers: React.FC = () => {
                         </div>
                     </div>
                 </Modal>
+            )}
+
+            {/* Dropdown Portal */}
+            {openDropdownId !== null && dropdownPosition && selectedDropdownCarrier && createPortal(
+                <div
+                    data-dropdown-portal
+                    className="absolute z-50 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg"
+                    style={{
+                        top: `${dropdownPosition.top}px`,
+                        left: `${dropdownPosition.left}px`,
+                    }}
+                >
+                    <div className="py-1">
+                        <button
+                            onClick={() => handleViewCarrier(selectedDropdownCarrier)}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center transition-colors"
+                        >
+                            <EyeIcon className="h-4 w-4 mr-3" />
+                            View Details
+                        </button>
+                        <button
+                            onClick={() => handleEditCarrier(selectedDropdownCarrier)}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center transition-colors"
+                        >
+                            <PencilIcon className="h-4 w-4 mr-3" />
+                            Edit
+                        </button>
+                        <button
+                            onClick={() => handleToggleCarrierStatus(selectedDropdownCarrier)}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center transition-colors"
+                        >
+                            {selectedDropdownCarrier.isActive ? (
+                                <>
+                                    <XMarkIcon className="h-4 w-4 mr-3" />
+                                    Deactivate
+                                </>
+                            ) : (
+                                <>
+                                    <CheckIcon className="h-4 w-4 mr-3" />
+                                    Activate
+                                </>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => handleDeleteCarrier(selectedDropdownCarrier)}
+                            className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center transition-colors"
+                        >
+                            <TrashIcon className="h-4 w-4 mr-3" />
+                            Delete
+                        </button>
+                    </div>
+                </div>,
+                document.body
             )}
         </div>
     );

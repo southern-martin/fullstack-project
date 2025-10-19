@@ -102,7 +102,7 @@ class CarrierApiClient {
 
   async updateCarrier(id: number, data: any): Promise<any> {
     return this.request<any>(`/carriers/${id}`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
