@@ -34,27 +34,23 @@ RUN apk add --no-cache curl
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nestjs -u 1001
 
-# Set working directory
-WORKDIR /app
+# Set working directory - IMPORTANT: Must match service directory for NPM resolution
+WORKDIR /app/carrier-service
 
-# Copy built shared infrastructure from builder
-# Builder creates: /app/carrier-service/dist/shared/infrastructure/src/
-# From /app/dist/carrier-service/src, ../../../../shared/infrastructure/src resolves to /shared/infrastructure/src
-COPY --from=builder /app/carrier-service/dist/shared/infrastructure/src /shared/infrastructure/src
-
-# Create symlinks for .ts extensions (TypeScript emits require with .ts, but files are .js)
-RUN find /shared/infrastructure/src -name "*.js" -type f | while read f; do \
-    ln -sf "$(basename "$f")" "${f%.js}.ts"; \
-    done
+# Copy shared infrastructure to parent directory for NPM resolution
+COPY --from=builder /app/shared/infrastructure /app/shared/infrastructure
 
 # Copy package files
-COPY carrier-service/package*.json ./
+COPY --from=builder /app/carrier-service/package*.json ./
 
-# Install only production dependencies
+# Install only production dependencies (creates symlink to ../shared/infrastructure)
 RUN npm ci --only=production && npm cache clean --force
 
-# Copy built application code
+# Copy built application from builder stage
 COPY --from=builder /app/carrier-service/dist ./dist
+
+# Copy scripts folder for seeding
+COPY --from=builder /app/carrier-service/scripts ./scripts
 
 # Change ownership to app user
 RUN chown -R nestjs:nodejs /app
@@ -64,7 +60,7 @@ USER nestjs
 EXPOSE 3005
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
   CMD curl -f http://localhost:3005/health || exit 1
 
 # Start the application

@@ -6,10 +6,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ApplicationModule } from './application/application.module';
 import { InterfacesModule } from './interfaces/interfaces.module';
 
-// Health Controller is now in interfaces module
-
 // TypeORM Entities
-import { Carrier } from './domain/entities/carrier.entity';
+import { CarrierTypeOrmEntity } from './infrastructure/database/typeorm/entities/carrier.typeorm.entity';
 
 /**
  * Main Application Module
@@ -26,15 +24,16 @@ import { Carrier } from './domain/entities/carrier.entity';
 
     // Database
     TypeOrmModule.forRoot({
-      type: 'postgres',
+      type: 'mysql',
       host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT) || 5432,
-      username: process.env.DB_USERNAME || 'postgres',
-      password: process.env.DB_PASSWORD || 'password',
-      database: process.env.DB_DATABASE || 'carrier_service_db',
-      entities: [Carrier],
+      port: parseInt(process.env.DB_PORT) || 3306,
+      username: process.env.DB_USERNAME || 'carrier_user',
+      password: process.env.DB_PASSWORD || 'carrier_password',
+      database: process.env.DB_NAME || 'carrier_service_db',
+      entities: [CarrierTypeOrmEntity],
       synchronize: process.env.NODE_ENV !== 'production',
       logging: process.env.NODE_ENV === 'development',
+      charset: 'utf8mb4',
     }),
 
     // Clean Architecture Layers
