@@ -11,8 +11,7 @@ import {
 import { LanguageTypeOrmEntity } from "./language.typeorm.entity";
 
 @Entity("language_values")
-@Index(["key"], { unique: true })
-@Index(["languageId"])
+@Index(["languageCode"])
 @Index(["isApproved"])
 @Index(["createdAt"])
 @Index(["usageCount"])
@@ -20,31 +19,27 @@ export class LanguageValueTypeOrmEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
+  @UpdateDateColumn()
   updatedAt: Date;
 
   @Column({ unique: true, length: 32 })
   key: string; // MD5 hash of the original text
 
-  @Column({ type: "text" })
-  originalText: string; // Original text in source language
-
-  @Column({ type: "text" })
-  translatedText: string; // Translated text
-
-  @Column()
-  languageId: number;
+  @Column({ length: 5 })
+  languageCode: string; // Language code reference (e.g., 'en', 'es', 'fr') - matches old system
 
   @ManyToOne(() => LanguageTypeOrmEntity)
-  @JoinColumn({ name: "languageId" })
+  @JoinColumn({ name: "languageCode", referencedColumnName: "code" })
   language: LanguageTypeOrmEntity;
+
+  @Column({ type: "text" })
+  original: string; // Original text in source language (renamed from originalText to match old system)
+
+  @Column({ type: "text" })
+  destination: string; // Translated text (renamed from translatedText to match old system)
 
   @Column({ type: "json", nullable: true })
   context: {

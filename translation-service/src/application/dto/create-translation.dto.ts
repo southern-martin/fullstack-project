@@ -1,6 +1,5 @@
 import {
   IsBoolean,
-  IsNumber,
   IsObject,
   IsOptional,
   IsString,
@@ -8,13 +7,13 @@ import {
 
 export class CreateTranslationDto {
   @IsString()
-  originalText: string;
+  original: string; // Changed from originalText
 
   @IsString()
-  translatedText: string;
+  destination: string; // Changed from translatedText
 
-  @IsNumber()
-  languageId: number;
+  @IsString()
+  languageCode: string; // Changed from languageId (number)
 
   @IsOptional()
   @IsObject()

@@ -19,8 +19,9 @@ export class LanguageRepository implements LanguageRepositoryInterface {
     return this.toDomainEntity(savedEntity);
   }
 
-  async findById(id: number): Promise<Language | null> {
-    const entity = await this.repository.findOne({ where: { id } });
+  async findById(code: string): Promise<Language | null> {
+    // Note: In old system, code is the primary key (no separate id)
+    const entity = await this.repository.findOne({ where: { code } });
     return entity ? this.toDomainEntity(entity) : null;
   }
 
@@ -42,22 +43,22 @@ export class LanguageRepository implements LanguageRepositoryInterface {
     return this.toDomainEntity(savedEntity);
   }
 
-  async update(id: number, language: Partial<Language>): Promise<Language> {
-    await this.repository.update(id, language);
-    const updatedLanguage = await this.findById(id);
+  async update(code: string, language: Partial<Language>): Promise<Language> {
+    await this.repository.update(code, language);
+    const updatedLanguage = await this.findByCode(code);
     if (!updatedLanguage) {
-      throw new Error(`Language with id ${id} not found`);
+      throw new Error(`Language with code ${code} not found`);
     }
     return updatedLanguage;
   }
 
-  async findMany(ids: number[]): Promise<Language[]> {
-    const entities = await this.repository.findByIds(ids);
+  async findMany(codes: string[]): Promise<Language[]> {
+    const entities = await this.repository.findByIds(codes);
     return entities.map((entity) => this.toDomainEntity(entity));
   }
 
   async findActive(): Promise<Language[]> {
-    const entities = await this.repository.find({ where: { isActive: true } });
+    const entities = await this.repository.find({ where: { status: 'active' } });
     return entities.map((entity) => this.toDomainEntity(entity));
   }
 
@@ -66,14 +67,14 @@ export class LanguageRepository implements LanguageRepositoryInterface {
   }
 
   async countActive(): Promise<number> {
-    return this.repository.count({ where: { isActive: true } });
+    return this.repository.count({ where: { status: 'active' } });
   }
 
   async search(query: string): Promise<Language[]> {
     const entities = await this.repository
       .createQueryBuilder("language")
       .where("language.name ILIKE :query", { query: `%${query}%` })
-      .orWhere("language.nativeName ILIKE :query", { query: `%${query}%` })
+      .orWhere("language.localName ILIKE :query", { query: `%${query}%` })
       .orWhere("language.code ILIKE :query", { query: `%${query}%` })
       .getMany();
     return entities.map((entity) => this.toDomainEntity(entity));
@@ -88,7 +89,7 @@ export class LanguageRepository implements LanguageRepositoryInterface {
     // Apply search if provided
     if (pagination.search) {
       queryBuilder.where(
-        "language.name ILIKE :search OR language.nativeName ILIKE :search OR language.code ILIKE :search",
+        "language.name ILIKE :search OR language.localName ILIKE :search OR language.code ILIKE :search",
         { search: `%${pagination.search}%` }
       );
     }
@@ -113,19 +114,19 @@ export class LanguageRepository implements LanguageRepositoryInterface {
     return { languages, total };
   }
 
-  async delete(id: number): Promise<void> {
-    await this.repository.delete(id);
+  async delete(code: string): Promise<void> {
+    await this.repository.delete(code);
   }
 
   private toDomainEntity(entity: LanguageTypeOrmEntity): Language {
     return new Language({
-      id: entity.id,
+      code: entity.code,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
-      code: entity.code,
       name: entity.name,
-      nativeName: entity.nativeName,
-      isActive: entity.isActive,
+      localName: entity.localName,
+      flag: entity.flag,
+      status: entity.status,
       isDefault: entity.isDefault,
       metadata: entity.metadata,
     });
@@ -133,13 +134,13 @@ export class LanguageRepository implements LanguageRepositoryInterface {
 
   private toTypeOrmEntity(language: Language): LanguageTypeOrmEntity {
     const entity = new LanguageTypeOrmEntity();
-    entity.id = language.id;
+    entity.code = language.code;
     entity.createdAt = language.createdAt;
     entity.updatedAt = language.updatedAt;
-    entity.code = language.code;
     entity.name = language.name;
-    entity.nativeName = language.nativeName;
-    entity.isActive = language.isActive;
+    entity.localName = language.localName;
+    entity.flag = language.flag;
+    entity.status = language.status;
     entity.isDefault = language.isDefault;
     entity.metadata = language.metadata;
     return entity;

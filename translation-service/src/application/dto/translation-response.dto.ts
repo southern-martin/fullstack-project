@@ -9,18 +9,17 @@ export class TranslationResponseDto {
   key: string;
 
   @Expose()
-  originalText: string;
+  original: string; // Changed from originalText
 
   @Expose()
-  translatedText: string;
+  destination: string; // Changed from translatedText
 
   @Expose()
-  languageId: number;
+  languageCode: string; // Changed from languageId (number)
 
   @Expose()
   language: {
-    id: number;
-    code: string;
+    code: string; // Primary key in old system (no separate id)
     name: string;
   };
 
@@ -57,12 +56,11 @@ export class TranslationResponseDto {
     const dto = new TranslationResponseDto();
     dto.id = languageValue.id;
     dto.key = languageValue.key;
-    dto.originalText = languageValue.originalText;
-    dto.translatedText = languageValue.translatedText;
-    dto.languageId = languageValue.languageId;
+    dto.original = languageValue.original;
+    dto.destination = languageValue.destination;
+    dto.languageCode = languageValue.languageCode;
     dto.language = languageValue.language
       ? {
-          id: languageValue.language.id,
           code: languageValue.language.code,
           name: languageValue.language.name,
         }

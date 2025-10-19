@@ -58,18 +58,19 @@ export class ManageLanguageUseCase {
     if (createLanguageDto.isDefault) {
       const currentDefault = await this.languageRepository.findDefault();
       if (currentDefault) {
-        await this.languageRepository.update(currentDefault.id, {
+        await this.languageRepository.update(currentDefault.code, {
           isDefault: false,
         });
       }
     }
 
-    // 4. Create language entity
+    // 4. Create language entity (old system fields)
     const language = new Language({
       code: createLanguageDto.code,
       name: createLanguageDto.name,
-      nativeName: createLanguageDto.nativeName || createLanguageDto.name,
-      isActive: createLanguageDto.isActive ?? true,
+      localName: createLanguageDto.localName || createLanguageDto.name,
+      status: createLanguageDto.status || 'active',
+      flag: createLanguageDto.flag,
       isDefault: createLanguageDto.isDefault ?? false,
       metadata: createLanguageDto.metadata || {},
     });
@@ -82,13 +83,13 @@ export class ManageLanguageUseCase {
   }
 
   /**
-   * Retrieves a language by its ID.
-   * @param id The ID of the language.
+   * Retrieves a language by its code (primary key in old system).
+   * @param code The language code.
    * @returns The language response DTO.
    * @throws NotFoundException if the language is not found.
    */
-  async getById(id: number): Promise<LanguageResponseDto> {
-    const language = await this.languageRepository.findById(id);
+  async getById(code: string): Promise<LanguageResponseDto> {
+    const language = await this.languageRepository.findById(code);
     if (!language) {
       throw new NotFoundException("Language not found");
     }
@@ -155,16 +156,16 @@ export class ManageLanguageUseCase {
 
   /**
    * Updates an existing language.
-   * @param id The ID of the language to update.
+   * @param code The language code (primary key).
    * @param updateLanguageDto The data for updating the language.
    * @returns Updated language response
    */
   async update(
-    id: number,
+    code: string,
     updateLanguageDto: UpdateLanguageDto
   ): Promise<LanguageResponseDto> {
     // 1. Find existing language
-    const existingLanguage = await this.languageRepository.findById(id);
+    const existingLanguage = await this.languageRepository.findById(code);
     if (!existingLanguage) {
       throw new NotFoundException("Language not found");
     }
@@ -181,8 +182,8 @@ export class ManageLanguageUseCase {
     // 3. If this is set as default, unset other defaults
     if (updateLanguageDto.isDefault) {
       const currentDefault = await this.languageRepository.findDefault();
-      if (currentDefault && currentDefault.id !== id) {
-        await this.languageRepository.update(currentDefault.id, {
+      if (currentDefault && currentDefault.code !== code) {
+        await this.languageRepository.update(currentDefault.code, {
           isDefault: false,
         });
       }
@@ -190,7 +191,7 @@ export class ManageLanguageUseCase {
 
     // 4. Update language in repository
     const updatedLanguage = await this.languageRepository.update(
-      id,
+      code,
       updateLanguageDto
     );
 
@@ -200,13 +201,13 @@ export class ManageLanguageUseCase {
 
   /**
    * Deletes a language.
-   * @param id The ID of the language to delete.
+   * @param code The language code (primary key).
    * @throws NotFoundException if the language is not found.
    * @throws BadRequestException if the language cannot be deleted due to business rules.
    */
-  async delete(id: number): Promise<void> {
+  async delete(code: string): Promise<void> {
     // 1. Find existing language
-    const existingLanguage = await this.languageRepository.findById(id);
+    const existingLanguage = await this.languageRepository.findById(code);
     if (!existingLanguage) {
       throw new NotFoundException("Language not found");
     }
@@ -227,7 +228,7 @@ export class ManageLanguageUseCase {
     }
 
     // 3. Delete language from repository
-    await this.languageRepository.delete(id);
+    await this.languageRepository.delete(code);
   }
 
   /**

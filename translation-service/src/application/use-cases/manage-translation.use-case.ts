@@ -44,28 +44,28 @@ export class ManageTranslationUseCase {
       throw new BadRequestException(validation.errors.join(", "));
     }
 
-    // 2. Generate MD5 key for translation
+    // 2. Generate MD5 key for translation (using languageCode)
     const key = this.translationDomainService.generateTranslationKey(
-      createTranslationDto.originalText,
-      createTranslationDto.languageId
+      createTranslationDto.original,
+      createTranslationDto.languageCode
     );
 
     // 3. Check if translation already exists
     const existingTranslation =
       await this.languageValueRepository.findByKeyAndLanguage(
         key,
-        createTranslationDto.languageId
+        createTranslationDto.languageCode
       );
     if (existingTranslation) {
       throw new ConflictException("Translation already exists");
     }
 
-    // 4. Create translation entity
+    // 4. Create translation entity (old system fields)
     const languageValue = new LanguageValue({
       key,
-      originalText: createTranslationDto.originalText,
-      translatedText: createTranslationDto.translatedText,
-      languageId: createTranslationDto.languageId,
+      original: createTranslationDto.original,
+      destination: createTranslationDto.destination,
+      languageCode: createTranslationDto.languageCode,
       context: createTranslationDto.context || {},
       isApproved: createTranslationDto.isApproved ?? false,
     });

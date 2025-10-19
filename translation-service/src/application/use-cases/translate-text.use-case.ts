@@ -56,17 +56,17 @@ export class TranslateTextUseCase {
       );
     }
 
-    // 3. Generate translation key
+    // 3. Generate translation key using language code (old system)
     const key = this.translationDomainService.generateTranslationKey(
       translateTextDto.text,
-      targetLanguage.id
+      targetLanguage.code
     );
 
     // 4. Check if translation exists in cache
     const existingTranslation =
       await this.languageValueRepository.findByKeyAndLanguage(
         key,
-        targetLanguage.id
+        targetLanguage.code
       );
 
     if (existingTranslation) {
@@ -76,7 +76,7 @@ export class TranslateTextUseCase {
       );
 
       return {
-        translatedText: existingTranslation.translatedText,
+        translatedText: existingTranslation.destination,
         fromCache: true,
       };
     }
@@ -90,9 +90,9 @@ export class TranslateTextUseCase {
 
     // 6. Save the translation for future use
     const createTranslationDto: CreateTranslationDto = {
-      originalText: translateTextDto.text,
-      translatedText,
-      languageId: targetLanguage.id,
+      original: translateTextDto.text,
+      destination: translatedText,
+      languageCode: targetLanguage.code,
       context: translateTextDto.context,
       isApproved: false, // Mark as pending approval
     };
@@ -188,9 +188,9 @@ export class TranslateTextUseCase {
     }
 
     const totalTranslations =
-      await this.languageValueRepository.countByLanguage(language.id);
+      await this.languageValueRepository.countByLanguage(language.code);
     const approvedTranslations =
-      await this.languageValueRepository.countApprovedByLanguage(language.id);
+      await this.languageValueRepository.countApprovedByLanguage(language.code);
     const pendingTranslations = totalTranslations - approvedTranslations;
 
     // Calculate cache hit rate (simplified)
