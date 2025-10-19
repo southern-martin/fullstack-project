@@ -54,7 +54,7 @@ export const PRICING_API_CONFIG = {
 export const TRANSLATION_API_CONFIG = {
   BASE_URL:
     (process.env.REACT_APP_TRANSLATION_API_URL || 'http://localhost:3007') +
-    '/api/v1',
+    '/api/v1/translation',
   HEADERS: {
     'Content-Type': 'application/json',
     'Accept-Language': 'en',

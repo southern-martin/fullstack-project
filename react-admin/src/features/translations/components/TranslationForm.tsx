@@ -21,7 +21,10 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
 }) => {
     const [formData, setFormData] = useState({
         key: translation?.key || '',
-        value: translation?.value || '',
+        value: translation?.destination || translation?.value || '',
+        original: translation?.original || '',
+        languageCode: translation?.languageCode || '',
+        // Backward compatibility
         languageId: translation?.languageId?.toString() || '',
     });
 
@@ -40,7 +43,7 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
         }
 
         const currentFormData = formDataRef.current;
-        if (!currentFormData.key.trim() || !currentFormData.value.trim() || !currentFormData.languageId) {
+        if (!currentFormData.key.trim() || !currentFormData.value.trim() || (!currentFormData.languageCode && !currentFormData.languageId)) {
             toast.error('Please fill in all required fields');
             return;
         }
@@ -48,8 +51,10 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
         try {
             setIsSubmitting(true);
             await onSubmit({
-                ...currentFormData,
-                languageId: parseInt(currentFormData.languageId),
+                key: currentFormData.key,
+                original: currentFormData.original || currentFormData.value,
+                destination: currentFormData.value,
+                languageCode: currentFormData.languageCode || currentFormData.languageId,
             });
         } catch (error) {
             // Error handling is done in parent component
@@ -123,20 +128,20 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
 
                 {/* Language Selection */}
                 <div>
-                    <label htmlFor="languageId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label htmlFor="languageCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Language *
                     </label>
                     <select
-                        id="languageId"
-                        value={formData.languageId}
-                        onChange={(e) => handleChange('languageId', e.target.value)}
+                        id="languageCode"
+                        value={formData.languageCode || formData.languageId}
+                        onChange={(e) => handleChange('languageCode', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
                         required
                     >
                         <option value="">Select a language</option>
                         {languages.map((language) => (
-                            <option key={language.id} value={language.id}>
-                                {getLanguageFlag(language.code)} {language.name} ({language.code})
+                            <option key={language.code} value={language.code}>
+                                {language.flag || getLanguageFlag(language.code)} {language.name} ({language.code})
                             </option>
                         ))}
                     </select>

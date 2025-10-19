@@ -236,8 +236,8 @@ export const useUpdateLanguage = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: UpdateLanguageDto }) =>
-      translationService.updateLanguage(id, data),
+    mutationFn: ({ code, data }: { code: string; data: UpdateLanguageDto }) =>
+      translationService.updateLanguage(code, data),
     onSuccess: (updatedLanguage: Language, variables) => {
       // Update language in cache
       queryClient.setQueryData(
