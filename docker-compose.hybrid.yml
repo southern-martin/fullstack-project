@@ -331,6 +331,66 @@ services:
       interval: 30s
       start_period: 40s
 
+  # Translation Service Database
+  translation-service-db:
+    image: mysql:8.0
+    container_name: translation-service-database
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: translation_root_password
+      MYSQL_DATABASE: translation_service_db
+      MYSQL_USER: translation_user
+      MYSQL_PASSWORD: translation_password
+    ports:
+      - "3312:3306"
+    volumes:
+      - translation_service_db_data:/var/lib/mysql
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ptranslation_root_password"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
+
+  # Translation Service
+  translation-service:
+    build:
+      context: .
+      dockerfile: translation-service/Dockerfile
+    container_name: translation-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3007
+      # Separate Database Configuration
+      DB_HOST: translation-service-db
+      DB_PORT: 3306
+      DB_USERNAME: translation_user
+      DB_PASSWORD: translation_password
+      DB_NAME: translation_service_db
+      # Shared Redis Configuration
+      REDIS_HOST: shared-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: shared_redis_password_2024
+      REDIS_KEY_PREFIX: translation
+    ports:
+      - "3007:3007"
+    depends_on:
+      translation-service-db:
+        condition: service_healthy
+      shared-redis:
+        condition: service_healthy
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3007/health"]
+      timeout: 10s
+      retries: 3
+      interval: 30s
+      start_period: 40s
+
   # ===========================================
   # FRONTEND
   # ===========================================
@@ -348,6 +408,7 @@ services:
       REACT_APP_CUSTOMER_API_URL: http://localhost:3004
       REACT_APP_CARRIER_API_URL: http://localhost:3005
       REACT_APP_PRICING_API_URL: http://localhost:3006
+      REACT_APP_TRANSLATION_API_URL: http://localhost:3007
     ports:
       - "3000:3000"
     depends_on:
@@ -356,6 +417,7 @@ services:
       - customer-service
       - carrier-service
       - pricing-service
+      - translation-service
     networks:
       - shared-services-network
 
@@ -372,6 +434,8 @@ volumes:
   carrier_service_db_data:
     driver: local
   pricing_service_db_data:
+    driver: local
+  translation_service_db_data:
     driver: local
 
 networks:
