@@ -34,23 +34,16 @@ RUN apk add --no-cache curl
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nestjs -u 1001
 
-# Set working directory
-WORKDIR /app
+# Set working directory - IMPORTANT: Must match service directory for NPM resolution
+WORKDIR /app/customer-service
 
-    # Copy shared infrastructure from builder
-    # Builder creates: /app/customer-service/dist/shared/infrastructure/src/
-    # From /app/dist/customer-service/src, ../../../../shared/infrastructure/src resolves to /shared/infrastructure/src
-    COPY --from=builder /app/customer-service/dist/shared/infrastructure/src /shared/infrastructure/src
-
-    # Create symlinks for .ts extensions (TypeScript emits require with .ts, but files are .js)
-    RUN find /shared/infrastructure/src -name "*.js" -type f | while read f; do \
-        ln -sf "$(basename "$f")" "${f%.js}.ts"; \
-        done
+# Copy shared infrastructure to parent directory for NPM resolution
+COPY --from=builder /app/shared/infrastructure /app/shared/infrastructure
 
 # Copy package files
-COPY customer-service/package*.json ./
+COPY --from=builder /app/customer-service/package*.json ./
 
-# Install only production dependencies
+# Install only production dependencies (creates symlink to ../shared/infrastructure)
 RUN npm ci --only=production && npm cache clean --force
 
 # Copy built application from builder stage
@@ -64,8 +57,8 @@ USER nestjs
 EXPOSE 3004
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3004/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:${PORT:-3004}/api/v1/health || exit 1
 
 # Start the application
 CMD ["node", "dist/customer-service/src/main.js"]

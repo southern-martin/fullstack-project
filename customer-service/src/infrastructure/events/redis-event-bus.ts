@@ -19,13 +19,19 @@ export class RedisEventBus implements EventBusInterface {
     const redisPort = parseInt(process.env.REDIS_PORT || "6379");
     const redisPassword = process.env.REDIS_PASSWORD;
 
-    this.client = createClient({
+    const config: any = {
       socket: {
         host: redisHost,
         port: redisPort,
       },
-      password: redisPassword,
-    }) as RedisClientType;
+    };
+
+    // Only add password if it's actually set
+    if (redisPassword) {
+      config.password = redisPassword;
+    }
+
+    this.client = createClient(config) as RedisClientType;
 
     this.initialize();
   }

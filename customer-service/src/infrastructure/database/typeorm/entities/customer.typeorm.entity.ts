@@ -13,7 +13,6 @@ import {
  * Maps to domain Customer entity
  */
 @Entity("customers")
-@Index(["email"], { unique: true })
 @Index(["isActive"])
 @Index(["createdAt"])
 export class CustomerTypeOrmEntity {

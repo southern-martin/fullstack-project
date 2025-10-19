@@ -162,8 +162,8 @@ services:
   # Customer Service
   customer-service:
     build:
-      context: ./customer-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: customer-service/Dockerfile
     container_name: customer-service
     restart: unless-stopped
     environment:
@@ -226,8 +226,8 @@ services:
   # Carrier Service
   carrier-service:
     build:
-      context: ./carrier-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: carrier-service/Dockerfile
     container_name: carrier-service
     restart: unless-stopped
     environment:
