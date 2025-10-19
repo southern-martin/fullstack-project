@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { TypeOrmModule } from "@nestjs/typeorm";
 
 // Use Cases
 import { CreateCarrierUseCase } from "./use-cases/create-carrier.use-case";
@@ -13,6 +14,7 @@ import { CarrierDomainService } from "../domain/services/carrier.domain.service"
 
 // Infrastructure Implementations
 import { CarrierRepository } from "../infrastructure/database/typeorm/repositories/carrier.repository";
+import { CarrierTypeOrmEntity } from "../infrastructure/database/typeorm/entities/carrier.typeorm.entity";
 import { RedisEventBus } from "../infrastructure/events/redis-event-bus";
 
 /**
@@ -21,6 +23,10 @@ import { RedisEventBus } from "../infrastructure/events/redis-event-bus";
  * Follows Clean Architecture principles
  */
 @Module({
+  imports: [
+    // Register TypeORM entity for dependency injection
+    TypeOrmModule.forFeature([CarrierTypeOrmEntity]),
+  ],
   providers: [
     // Domain Services
     CarrierDomainService,
@@ -52,6 +58,12 @@ import { RedisEventBus } from "../infrastructure/events/redis-event-bus";
 
     // Export domain services
     CarrierDomainService,
+
+    // Export repository interface for controllers if needed
+    "CarrierRepositoryInterface",
+    
+    // Export event bus for other modules
+    "IEventBus",
   ],
 })
 export class ApplicationModule {}

@@ -8,21 +8,16 @@ import {
 } from "typeorm";
 
 @Entity("carriers")
-@Index(["name"], { unique: true })
 @Index(["isActive"])
 @Index(["createdAt"])
 export class CarrierTypeOrmEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
+  @UpdateDateColumn()
   updatedAt: Date;
 
   @Column({ unique: true, length: 255 })
