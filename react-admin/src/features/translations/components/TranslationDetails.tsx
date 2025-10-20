@@ -25,11 +25,11 @@ const TranslationDetails: React.FC<TranslationDetailsProps> = ({
                         </p>
                     </div>
                     <div className="flex items-center space-x-2">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${translation.isActive
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${translation.isApproved
                             ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400'
                             : 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400'
                             }`}>
-                            {translation.isActive ? 'Active' : 'Inactive'}
+                            {translation.isApproved ? 'Approved' : 'Pending'}
                         </span>
                     </div>
                 </div>
@@ -37,10 +37,10 @@ const TranslationDetails: React.FC<TranslationDetailsProps> = ({
                 {/* Translation Key */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Translation Key
+                        Translation Key (MD5)
                     </label>
                     <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
-                        <code className="text-sm text-gray-900 dark:text-gray-100">{translation.key}</code>
+                        <code className="text-sm text-gray-900 dark:text-gray-100 break-all">{translation.key}</code>
                     </div>
                 </div>
 
@@ -51,25 +51,79 @@ const TranslationDetails: React.FC<TranslationDetailsProps> = ({
                     </label>
                     <div className="flex items-center px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
                         <span className="text-lg mr-2">
-                            🌐
+                            {translation.language?.flag || '🌐'}
                         </span>
                         <span className="text-sm text-gray-900 dark:text-gray-100">
-                            Language ID: {translation.languageId} ({translation.languageCode})
+                            {translation.language?.name || translation.languageCode.toUpperCase()}
                         </span>
                     </div>
                 </div>
 
-                {/* Translation Value */}
+                {/* Original Text */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Translation Value
+                        Original Text
                     </label>
                     <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
                         <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
-                            {translation.value}
+                            {translation.original}
                         </p>
                     </div>
                 </div>
+
+                {/* Translated Text */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Translated Text
+                    </label>
+                    <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
+                            {translation.destination}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Context (if exists) */}
+                {translation.context && Object.keys(translation.context).length > 0 && (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Context
+                        </label>
+                        <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
+                            <pre className="text-sm text-gray-900 dark:text-gray-100">
+                                {JSON.stringify(translation.context, null, 2)}
+                            </pre>
+                        </div>
+                    </div>
+                )}
+
+                {/* Usage Stats */}
+                {translation.usageCount !== undefined && (
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Usage Count
+                            </label>
+                            <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
+                                <span className="text-sm text-gray-900 dark:text-gray-100">
+                                    {translation.usageCount} times
+                                </span>
+                            </div>
+                        </div>
+                        {translation.lastUsedAt && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Last Used
+                                </label>
+                                <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
+                                    <span className="text-sm text-gray-900 dark:text-gray-100">
+                                        {new Date(translation.lastUsedAt).toLocaleString()}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
 
 
                 {/* Metadata */}

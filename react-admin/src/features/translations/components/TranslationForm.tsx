@@ -21,11 +21,9 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
 }) => {
     const [formData, setFormData] = useState({
         key: translation?.key || '',
-        value: translation?.destination || translation?.value || '',
         original: translation?.original || '',
+        destination: translation?.destination || '',
         languageCode: translation?.languageCode || '',
-        // Backward compatibility
-        languageId: translation?.languageId?.toString() || '',
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,7 +41,7 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
         }
 
         const currentFormData = formDataRef.current;
-        if (!currentFormData.key.trim() || !currentFormData.value.trim() || (!currentFormData.languageCode && !currentFormData.languageId)) {
+        if (!currentFormData.key.trim() || !currentFormData.original.trim() || !currentFormData.destination.trim() || !currentFormData.languageCode) {
             toast.error('Please fill in all required fields');
             return;
         }
@@ -52,9 +50,9 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
             setIsSubmitting(true);
             await onSubmit({
                 key: currentFormData.key,
-                original: currentFormData.original || currentFormData.value,
-                destination: currentFormData.value,
-                languageCode: currentFormData.languageCode || currentFormData.languageId,
+                original: currentFormData.original,
+                destination: currentFormData.destination,
+                languageCode: currentFormData.languageCode,
             });
         } catch (error) {
             // Error handling is done in parent component
@@ -133,7 +131,7 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
                     </label>
                     <select
                         id="languageCode"
-                        value={formData.languageCode || formData.languageId}
+                        value={formData.languageCode}
                         onChange={(e) => handleChange('languageCode', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
                         required
@@ -147,18 +145,34 @@ const TranslationForm: React.FC<TranslationFormProps> = ({
                     </select>
                 </div>
 
-                {/* Translation Value */}
+                {/* Original Text */}
                 <div>
-                    <label htmlFor="value" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Translation Value *
+                    <label htmlFor="original" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Original Text *
                     </label>
                     <textarea
-                        id="value"
-                        value={formData.value}
-                        onChange={(e) => handleChange('value', e.target.value)}
+                        id="original"
+                        value={formData.original}
+                        onChange={(e) => handleChange('original', e.target.value)}
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
-                        placeholder="Enter the translation value..."
+                        placeholder="Enter the original text..."
+                        required
+                    />
+                </div>
+
+                {/* Translated Text */}
+                <div>
+                    <label htmlFor="destination" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Translated Text *
+                    </label>
+                    <textarea
+                        id="destination"
+                        value={formData.destination}
+                        onChange={(e) => handleChange('destination', e.target.value)}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
+                        placeholder="Enter the translated text..."
                         required
                     />
                 </div>
