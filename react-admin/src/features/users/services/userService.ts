@@ -50,7 +50,7 @@ class UserService {
   // Add health check method
   async healthCheck(): Promise<boolean> {
     try {
-      await apiClient.get('/api/v1/health');
+      await apiClient.get('/health');
       return true;
     } catch (error) {
       console.error('User service health check failed:', error);
