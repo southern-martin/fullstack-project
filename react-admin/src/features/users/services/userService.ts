@@ -1,4 +1,4 @@
-import { apiClient } from '../../../shared/utils/api';
+import { userApiClient } from './userApiClient';
 import { userApiService } from './userApiService';
 
 class UserService {
@@ -50,7 +50,7 @@ class UserService {
   // Add health check method
   async healthCheck(): Promise<boolean> {
     try {
-      await apiClient.get('/health');
+      await userApiClient.get('/health');
       return true;
     } catch (error) {
       console.error('User service health check failed:', error);
