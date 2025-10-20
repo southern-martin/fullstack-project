@@ -63,8 +63,10 @@ class CarrierApiClient {
         throw error;
       }
 
-      const data = await response.json();
-      return data;
+      const responseData = await response.json();
+      // Unwrap the standardized API response format
+      // Backend returns: { data: {...}, message: "Success", statusCode: 200, success: true }
+      return responseData.data || responseData;
     } catch (error) {
       if (!(error as any).validationErrors && (error as any).status !== 404) {
         console.error('Carrier API request failed:', error);
