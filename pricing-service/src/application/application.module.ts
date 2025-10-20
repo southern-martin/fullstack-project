@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { TypeOrmModule } from "@nestjs/typeorm";
 
 // Use Cases
 import { CalculatePriceUseCase } from "./use-cases/calculate-price.use-case";
@@ -8,11 +9,16 @@ import { ManagePricingRuleUseCase } from "./use-cases/manage-pricing-rule.use-ca
 // Domain Services
 import { PricingDomainService } from "../domain/services/pricing.domain.service";
 
-// Repository Interfaces (will be implemented in infrastructure)
-
-// Infrastructure Implementations
-import { PriceCalculationRepository } from "../infrastructure/database/typeorm/repositories/price-calculation.repository";
+// Infrastructure Implementations (repositories)
 import { PricingRuleRepository } from "../infrastructure/database/typeorm/repositories/pricing-rule.repository";
+import { PriceCalculationRepository } from "../infrastructure/database/typeorm/repositories/price-calculation.repository";
+
+// TypeORM Entities
+import { PricingRuleTypeOrmEntity } from "../infrastructure/database/typeorm/entities/pricing-rule.typeorm.entity";
+import { PriceCalculationTypeOrmEntity } from "../infrastructure/database/typeorm/entities/price-calculation.typeorm.entity";
+
+// Event Bus
+// import { RedisEventBus } from "../infrastructure/events/redis-event-bus";
 
 /**
  * Application Module
@@ -20,6 +26,13 @@ import { PricingRuleRepository } from "../infrastructure/database/typeorm/reposi
  * Follows Clean Architecture principles
  */
 @Module({
+  imports: [
+    // Register TypeORM entities for dependency injection
+    TypeOrmModule.forFeature([
+      PricingRuleTypeOrmEntity,
+      PriceCalculationTypeOrmEntity,
+    ]),
+  ],
   providers: [
     // Domain Services
     PricingDomainService,
@@ -38,6 +51,12 @@ import { PricingRuleRepository } from "../infrastructure/database/typeorm/reposi
       provide: "PriceCalculationRepositoryInterface",
       useClass: PriceCalculationRepository,
     },
+
+    // Event Bus Implementation (TODO: Create RedisEventBus)
+    // {
+    //   provide: "EventBusInterface",
+    //   useClass: RedisEventBus,
+    // },
   ],
   exports: [
     // Export use cases for controllers

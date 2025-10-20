@@ -7,8 +7,8 @@ import { ApplicationModule } from "./application/application.module";
 import { InterfacesModule } from "./interfaces/interfaces.module";
 
 // TypeORM Entities
-import { PriceCalculation } from "./domain/entities/price-calculation.entity";
-import { PricingRule } from "./domain/entities/pricing-rule.entity";
+import { PricingRuleTypeOrmEntity } from "./infrastructure/database/typeorm/entities/pricing-rule.typeorm.entity";
+import { PriceCalculationTypeOrmEntity } from "./infrastructure/database/typeorm/entities/price-calculation.typeorm.entity";
 
 /**
  * Main Application Module
@@ -23,15 +23,15 @@ import { PricingRule } from "./domain/entities/pricing-rule.entity";
       envFilePath: [".env.local", ".env"],
     }),
 
-    // Database
+    // Database Connection
     TypeOrmModule.forRoot({
-      type: "postgres",
+      type: "mysql",
       host: process.env.DB_HOST || "localhost",
-      port: parseInt(process.env.DB_PORT) || 5432,
-      username: process.env.DB_USERNAME || "postgres",
+      port: parseInt(process.env.DB_PORT) || 3306,
+      username: process.env.DB_USERNAME || "root",
       password: process.env.DB_PASSWORD || "password",
-      database: process.env.DB_DATABASE || "pricing_service_db",
-      entities: [PricingRule, PriceCalculation],
+      database: process.env.DB_NAME || "pricing_service_db",
+      entities: [PricingRuleTypeOrmEntity, PriceCalculationTypeOrmEntity],
       synchronize: process.env.NODE_ENV !== "production",
       logging: process.env.NODE_ENV === "development",
     }),

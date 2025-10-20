@@ -290,8 +290,8 @@ services:
   # Pricing Service
   pricing-service:
     build:
-      context: ./pricing-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./pricing-service/Dockerfile
     container_name: pricing-service
     restart: unless-stopped
     environment:
