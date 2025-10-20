@@ -179,7 +179,24 @@ class TranslationApiClient {
   }
 
   async healthCheck(): Promise<any> {
-    return this.request<any>('/health', { method: 'GET' });
+    // Health endpoint is at /api/v1/health, not /api/v1/translation/health
+    // So we need to call it directly without using the base URL
+    const healthUrl = this.baseURL.replace('/api/v1/translation', '/api/v1/health');
+    const token = localStorage.getItem('authToken');
+    
+    const response = await fetch(healthUrl, {
+      method: 'GET',
+      headers: {
+        ...this.defaultHeaders,
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Cannot GET ${healthUrl.replace(this.baseURL.split('/api')[0], '')}`);
+    }
+    
+    return response.json();
   }
 }
 
