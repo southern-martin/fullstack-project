@@ -50,9 +50,9 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
         }
     };
 
-    const handleUpdateLanguage = async (id: number, languageData: any) => {
+    const handleUpdateLanguage = async (code: string, languageData: any) => {
         try {
-            await translationService.updateLanguage(id, languageData);
+            await translationService.updateLanguage(code, languageData);
             toast.success('Language updated successfully');
             loadLanguages();
             onLanguageChange();
@@ -63,9 +63,9 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
         }
     };
 
-    const handleDeleteLanguage = async (id: number) => {
+    const handleDeleteLanguage = async (code: string) => {
         try {
-            await translationService.deleteLanguage(id);
+            await translationService.deleteLanguage(code);
             toast.success('Language deleted successfully');
             loadLanguages();
             onLanguageChange();
@@ -74,9 +74,11 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
         }
     };
 
-    const toggleLanguageStatus = async (id: number, isActive: boolean) => {
+    const toggleLanguageStatus = async (code: string, isActive: boolean) => {
         try {
-            await translationService.updateLanguage(id, { isActive });
+            await translationService.updateLanguage(code, { 
+                status: isActive ? 'active' : 'inactive' 
+            });
             toast.success(isActive ? 'Language activated' : 'Language deactivated');
             loadLanguages();
             onLanguageChange();
@@ -121,11 +123,11 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
                 <div className="space-y-3">
                     {languages.map((language) => (
                         <div
-                            key={language.id}
+                            key={language.code}
                             className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
                         >
                             <div className="flex items-center space-x-3">
-                                <span className="text-2xl">{getLanguageFlag(language.code)}</span>
+                                <span className="text-2xl">{language.flag || getLanguageFlag(language.code)}</span>
                                 <div>
                                     <div className="flex items-center space-x-2">
                                         <span className="font-medium text-gray-900 dark:text-gray-100">
@@ -134,23 +136,23 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
                                         <span className="text-sm text-gray-500 dark:text-gray-400">
                                             ({language.code})
                                         </span>
-                                        {language.code === 'en' && (
+                                        {(language.code === 'en' || language.isDefault) && (
                                             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400">
                                                 Default
                                             </span>
                                         )}
                                     </div>
                                     <div className="text-sm text-gray-500 dark:text-gray-400">
-                                        {language.nativeName}
+                                        {language.localName}
                                     </div>
                                 </div>
                             </div>
                             <div className="flex items-center space-x-2">
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${language.isActive
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${language.isActive || language.status === 'active'
                                     ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400'
                                     : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400'
                                     }`}>
-                                    {language.isActive ? 'Active' : 'Inactive'}
+                                    {(language.isActive || language.status === 'active') ? 'Active' : 'Inactive'}
                                 </span>
                                 <Button
                                     variant="secondary"
@@ -165,9 +167,9 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
                                 <Button
                                     variant="secondary"
                                     size="sm"
-                                    onClick={() => toggleLanguageStatus(language.id, !language.isActive)}
+                                    onClick={() => toggleLanguageStatus(language.code, !(language.isActive || language.status === 'active'))}
                                 >
-                                    {language.isActive ? (
+                                    {(language.isActive || language.status === 'active') ? (
                                         <XMarkIcon className="h-4 w-4" />
                                     ) : (
                                         <CheckIcon className="h-4 w-4" />
@@ -177,7 +179,7 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
                                     <Button
                                         variant="danger"
                                         size="sm"
-                                        onClick={() => handleDeleteLanguage(language.id)}
+                                        onClick={() => handleDeleteLanguage(language.code)}
                                     >
                                         <TrashIcon className="h-4 w-4" />
                                     </Button>
@@ -223,7 +225,7 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
                 >
                     <LanguageForm
                         language={selectedLanguage}
-                        onSubmit={(data) => handleUpdateLanguage(selectedLanguage.id, data)}
+                        onSubmit={(data) => handleUpdateLanguage(selectedLanguage.code, data)}
                         onCancel={() => setShowEditModal(false)}
                     />
                 </Modal>
@@ -247,14 +249,15 @@ const LanguageForm: React.FC<LanguageFormProps> = ({
     const [formData, setFormData] = useState({
         code: language?.code || '',
         name: language?.name || '',
-        nativeName: language?.nativeName || '',
-        isActive: language?.isActive ?? true,
-        isDefault: language?.code === 'en' ?? false,
-        flag: '🌐',
-        region: language?.code?.toUpperCase() || '',
-        currency: language?.code === 'en' ? 'USD' : 'EUR',
-        direction: language?.isRTL ? 'rtl' : 'ltr',
-        dateFormat: 'MM/DD/YYYY',
+        localName: language?.localName || '',
+        status: language?.status || 'active',
+        isActive: language?.isActive || language?.status === 'active',
+        isDefault: language?.code === 'en' || language?.isDefault || false,
+        flag: language?.flag || '🌐',
+        region: language?.metadata?.region || language?.code?.toUpperCase() || '',
+        currency: language?.metadata?.currency || (language?.code === 'en' ? 'USD' : 'EUR'),
+        direction: language?.metadata?.direction || (language?.isRTL ? 'rtl' : 'ltr'),
+        dateFormat: language?.metadata?.dateFormat || 'MM/DD/YYYY',
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -262,7 +265,7 @@ const LanguageForm: React.FC<LanguageFormProps> = ({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!formData.code.trim() || !formData.name.trim() || !formData.nativeName.trim()) {
+        if (!formData.code.trim() || !formData.name.trim() || !formData.localName.trim()) {
             toast.error('Please fill in all required fields');
             return;
         }
@@ -272,7 +275,7 @@ const LanguageForm: React.FC<LanguageFormProps> = ({
             await onSubmit({
                 code: formData.code.toLowerCase(),
                 name: formData.name,
-                nativeName: formData.nativeName,
+                localName: formData.localName,
                 isActive: formData.isActive,
                 isDefault: formData.isDefault,
                 metadata: {
@@ -349,14 +352,14 @@ const LanguageForm: React.FC<LanguageFormProps> = ({
 
                 {/* Native Name */}
                 <div>
-                    <label htmlFor="nativeName" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="localName" className="block text-sm font-medium text-gray-700 mb-1">
                         Native Name *
                     </label>
                     <input
                         type="text"
-                        id="nativeName"
-                        value={formData.nativeName}
-                        onChange={(e) => handleChange('nativeName', e.target.value)}
+                        id="localName"
+                        value={formData.localName}
+                        onChange={(e) => handleChange('localName', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         placeholder="e.g., English"
                         required

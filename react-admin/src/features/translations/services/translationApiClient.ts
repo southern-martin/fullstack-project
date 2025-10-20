@@ -81,8 +81,8 @@ class TranslationApiClient {
     return this.request<any>('/languages/active', { method: 'GET' });
   }
 
-  async getLanguage(id: number): Promise<any> {
-    return this.request<any>(`/languages/${id}`, { method: 'GET' });
+  async getLanguage(code: string): Promise<any> {
+    return this.request<any>(`/languages/${code}`, { method: 'GET' });
   }
 
   async getLanguageByCode(code: string): Promise<any> {
@@ -96,15 +96,15 @@ class TranslationApiClient {
     });
   }
 
-  async updateLanguage(id: number, data: any): Promise<any> {
-    return this.request<any>(`/languages/${id}`, {
-      method: 'PUT',
+  async updateLanguage(code: string, data: any): Promise<any> {
+    return this.request<any>(`/languages/${code}`, {
+      method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
 
-  async deleteLanguage(id: number): Promise<any> {
-    return this.request<any>(`/languages/${id}`, { method: 'DELETE' });
+  async deleteLanguage(code: string): Promise<any> {
+    return this.request<any>(`/languages/${code}`, { method: 'DELETE' });
   }
 
   async getLanguageCount(): Promise<any> {
@@ -140,7 +140,7 @@ class TranslationApiClient {
 
   async updateTranslation(id: number, data: any): Promise<any> {
     return this.request<any>(`/translations/${id}`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(data),
     });
   }

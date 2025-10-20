@@ -65,13 +65,6 @@ export class ApiResponseDto<T = any> {
   }
 
   /**
-   * Convert to JSON
-   */
-  toJSON(): string {
-    return JSON.stringify(this);
-  }
-
-  /**
    * Get response metadata
    */
   getMetadata(): ResponseMetadata {

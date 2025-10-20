@@ -20,6 +20,12 @@ export * from "./dto/api-response.dto";
 export * from "./dto/error-response.dto";
 export * from "./dto/pagination.dto";
 
+// Filters
+export * from "./filters/http-exception.filter";
+
+// Interceptors
+export * from "./interceptors/transform.interceptor";
+
 // Communication
 export * from "./communication/http-client";
 export * from "./communication/service-communicator";

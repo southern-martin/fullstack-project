@@ -1,6 +1,8 @@
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
+import { HttpExceptionFilter } from "@shared/infrastructure/filters/http-exception.filter";
+import { TransformInterceptor } from "@shared/infrastructure/interceptors/transform.interceptor";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,6 +22,12 @@ async function bootstrap() {
     })
   );
 
+  // Global exception filter - Standardizes all error responses
+  app.useGlobalFilters(new HttpExceptionFilter());
+
+  // Global transform interceptor - Wraps all successful responses
+  app.useGlobalInterceptors(new TransformInterceptor());
+
   // Set global prefix
   app.setGlobalPrefix("api/v1");
 
@@ -30,6 +38,7 @@ async function bootstrap() {
   console.log(
     `📚 API Documentation: http://localhost:${port}/api/v1/auth/health`
   );
+  console.log(`✅ API Standards: Global Exception Filter & Transform Interceptor enabled`);
 }
 
 bootstrap();

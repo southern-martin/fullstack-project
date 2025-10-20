@@ -11,7 +11,7 @@ import { toast } from 'react-hot-toast';
 
 import Button from '../../../shared/components/ui/Button';
 import Card from '../../../shared/components/ui/Card';
-import { FormField } from '../../../shared/components/ui/FormField';
+import { FormField, SelectField } from '../../../shared/components/ui/FormField';
 
 interface SettingsData {
     general: {
@@ -117,42 +117,34 @@ const Settings: React.FC = () => {
                     placeholder={'Enter company email'}
                 />
 
-                <div>
-                    <label htmlFor="timezone" className="block text-sm font-medium text-gray-700 mb-2">
-                        {'Timezone'}
-                    </label>
-                    <select
-                        id="timezone"
-                        value={settings.general.timezone}
-                        onChange={handleInputChange('general', 'timezone')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        <option value="UTC">UTC</option>
-                        <option value="America/New_York">Eastern Time</option>
-                        <option value="America/Chicago">Central Time</option>
-                        <option value="America/Denver">Mountain Time</option>
-                        <option value="America/Los_Angeles">Pacific Time</option>
-                        <option value="Europe/London">London</option>
-                        <option value="Europe/Paris">Paris</option>
-                        <option value="Asia/Tokyo">Tokyo</option>
-                    </select>
-                </div>
+                <SelectField
+                    label={'Timezone'}
+                    name="timezone"
+                    value={settings.general.timezone}
+                    onChange={handleInputChange('general', 'timezone')}
+                    options={[
+                        { value: 'UTC', label: 'UTC' },
+                        { value: 'America/New_York', label: 'Eastern Time' },
+                        { value: 'America/Chicago', label: 'Central Time' },
+                        { value: 'America/Denver', label: 'Mountain Time' },
+                        { value: 'America/Los_Angeles', label: 'Pacific Time' },
+                        { value: 'Europe/London', label: 'London' },
+                        { value: 'Europe/Paris', label: 'Paris' },
+                        { value: 'Asia/Tokyo', label: 'Tokyo' }
+                    ]}
+                />
 
-                <div>
-                    <label htmlFor="dateFormat" className="block text-sm font-medium text-gray-700 mb-2">
-                        {'Date Format'}
-                    </label>
-                    <select
-                        id="dateFormat"
-                        value={settings.general.dateFormat}
-                        onChange={handleInputChange('general', 'dateFormat')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-                        <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-                        <option value="YYYY-MM-DD">YYYY-MM-DD</option>
-                    </select>
-                </div>
+                <SelectField
+                    label={'Date Format'}
+                    name="dateFormat"
+                    value={settings.general.dateFormat}
+                    onChange={handleInputChange('general', 'dateFormat')}
+                    options={[
+                        { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY' },
+                        { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY' },
+                        { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD' }
+                    ]}
+                />
             </div>
         </div>
     );
@@ -231,35 +223,21 @@ const Settings: React.FC = () => {
                     />
                 </div>
 
-                <div>
-                    <label htmlFor="sessionTimeout" className="block text-sm font-medium text-gray-700 mb-2">
-                        {'Session Timeout (minutes)'}
-                    </label>
-                    <input
-                        type="number"
-                        id="sessionTimeout"
-                        value={settings.security.sessionTimeout}
-                        onChange={handleInputChange('security', 'sessionTimeout')}
-                        min="5"
-                        max="480"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                </div>
+                <FormField
+                    label={'Session Timeout (minutes)'}
+                    name="sessionTimeout"
+                    type="number"
+                    value={settings.security.sessionTimeout.toString()}
+                    onChange={handleInputChange('security', 'sessionTimeout')}
+                />
 
-                <div>
-                    <label htmlFor="passwordExpiry" className="block text-sm font-medium text-gray-700 mb-2">
-                        {'Password Expiry (days)'}
-                    </label>
-                    <input
-                        type="number"
-                        id="passwordExpiry"
-                        value={settings.security.passwordExpiry}
-                        onChange={handleInputChange('security', 'passwordExpiry')}
-                        min="30"
-                        max="365"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                </div>
+                <FormField
+                    label={'Password Expiry (days)'}
+                    name="passwordExpiry"
+                    type="number"
+                    value={settings.security.passwordExpiry.toString()}
+                    onChange={handleInputChange('security', 'passwordExpiry')}
+                />
             </div>
         </div>
     );
@@ -267,38 +245,30 @@ const Settings: React.FC = () => {
     const renderAppearanceSettings = () => (
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label htmlFor="theme" className="block text-sm font-medium text-gray-700 mb-2">
-                        {'Theme'}
-                    </label>
-                    <select
-                        id="theme"
-                        value={settings.appearance.theme}
-                        onChange={handleInputChange('appearance', 'theme')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        <option value="light">{'Light'}</option>
-                        <option value="dark">{'Dark'}</option>
-                        <option value="auto">{'Auto'}</option>
-                    </select>
-                </div>
+                <SelectField
+                    label={'Theme'}
+                    name="theme"
+                    value={settings.appearance.theme}
+                    onChange={handleInputChange('appearance', 'theme')}
+                    options={[
+                        { value: 'light', label: 'Light' },
+                        { value: 'dark', label: 'Dark' },
+                        { value: 'auto', label: 'Auto' }
+                    ]}
+                />
 
-                <div>
-                    <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-2">
-                        {'Language'}
-                    </label>
-                    <select
-                        id="language"
-                        value={settings.appearance.language}
-                        onChange={handleInputChange('appearance', 'language')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        <option value="en">{'English'}</option>
-                        <option value="fr">{'French'}</option>
-                        <option value="es">{'Spanish'}</option>
-                        <option value="de">{'German'}</option>
-                    </select>
-                </div>
+                <SelectField
+                    label={'Language'}
+                    name="language"
+                    value={settings.appearance.language}
+                    onChange={handleInputChange('appearance', 'language')}
+                    options={[
+                        { value: 'en', label: 'English' },
+                        { value: 'fr', label: 'French' },
+                        { value: 'es', label: 'Spanish' },
+                        { value: 'de', label: 'German' }
+                    ]}
+                />
             </div>
 
             <div className="flex items-center justify-between">

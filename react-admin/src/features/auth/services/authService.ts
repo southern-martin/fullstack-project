@@ -5,17 +5,26 @@ import { AuthResponse, LoginCredentials, RegisterData, User } from '../types';
 class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const response = await apiClient.post<{
-      user: any;
-      access_token: string;
-      token: string;
-      expiresIn: string;
+      data: {
+        user: any;
+        access_token: string;
+        token: string;
+        expiresIn: string;
+      };
+      message: string;
+      statusCode: number;
+      timestamp: string;
+      success: boolean;
     }>(AUTH_API_CONFIG.ENDPOINTS.LOGIN, credentials);
+
+    // Unwrap the data from the standardized API response format
+    const responseData = response.data;
 
     // Transform the response to match the expected AuthResponse format
     const authResponse: AuthResponse = {
-      user: response.user,
-      token: response.token || response.access_token,
-      expiresIn: response.expiresIn,
+      user: responseData.user,
+      token: responseData.token || responseData.access_token,
+      expiresIn: responseData.expiresIn,
     };
 
     // Store token in localStorage
@@ -28,17 +37,26 @@ class AuthService {
 
   async register(data: RegisterData): Promise<AuthResponse> {
     const response = await apiClient.post<{
-      user: any;
-      access_token: string;
-      token: string;
-      expiresIn: string;
+      data: {
+        user: any;
+        access_token: string;
+        token: string;
+        expiresIn: string;
+      };
+      message: string;
+      statusCode: number;
+      timestamp: string;
+      success: boolean;
     }>(AUTH_API_CONFIG.ENDPOINTS.REGISTER, data);
+
+    // Unwrap the data from the standardized API response format
+    const responseData = response.data;
 
     // Transform the response to match the expected AuthResponse format
     const authResponse: AuthResponse = {
-      user: response.user,
-      token: response.token || response.access_token,
-      expiresIn: response.expiresIn,
+      user: responseData.user,
+      token: responseData.token || responseData.access_token,
+      expiresIn: responseData.expiresIn,
     };
 
     // Store token in localStorage
@@ -51,17 +69,26 @@ class AuthService {
 
   async refreshToken(): Promise<AuthResponse> {
     const response = await apiClient.post<{
-      user: any;
-      access_token: string;
-      token: string;
-      expiresIn: string;
+      data: {
+        user: any;
+        access_token: string;
+        token: string;
+        expiresIn: string;
+      };
+      message: string;
+      statusCode: number;
+      timestamp: string;
+      success: boolean;
     }>(AUTH_API_CONFIG.ENDPOINTS.REFRESH);
+
+    // Unwrap the data from the standardized API response format
+    const responseData = response.data;
 
     // Transform the response to match the expected AuthResponse format
     const authResponse: AuthResponse = {
-      user: response.user,
-      token: response.token || response.access_token,
-      expiresIn: response.expiresIn,
+      user: responseData.user,
+      token: responseData.token || responseData.access_token,
+      expiresIn: responseData.expiresIn,
     };
 
     // Update token in localStorage
@@ -107,7 +134,7 @@ class AuthService {
 
   async healthCheck(): Promise<boolean> {
     try {
-      await apiClient.get('/health');
+      await apiClient.get('/auth/health');
       return true;
     } catch (error) {
       console.error('Auth service health check failed:', error);

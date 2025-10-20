@@ -109,22 +109,22 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
                             {languages.map((language) => (
                                 <button
-                                    key={language.id}
+                                    key={language.code}
                                     onClick={() => handleLanguageChange(language)}
-                                    className={`w-full flex items-center space-x-3 px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${currentLanguage.id === language.id ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
+                                    className={`w-full flex items-center space-x-3 px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${currentLanguage.code === language.code ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
                                         }`}
                                 >
                                     <span className="text-lg">{getLanguageFlag(language.code)}</span>
                                     <div className="flex-1">
                                         <div className="font-medium">{language.name}</div>
-                                        <div className="text-xs text-gray-500 dark:text-gray-400">{language.nativeName}</div>
+                                        <div className="text-xs text-gray-500 dark:text-gray-400">{language.localName}</div>
                                     </div>
                                     {language.code === 'en' && (
                                         <span className="text-xs bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400 px-2 py-0.5 rounded-full">
                                             Default
                                         </span>
                                     )}
-                                    {currentLanguage.id === language.id && (
+                                    {currentLanguage.code === language.code && (
                                         <span className="text-blue-600 dark:text-blue-400">
                                             ✓
                                         </span>

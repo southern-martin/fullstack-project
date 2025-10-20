@@ -136,7 +136,7 @@ const TranslationDemo: React.FC = () => {
                             </SelectTrigger>
                             <SelectContent>
                                 {languages.map((language) => (
-                                    <SelectItem key={language.id} value={language.code}>
+                                    <SelectItem key={language.code} value={language.code}>
                                         <div className="flex items-center space-x-2">
                                             <span>{getLanguageFlag(language.code)}</span>
                                             <span>{language.name}</span>
@@ -222,7 +222,7 @@ const TranslationDemo: React.FC = () => {
                                                 <div className="flex items-center space-x-2">
                                                     <span>🌐</span>
                                                     <span className="font-medium">{language.name}</span>
-                                                    <span className="text-muted-foreground">({language.nativeName})</span>
+                                                    <span className="text-muted-foreground">({language.localName})</span>
                                                 </div>
                                                 <div className="text-muted-foreground">
                                                     Direction: {language.isRTL ? 'RTL' : 'LTR'}
@@ -239,7 +239,7 @@ const TranslationDemo: React.FC = () => {
                                 <div className="flex flex-wrap gap-2">
                                     {languages.map((language) => (
                                         <Badge
-                                            key={language.id}
+                                            key={language.code}
                                             variant={language.code === selectedLanguage ? "default" : "outline"}
                                             className="cursor-pointer"
                                             onClick={() => setSelectedLanguage(language.code)}

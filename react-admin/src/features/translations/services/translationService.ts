@@ -2,53 +2,132 @@ import { PaginatedResponse } from '../../../shared/types';
 import { translationApiClient } from './translationApiClient';
 
 export interface Language {
-  id: number;
-  code: string;
+  code: string; // Primary key (no separate id in old system)
   name: string;
-  nativeName: string;
-  isRTL: boolean;
-  isActive: boolean;
+  localName: string; // Changed from nativeName
+  status: string; // 'active' or 'inactive' (changed from isActive boolean)
+  flag?: string; // Flag emoji
+  isDefault?: boolean;
+  metadata?: {
+    direction?: 'ltr' | 'rtl'; // Changed from isRTL
+    region?: string;
+    currency?: string;
+    dateFormat?: string;
+  };
+  createdAt?: string;
+  updatedAt?: string;
+  
+  // Computed property for backward compatibility
+  isActive?: boolean; // derived from status === 'active'
+  isRTL?: boolean; // derived from metadata.direction === 'rtl'
 }
 
 export interface Translation {
   id: number;
   key: string;
-  languageId: number;
-  languageCode: string;
-  value: string;
-  isActive: boolean;
+  original: string; // Changed from originalText
+  destination: string; // Changed from translatedText  
+  languageCode: string; // Changed from languageId (number)
+  language?: {
+    code: string;
+    name: string;
+  };
+  context?: {
+    category?: string;
+    module?: string;
+    component?: string;
+    field?: string;
+  };
+  isApproved?: boolean;
+  approvedBy?: string;
+  approvedAt?: string;
+  usageCount?: number;
+  lastUsedAt?: string;
   createdAt: string;
   updatedAt: string;
+  
+  // Backward compatibility aliases
+  languageId?: number; // deprecated
+  value?: string; // deprecated, use destination
+  isActive?: boolean; // deprecated
 }
 
 export interface CreateLanguageDto {
   code: string;
   name: string;
-  nativeName?: string;
-  isRTL?: boolean;
-  isActive?: boolean;
+  localName?: string; // Changed from nativeName
+  status?: string; // 'active' or 'inactive' (changed from isActive)
+  flag?: string;
+  isDefault?: boolean;
+  metadata?: {
+    direction?: 'ltr' | 'rtl'; // Changed from isRTL
+    region?: string;
+    currency?: string;
+    dateFormat?: string;
+  };
+  
+  // Backward compatibility (will be converted)
+  nativeName?: string; // deprecated, use localName
+  isRTL?: boolean; // deprecated, use metadata.direction
+  isActive?: boolean; // deprecated, use status
 }
 
 export interface UpdateLanguageDto {
   code?: string;
   name?: string;
-  nativeName?: string;
-  isRTL?: boolean;
-  isActive?: boolean;
+  localName?: string; // Changed from nativeName
+  status?: string; // 'active' or 'inactive'
+  flag?: string;
+  isDefault?: boolean;
+  metadata?: {
+    direction?: 'ltr' | 'rtl';
+    region?: string;
+    currency?: string;
+    dateFormat?: string;
+  };
+  
+  // Backward compatibility
+  nativeName?: string; // deprecated, use localName
+  isRTL?: boolean; // deprecated, use metadata.direction
+  isActive?: boolean; // deprecated, use status
 }
 
 export interface CreateTranslationDto {
   key: string;
-  languageId: number;
-  value: string;
-  isActive?: boolean;
+  languageCode: string; // Changed from languageId (number)
+  original: string; // Changed from originalText
+  destination: string; // Changed from translatedText/value
+  context?: {
+    category?: string;
+    module?: string;
+    component?: string;
+    field?: string;
+  };
+  isApproved?: boolean;
+  
+  // Backward compatibility
+  languageId?: number; // deprecated, use languageCode
+  value?: string; // deprecated, use destination
+  isActive?: boolean; // deprecated
 }
 
 export interface UpdateTranslationDto {
   key?: string;
-  languageId?: number;
-  value?: string;
-  isActive?: boolean;
+  languageCode?: string; // Changed from languageId
+  original?: string; // Changed from originalText
+  destination?: string; // Changed from translatedText/value
+  context?: {
+    category?: string;
+    module?: string;
+    component?: string;
+    field?: string;
+  };
+  isApproved?: boolean;
+  
+  // Backward compatibility
+  languageId?: number; // deprecated, use languageCode
+  value?: string; // deprecated, use destination
+  isActive?: boolean; // deprecated
 }
 
 export interface TranslateTextDto {
@@ -64,17 +143,54 @@ export interface TranslateTextDto {
 }
 
 class TranslationService {
+  // Helper method to transform language data from backend
+  private transformLanguage(lang: any): Language {
+    return {
+      code: lang.code,
+      name: lang.name,
+      localName: lang.localName,
+      status: lang.status,
+      flag: lang.flag,
+      isDefault: lang.isDefault,
+      metadata: lang.metadata || {},
+      createdAt: lang.createdAt,
+      updatedAt: lang.updatedAt,
+      // Computed backward compatibility properties
+      isActive: lang.status === 'active',
+      isRTL: lang.metadata?.direction === 'rtl',
+    };
+  }
+
+  // Helper method to transform translation data from backend
+  private transformTranslation(trans: any): Translation {
+    return {
+      id: trans.id,
+      key: trans.key,
+      original: trans.original,
+      destination: trans.destination,
+      languageCode: trans.languageCode,
+      language: trans.language,
+      context: trans.context,
+      isApproved: trans.isApproved,
+      approvedBy: trans.approvedBy,
+      approvedAt: trans.approvedAt,
+      usageCount: trans.usageCount,
+      lastUsedAt: trans.lastUsedAt,
+      createdAt: trans.createdAt,
+      updatedAt: trans.updatedAt,
+      // Backward compatibility
+      value: trans.destination,
+    };
+  }
+
   // Language Management
   async getLanguages(): Promise<Language[]> {
     try {
       const response = await translationApiClient.getLanguages();
-      // The API returns { languages: [...], total: ..., page: ..., limit: ..., totalPages: ... }
-      return (
-        response.data.languages || response.data.data || response.data || []
-      );
+      const languages = response.data?.languages || response.data?.data || response.data || [];
+      return languages.map((lang: any) => this.transformLanguage(lang));
     } catch (error) {
       console.error('Error fetching languages:', error);
-      // Return empty array on error to prevent crashes
       return [];
     }
   }
@@ -82,23 +198,21 @@ class TranslationService {
   async getActiveLanguages(): Promise<Language[]> {
     try {
       const response = await translationApiClient.getActiveLanguages();
-      // The API returns { languages: [...], total: ..., page: ..., limit: ..., totalPages: ... }
-      return (
-        response.data.languages || response.data.data || response.data || []
-      );
+      const languages = response.data?.languages || response.data?.data || response.data || [];
+      return languages.map((lang: any) => this.transformLanguage(lang));
     } catch (error) {
       console.error('Error fetching active languages:', error);
-      // Return empty array on error to prevent crashes
       return [];
     }
   }
 
-  async getLanguage(id: number): Promise<Language> {
+  async getLanguage(code: string): Promise<Language> {
     try {
-      const response = await translationApiClient.getLanguage(id);
-      return response.data.data || response.data;
+      const response = await translationApiClient.getLanguage(code);
+      const lang = response.data?.data || response.data;
+      return this.transformLanguage(lang);
     } catch (error) {
-      console.error(`Error fetching language ${id}:`, error);
+      console.error(`Error fetching language ${code}:`, error);
       throw error;
     }
   }
@@ -106,7 +220,8 @@ class TranslationService {
   async getLanguageByCode(code: string): Promise<Language> {
     try {
       const response = await translationApiClient.getLanguageByCode(code);
-      return response.data.data || response.data;
+      const lang = response.data?.data || response.data;
+      return this.transformLanguage(lang);
     } catch (error) {
       console.error(`Error fetching language by code ${code}:`, error);
       throw error;
@@ -116,28 +231,30 @@ class TranslationService {
   async createLanguage(data: CreateLanguageDto): Promise<Language> {
     try {
       const response = await translationApiClient.createLanguage(data);
-      return response.data;
+      const lang = response.data?.data || response.data;
+      return this.transformLanguage(lang);
     } catch (error) {
       console.error('Error creating language:', error);
       throw error;
     }
   }
 
-  async updateLanguage(id: number, data: UpdateLanguageDto): Promise<Language> {
+  async updateLanguage(code: string, data: UpdateLanguageDto): Promise<Language> {
     try {
-      const response = await translationApiClient.updateLanguage(id, data);
-      return response.data;
+      const response = await translationApiClient.updateLanguage(code, data);
+      const lang = response.data?.data || response.data;
+      return this.transformLanguage(lang);
     } catch (error) {
-      console.error(`Error updating language ${id}:`, error);
+      console.error(`Error updating language ${code}:`, error);
       throw error;
     }
   }
 
-  async deleteLanguage(id: number): Promise<void> {
+  async deleteLanguage(code: string): Promise<void> {
     try {
-      await translationApiClient.deleteLanguage(id);
+      await translationApiClient.deleteLanguage(code);
     } catch (error) {
-      console.error(`Error deleting language ${id}:`, error);
+      console.error(`Error deleting language ${code}:`, error);
       throw error;
     }
   }
@@ -160,7 +277,20 @@ class TranslationService {
   }): Promise<PaginatedResponse<Translation>> {
     try {
       const response = await translationApiClient.getTranslations(params);
-      return response.data;
+      // Backend returns { translations: [...], total: ... } directly
+      const responseData = response.data || response;
+      
+      // Transform translations
+      const translations = responseData.translations || responseData.data || [];
+      const transformedTranslations = translations.map((trans: any) => this.transformTranslation(trans));
+      
+      return {
+        data: transformedTranslations,
+        total: responseData.total || 0,
+        page: params?.page || 1,
+        limit: params?.limit || 10,
+        totalPages: Math.ceil((responseData.total || 0) / (params?.limit || 10))
+      };
     } catch (error) {
       console.error('Error fetching translations:', error);
       throw error;
@@ -170,7 +300,8 @@ class TranslationService {
   async getTranslation(id: number): Promise<Translation> {
     try {
       const response = await translationApiClient.getTranslation(id);
-      return response.data;
+      const trans = response.data?.data || response.data;
+      return this.transformTranslation(trans);
     } catch (error) {
       console.error(`Error fetching translation ${id}:`, error);
       throw error;
@@ -180,7 +311,8 @@ class TranslationService {
   async createTranslation(data: CreateTranslationDto): Promise<Translation> {
     try {
       const response = await translationApiClient.createTranslation(data);
-      return response.data;
+      const trans = response.data?.data || response.data;
+      return this.transformTranslation(trans);
     } catch (error) {
       console.error('Error creating translation:', error);
       throw error;
@@ -193,7 +325,8 @@ class TranslationService {
   ): Promise<Translation> {
     try {
       const response = await translationApiClient.updateTranslation(id, data);
-      return response.data;
+      const trans = response.data?.data || response.data;
+      return this.transformTranslation(trans);
     } catch (error) {
       console.error(`Error updating translation ${id}:`, error);
       throw error;

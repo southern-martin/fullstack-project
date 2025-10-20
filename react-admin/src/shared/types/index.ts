@@ -238,12 +238,21 @@ export interface UpdateTranslationData {
 }
 
 export interface Language {
-  id: number;
-  code: string;
+  code: string; // Primary key (no numeric id)
   name: string;
-  nativeName: string;
-  isActive: boolean;
-  isDefault: boolean;
-  createdAt: string;
-  updatedAt: string;
+  localName: string; // Changed from nativeName
+  status: string; // 'active' or 'inactive'
+  flag?: string;
+  isDefault?: boolean;
+  metadata?: {
+    direction?: 'ltr' | 'rtl';
+    region?: string;
+    currency?: string;
+    dateFormat?: string;
+  };
+  createdAt?: string;
+  updatedAt?: string;
+  // Computed/backward compatibility
+  isActive?: boolean;
+  isRTL?: boolean;
 }

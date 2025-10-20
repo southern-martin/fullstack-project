@@ -36,10 +36,12 @@ class DashboardService {
       });
 
       // Extract data from settled promises
+      // Note: userApiService.getUsers() already returns PaginatedResponse<User> with {data, total, page, limit, totalPages}
+      // customerApiClient and carrierApiClient return standardized API responses with {data: {items, total}, ...}
       const usersData =
         usersResponse.status === 'fulfilled'
           ? usersResponse.value
-          : { total: 0 };
+          : { total: 0, data: [] };
       const customersData =
         customersResponse.status === 'fulfilled'
           ? customersResponse.value.data

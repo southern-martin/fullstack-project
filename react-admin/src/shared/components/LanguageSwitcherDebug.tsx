@@ -39,9 +39,9 @@ const LanguageSwitcherDebug: React.FC = () => {
                 <h4 className="font-semibold text-yellow-800">Available Languages:</h4>
                 {languages.map((language) => (
                     <button
-                        key={language.id}
+                        key={language.code}
                         onClick={() => handleSetLanguage(language)}
-                        className={`block w-full text-left p-2 rounded ${currentLanguage?.id === language.id
+                        className={`block w-full text-left p-2 rounded ${currentLanguage?.code === language.code
                             ? 'bg-blue-200 text-blue-800'
                             : 'bg-white text-gray-700 hover:bg-gray-100'
                             }`}
