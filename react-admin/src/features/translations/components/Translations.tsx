@@ -264,39 +264,45 @@ const Translations: React.FC = () => {
                 label: 'Key',
                 sortable: true,
                 render: (key: string) => (
-                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{key}</span>
+                    <span className="text-sm font-mono text-gray-600 dark:text-gray-400">{key.substring(0, 12)}...</span>
                 ),
             },
             {
-                key: 'originalText',
+                key: 'original',
                 label: 'Original Text',
                 sortable: true,
                 render: (text: string) => (
-                    <span className="text-sm text-gray-900 dark:text-gray-100 max-w-xs truncate" title={text}>
+                    <span className="text-sm text-gray-900 dark:text-gray-100 max-w-xs truncate block" title={text}>
                         {text}
                     </span>
                 ),
             },
             {
-                key: 'translatedText',
+                key: 'destination',
                 label: 'Translated Text',
                 sortable: true,
                 render: (text: string) => (
-                    <span className="text-sm text-gray-900 dark:text-gray-100 max-w-xs truncate" title={text}>
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100 max-w-xs truncate block" title={text}>
                         {text}
                     </span>
                 ),
             },
             {
-                key: 'language',
+                key: 'languageCode',
                 label: 'Language',
                 sortable: true,
-                render: (language: any) => (
-                    <div className="flex items-center">
-                        <span className="text-lg mr-2">{language?.metadata?.flag || '🌐'}</span>
-                        <span className="text-sm text-gray-900 dark:text-gray-100">{language?.name || 'Unknown'}</span>
-                    </div>
-                ),
+                render: (languageCode: string, translation: Translation) => {
+                    // Find the language from our languages array
+                    const language = languages.find(lang => lang.code === languageCode);
+                    return (
+                        <div className="flex items-center">
+                            <span className="text-lg mr-2">{language?.flag || '🌐'}</span>
+                            <span className="text-sm text-gray-900 dark:text-gray-100">
+                                {language?.name || languageCode.toUpperCase()}
+                            </span>
+                        </div>
+                    );
+                },
             },
             {
                 key: 'isApproved',
@@ -367,7 +373,7 @@ const Translations: React.FC = () => {
             multiSelect: true,
         },
         emptyMessage: 'No translations found',
-    }), [handleViewTranslation, handleEditTranslation, handleToggleTranslationStatus, handleDeleteTranslation, openDropdownId]);
+    }), [handleViewTranslation, handleEditTranslation, handleToggleTranslationStatus, handleDeleteTranslation, openDropdownId, languages]);
 
 
     // Export function

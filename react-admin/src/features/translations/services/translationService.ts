@@ -31,7 +31,9 @@ export interface Translation {
   language?: {
     code: string;
     name: string;
-  };
+    flag?: string;
+    localName?: string;
+  } | null;
   context?: {
     category?: string;
     module?: string;
