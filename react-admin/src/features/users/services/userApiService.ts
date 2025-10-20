@@ -58,17 +58,26 @@ class UserApiService {
       ? `${this.basePath}?${queryParams}`
       : this.basePath;
 
-    // User Service returns {users: User[], total: number}
+    // User Service now returns standardized format: {data: {users: User[], total: number}, message, statusCode, ...}
     // Frontend expects {data: User[], total: number, page: number, limit: number, totalPages: number}
-    const response = await userApiClient.get<{ users: User[]; total: number }>(url);
+    const response = await userApiClient.get<{
+      data: { users: User[]; total: number };
+      message: string;
+      statusCode: number;
+      timestamp: string;
+      success: boolean;
+    }>(url);
+
+    // Unwrap the data field from the standardized response
+    const responseData = response.data;
 
     const page = params?.page || 1;
     const limit = params?.limit || 10;
-    const totalPages = Math.ceil(response.total / limit);
+    const totalPages = Math.ceil(responseData.total / limit);
 
     return {
-      data: response.users,
-      total: response.total,
+      data: responseData.users,
+      total: responseData.total,
       page,
       limit,
       totalPages,
@@ -76,51 +85,99 @@ class UserApiService {
   }
 
   async getUserById(id: number): Promise<User> {
-    return userApiClient.get<User>(`${this.basePath}/${id}`);
+    const response = await userApiClient.get<{
+      data: User;
+      message: string;
+      statusCode: number;
+    }>(`${this.basePath}/${id}`);
+    return response.data;
   }
 
   async getUserByEmail(email: string): Promise<User> {
-    return userApiClient.get<User>(USERS_API_CONFIG.ENDPOINTS.BY_EMAIL(email));
+    const response = await userApiClient.get<{
+      data: User;
+      message: string;
+      statusCode: number;
+    }>(USERS_API_CONFIG.ENDPOINTS.BY_EMAIL(email));
+    return response.data;
   }
 
   async createUser(userData: CreateUserRequest): Promise<User> {
-    return userApiClient.post<User>(USERS_API_CONFIG.ENDPOINTS.CREATE, userData);
+    const response = await userApiClient.post<{
+      data: User;
+      message: string;
+      statusCode: number;
+    }>(USERS_API_CONFIG.ENDPOINTS.CREATE, userData);
+    return response.data;
   }
 
   async updateUser(id: number, userData: UpdateUserRequest): Promise<User> {
-    return userApiClient.patch<User>(
+    const response = await userApiClient.patch<{
+      data: User;
+      message: string;
+      statusCode: number;
+    }>(
       USERS_API_CONFIG.ENDPOINTS.UPDATE(id),
       userData
     );
+    return response.data;
   }
 
   async deleteUser(id: number): Promise<void> {
-    return userApiClient.delete<void>(USERS_API_CONFIG.ENDPOINTS.DELETE(id));
+    await userApiClient.delete<{
+      message: string;
+      statusCode: number;
+    }>(USERS_API_CONFIG.ENDPOINTS.DELETE(id));
   }
 
   async assignRoles(id: number, roles: AssignRolesRequest): Promise<User> {
-    return userApiClient.patch<User>(
+    const response = await userApiClient.patch<{
+      data: User;
+      message: string;
+      statusCode: number;
+    }>(
       USERS_API_CONFIG.ENDPOINTS.ASSIGN_ROLES(id),
       roles
     );
+    return response.data;
   }
 
   async getActiveUsers(): Promise<User[]> {
-    return userApiClient.get<User[]>(USERS_API_CONFIG.ENDPOINTS.ACTIVE);
+    const response = await userApiClient.get<{
+      data: User[];
+      message: string;
+      statusCode: number;
+    }>(USERS_API_CONFIG.ENDPOINTS.ACTIVE);
+    return response.data;
   }
 
   async getUserCount(): Promise<{ count: number }> {
-    return userApiClient.get<{ count: number }>(USERS_API_CONFIG.ENDPOINTS.COUNT);
+    const response = await userApiClient.get<{
+      data: { count: number };
+      message: string;
+      statusCode: number;
+    }>(USERS_API_CONFIG.ENDPOINTS.COUNT);
+    return response.data;
   }
 
   async getUsersByRole(roleName: string): Promise<User[]> {
-    return userApiClient.get<User[]>(USERS_API_CONFIG.ENDPOINTS.BY_ROLE(roleName));
+    const response = await userApiClient.get<{
+      data: User[];
+      message: string;
+      statusCode: number;
+    }>(USERS_API_CONFIG.ENDPOINTS.BY_ROLE(roleName));
+    return response.data;
   }
 
   async checkUserExists(email: string): Promise<{ exists: boolean }> {
-    return userApiClient.get<{ exists: boolean }>(
+    const response = await userApiClient.get<{
+      data: { exists: boolean };
+      message: string;
+      statusCode: number;
+    }>(
       USERS_API_CONFIG.ENDPOINTS.EXISTS(email)
     );
+    return response.data;
   }
 }
 
