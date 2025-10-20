@@ -260,7 +260,11 @@ class PricingService {
       const response = await pricingApiClient.getPricingRuleCount();
       return response.data;
     } catch (error) {
-      console.error('Error fetching pricing rule count:', error);
+      // Don't log connection errors when service is not running
+      const isConnectionError = error instanceof TypeError && (error as Error).message.includes('fetch');
+      if (!isConnectionError) {
+        console.error('Error fetching pricing rule count:', error);
+      }
       throw error;
     }
   }
@@ -298,7 +302,11 @@ class PricingService {
       const response = await pricingApiClient.getPriceCalculationCount();
       return response.data;
     } catch (error) {
-      console.error('Error fetching price calculation count:', error);
+      // Don't log connection errors when service is not running
+      const isConnectionError = error instanceof TypeError && (error as Error).message.includes('fetch');
+      if (!isConnectionError) {
+        console.error('Error fetching price calculation count:', error);
+      }
       throw error;
     }
   }
@@ -309,7 +317,11 @@ class PricingService {
       await pricingApiClient.healthCheck();
       return true;
     } catch (error) {
-      console.error('Pricing service health check failed:', error);
+      // Don't log connection errors when service is not running
+      const isConnectionError = error instanceof TypeError && (error as Error).message.includes('fetch');
+      if (!isConnectionError) {
+        console.error('Pricing service health check failed:', error);
+      }
       return false;
     }
   }
