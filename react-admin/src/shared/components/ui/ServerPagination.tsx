@@ -1,5 +1,6 @@
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import React from 'react';
+import { useSharedUILabels } from '../../hooks/useSharedUILabels';
 
 export interface ServerPaginationProps {
     // Pagination state
@@ -51,6 +52,9 @@ export const ServerPagination: React.FC<ServerPaginationProps> = ({
     maxVisiblePages = 5,
     className = '',
 }) => {
+    // Get translated labels
+    const { labels: L } = useSharedUILabels();
+
     const handlePageChange = (page: number) => {
         if (page >= 1 && page <= totalPages && page !== currentPage && !loading) {
             onPageChange(page);
@@ -126,12 +130,12 @@ export const ServerPagination: React.FC<ServerPaginationProps> = ({
                 {showTotalInfo && (
                     <div className="text-sm text-gray-700 dark:text-gray-300">
                         {loading ? (
-                            <span className="animate-pulse">Loading...</span>
+                            <span className="animate-pulse">{L.pagination.loading}</span>
                         ) : (
                             <>
-                                Showing <span className="font-medium">{startIndex}</span> to{' '}
-                                <span className="font-medium">{endIndex}</span> of{' '}
-                                <span className="font-medium">{total.toLocaleString()}</span> results
+                                {L.pagination.showing} <span className="font-medium">{startIndex}</span> {L.pagination.to}{' '}
+                                <span className="font-medium">{endIndex}</span> {L.pagination.of}{' '}
+                                <span className="font-medium">{total.toLocaleString()}</span> {L.pagination.results}
                             </>
                         )}
                     </div>
@@ -140,7 +144,7 @@ export const ServerPagination: React.FC<ServerPaginationProps> = ({
                 {showPageSizeSelector && (
                     <div className="flex items-center gap-2">
                         <label htmlFor="page-size" className="text-sm text-gray-700 dark:text-gray-300">
-                            Show:
+                            {L.pagination.show}
                         </label>
                         <select
                             id="page-size"
@@ -155,7 +159,7 @@ export const ServerPagination: React.FC<ServerPaginationProps> = ({
                                 </option>
                             ))}
                         </select>
-                        <span className="text-sm text-gray-700 dark:text-gray-300">per page</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{L.pagination.perPage}</span>
                     </div>
                 )}
             </div>
@@ -168,7 +172,7 @@ export const ServerPagination: React.FC<ServerPaginationProps> = ({
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={!hasPreviousPage || loading}
                         className="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-l-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                        aria-label="Previous page"
+                        aria-label={L.pagination.previous}
                     >
                         <ChevronLeftIcon className="h-4 w-4" />
                     </button>
@@ -188,7 +192,7 @@ export const ServerPagination: React.FC<ServerPaginationProps> = ({
                                         ? 'z-10 bg-blue-50 dark:bg-blue-900/20 border-blue-500 dark:border-blue-400 text-blue-600 dark:text-blue-400'
                                         : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                                         } focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 disabled:opacity-50 disabled:cursor-not-allowed`}
-                                    aria-label={`Go to page ${page}`}
+                                    aria-label={`${L.pagination.goToPage} ${page}`}
                                     aria-current={page === currentPage ? 'page' : undefined}
                                 >
                                     {page}
@@ -202,7 +206,7 @@ export const ServerPagination: React.FC<ServerPaginationProps> = ({
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={!hasNextPage || loading}
                         className="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-r-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                        aria-label="Next page"
+                        aria-label={L.pagination.next}
                     >
                         <ChevronRightIcon className="h-4 w-4" />
                     </button>
