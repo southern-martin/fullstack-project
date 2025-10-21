@@ -310,9 +310,21 @@ const Carriers: React.FC = () => {
                 key: 'description',
                 label: L.table.description,
                 sortable: true,
-                render: (description: string) => (
-                    <span className="text-sm text-gray-900 dark:text-gray-100">{description || '-'}</span>
-                ),
+                render: (description: string) => {
+                    const text = description || '-';
+                    return (
+                        <div className="group relative max-w-[200px]">
+                            <span className="text-sm text-gray-900 dark:text-gray-100 block truncate">
+                                {text}
+                            </span>
+                            {description && description.length > 30 && (
+                                <div className="invisible group-hover:visible absolute z-50 left-0 top-full mt-1 w-64 p-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded shadow-lg">
+                                    {description}
+                                </div>
+                            )}
+                        </div>
+                    );
+                },
             },
             {
                 key: 'isActive',
