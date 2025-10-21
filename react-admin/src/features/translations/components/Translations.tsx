@@ -11,6 +11,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'react-hot-toast';
+import { useLanguage } from '../../../app/providers/LanguageProvider';
 
 import {
     Table,
@@ -43,6 +44,9 @@ const Translations: React.FC = () => {
     const [sortBy, setSortBy] = useState('createdAt');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
+    // Get current language to refetch translations when language changes
+    const { currentLanguage } = useLanguage();
+
     // TanStack Query hooks
     const {
         data: translationsResponse,
@@ -68,6 +72,13 @@ const Translations: React.FC = () => {
     const createTranslationMutation = useCreateTranslation();
     const updateTranslationMutation = useUpdateTranslation();
     const deleteTranslationMutation = useDeleteTranslation();
+
+    // Refetch translations when language changes
+    useEffect(() => {
+        if (currentLanguage) {
+            refetch();
+        }
+    }, [currentLanguage, refetch]);
 
     // Extract data from response
     const translations = translationsResponse?.data || [];

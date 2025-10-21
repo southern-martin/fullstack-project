@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import ThemeToggle from '../ThemeToggle';
 import Navigation from './Navigation';
+import { LanguageSelector } from '../../../features/translations/components/LanguageSelector';
 
 const Layout: React.FC = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -70,6 +71,9 @@ const Layout: React.FC = () => {
                         </div>
 
                         <div className="ml-4 flex items-center md:ml-6 space-x-4">
+                            {/* Language Selector */}
+                            <LanguageSelector minimal showFlags />
+
                             {/* Theme Toggle */}
                             <ThemeToggle size="sm" />
 

@@ -11,6 +11,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'react-hot-toast';
+import { useLanguage } from '../../../app/providers/LanguageProvider';
 
 import {
     Table,
@@ -28,6 +29,7 @@ import {
     useDeleteCarrier,
     useUpdateCarrier
 } from '../hooks/useCarrierQueries';
+import { useCarrierTranslation } from '../hooks/useCarrierTranslation';
 import { Carrier, CreateCarrierRequest, UpdateCarrierRequest } from '../services/carrierApiService';
 
 import CarrierDetails from './CarrierDetails';
@@ -75,6 +77,32 @@ const Carriers: React.FC = () => {
     const startIndex = total > 0 ? (currentPage - 1) * pageSize + 1 : 0;
     const endIndex = Math.min(currentPage * pageSize, total);
 
+    // Translation hook
+    const { translateCarriers, isTranslating } = useCarrierTranslation();
+    const [translatedCarriers, setTranslatedCarriers] = useState<Carrier[]>([]);
+    const [isTranslated, setIsTranslated] = useState(false);
+    
+    // Get current language to trigger re-translation on language change
+    const { currentLanguage } = useLanguage();
+
+    // Translate carriers when they load or when language changes
+    useEffect(() => {
+        if (carriers.length > 0) {
+            const translate = async () => {
+                const translated = await translateCarriers(carriers);
+                setTranslatedCarriers(translated);
+                setIsTranslated(true);
+            };
+            translate();
+        } else {
+            setTranslatedCarriers([]);
+            setIsTranslated(false);
+        }
+    }, [carriers, translateCarriers, currentLanguage]); // Added currentLanguage dependency
+
+    // Use translated carriers for display
+    const displayCarriers = isTranslated ? translatedCarriers : carriers;
+
     // Modal states
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
@@ -87,8 +115,8 @@ const Carriers: React.FC = () => {
     // Get the carrier associated with the currently open dropdown
     const selectedDropdownCarrier = useMemo(() => {
         if (openDropdownId === null) return null;
-        return carriers.find(carrier => carrier.id === openDropdownId) || null;
-    }, [openDropdownId, carriers]);
+        return displayCarriers.find(carrier => carrier.id === openDropdownId) || null;
+    }, [openDropdownId, displayCarriers]);
 
     // Click outside handler for dropdown
     useEffect(() => {
@@ -358,7 +386,7 @@ const Carriers: React.FC = () => {
     const handleExport = useCallback(async (format: 'csv' | 'excel' | 'pdf') => {
         try {
             const { exportData } = await import('../../../shared/components/table/utils/exportUtils');
-            exportData(carriers, tableConfig.columns, format, {
+            exportData(displayCarriers, tableConfig.columns, format, {
                 filename: `carriers-export.${format}`,
                 includeHeaders: true,
             });
@@ -366,7 +394,7 @@ const Carriers: React.FC = () => {
         } catch (error) {
             toast.error('Failed to export carriers: ' + (error instanceof Error ? error.message : 'Unknown error'));
         }
-    }, [carriers, tableConfig.columns]);
+    }, [displayCarriers, tableConfig.columns]);
 
     return (
         <div className="space-y-6">
@@ -434,8 +462,8 @@ const Carriers: React.FC = () => {
                 {/* Table */}
                 <Table
                     config={tableConfig}
-                    data={carriers}
-                    loading={loading}
+                    data={displayCarriers}
+                    loading={loading || isTranslating}
                     error={error?.message || undefined}
                 />
 

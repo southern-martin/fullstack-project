@@ -2,6 +2,7 @@ import {
     CalendarIcon,
     CheckCircleIcon,
     EnvelopeIcon,
+    LanguageIcon,
     PhoneIcon,
     TruckIcon,
     UserIcon,
@@ -13,11 +14,20 @@ import Button from '../../../shared/components/ui/Button';
 import { Carrier } from '../services/carrierApiService';
 
 interface CarrierDetailsProps {
-    carrier: Carrier;
+    carrier: Carrier & {
+        _original?: Carrier;
+        _isTranslated?: boolean;
+        _translationMeta?: {
+            language: string;
+            cacheHitRate: number;
+        };
+    };
     onClose: () => void;
 }
 
 const CarrierDetails: React.FC<CarrierDetailsProps> = ({ carrier, onClose }) => {
+    const isTranslated = carrier._isTranslated || false;
+    const originalCarrier = carrier._original || carrier;
 
     return (
         <div className="p-6">
@@ -28,9 +38,17 @@ const CarrierDetails: React.FC<CarrierDetailsProps> = ({ carrier, onClose }) => 
                     </div>
                 </div>
                 <div className="flex-1">
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                        {carrier.name}
-                    </h2>
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                            {carrier.name}
+                        </h2>
+                        {isTranslated && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                <LanguageIcon className="h-3 w-3 mr-1" />
+                                FR
+                            </span>
+                        )}
+                    </div>
                     <p className="text-sm text-gray-500 dark:text-gray-400 font-mono">{carrier.metadata?.code || '-'}</p>
                 </div>
                 <div className="flex-shrink-0">
@@ -58,7 +76,9 @@ const CarrierDetails: React.FC<CarrierDetailsProps> = ({ carrier, onClose }) => 
                     <div className="space-y-3">
                         <div>
                             <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">{'Name'}</label>
-                            <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{carrier.name}</p>
+                            <p className="mt-1 text-sm text-gray-900 dark:text-gray-100" title={isTranslated ? `Original: ${originalCarrier.name}` : undefined}>
+                                {carrier.name}
+                            </p>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">{'Code'}</label>
@@ -66,7 +86,7 @@ const CarrierDetails: React.FC<CarrierDetailsProps> = ({ carrier, onClose }) => 
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">{'Description'}</label>
-                            <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                            <p className="mt-1 text-sm text-gray-900 dark:text-gray-100" title={isTranslated ? `Original: ${originalCarrier.description}` : undefined}>
                                 {carrier.description || 'No description provided'}
                             </p>
                         </div>

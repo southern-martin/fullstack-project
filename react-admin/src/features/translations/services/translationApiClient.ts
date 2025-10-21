@@ -171,11 +171,43 @@ class TranslationApiClient {
     });
   }
 
-  async translateBatch(data: any): Promise<any> {
-    return this.request<any>('/translate/batch', {
+  /**
+   * Convenience method for single text translation
+   */
+  async translate(params: {
+    text: string;
+    targetLanguage: string;
+    sourceLanguage?: string;
+  }): Promise<{
+    translatedText: string;
+    fromCache: boolean;
+  }> {
+    const response = await this.request<any>('/translate', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(params),
     });
+    return response.data;
+  }
+
+  /**
+   * Batch translate multiple texts at once
+   */
+  async translateBatch(params: {
+    texts: string[];
+    targetLanguage: string;
+    sourceLanguage?: string;
+  }): Promise<{
+    translations: {
+      text: string;
+      translatedText: string;
+      fromCache: boolean;
+    }[];
+  }> {
+    const response = await this.request<any>('/translate/batch', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    });
+    return response.data;
   }
 
   async healthCheck(): Promise<any> {

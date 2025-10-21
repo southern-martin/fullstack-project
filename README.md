@@ -1,265 +1,193 @@
 # 🚀 Fullstack Microservices Project
 
-A comprehensive fullstack application built with microservices architecture, featuring React Admin frontend, NestJS backend services, and shared database architecture.
+**A modern microservices platform with React Admin frontend, NestJS backend services, and intelligent translation system.**
 
-## 🏗️ **Architecture Overview**
-
-### **Frontend**
-- **React Admin Dashboard** - Modern admin interface with Tailwind CSS
-- **Authentication** - JWT-based authentication with role management
-- **Multi-language Support** - Internationalization ready
-- **Responsive Design** - Mobile-first approach
-
-### **Backend Microservices**
-- **Auth Service** - Authentication and authorization (Port 3001)
-- **User Service** - User management and profiles (Port 3003)
-- **Carrier Service** - Carrier management (Port 3004)
-- **Customer Service** - Customer management (Port 3005)
-- **Pricing Service** - Pricing calculations (Port 3006)
-- **Translation Service** - Internationalization (Port 3007)
-
-### **Shared Infrastructure**
-- **Shared Database** - MySQL database for Auth and User services (Port 3306)
-- **Shared Redis** - Caching and session management (Port 6379)
-- **Docker Compose** - Container orchestration
-
-## 🎯 **Key Features**
-
-### **✅ Shared Database Architecture**
-- **Single Source of Truth** - Auth and User services share the same database
-- **No Data Duplication** - Eliminates sync issues between services
-- **Better Performance** - No cross-service API calls for user data
-- **Simplified Maintenance** - Single database to manage
-
-### **✅ Modern Tech Stack**
-- **Frontend**: React 18, TypeScript, Tailwind CSS, React Admin
-- **Backend**: NestJS, TypeScript, TypeORM, JWT Authentication
-- **Database**: MySQL 8.0 with shared architecture
-- **Caching**: Redis for session management
-- **Containerization**: Docker & Docker Compose
-
-### **✅ Production Ready**
-- **Health Checks** - All services include health monitoring
-- **Environment Configuration** - Comprehensive environment setup
-- **Docker Support** - Full containerization with Docker Compose
-- **Documentation** - Complete setup and deployment guides
-
-## 🚀 **Quick Start**
-
-### **Prerequisites**
-- Docker Desktop
-- Node.js 18+ and npm
-- Git
-
-### **1. Clone and Setup**
-```bash
-git clone <repository-url>
-cd fullstack-project
-```
-
-### **2. Start Shared Database**
-```bash
-cd shared-database
-docker-compose up -d
-```
-
-### **3. Configure Services**
-```bash
-# Copy environment files
-cp auth-service/.env.shared.example auth-service/.env
-cp user-service/.env.shared.example user-service/.env
-```
-
-### **4. Start Services**
-```bash
-# Start Auth Service
-cd auth-service && npm install && npm run start:dev
-
-# Start User Service (in another terminal)
-cd user-service && npm install && npm run start:dev
-
-# Start React Admin (in another terminal)
-cd react-admin && npm install && npm start
-```
-
-### **5. Access the Application**
-- **React Admin**: http://localhost:3000
-- **Auth Service**: http://localhost:3001
-- **User Service**: http://localhost:3003
-
-### **Default Login**
-- **Email**: admin@example.com
-- **Password**: admin123
-
-## 📁 **Project Structure**
-
-```
-fullstack-project/
-├── 📱 react-admin/              # React Admin frontend
-├── 🔐 auth-service/             # Authentication service
-├── 👥 user-service/             # User management service
-├── 🚚 carrier-service/          # Carrier management service
-├── 🏢 customer-service/         # Customer management service
-├── 💰 pricing-service/          # Pricing calculation service
-├── 🌐 translation-service/      # Translation service
-├── 🗄️ shared-database/          # Shared database setup
-├── 🔴 shared-redis/             # Shared Redis setup
-├── 📚 docs/                     # Comprehensive documentation
-├── 🐳 docker-compose.yml        # Main Docker Compose
-└── 📋 README.md                 # This file
-```
-
-## 🛠️ **Development**
-
-### **Available Scripts**
-```bash
-# Start all services with Docker
-docker-compose -f shared-database/docker-compose.services.yml up -d
-
-# Start individual services
-npm run start:dev          # Development mode
-npm run build              # Production build
-npm run test               # Run tests
-npm run lint               # Lint code
-```
-
-### **Environment Variables**
-Each service has its own `.env` file with:
-- Database configuration
-- JWT secrets
-- Service ports
-- External service URLs
-
-## 🗄️ **Database Schema**
-
-### **Shared Database (shared_user_db)**
-```sql
--- Users table (shared between Auth and User services)
-users (
-  id, email, password, first_name, last_name, 
-  phone, is_active, is_email_verified, 
-  last_login_at, password_changed_at, 
-  created_at, updated_at
-)
-
--- Roles table (shared between services)  
-roles (
-  id, name, description, permissions, 
-  is_active, created_at, updated_at
-)
-
--- User-Roles junction table
-user_roles (
-  id, user_id, role_id, assigned_at, assigned_by
-)
-```
-
-## 🚀 **Deployment**
-
-### **Production Deployment**
-```bash
-# Build all services
-docker-compose -f shared-database/docker-compose.services.yml build
-
-# Deploy to production
-docker-compose -f shared-database/docker-compose.services.yml up -d
-```
-
-### **Environment Setup**
-1. Update environment variables for production
-2. Configure database credentials
-3. Set up SSL certificates
-4. Configure reverse proxy (nginx)
-
-## 📊 **Monitoring & Health Checks**
-
-All services include health check endpoints:
-- **Auth Service**: http://localhost:3001/api/v1/auth/health
-- **User Service**: http://localhost:3003/health
-- **Carrier Service**: http://localhost:3004/health
-- **Customer Service**: http://localhost:3005/health
-- **Pricing Service**: http://localhost:3006/health
-- **Translation Service**: http://localhost:3007/health
-
-## 🔧 **Configuration**
-
-### **Service Ports**
-- React Admin: 3000
-- Auth Service: 3001
-- User Service: 3003
-- Carrier Service: 3004
-- Customer Service: 3005
-- Pricing Service: 3006
-- Translation Service: 3007
-- Shared Database: 3306
-- Shared Redis: 6379
-
-### **Database Configuration**
-- **Host**: localhost
-- **Port**: 3306
-- **Database**: shared_user_db
-- **Username**: shared_user
-- **Password**: shared_password_2024
-
-## 📚 **Documentation**
-
-### **🚀 Start Here - Git Flow**
-- **[⭐ Executive Summary](GIT-FLOW-EXECUTIVE-SUMMARY.md)** - **START HERE** - Overview, timeline, priorities
-- **[📋 Complete Strategy](GIT-FLOW-COMPLETE-STRATEGY.md)** - Full details, PR templates, all commands
-- **[🤖 Automated Script](scripts/git-flow-execute.sh)** - Execute with interactive prompts
-
-### **🐳 Docker Fix Documentation**
-Located in `docs/development/`:
-- **[📚 Index](docs/development/GIT-FLOW-INDEX.md)** - Navigation hub
-- **[⚡ Quick Reference](docs/development/QUICK-REFERENCE-DOCKER-FIX.md)** - Fast commands
-- **[🐳 Complete Details](docs/development/GIT-FLOW-DOCKER-SHARED-INFRASTRUCTURE-FIX.md)** - Full fix
-- **[� Auth Service](docs/development/GIT-FLOW-AUTH-SERVICE-DOCKER-FIX.md)** - Auth specific
-- **[👥 User Service](docs/development/GIT-FLOW-USER-SERVICE-DOCKER-FIX.md)** - User specific
-
-### **📖 Project Documentation**
-- **[Architecture](docs/architecture/README.md)** - System design and architecture
-- **[API Documentation](docs/api/README.md)** - API endpoints and usage
-- **[Deployment](docs/deployment/README.md)** - Production deployment
-- **[Development](docs/development/README.md)** - Development setup
-- **[Frontend](docs/frontend/README.md)** - React Admin setup
-
-### **✅ Features Ready to Merge**
-1. ✅ **Documentation Cleanup** - Organize and archive outdated docs
-2. ✅ **CMake Modernization** - Update build system for hybrid architecture
-3. ✅ **Customer Service Architecture** - Apply Clean Architecture guidelines
-4. ✅ **Docker Infrastructure Fix** - Fix shared infrastructure (CRITICAL)
-5. ⏳ **Carrier Service Architecture** - Pending implementation
-6. ⏳ **Pricing Service Architecture** - Pending implementation
-
-## 🤝 **Contributing**
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
-## 📄 **License**
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 **Support**
-
-For support and questions:
-- Check the [documentation](docs/)
-- Review [troubleshooting guide](docs/deployment/README.md#troubleshooting)
-- Create an issue in the repository
-
-## 🎯 **Roadmap**
-
-- [ ] Add more microservices (Inventory, Orders, etc.)
-- [ ] Implement API Gateway
-- [ ] Add monitoring and logging
-- [ ] Implement CI/CD pipeline
-- [ ] Add comprehensive testing suite
-- [ ] Implement caching strategies
-- [ ] Add real-time features with WebSockets
+[![Services](https://img.shields.io/badge/Microservices-6-blue)](./docs/DOCUMENTATION-INDEX.md)
+[![Status](https://img.shields.io/badge/Status-Active%20Development-green)]()
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue)](./docker-compose.hybrid.yml)
 
 ---
 
-**Built with ❤️ using modern microservices architecture**
+## 🎯 Quick Links
+
+- **[📖 Documentation Index](./docs/DOCUMENTATION-INDEX.md)** - Complete documentation navigation
+- **[🚀 Quick Start](./QUICK-START.md)** - Get running in 5 minutes
+- **[🐳 Start Services](./START-SERVICES-GUIDE.md)** - Docker services guide
+- **[🌐 Translation Feature](./TRANSLATION-FEATURE-COMPLETE-SUMMARY.md)** - Latest feature overview
+- **[📮 Postman Guide](./POSTMAN-QUICK-REFERENCE.md)** - API testing
+
+---
+
+## 🏗️ Architecture
+
+### Microservices (6 Services)
+
+| Service | Port | Purpose | Database |
+|---------|------|---------|----------|
+| **Auth Service** | 3001 | Authentication & JWT | Shared MySQL |
+| **User Service** | 3003 | User management | Shared MySQL |
+| **Customer Service** | 3004 | Customer operations | PostgreSQL |
+| **Carrier Service** | 3005 | Carrier management | PostgreSQL |
+| **Pricing Service** | 3006 | Pricing calculations | PostgreSQL |
+| **Translation Service** | 3007 | i18n & translations | PostgreSQL |
+
+### Shared Infrastructure
+
+- **MySQL (3306)** - Shared database for Auth + User services
+- **Redis (6379)** - Caching and session management
+- **Docker Compose** - Container orchestration
+
+---
+
+## ⚡ Quick Start
+
+### 1. Start Services
+```bash
+# Start shared infrastructure
+cd shared-database && docker-compose up -d
+
+# Start all microservices
+docker-compose -f docker-compose.hybrid.yml up -d
+```
+
+### 2. Access Application
+- **Frontend**: http://localhost:3000
+- **Default Login**: admin@example.com / Admin123!
+
+### 3. Verify Services
+```bash
+# Check all services are healthy
+make health-check
+```
+
+**→ See [Quick Start Guide](./QUICK-START.md) for detailed instructions**
+
+---
+
+## 🌟 Key Features
+
+### ✅ Translation System (Latest Feature)
+- **Language Selector** - Global language switching in header
+- **Batch Translation** - 10× faster performance (1 request vs 40)
+- **Redis Caching** - 100% cache hit rate for translations
+- **Multi-language UI** - Supports English, French, Spanish, etc.
+- **Carrier Module** - Fully translated with auto-update
+
+**→ Read [Translation Feature Summary](./TRANSLATION-FEATURE-COMPLETE-SUMMARY.md)**
+
+### ✅ Standardized API Format
+All 6 microservices use consistent response format:
+```typescript
+{
+  data: T,              // Actual response data
+  message: string,      // Success/error message
+  statusCode: number,   // HTTP status code
+  timestamp: string,    // ISO timestamp
+  success: boolean      // Operation success flag
+}
+```
+
+**→ Read [API Standards](./docs/API-STANDARDS.md)**
+
+### ✅ Hybrid Database Architecture
+- **Shared Pattern**: Auth + User services share MySQL for tightly coupled data
+- **Separate Pattern**: Business services have independent databases for loose coupling
+- **Best of Both**: Performance + scalability
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+- **React 18** with TypeScript
+- **TanStack Query** (React Query) for state management
+- **Tailwind CSS** for styling
+- **Heroicons** for icons
+
+### Backend
+- **NestJS** with TypeScript
+- **TypeORM** for database access
+- **JWT** authentication
+- **Redis** caching
+
+### Infrastructure
+- **Docker** & Docker Compose
+- **MySQL 8.0** & **PostgreSQL 14**
+- **Redis 7**
+
+---
+
+## 📚 Documentation Structure
+
+### For Developers (Start Here)
+1. [Quick Start Guide](./QUICK-START.md) - Get up and running
+2. [Documentation Index](./docs/DOCUMENTATION-INDEX.md) - Find any document
+3. [API Standards](./docs/API-STANDARDS.md) - API conventions
+
+### Feature Documentation
+- [Translation Feature](./TRANSLATION-FEATURE-COMPLETE-SUMMARY.md) - Complete translation system
+- [Language Selector](./LANGUAGE-SELECTOR-IMPLEMENTATION.md) - Language switching UI
+- [Carrier Translation](./CARRIER-MODULE-BATCH-TRANSLATION-COMPLETE.md) - Batch translation
+
+### Service Documentation
+Each service has its own README in its folder:
+- [auth-service/README.md](./auth-service/README.md)
+- [user-service/README.md](./user-service/README.md)
+- [customer-service/README.md](./customer-service/README.md)
+- [carrier-service/README.md](./carrier-service/README.md)
+- [pricing-service/README.md](./pricing-service/README.md)
+- [translation-service/README.md](./translation-service/README.md)
+
+---
+
+## 🧪 Testing
+
+### API Testing with Postman
+1. Import [Postman Collection](./Fullstack-Project-API.postman_collection.json)
+2. Import [Environment](./Fullstack-Project-Environment.postman_environment.json)
+3. Read [Postman Guide](./POSTMAN-QUICK-REFERENCE.md)
+
+### Translation Testing
+- [Carrier Translation Testing Guide](./CARRIER-TRANSLATION-TESTING-GUIDE.md)
+
+---
+
+## 📊 Current Status
+
+| Feature | Status | Documentation |
+|---------|--------|---------------|
+| API Standardization | ✅ Complete (6/6 services) | [API Standards](./API-STANDARDIZATION-COMPLETE.md) |
+| Translation Service | ✅ Running | [Translation Guide](./TRANSLATION-FEATURE-COMPLETE-SUMMARY.md) |
+| Language Selector | ✅ Integrated | [Language Selector](./LANGUAGE-SELECTOR-IMPLEMENTATION.md) |
+| Carrier Translation | ✅ Complete | [Carrier Module](./CARRIER-MODULE-BATCH-TRANSLATION-COMPLETE.md) |
+| Docker Services | ✅ All healthy | [Start Guide](./START-SERVICES-GUIDE.md) |
+
+**→ See [TODO.md](./TODO.md) for pending work**
+
+---
+
+## 🤝 Contributing
+
+1. Follow [Git Flow Guide](./scripts/gitflow/README.md)
+2. Adhere to [API Standards](./docs/API-STANDARDS.md)
+3. Update relevant documentation
+4. Test with Postman collection
+
+---
+
+## 📞 Need Help?
+
+- **Documentation**: Start with [Documentation Index](./docs/DOCUMENTATION-INDEX.md)
+- **Quick Start Issues**: Check [Start Services Guide](./START-SERVICES-GUIDE.md)
+- **API Questions**: Review [Postman Guide](./POSTMAN-QUICK-REFERENCE.md)
+- **Service Issues**: Check individual service README files
+
+---
+
+## 📝 License
+
+[Add your license here]
+
+---
+
+**Last Updated**: October 21, 2025

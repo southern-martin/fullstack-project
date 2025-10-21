@@ -407,7 +407,7 @@ class TranslationService {
   }> {
     try {
       const response = await translationApiClient.translateBatch(data);
-      return response.data;
+      return response; // Already unwrapped by translationApiClient
     } catch (error) {
       console.error('Error translating batch:', error);
       throw error;
