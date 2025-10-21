@@ -3,6 +3,7 @@ import { toast } from 'react-hot-toast';
 
 import Button from '../../../shared/components/ui/Button';
 import { FormField } from '../../../shared/components/ui/FormField';
+import { useCarrierLabels } from '../hooks/useCarrierLabels';
 import { Carrier, CreateCarrierRequest, UpdateCarrierRequest } from '../services/carrierApiService';
 
 interface CarrierFormProps {
@@ -13,6 +14,7 @@ interface CarrierFormProps {
 }
 
 const CarrierForm: React.FC<CarrierFormProps> = ({ carrier, onSubmit, onCancel, onFooterReady }) => {
+    const { L } = useCarrierLabels();
     const [formData, setFormData] = useState({
         name: '',
         code: '',
@@ -56,22 +58,22 @@ const CarrierForm: React.FC<CarrierFormProps> = ({ carrier, onSubmit, onCancel, 
         const currentFormData = formDataRef.current;
 
         if (!currentFormData.name.trim()) {
-            newErrors.name = 'Name is required';
+            newErrors.name = L.validation.nameRequired;
         }
 
         if (!currentFormData.code.trim()) {
-            newErrors.code = 'Code is required';
+            newErrors.code = L.validation.codeRequired;
         } else if (!/^[A-Z0-9_-]+$/.test(currentFormData.code.trim())) {
-            newErrors.code = 'Code must contain only uppercase letters, numbers, hyphens, and underscores';
+            newErrors.code = L.validation.codeFormat;
         }
 
         if (currentFormData.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(currentFormData.contactEmail)) {
-            newErrors.contactEmail = 'Please enter a valid email address';
+            newErrors.contactEmail = L.validation.emailInvalid;
         }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
-    }, []);
+    }, [L.validation.nameRequired, L.validation.codeRequired, L.validation.codeFormat, L.validation.emailInvalid]);
 
     const handleSubmit = useCallback(async (e?: React.FormEvent) => {
         if (e) {
@@ -100,12 +102,12 @@ const CarrierForm: React.FC<CarrierFormProps> = ({ carrier, onSubmit, onCancel, 
             if (error && typeof error === 'object' && 'validationErrors' in error) {
                 setErrors((error as { validationErrors: Record<string, string> }).validationErrors);
             } else {
-                toast.error('An error occurred while saving the carrier');
+                toast.error(L.messages.createError);
             }
         } finally {
             setIsSubmitting(false);
         }
-    }, [validateForm, onSubmit]);
+    }, [validateForm, onSubmit, L.messages.createError]);
 
     // Memoize footer to prevent infinite re-renders
     const footer = useMemo(() => (
@@ -116,7 +118,7 @@ const CarrierForm: React.FC<CarrierFormProps> = ({ carrier, onSubmit, onCancel, 
                 onClick={onCancel}
                 disabled={isSubmitting}
             >
-                {'Cancel'}
+                {L.actions.cancel}
             </Button>
             <Button
                 type="submit"
@@ -125,14 +127,14 @@ const CarrierForm: React.FC<CarrierFormProps> = ({ carrier, onSubmit, onCancel, 
                 onClick={handleSubmit}
             >
                 {isSubmitting
-                    ? 'Saving...'
+                    ? L.actions.saving
                     : carrier
-                        ? 'Update Carrier'
-                        : 'Create Carrier'
+                        ? L.actions.update
+                        : L.actions.create
                 }
             </Button>
         </div>
-    ), [onCancel, isSubmitting, handleSubmit, carrier]);
+    ), [onCancel, isSubmitting, handleSubmit, carrier, L.actions.cancel, L.actions.saving, L.actions.update, L.actions.create]);
 
     // Pass footer to parent component only once when component mounts
     useEffect(() => {
@@ -147,48 +149,48 @@ const CarrierForm: React.FC<CarrierFormProps> = ({ carrier, onSubmit, onCancel, 
             <div className="space-y-6 p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField
-                        label={'Name'}
+                        label={L.fields.name}
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange('name')}
                         error={errors.name}
-                        placeholder={'Enter carrier name'}
+                        placeholder={L.placeholders.enterName}
                     />
 
                     <FormField
-                        label={'Code'}
+                        label={L.fields.code}
                         name="code"
                         value={formData.code}
                         onChange={handleInputChange('code')}
                         error={errors.code}
-                        placeholder={'Enter carrier code (e.g., UPS, FEDEX)'}
+                        placeholder={L.placeholders.enterCode}
                     />
 
                     <FormField
-                        label={'Contact Email'}
+                        label={L.fields.contactEmail}
                         name="contactEmail"
                         type="email"
                         value={formData.contactEmail}
                         onChange={handleInputChange('contactEmail')}
                         error={errors.contactEmail}
-                        placeholder={'Enter contact email'}
+                        placeholder={L.placeholders.enterEmail}
                     />
 
                     <FormField
-                        label={'Contact Phone'}
+                        label={L.fields.contactPhone}
                         name="contactPhone"
                         type="tel"
                         value={formData.contactPhone}
                         onChange={handleInputChange('contactPhone')}
                         error={errors.contactPhone}
-                        placeholder={'Enter contact phone'}
+                        placeholder={L.placeholders.enterPhone}
                     />
                 </div>
 
                 <div className="grid grid-cols-1 gap-6">
                     <div>
                         <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            {'Description'}
+                            {L.fields.description}
                         </label>
                         <textarea
                             id="description"
@@ -200,7 +202,7 @@ const CarrierForm: React.FC<CarrierFormProps> = ({ carrier, onSubmit, onCancel, 
                                     setErrors(prev => ({ ...prev, description: '' }));
                                 }
                             }}
-                            placeholder={'Enter carrier description'}
+                            placeholder={L.placeholders.enterDescription}
                             rows={3}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                         />

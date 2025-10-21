@@ -1,5 +1,6 @@
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 import React from 'react';
+import { useSharedUILabels } from '../../hooks/useSharedUILabels';
 
 export interface SortOption {
     key: string;
@@ -30,11 +31,17 @@ export const ServerSorting: React.FC<ServerSortingProps> = ({
     sortOrder,
     onSortChange,
     sortOptions,
-    placeholder = 'Sort by...',
+    placeholder,
     loading = false,
     className = '',
     selectClassName = '',
 }) => {
+    // Get translated labels
+    const { labels: L } = useSharedUILabels();
+
+    // Use translated placeholder if not provided
+    const displayPlaceholder = placeholder || L.sorting.sortByPlaceholder;
+
     const handleSortByChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const newSortBy = e.target.value;
         if (newSortBy && newSortBy !== sortBy) {
@@ -65,7 +72,7 @@ export const ServerSorting: React.FC<ServerSortingProps> = ({
     return (
         <div className={`flex items-center gap-2 ${className}`}>
             <label htmlFor="sort-by" className="text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                Sort by:
+                {L.sorting.sortBy}
             </label>
 
             <div className="flex items-center gap-1">
@@ -76,7 +83,7 @@ export const ServerSorting: React.FC<ServerSortingProps> = ({
                     disabled={loading}
                     className={`rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed ${selectClassName}`}
                 >
-                    <option value="">{placeholder}</option>
+                    <option value="">{displayPlaceholder}</option>
                     {sortOptions.map((option) => (
                         <option key={option.key} value={option.key}>
                             {option.label}
@@ -90,7 +97,7 @@ export const ServerSorting: React.FC<ServerSortingProps> = ({
                         onClick={handleSortOrderToggle}
                         disabled={loading}
                         className="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none focus:text-gray-600 dark:focus:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                        aria-label={`Sort ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
+                        aria-label={sortOrder === 'asc' ? L.sorting.sortDescending : L.sorting.sortAscending}
                     >
                         {getSortIcon()}
                     </button>
