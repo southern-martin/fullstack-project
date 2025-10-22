@@ -8,6 +8,7 @@ import { InterfacesModule } from "./interfaces/interfaces.module";
 // TypeORM Entities (Infrastructure Layer)
 import { UserTypeOrmEntity } from "./infrastructure/database/typeorm/entities/user.typeorm.entity";
 import { RoleTypeOrmEntity } from "./infrastructure/database/typeorm/entities/role.typeorm.entity";
+import { UserProfileTypeOrmEntity } from "./infrastructure/database/typeorm/entities/user-profile.typeorm.entity";
 
 /**
  * Main Application Module
@@ -30,7 +31,7 @@ import { RoleTypeOrmEntity } from "./infrastructure/database/typeorm/entities/ro
       username: process.env.DB_USERNAME || "root",
       password: process.env.DB_PASSWORD || "password",
       database: process.env.DB_DATABASE || "user_service_db",
-      entities: [UserTypeOrmEntity, RoleTypeOrmEntity],
+      entities: [UserTypeOrmEntity, RoleTypeOrmEntity, UserProfileTypeOrmEntity],
       synchronize: true, // Temporarily enabled to auto-create tables
       logging: process.env.NODE_ENV === "development",
       migrations: ["dist/infrastructure/database/typeorm/migrations/*.js"],
