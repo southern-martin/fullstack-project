@@ -28,6 +28,7 @@ import {
     YAxis
 } from 'recharts';
 import Card from '../../../shared/components/ui/Card';
+import { useDashboardLabels } from '../hooks/useDashboardLabels';
 
 // Mock data for demonstration - in real app, this would come from APIs
 const mockData = {
@@ -86,7 +87,8 @@ const StatCard: React.FC<{
     change: number;
     icon: React.ReactNode;
     color: string;
-}> = ({ title, value, change, icon, color }) => {
+    vsLastMonthLabel: string;
+}> = ({ title, value, change, icon, color, vsLastMonthLabel }) => {
     const isPositive = change >= 0;
 
     return (
@@ -104,7 +106,7 @@ const StatCard: React.FC<{
                         <span className={`text-sm font-medium ml-1 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
                             {Math.abs(change)}%
                         </span>
-                        <span className="text-sm text-gray-500 ml-1">vs last month</span>
+                        <span className="text-sm text-gray-500 ml-1">{vsLastMonthLabel}</span>
                     </div>
                 </div>
                 <div className={`p-3 rounded-full ${color}`}>
@@ -116,6 +118,7 @@ const StatCard: React.FC<{
 };
 
 const EcommerceDashboard: React.FC = () => {
+    const { labels: L } = useDashboardLabels();
     const stats = useMemo(() => ({
         totalRevenue: 1250000,
         totalOrders: 15420,
@@ -131,39 +134,43 @@ const EcommerceDashboard: React.FC = () => {
         <div className="space-y-6">
             {/* Header */}
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">Ecommerce Dashboard</h1>
-                <p className="text-gray-600">Multi-seller platform analytics and insights</p>
+                <h1 className="text-3xl font-bold text-gray-900">{L.ECOMMERCE_TITLE}</h1>
+                <p className="text-gray-600">{L.ECOMMERCE_SUBTITLE}</p>
             </div>
 
             {/* Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
-                    title="Total Revenue"
+                    title={L.STATS_TOTAL_REVENUE}
                     value={`$${stats.totalRevenue.toLocaleString()}`}
                     change={stats.revenueChange}
                     icon={<CurrencyDollarIcon className="h-6 w-6 text-white" />}
                     color="bg-green-500"
+                    vsLastMonthLabel={L.STATS_VS_LAST_MONTH}
                 />
                 <StatCard
-                    title="Total Orders"
+                    title={L.STATS_TOTAL_ORDERS}
                     value={stats.totalOrders.toLocaleString()}
                     change={stats.ordersChange}
                     icon={<ShoppingCartIcon className="h-6 w-6 text-white" />}
                     color="bg-blue-500"
+                    vsLastMonthLabel={L.STATS_VS_LAST_MONTH}
                 />
                 <StatCard
-                    title="Active Sellers"
+                    title={L.STATS_ACTIVE_SELLERS}
                     value={stats.totalSellers}
                     change={stats.sellersChange}
                     icon={<UserGroupIcon className="h-6 w-6 text-white" />}
                     color="bg-purple-500"
+                    vsLastMonthLabel={L.STATS_VS_LAST_MONTH}
                 />
                 <StatCard
-                    title="Total Customers"
+                    title={L.STATS_TOTAL_CUSTOMERS}
                     value={stats.totalCustomers.toLocaleString()}
                     change={stats.customersChange}
                     icon={<UsersIcon className="h-6 w-6 text-white" />}
                     color="bg-orange-500"
+                    vsLastMonthLabel={L.STATS_VS_LAST_MONTH}
                 />
             </div>
 
@@ -172,10 +179,10 @@ const EcommerceDashboard: React.FC = () => {
                 {/* Sales Trend */}
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-gray-900">Sales Trend</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">{L.CHART_SALES_TREND}</h3>
                         <div className="flex items-center space-x-2">
                             <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                            <span className="text-sm text-gray-600">Revenue</span>
+                            <span className="text-sm text-gray-600">{L.CHART_LEGEND_REVENUE}</span>
                         </div>
                     </div>
                     <ResponsiveContainer width="100%" height={300}>
@@ -183,8 +190,8 @@ const EcommerceDashboard: React.FC = () => {
                             <XAxis dataKey="date" />
                             <YAxis />
                             <Tooltip
-                                formatter={(value: any) => [`$${value.toLocaleString()}`, 'Revenue']}
-                                labelFormatter={(label) => `Date: ${label}`}
+                                formatter={(value: any) => [`$${value.toLocaleString()}`, L.CHART_LEGEND_REVENUE]}
+                                labelFormatter={(label) => `${L.ECOMMERCE_DATE}: ${label}`}
                             />
                             <Area
                                 type="monotone"
@@ -200,10 +207,10 @@ const EcommerceDashboard: React.FC = () => {
                 {/* Orders Trend */}
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-gray-900">Orders Trend</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">{L.CHART_ORDERS_TREND}</h3>
                         <div className="flex items-center space-x-2">
                             <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                            <span className="text-sm text-gray-600">Orders</span>
+                            <span className="text-sm text-gray-600">{L.CHART_LEGEND_ORDERS}</span>
                         </div>
                     </div>
                     <ResponsiveContainer width="100%" height={300}>
@@ -211,8 +218,8 @@ const EcommerceDashboard: React.FC = () => {
                             <XAxis dataKey="date" />
                             <YAxis />
                             <Tooltip
-                                formatter={(value: any) => [value, 'Orders']}
-                                labelFormatter={(label) => `Date: ${label}`}
+                                formatter={(value: any) => [value, L.CHART_LEGEND_ORDERS]}
+                                labelFormatter={(label) => `${L.ECOMMERCE_DATE}: ${label}`}
                             />
                             <Line
                                 type="monotone"
@@ -230,14 +237,14 @@ const EcommerceDashboard: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Top Products */}
                 <Card className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Selling Products</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{L.CHART_TOP_PRODUCTS}</h3>
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={mockData.topProducts} layout="horizontal">
                             <XAxis type="number" />
                             <YAxis dataKey="name" type="category" width={100} />
                             <Tooltip
-                                formatter={(value: any) => [value, 'Sales']}
-                                labelFormatter={(label) => `Product: ${label}`}
+                                formatter={(value: any) => [value, L.ECOMMERCE_CHART_SALES]}
+                                labelFormatter={(label) => `${L.ECOMMERCE_CHART_PRODUCT}: ${label}`}
                             />
                             <Bar dataKey="sales" fill="#8884d8" />
                         </BarChart>
@@ -246,7 +253,7 @@ const EcommerceDashboard: React.FC = () => {
 
                 {/* Revenue by Category */}
                 <Card className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue by Category</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{L.CHART_REVENUE_BY_CATEGORY}</h3>
                     <ResponsiveContainer width="100%" height={300}>
                         <PieChart>
                             <Pie
@@ -263,7 +270,7 @@ const EcommerceDashboard: React.FC = () => {
                                     <Cell key={`cell-${index}`} fill={entry.color} />
                                 ))}
                             </Pie>
-                            <Tooltip formatter={(value: any) => [`${value}%`, 'Revenue']} />
+                            <Tooltip formatter={(value: any) => [`${value}%`, L.CHART_LEGEND_REVENUE]} />
                         </PieChart>
                     </ResponsiveContainer>
                 </Card>
@@ -273,21 +280,21 @@ const EcommerceDashboard: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Seller Performance */}
                 <Card className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Seller Performance</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{L.CHART_SELLER_PERFORMANCE}</h3>
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={mockData.sellerPerformance}>
                             <XAxis dataKey="name" />
                             <YAxis />
                             <Tooltip />
-                            <Bar dataKey="sellers" fill="#8884d8" name="Total Sellers" />
-                            <Bar dataKey="activeSellers" fill="#82ca9d" name="Active Sellers" />
+                            <Bar dataKey="sellers" fill="#8884d8" name={L.ECOMMERCE_CHART_TOTAL_SELLERS} />
+                            <Bar dataKey="activeSellers" fill="#82ca9d" name={L.ECOMMERCE_CHART_ACTIVE_SELLERS} />
                         </BarChart>
                     </ResponsiveContainer>
                 </Card>
 
                 {/* Recent Orders */}
                 <Card className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Orders</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{L.CHART_RECENT_ORDERS}</h3>
                     <div className="space-y-4">
                         {mockData.recentOrders.map((order) => (
                             <div key={order.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -307,7 +314,10 @@ const EcommerceDashboard: React.FC = () => {
                                             order.status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
                                                 'bg-gray-100 text-gray-800'
                                         }`}>
-                                        {order.status}
+                                        {order.status === 'completed' ? L.STATUS_COMPLETED :
+                                            order.status === 'shipped' ? L.STATUS_SHIPPED :
+                                                order.status === 'processing' ? L.STATUS_PROCESSING :
+                                                    L.STATUS_PENDING}
                                     </span>
                                 </div>
                             </div>
@@ -324,8 +334,8 @@ const EcommerceDashboard: React.FC = () => {
                             <TruckIcon className="h-8 w-8 text-blue-600" />
                         </div>
                         <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-500">Avg. Delivery Time</p>
-                            <p className="text-2xl font-semibold text-gray-900">2.3 days</p>
+                            <p className="text-sm font-medium text-gray-500">{L.STATS_AVG_DELIVERY_TIME}</p>
+                            <p className="text-2xl font-semibold text-gray-900">2.3 {L.TIME_DAYS}</p>
                         </div>
                     </div>
                 </Card>
@@ -336,7 +346,7 @@ const EcommerceDashboard: React.FC = () => {
                             <ChartBarIcon className="h-8 w-8 text-green-600" />
                         </div>
                         <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-500">Conversion Rate</p>
+                            <p className="text-sm font-medium text-gray-500">{L.STATS_CONVERSION_RATE}</p>
                             <p className="text-2xl font-semibold text-gray-900">3.2%</p>
                         </div>
                     </div>
@@ -348,7 +358,7 @@ const EcommerceDashboard: React.FC = () => {
                             <BanknotesIcon className="h-8 w-8 text-purple-600" />
                         </div>
                         <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-500">Avg. Order Value</p>
+                            <p className="text-sm font-medium text-gray-500">{L.STATS_AVG_ORDER_VALUE}</p>
                             <p className="text-2xl font-semibold text-gray-900">$89.50</p>
                         </div>
                     </div>
