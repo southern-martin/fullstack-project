@@ -4,7 +4,7 @@
 
 This guide documents the structured logging implementation using Winston across all NestJS microservices. The logging infrastructure provides:
 
-- **JSON-formatted logs** for easy parsing by Loki/ELK
+- **JSON-formatted logs** for easy parsing by Loki
 - **Correlation IDs** for request tracing across services
 - **Contextual metadata** (user ID, service name, request path)
 - **Automatic request/response logging**
@@ -35,7 +35,7 @@ This guide documents the structured logging implementation using Winston across 
            ├─> Console (Development)
            ├─> Docker stdout (Production)
            │
-           └─> Loki/ELK
+           └─> Loki
                - Promtail collects from Docker
                - Grafana for visualization
 ```
