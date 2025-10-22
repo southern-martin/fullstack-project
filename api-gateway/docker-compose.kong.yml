@@ -23,7 +23,7 @@ services:
 
   # Kong Database Migration
   kong-migration:
-    image: kong:3.4-alpine
+    image: kong:3.4
     container_name: kong-migration
     command: kong migrations bootstrap
     environment:
@@ -42,7 +42,7 @@ services:
 
   # Kong Gateway
   kong:
-    image: kong:3.4-alpine
+    image: kong:3.4
     container_name: kong-gateway
     environment:
       KONG_DATABASE: postgres
@@ -103,6 +103,7 @@ services:
 networks:
   fullstack-network:
     external: true
+    name: fullstack-project-hybrid-network
 
 volumes:
   kong-db-data:
