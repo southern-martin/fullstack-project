@@ -146,6 +146,7 @@ export class LoginUseCase {
     const payload = {
       sub: user.id,
       email: user.email,
+      iss: 'auth-service', // Issuer claim for Kong JWT validation
       roles: user.roles?.map((role: any) => role.name) || [],
       permissions: this.getUserPermissions(user),
     };
