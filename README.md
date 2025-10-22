@@ -1,193 +1,194 @@
 # 🚀 Fullstack Microservices Project
 
-**A modern microservices platform with React Admin frontend, NestJS backend services, and intelligent translation system.**
+**A modern cloud-ready microservices platform with React Admin, NestJS/Go services, and multi-language support.**
 
-[![Services](https://img.shields.io/badge/Microservices-6-blue)](./docs/DOCUMENTATION-INDEX.md)
-[![Status](https://img.shields.io/badge/Status-Active%20Development-green)]()
+[![Services](https://img.shields.io/badge/Microservices-6-blue)](./DOCUMENTATION-INDEX.md)
+[![Deployments](https://img.shields.io/badge/Deployment-Local%20%7C%20VM%20%7C%20GCP-green)]()
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue)](./docker-compose.hybrid.yml)
+
+> **New**: Now supports deployment to Custom VMs and Google Cloud Platform! See [deployment guides](#-deployment-options) below.
 
 ---
 
 ## 🎯 Quick Links
 
-- **[📖 Documentation Index](./docs/DOCUMENTATION-INDEX.md)** - Complete documentation navigation
-- **[🚀 Quick Start](./QUICK-START.md)** - Get running in 5 minutes
-- **[🐳 Start Services](./START-SERVICES-GUIDE.md)** - Docker services guide
-- **[🌐 Translation Feature](./TRANSLATION-FEATURE-COMPLETE-SUMMARY.md)** - Latest feature overview
-- **[📮 Postman Guide](./POSTMAN-QUICK-REFERENCE.md)** - API testing
+- **[📖 Documentation Index](DOCUMENTATION-INDEX.md)** - ⭐ Complete navigation
+- **[🚀 Quick Start](QUICK-START.md)** - Get running in 5 minutes
+- **[☁️ GCP Deployment](QUICK-REFERENCE-GCP.md)** - Deploy to Google Cloud
+- **[🖥️ VM Deployment](infrastructure/vm/README.md)** - Deploy to custom VMs
+- **[📮 Postman Collection](Fullstack-Project-API.postman_collection.json)** - API testing
 
 ---
 
 ## 🏗️ Architecture
 
-### Microservices (6 Services)
+### Microservices (6 Services + Frontend)
 
-| Service | Port | Purpose | Database |
-|---------|------|---------|----------|
-| **Auth Service** | 3001 | Authentication & JWT | Shared MySQL |
-| **User Service** | 3003 | User management | Shared MySQL |
-| **Customer Service** | 3004 | Customer operations | PostgreSQL |
-| **Carrier Service** | 3005 | Carrier management | PostgreSQL |
-| **Pricing Service** | 3006 | Pricing calculations | PostgreSQL |
-| **Translation Service** | 3007 | i18n & translations | PostgreSQL |
+| Service | Port | Technology | Purpose | Database |
+|---------|------|-----------|---------|----------|
+| **React Admin** | 3000 | React 18 | Admin dashboard | - |
+| **Auth Service** | 3001 | NestJS | Authentication & JWT | Shared MySQL |
+| **User Service** | 3003 | NestJS | User management | Shared MySQL |
+| **Carrier Service** | 3004 | Go | Carrier operations | MySQL |
+| **Customer Service** | 3005 | Go | Customer operations | MySQL |
+| **Pricing Service** | 3006 | Go | Pricing calculations | MySQL |
+| **Translation Service** | 3007 | NestJS | Multi-language i18n | MySQL |
 
 ### Shared Infrastructure
 
-- **MySQL (3306)** - Shared database for Auth + User services
-- **Redis (6379)** - Caching and session management
-- **Docker Compose** - Container orchestration
+- **MySQL 8.0** - 4 database instances (hybrid architecture)
+- **Redis 7** - Shared cache and session store
+- **Nginx** - Reverse proxy (VM deployment)
+- **Docker Compose** - Local orchestration
+- **Kubernetes** - GCP deployment (GKE)
 
 ---
 
 ## ⚡ Quick Start
 
-### 1. Start Services
+### 1. Start Services (Local Development)
 ```bash
-# Start shared infrastructure
-cd shared-database && docker-compose up -d
+# Easiest way - use Makefile
+make start
 
-# Start all microservices
+# Or manually start services
+cd shared-database && docker-compose up -d
 docker-compose -f docker-compose.hybrid.yml up -d
 ```
 
 ### 2. Access Application
 - **Frontend**: http://localhost:3000
-- **Default Login**: admin@example.com / Admin123!
+- **Default Login**: `admin@example.com` / `Admin123!`
+- **API Documentation**: See [API Standards](docs/API-STANDARDS.md)
 
-### 3. Verify Services
+**→ See [QUICK-START.md](QUICK-START.md) for detailed instructions**
+
+---
+
+## 🚀 Deployment Options
+
+### Local Development (5 minutes)
 ```bash
-# Check all services are healthy
-make health-check
+make start
 ```
+- **Best for**: Development, testing
+- **Cost**: Free
+- **Documentation**: [QUICK-START.md](QUICK-START.md)
 
-**→ See [Quick Start Guide](./QUICK-START.md) for detailed instructions**
+### Custom VM Deployment (15 minutes)
+```bash
+sudo ./infrastructure/vm/install-vm.sh
+sudo ./infrastructure/vm/deploy-vm.sh
+```
+- **Best for**: Small-medium sites, on-premises
+- **Cost**: $20-100/month
+- **Documentation**: [infrastructure/vm/README.md](infrastructure/vm/README.md)
+
+### Google Cloud Platform (30 minutes)
+```bash
+cd infrastructure/terraform/environments/dev
+terraform apply
+```
+- **Best for**: Enterprise, auto-scaling
+- **Cost**: $150-1200/month
+- **Documentation**: [QUICK-REFERENCE-GCP.md](QUICK-REFERENCE-GCP.md)
 
 ---
 
 ## 🌟 Key Features
 
-### ✅ Translation System (Latest Feature)
-- **Language Selector** - Global language switching in header
-- **Batch Translation** - 10× faster performance (1 request vs 40)
-- **Redis Caching** - 100% cache hit rate for translations
-- **Multi-language UI** - Supports English, French, Spanish, etc.
-- **Carrier Module** - Fully translated with auto-update
-
-**→ Read [Translation Feature Summary](./TRANSLATION-FEATURE-COMPLETE-SUMMARY.md)**
+### ✅ Multi-Language Support
+- **3 Languages**: English, French, Spanish
+- **401 User Profiles**: Pre-seeded with translations
+- **Dynamic Translation**: Real-time language switching
+- **Redis Caching**: Fast translation lookups
 
 ### ✅ Standardized API Format
-All 6 microservices use consistent response format:
-```typescript
+All microservices use consistent responses:
+```json
 {
-  data: T,              // Actual response data
-  message: string,      // Success/error message
-  statusCode: number,   // HTTP status code
-  timestamp: string,    // ISO timestamp
-  success: boolean      // Operation success flag
+  "data": {},
+  "message": "Success",
+  "statusCode": 200,
+  "timestamp": "2025-10-22T00:00:00.000Z",
+  "success": true
 }
 ```
 
-**→ Read [API Standards](./docs/API-STANDARDS.md)**
-
 ### ✅ Hybrid Database Architecture
-- **Shared Pattern**: Auth + User services share MySQL for tightly coupled data
-- **Separate Pattern**: Business services have independent databases for loose coupling
-- **Best of Both**: Performance + scalability
+- **Shared DB**: Auth + User services (tightly coupled)
+- **Separate DBs**: Business services (loose coupling)
+- **Benefits**: Performance + Scalability
+
+### ✅ Cloud-Ready Infrastructure
+- **Secrets Management**: YAML-based with environment separation
+- **Terraform**: Complete GCP infrastructure as code
+- **Docker Compose**: Production-ready VM deployment
+- **Auto-scaling**: Kubernetes support for GCP
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Frontend
-- **React 18** with TypeScript
-- **TanStack Query** (React Query) for state management
-- **Tailwind CSS** for styling
-- **Heroicons** for icons
-
-### Backend
-- **NestJS** with TypeScript
-- **TypeORM** for database access
-- **JWT** authentication
-- **Redis** caching
-
-### Infrastructure
-- **Docker** & Docker Compose
-- **MySQL 8.0** & **PostgreSQL 14**
-- **Redis 7**
+| Layer | Technologies |
+|-------|-------------|
+| **Frontend** | React 18, TypeScript, TanStack Query, Tailwind CSS |
+| **Backend** | NestJS (TypeScript), Go 1.21 |
+| **Databases** | MySQL 8.0, Redis 7 |
+| **Infrastructure** | Docker, Kubernetes (GKE), Terraform |
+| **Cloud** | Google Cloud Platform |
+| **Auth** | JWT with refresh tokens |
 
 ---
 
-## 📚 Documentation Structure
+## 📚 Documentation
 
-### For Developers (Start Here)
-1. [Quick Start Guide](./QUICK-START.md) - Get up and running
-2. [Documentation Index](./docs/DOCUMENTATION-INDEX.md) - Find any document
-3. [API Standards](./docs/API-STANDARDS.md) - API conventions
+**Start Here**: [DOCUMENTATION-INDEX.md](DOCUMENTATION-INDEX.md) - Complete navigation
 
-### Feature Documentation
-- [Translation Feature](./TRANSLATION-FEATURE-COMPLETE-SUMMARY.md) - Complete translation system
-- [Language Selector](./LANGUAGE-SELECTOR-IMPLEMENTATION.md) - Language switching UI
-- [Carrier Translation](./CARRIER-MODULE-BATCH-TRANSLATION-COMPLETE.md) - Batch translation
+### Essential Guides
+- **[QUICK-START.md](QUICK-START.md)** - Get running in 5 minutes
+- **[QUICK-REFERENCE-GCP.md](QUICK-REFERENCE-GCP.md)** - GCP deployment
+- **[infrastructure/vm/README.md](infrastructure/vm/README.md)** - VM deployment
+- **[START-SERVICES-GUIDE.md](START-SERVICES-GUIDE.md)** - Service management
 
-### Service Documentation
-Each service has its own README in its folder:
-- [auth-service/README.md](./auth-service/README.md)
-- [user-service/README.md](./user-service/README.md)
-- [customer-service/README.md](./customer-service/README.md)
-- [carrier-service/README.md](./carrier-service/README.md)
-- [pricing-service/README.md](./pricing-service/README.md)
-- [translation-service/README.md](./translation-service/README.md)
+### By Category
+- **Architecture**: [docs/architecture/](docs/architecture/)
+- **API Docs**: [docs/api/](docs/api/)
+- **Translation**: [docs/translation/](docs/translation/)
+- **Development**: [docs/development/](docs/development/)
+- **Deployment**: [docs/deployment/](docs/deployment/)
 
 ---
 
-## 🧪 Testing
+## 📊 Project Status
 
-### API Testing with Postman
-1. Import [Postman Collection](./Fullstack-Project-API.postman_collection.json)
-2. Import [Environment](./Fullstack-Project-Environment.postman_environment.json)
-3. Read [Postman Guide](./POSTMAN-QUICK-REFERENCE.md)
-
-### Translation Testing
-- [Carrier Translation Testing Guide](./CARRIER-TRANSLATION-TESTING-GUIDE.md)
-
----
-
-## 📊 Current Status
-
-| Feature | Status | Documentation |
-|---------|--------|---------------|
-| API Standardization | ✅ Complete (6/6 services) | [API Standards](./API-STANDARDIZATION-COMPLETE.md) |
-| Translation Service | ✅ Running | [Translation Guide](./TRANSLATION-FEATURE-COMPLETE-SUMMARY.md) |
-| Language Selector | ✅ Integrated | [Language Selector](./LANGUAGE-SELECTOR-IMPLEMENTATION.md) |
-| Carrier Translation | ✅ Complete | [Carrier Module](./CARRIER-MODULE-BATCH-TRANSLATION-COMPLETE.md) |
-| Docker Services | ✅ All healthy | [Start Guide](./START-SERVICES-GUIDE.md) |
-
-**→ See [TODO.md](./TODO.md) for pending work**
+| Component | Status | Version |
+|-----------|--------|---------|
+| User Profiles | ✅ Complete | 401 seeded |
+| Multi-language | ✅ Complete | EN/FR/ES |
+| API Standardization | ✅ Complete | 6/6 services |
+| Local Deployment | ✅ Ready | Docker Compose |
+| VM Deployment | ✅ Ready | Ubuntu/Debian/CentOS |
+| GCP Deployment | ✅ Ready | Terraform |
+| AWS Deployment | ⏳ Planned | Phase 4 |
 
 ---
 
 ## 🤝 Contributing
 
-1. Follow [Git Flow Guide](./scripts/gitflow/README.md)
-2. Adhere to [API Standards](./docs/API-STANDARDS.md)
-3. Update relevant documentation
-4. Test with Postman collection
+1. **Git Workflow**: See [docs/development/GITFLOW.md](docs/development/GITFLOW.md)
+2. **Coding Standards**: Follow [docs/development/coding-standards.md](docs/development/coding-standards.md)
+3. **API Standards**: Adhere to [docs/API-STANDARDS.md](docs/API-STANDARDS.md)
+4. **Testing**: Use [Postman collection](Fullstack-Project-API.postman_collection.json)
 
 ---
 
-## 📞 Need Help?
+## 📞 Support
 
-- **Documentation**: Start with [Documentation Index](./docs/DOCUMENTATION-INDEX.md)
-- **Quick Start Issues**: Check [Start Services Guide](./START-SERVICES-GUIDE.md)
-- **API Questions**: Review [Postman Guide](./POSTMAN-QUICK-REFERENCE.md)
-- **Service Issues**: Check individual service README files
-
----
-
-## 📝 License
-
-[Add your license here]
+- **📖 Documentation**: [DOCUMENTATION-INDEX.md](DOCUMENTATION-INDEX.md)
+- **🆘 Troubleshooting**: [docs/SERVICES-NOT-RUNNING.md](docs/SERVICES-NOT-RUNNING.md)
+- **💬 Questions**: Check service-specific README files
 
 ---
 
-**Last Updated**: October 21, 2025
+**Last Updated**: October 22, 2025

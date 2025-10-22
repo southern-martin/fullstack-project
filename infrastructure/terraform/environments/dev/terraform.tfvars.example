@@ -1,0 +1,43 @@
+# Development Environment Configuration
+# Copy this file to terraform.tfvars and update with your values
+
+# GCP Project Configuration
+project_id = "your-gcp-project-id"  # REQUIRED: Change to your GCP project ID
+region     = "us-central1"
+environment = "dev"
+
+# Network Configuration
+subnet_cidr    = "10.10.0.0/20"    # Dev subnet
+pods_cidr      = "10.11.0.0/16"    # Dev GKE pods
+services_cidr  = "10.12.0.0/16"    # Dev GKE services
+
+# GKE Configuration (Cost-optimized for dev)
+gke_cluster_name = "fullstack-dev-gke"
+gke_node_count   = 2               # Smaller for dev
+gke_machine_type = "e2-standard-2" # Smaller machines for dev
+gke_disk_size_gb = 50              # Less disk space
+gke_min_nodes    = 1
+gke_max_nodes    = 3
+enable_preemptible_nodes = true    # Cost savings for dev
+
+# Cloud SQL Configuration (Cost-optimized for dev)
+cloudsql_tier               = "db-n1-standard-1"  # Smaller tier
+cloudsql_availability_type  = "ZONAL"             # Single zone for dev
+cloudsql_disk_size_gb       = 10                  # Smaller disk
+cloudsql_backup_enabled     = true
+cloudsql_point_in_time_recovery = false           # Disable for cost savings
+
+# Redis Configuration (Cost-optimized for dev)
+redis_memory_size_gb = 1           # Minimal memory
+redis_tier           = "BASIC"     # Basic tier for dev
+
+# Feature Flags
+enable_secret_manager = true
+enable_monitoring     = true
+
+# Labels
+labels = {
+  team        = "engineering"
+  cost_center = "development"
+  created_by  = "terraform"
+}

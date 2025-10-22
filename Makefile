@@ -8,15 +8,24 @@
 .PHONY: go-build go-run go-debug
 .PHONY: docker-clean docker-clean-all docker-clean-system docker-clean-auth docker-status
 .PHONY: docker-build docker-up docker-down docker-start docker-restart docker-logs
+.PHONY: init-secrets load-env start-local stop-local restart-local logs-local
 
 # Default target
 help:
 	@echo "Fullstack Project Makefile"
 	@echo ""
+	@echo "🚀 Quick Start (Local Development with Secrets):"
+	@echo "  init-secrets    - Generate local development secrets (run once)"
+	@echo "  load-env        - Load secrets and create .env file"
+	@echo "  start-local     - Start all services locally with secrets"
+	@echo "  stop-local      - Stop local services"
+	@echo "  restart-local   - Restart local services"
+	@echo "  logs-local      - View logs from local services"
+	@echo ""
 	@echo "Available targets:"
 	@echo "  setup           - Setup build environment and install dependencies"
 	@echo "  build           - Build all projects"
-	@echo "  start           - Start all development servers"
+	@echo "  start           - Start all development servers (legacy)"
 	@echo "  debug           - Start all services in debug mode"
 	@echo "  dev             - Start all services in development mode with hot reload"
 	@echo "  stop            - Stop all running services"
@@ -296,6 +305,55 @@ docker-status:
 	@echo "Containers:"
 	@docker ps -a --filter "name=southern-martin" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" || echo "No containers found"
 	@echo ""
+
+# ==========================================
+# LOCAL DEVELOPMENT WITH SECRETS
+# ==========================================
+
+init-secrets:
+	@echo "🔐 Initializing local development secrets..."
+	@./scripts/init-local-secrets.sh
+
+load-env:
+	@echo "🔄 Loading environment configuration..."
+	@./scripts/load-env.sh
+
+start-local: load-env
+	@echo "🚀 Starting all services locally with externalized secrets..."
+	@docker-compose -f docker-compose.local.yml up -d
+	@echo "✅ All services started!"
+	@echo ""
+	@echo "📋 Service URLs:"
+	@echo "  Auth Service:        http://localhost:3001"
+	@echo "  User Service:        http://localhost:3003"
+	@echo "  Carrier Service:     http://localhost:3004"
+	@echo "  Customer Service:    http://localhost:3005"
+	@echo "  Pricing Service:     http://localhost:3006"
+	@echo "  React Admin:         http://localhost:3000"
+	@echo ""
+	@echo "📊 View logs with: make logs-local"
+	@echo "🛑 Stop services with: make stop-local"
+
+stop-local:
+	@echo "🛑 Stopping local services..."
+	@docker-compose -f docker-compose.local.yml down
+	@echo "✅ All services stopped!"
+
+restart-local: stop-local start-local
+
+logs-local:
+	@docker-compose -f docker-compose.local.yml logs -f
+
+build-local:
+	@echo "🔨 Building all services for local development..."
+	@docker-compose -f docker-compose.local.yml build
+	@echo "✅ Build completed!"
+
+clean-local:
+	@echo "🧹 Cleaning up local development environment..."
+	@docker-compose -f docker-compose.local.yml down -v
+	@echo "✅ Cleanup completed!"
+
 	@echo "Images:"
 	@docker images --filter "reference=*southern-martin*" --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}" || echo "No images found"
 	@echo ""

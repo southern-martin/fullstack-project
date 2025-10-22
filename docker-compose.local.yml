@@ -1,0 +1,382 @@
+version: '3.8'
+
+name: fullstack-project-local
+
+# ==========================================
+# LOCAL DEVELOPMENT WITH EXTERNALIZED SECRETS
+# ==========================================
+# This docker-compose file uses environment variables from:
+# - infrastructure/environments/local.env
+# - infrastructure/secrets/secrets.yaml (loaded via .env)
+#
+# Usage:
+#   make start-local
+#   or
+#   docker-compose -f docker-compose.local.yml --env-file .env up
+
+services:
+  # ===========================================
+  # SHARED INFRASTRUCTURE
+  # ===========================================
+  
+  # Shared Database (Auth + User Services)
+  shared-user-db:
+    image: mysql:8.0
+    container_name: shared-user-database
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${SHARED_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME:-shared_user_db}
+      MYSQL_USER: ${DB_USERNAME:-shared_user}
+      MYSQL_PASSWORD: ${SHARED_DB_PASSWORD}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - shared_user_db_data:/var/lib/mysql
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${SHARED_DB_ROOT_PASSWORD}"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
+
+  # Shared Redis (All Services)
+  shared-redis:
+    image: redis:7-alpine
+    container_name: shared-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - shared_redis_data:/data
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      timeout: 10s
+      retries: 5
+      interval: 10s
+      start_period: 30s
+
+  # ===========================================
+  # CORE SERVICES (Shared Database)
+  # ===========================================
+  
+  # Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    container_name: auth-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${AUTH_SERVICE_PORT:-3001}
+      # Database
+      DB_HOST: ${DB_HOST:-shared-user-db}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${SHARED_DB_PASSWORD}
+      DB_NAME: ${DB_NAME:-shared_user_db}
+      # Redis
+      REDIS_HOST: ${REDIS_HOST:-shared-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_KEY_PREFIX: auth
+      # JWT
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-24h}
+      # Service URLs
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      USER_SERVICE_URL: ${USER_SERVICE_URL:-http://user-service:3003}
+    ports:
+      - "${AUTH_SERVICE_PORT:-3001}:3001"
+    depends_on:
+      shared-user-db:
+        condition: service_healthy
+      shared-redis:
+        condition: service_healthy
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/v1/auth/health"]
+      timeout: 10s
+      retries: 3
+      interval: 30s
+      start_period: 40s
+
+  # User Service
+  user-service:
+    build:
+      context: .
+      dockerfile: ./user-service/Dockerfile.simple
+    container_name: user-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${USER_SERVICE_PORT:-3003}
+      # Database
+      DB_HOST: ${DB_HOST:-shared-user-db}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${SHARED_DB_PASSWORD}
+      DB_DATABASE: ${DB_NAME:-shared_user_db}
+      # Redis
+      REDIS_HOST: ${REDIS_HOST:-shared-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_KEY_PREFIX: user
+    ports:
+      - "${USER_SERVICE_PORT:-3003}:3003"
+    depends_on:
+      shared-user-db:
+        condition: service_healthy
+      shared-redis:
+        condition: service_healthy
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3003/api/v1/health"]
+      timeout: 10s
+      retries: 3
+      interval: 30s
+      start_period: 40s
+
+  # ===========================================
+  # BUSINESS SERVICES (Separate Databases)
+  # ===========================================
+  
+  # Customer Service Database
+  customer-service-db:
+    image: mysql:8.0
+    container_name: customer-service-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${CUSTOMER_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${CUSTOMER_DB_NAME:-customer_service_db}
+      MYSQL_USER: ${CUSTOMER_DB_USERNAME:-customer_user}
+      MYSQL_PASSWORD: ${CUSTOMER_DB_PASSWORD}
+    ports:
+      - "3309:3306"
+    volumes:
+      - customer_service_db_data:/var/lib/mysql
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${CUSTOMER_DB_ROOT_PASSWORD}"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
+
+  # Customer Service
+  customer-service:
+    build:
+      context: .
+      dockerfile: ./customer-service/Dockerfile
+    container_name: customer-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${CUSTOMER_SERVICE_PORT:-3005}
+      # Database
+      DB_HOST: ${CUSTOMER_DB_HOST:-customer-service-db}
+      DB_PORT: 3306
+      DB_USERNAME: ${CUSTOMER_DB_USERNAME:-customer_user}
+      DB_PASSWORD: ${CUSTOMER_DB_PASSWORD}
+      DB_DATABASE: ${CUSTOMER_DB_NAME:-customer_service_db}
+      # Redis
+      REDIS_HOST: ${REDIS_HOST:-shared-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_KEY_PREFIX: customer
+      # Service URLs
+      USER_SERVICE_URL: ${USER_SERVICE_URL:-http://user-service:3003}
+    ports:
+      - "${CUSTOMER_SERVICE_PORT:-3005}:3005"
+    depends_on:
+      customer-service-db:
+        condition: service_healthy
+      shared-redis:
+        condition: service_healthy
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3005/health"]
+      timeout: 10s
+      retries: 3
+      interval: 30s
+      start_period: 40s
+
+  # Carrier Service Database
+  carrier-service-db:
+    image: mysql:8.0
+    container_name: carrier-service-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${CARRIER_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${CARRIER_DB_NAME:-carrier_service_db}
+      MYSQL_USER: ${CARRIER_DB_USERNAME:-carrier_user}
+      MYSQL_PASSWORD: ${CARRIER_DB_PASSWORD}
+    ports:
+      - "3310:3306"
+    volumes:
+      - carrier_service_db_data:/var/lib/mysql
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${CARRIER_DB_ROOT_PASSWORD}"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
+
+  # Carrier Service
+  carrier-service:
+    build:
+      context: .
+      dockerfile: ./carrier-service/Dockerfile
+    container_name: carrier-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${CARRIER_SERVICE_PORT:-3004}
+      # Database
+      DB_HOST: ${CARRIER_DB_HOST:-carrier-service-db}
+      DB_PORT: 3306
+      DB_USERNAME: ${CARRIER_DB_USERNAME:-carrier_user}
+      DB_PASSWORD: ${CARRIER_DB_PASSWORD}
+      DB_DATABASE: ${CARRIER_DB_NAME:-carrier_service_db}
+      # Redis
+      REDIS_HOST: ${REDIS_HOST:-shared-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_KEY_PREFIX: carrier
+      # Service URLs
+      USER_SERVICE_URL: ${USER_SERVICE_URL:-http://user-service:3003}
+    ports:
+      - "${CARRIER_SERVICE_PORT:-3004}:3004"
+    depends_on:
+      carrier-service-db:
+        condition: service_healthy
+      shared-redis:
+        condition: service_healthy
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3004/health"]
+      timeout: 10s
+      retries: 3
+      interval: 30s
+      start_period: 40s
+
+  # Pricing Service Database
+  pricing-service-db:
+    image: mysql:8.0
+    container_name: pricing-service-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${PRICING_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${PRICING_DB_NAME:-pricing_service_db}
+      MYSQL_USER: ${PRICING_DB_USERNAME:-pricing_user}
+      MYSQL_PASSWORD: ${PRICING_DB_PASSWORD}
+    ports:
+      - "3311:3306"
+    volumes:
+      - pricing_service_db_data:/var/lib/mysql
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${PRICING_DB_ROOT_PASSWORD}"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
+
+  # Pricing Service
+  pricing-service:
+    build:
+      context: .
+      dockerfile: ./pricing-service/Dockerfile
+    container_name: pricing-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${PRICING_SERVICE_PORT:-3006}
+      # Database
+      DB_HOST: ${PRICING_DB_HOST:-pricing-service-db}
+      DB_PORT: 3306
+      DB_USERNAME: ${PRICING_DB_USERNAME:-pricing_user}
+      DB_PASSWORD: ${PRICING_DB_PASSWORD}
+      DB_DATABASE: ${PRICING_DB_NAME:-pricing_service_db}
+      # Redis
+      REDIS_HOST: ${REDIS_HOST:-shared-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_KEY_PREFIX: pricing
+    ports:
+      - "${PRICING_SERVICE_PORT:-3006}:3006"
+    depends_on:
+      pricing-service-db:
+        condition: service_healthy
+      shared-redis:
+        condition: service_healthy
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3006/health"]
+      timeout: 10s
+      retries: 3
+      interval: 30s
+      start_period: 40s
+
+  # ===========================================
+  # FRONTEND
+  # ===========================================
+  
+  react-admin:
+    build:
+      context: ./react-admin
+      dockerfile: Dockerfile
+    container_name: react-admin
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      REACT_APP_AUTH_SERVICE_URL: http://localhost:${AUTH_SERVICE_PORT:-3001}
+      REACT_APP_USER_SERVICE_URL: http://localhost:${USER_SERVICE_PORT:-3003}
+    ports:
+      - "${REACT_ADMIN_PORT:-3000}:3000"
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      timeout: 10s
+      retries: 3
+      interval: 30s
+      start_period: 30s
+
+# ===========================================
+# NETWORKS
+# ===========================================
+networks:
+  shared-services-network:
+    driver: bridge
+    name: shared-services-network
+
+# ===========================================
+# VOLUMES
+# ===========================================
+volumes:
+  shared_user_db_data:
+    name: shared_user_db_data
+  shared_redis_data:
+    name: shared_redis_data
+  customer_service_db_data:
+    name: customer_service_db_data
+  carrier_service_db_data:
+    name: carrier_service_db_data
+  pricing_service_db_data:
+    name: pricing_service_db_data
