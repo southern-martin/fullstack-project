@@ -2,6 +2,9 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
+// Shared Infrastructure
+import { WinstonLoggerModule } from "@shared/infrastructure/logging/winston-logger.module";
+
 // Clean Architecture Modules
 import { ApplicationModule } from "./application/application.module";
 import { InterfacesModule } from "./interfaces/interfaces.module";
@@ -22,6 +25,9 @@ import { PriceCalculationTypeOrmEntity } from "./infrastructure/database/typeorm
       isGlobal: true,
       envFilePath: [".env.local", ".env"],
     }),
+
+    // Structured Logging
+    WinstonLoggerModule,
 
     // Database Connection
     TypeOrmModule.forRoot({

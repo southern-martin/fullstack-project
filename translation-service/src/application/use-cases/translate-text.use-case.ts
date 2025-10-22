@@ -10,6 +10,7 @@ import { TranslationDomainService } from "../../domain/services/translation.doma
 import { CreateTranslationDto } from "../dto/create-translation.dto";
 import { TranslateTextDto } from "../dto/translate-text.dto";
 import { ManageTranslationUseCase } from "./manage-translation.use-case";
+import { WinstonLoggerService } from "@shared/infrastructure/logging/winston-logger.service";
 
 /**
  * TranslateTextUseCase
@@ -25,7 +26,8 @@ export class TranslateTextUseCase {
     @Inject("LanguageValueRepositoryInterface")
     private readonly languageValueRepository: LanguageValueRepositoryInterface,
     private readonly translationDomainService: TranslationDomainService,
-    private readonly manageTranslationUseCase: ManageTranslationUseCase
+    private readonly manageTranslationUseCase: ManageTranslationUseCase,
+    private readonly logger: WinstonLoggerService
   ) {}
 
   /**
@@ -229,8 +231,9 @@ export class TranslateTextUseCase {
     // 3. Call AWS Translate API
     // 4. Or any other translation service
 
-    console.log(
-      `Translating "${text}" from ${sourceLanguage} to ${targetLanguage}`
+    this.logger.debug(
+      `Translating "${text}" from ${sourceLanguage} to ${targetLanguage}`,
+      "TranslateTextUseCase"
     );
 
     // Placeholder: return original text with a prefix to indicate it's translated

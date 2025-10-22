@@ -3,9 +3,17 @@ import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { HttpExceptionFilter } from "@shared/infrastructure/filters/http-exception.filter";
 import { TransformInterceptor } from "@shared/infrastructure/interceptors/transform.interceptor";
+import { WinstonLoggerService } from "@shared/infrastructure/logging/winston-logger.service";
+import { LoggingInterceptor } from "@shared/infrastructure/logging/logging.interceptor";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
+
+  // Set up Winston logger
+  const logger = app.get(WinstonLoggerService);
+  app.useLogger(logger);
 
   // Enable CORS
   app.enableCors({
@@ -15,6 +23,9 @@ async function bootstrap() {
 
   // Global exception filter (API Standards)
   app.useGlobalFilters(new HttpExceptionFilter());
+
+  // Global logging interceptor (Correlation IDs + Request/Response logging)
+  app.useGlobalInterceptors(new LoggingInterceptor(logger));
 
   // Global transform interceptor (API Standards)
   app.useGlobalInterceptors(new TransformInterceptor());
@@ -34,11 +45,13 @@ async function bootstrap() {
   const port = process.env.PORT || 3004;
   await app.listen(port);
 
-  console.log(
-    `🚀 Customer Service is running on: http://localhost:${port}/api/v1`
+  logger.log(
+    `🚀 Customer Service is running on: http://localhost:${port}/api/v1`,
+    "Bootstrap"
   );
-  console.log(`📊 Health check: http://localhost:${port}/api/v1/health`);
-  console.log(`✅ API Standards: Enabled (GlobalExceptionFilter + TransformInterceptor)`);
+  logger.log(`📊 Health check: http://localhost:${port}/api/v1/health`, "Bootstrap");
+  logger.log(`✅ API Standards: Enabled (GlobalExceptionFilter + TransformInterceptor)`, "Bootstrap");
+  logger.log(`📝 Structured Logging: Enabled (Winston + Correlation IDs)`, "Bootstrap");
 }
 
 bootstrap();

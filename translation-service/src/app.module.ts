@@ -1,6 +1,9 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 
+// Shared Infrastructure
+import { WinstonLoggerModule } from "@shared/infrastructure/logging/winston-logger.module";
+
 // Clean Architecture Modules
 import { ApplicationModule } from "./application/application.module";
 import { InterfacesModule } from "./interfaces/interfaces.module";
@@ -18,6 +21,9 @@ import { DatabaseModule } from "./infrastructure/database/database.module";
       isGlobal: true,
       envFilePath: [".env.local", ".env"],
     }),
+
+    // Structured Logging
+    WinstonLoggerModule,
 
     // Infrastructure (Database)
     DatabaseModule,
