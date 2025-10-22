@@ -1,0 +1,279 @@
+# Kong Declarative Configuration
+# This file defines all Kong services, routes, and plugins
+# Can be version controlled and applied via deck or Admin API
+
+_format_version: "3.0"
+
+# ============================================
+# UPSTREAM SERVICES (Microservices)
+# ============================================
+
+services:
+  # Auth Service
+  - name: auth-service
+    url: http://auth-service:3001
+    tags:
+      - microservice
+      - auth
+    
+  # User Service  
+  - name: user-service
+    url: http://user-service:3003
+    tags:
+      - microservice
+      - users
+    
+  # Carrier Service (Go)
+  - name: carrier-service
+    url: http://carrier-service:3004
+    tags:
+      - microservice
+      - carrier
+    
+  # Customer Service (Go)
+  - name: customer-service
+    url: http://customer-service:3005
+    tags:
+      - microservice
+      - customer
+    
+  # Pricing Service (Go)
+  - name: pricing-service
+    url: http://pricing-service:3006
+    tags:
+      - microservice
+      - pricing
+    
+  # Translation Service
+  - name: translation-service
+    url: http://translation-service:3007
+    tags:
+      - microservice
+      - translation
+
+# ============================================
+# ROUTES (Public API Endpoints)
+# ============================================
+
+# Auth Service Routes
+routes:
+  - name: auth-login
+    service: auth-service
+    paths:
+      - /api/v1/auth/login
+    methods:
+      - POST
+    strip_path: false
+    
+  - name: auth-register
+    service: auth-service
+    paths:
+      - /api/v1/auth/register
+    methods:
+      - POST
+    strip_path: false
+    
+  - name: auth-refresh
+    service: auth-service
+    paths:
+      - /api/v1/auth/refresh
+    methods:
+      - POST
+    strip_path: false
+    
+  - name: auth-logout
+    service: auth-service
+    paths:
+      - /api/v1/auth/logout
+    methods:
+      - POST
+    strip_path: false
+    plugins:
+      - name: jwt
+        config:
+          key_claim_name: sub
+          
+  # User Service Routes (Protected)
+  - name: users-list
+    service: user-service
+    paths:
+      - /api/v1/users
+    methods:
+      - GET
+    strip_path: false
+    plugins:
+      - name: jwt
+        config:
+          key_claim_name: sub
+      - name: acl
+        config:
+          whitelist:
+            - admin
+            - super_admin
+            
+  - name: users-crud
+    service: user-service
+    paths:
+      - /api/v1/users/.*
+    methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+    strip_path: false
+    plugins:
+      - name: jwt
+        config:
+          key_claim_name: sub
+          
+  # Roles Routes (Protected)
+  - name: roles-routes
+    service: user-service
+    paths:
+      - /api/v1/roles
+      - /api/v1/roles/.*
+    methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+    strip_path: false
+    plugins:
+      - name: jwt
+        config:
+          key_claim_name: sub
+      - name: acl
+        config:
+          whitelist:
+            - admin
+            - super_admin
+            
+  # Carrier Service Routes (Protected)
+  - name: carriers-routes
+    service: carrier-service
+    paths:
+      - /api/carriers
+      - /api/carriers/.*
+    methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+    strip_path: false
+    plugins:
+      - name: jwt
+        config:
+          key_claim_name: sub
+          
+  # Customer Service Routes (Protected)
+  - name: customers-routes
+    service: customer-service
+    paths:
+      - /api/customers
+      - /api/customers/.*
+    methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+    strip_path: false
+    plugins:
+      - name: jwt
+        config:
+          key_claim_name: sub
+          
+  # Pricing Service Routes (Protected)
+  - name: pricing-routes
+    service: pricing-service
+    paths:
+      - /api/pricing
+      - /api/pricing/.*
+    methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+    strip_path: false
+    plugins:
+      - name: jwt
+        config:
+          key_claim_name: sub
+          
+  # Translation Service Routes
+  - name: translations-routes
+    service: translation-service
+    paths:
+      - /api/v1/translations
+      - /api/v1/translations/.*
+    methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+    strip_path: false
+    plugins:
+      - name: jwt
+        config:
+          key_claim_name: sub
+
+# ============================================
+# GLOBAL PLUGINS
+# ============================================
+
+plugins:
+  # CORS for frontend
+  - name: cors
+    config:
+      origins:
+        - http://localhost:3000
+        - http://localhost:3001
+        - http://react-admin:3000
+      credentials: true
+      max_age: 3600
+      
+  # Rate Limiting (Global)
+  - name: rate-limiting
+    config:
+      minute: 100
+      hour: 1000
+      policy: local
+      
+  # Request/Response Logging
+  - name: file-log
+    config:
+      path: /tmp/kong-requests.log
+      
+# ============================================
+# CONSUMERS (Users/Applications)
+# ============================================
+
+consumers:
+  - username: admin-user
+    custom_id: "1"
+    tags:
+      - admin
+      
+  - username: regular-user
+    custom_id: "2"
+    tags:
+      - user
+
+# ============================================
+# ACL GROUPS (Role-Based Access)
+# ============================================
+
+acls:
+  - consumer: admin-user
+    group: admin
+    
+  - consumer: admin-user
+    group: super_admin
+    
+  - consumer: regular-user
+    group: user
