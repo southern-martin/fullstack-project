@@ -3,42 +3,50 @@ import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
 // Clean Architecture Modules
+import { ApplicationModule } from "./application/application.module";
+import { InfrastructureModule } from "./infrastructure/infrastructure.module";
 import { InterfacesModule } from "./interfaces/interfaces.module";
 
-// TypeORM Entities (Infrastructure Layer)
-import { UserTypeOrmEntity } from "./infrastructure/database/typeorm/entities/user.typeorm.entity";
+// TypeORM Entities
 import { RoleTypeOrmEntity } from "./infrastructure/database/typeorm/entities/role.typeorm.entity";
-import { UserProfileTypeOrmEntity } from "./infrastructure/database/typeorm/entities/user-profile.typeorm.entity";
+import { UserTypeOrmEntity } from "./infrastructure/database/typeorm/entities/user.typeorm.entity";
+
+// Logging
+import { WinstonLoggerModule } from "@shared/infrastructure/logging";
 
 /**
  * Main Application Module
  * Follows Clean Architecture principles
- * Orchestrates all layers through the Interfaces module
+ * Orchestrates all layers
  */
 @Module({
   imports: [
     // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [".env.local", ".env"],
+      envFilePath: ".env",
     }),
+
+    // Structured Logging
+    WinstonLoggerModule,
 
     // Database
     TypeOrmModule.forRoot({
       type: "mysql",
       host: process.env.DB_HOST || "localhost",
       port: parseInt(process.env.DB_PORT) || 3306,
-      username: process.env.DB_USERNAME || "root",
-      password: process.env.DB_PASSWORD || "password",
-      database: process.env.DB_DATABASE || "user_service_db",
-      entities: [UserTypeOrmEntity, RoleTypeOrmEntity, UserProfileTypeOrmEntity],
-      synchronize: true, // Temporarily enabled to auto-create tables
-      logging: process.env.NODE_ENV === "development",
-      migrations: ["dist/infrastructure/database/typeorm/migrations/*.js"],
-      migrationsRun: process.env.NODE_ENV === "production",
+      username: process.env.DB_USERNAME || "shared_user",
+      password: process.env.DB_PASSWORD || "shared_password_2024",
+      database: process.env.DB_NAME || "shared_user_db",
+      entities: [UserTypeOrmEntity, RoleTypeOrmEntity],
+      synchronize: process.env.DB_SYNCHRONIZE === "true" || false,
+      logging: process.env.DB_LOGGING === 'true' || process.env.NODE_ENV === "development",
+      maxQueryExecutionTime: 1000, // Log slow queries > 1s
     }),
 
-    // Clean Architecture Layers (only import Interfaces module)
+    // Clean Architecture Layers
+    ApplicationModule,
+    InfrastructureModule,
     InterfacesModule,
   ],
   controllers: [],

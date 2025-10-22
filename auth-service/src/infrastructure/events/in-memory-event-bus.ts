@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { EventBusInterface } from "../../domain/events/event-bus.interface";
+import { WinstonLoggerService } from "@shared/infrastructure/logging";
 
 /**
  * In-Memory Event Bus Implementation
@@ -17,6 +18,11 @@ import { EventBusInterface } from "../../domain/events/event-bus.interface";
 export class InMemoryEventBus implements EventBusInterface {
   private handlers: Map<string, Array<(event: any) => Promise<void>>> =
     new Map();
+  private readonly logger = new WinstonLoggerService();
+
+  constructor() {
+    this.logger.setContext('Auth-EventBus');
+  }
 
   /**
    * Publish a domain event
@@ -25,20 +31,19 @@ export class InMemoryEventBus implements EventBusInterface {
   async publish(event: any): Promise<void> {
     const eventName = event.constructor.name;
     const handlers = this.handlers.get(eventName) || [];
+    const eventData = event.getEventData ? event.getEventData() : event;
 
-    console.log(`[Auth EventBus] Publishing event: ${eventName}`, {
-      timestamp: new Date().toISOString(),
-      eventData: event.getEventData ? event.getEventData() : event,
-    });
+    this.logger.logEvent(eventName, eventData);
 
     // Execute all handlers for this event type
     for (const handler of handlers) {
       try {
         await handler(event);
       } catch (error) {
-        console.error(
-          `[Auth EventBus] Error handling event ${eventName}:`,
-          error
+        this.logger.error(
+          `Error handling event ${eventName}`,
+          error.stack,
+          'Auth-EventBus'
         );
         // Don't throw - continue processing other handlers
         // In production, send to error monitoring service
