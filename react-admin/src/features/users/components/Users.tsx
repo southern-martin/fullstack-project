@@ -31,12 +31,14 @@ import {
 
 import UserDetails from './UserDetails';
 import UserForm from './UserForm';
+import { useUserLabels } from '../hooks/useUserLabels';
 
 // Constants
 const DROPDOWN_WIDTH = 192; // w-48 in pixels
 const DROPDOWN_OFFSET = 4; // gap between button and dropdown
 
 const Users: React.FC = () => {
+    const { L } = useUserLabels();
     // Local state for pagination and search
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
@@ -133,58 +135,58 @@ const Users: React.FC = () => {
 
     // Sort options for the sorting component
     const sortOptions: SortOption[] = useMemo(() => [
-        { key: 'firstName', label: 'First Name', defaultOrder: 'asc' },
-        { key: 'lastName', label: 'Last Name', defaultOrder: 'asc' },
-        { key: 'email', label: 'Email', defaultOrder: 'asc' },
-        { key: 'createdAt', label: 'Created Date', defaultOrder: 'desc' },
-        { key: 'isActive', label: 'Status', defaultOrder: 'asc' },
-    ], []);
+        { key: 'firstName', label: L.sortOptions.firstName, defaultOrder: 'asc' },
+        { key: 'lastName', label: L.sortOptions.lastName, defaultOrder: 'asc' },
+        { key: 'email', label: L.sortOptions.email, defaultOrder: 'asc' },
+        { key: 'createdAt', label: L.sortOptions.createdAt, defaultOrder: 'desc' },
+        { key: 'isActive', label: L.sortOptions.status, defaultOrder: 'asc' },
+    ], [L.sortOptions]);
 
     // CRUD actions using TanStack Query mutations
     const createUser = useCallback(async (userData: CreateUserData) => {
         try {
             await createUserMutation.mutateAsync(userData);
-            toast.success('User created successfully');
+            toast.success(L.messages.createSuccess);
             setShowCreateModal(false);
             setModalFooter(null);
         } catch (error) {
-            toast.error('Failed to create user: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(`${L.messages.createError}: ` + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [createUserMutation]);
+    }, [createUserMutation, L.messages]);
 
     const updateUser = useCallback(async (id: number, userData: UpdateUserData) => {
         try {
             await updateUserMutation.mutateAsync({ id, data: userData });
-            toast.success('User updated successfully');
+            toast.success(L.messages.updateSuccess);
             setShowEditModal(false);
             setModalFooter(null);
         } catch (error) {
-            toast.error('Failed to update user: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(`${L.messages.updateError}: ` + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [updateUserMutation]);
+    }, [updateUserMutation, L.messages]);
 
     const deleteUser = useCallback(async (id: number) => {
         try {
             await deleteUserMutation.mutateAsync(id);
-            toast.success('User deleted successfully');
+            toast.success(L.messages.deleteSuccess);
             setShowDeleteModal(false);
         } catch (error) {
-            toast.error('Failed to delete user: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(`${L.messages.deleteError}: ` + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [deleteUserMutation]);
+    }, [deleteUserMutation, L.messages]);
 
     const toggleUserStatus = useCallback(async (id: number, status: boolean) => {
         try {
             await updateUserMutation.mutateAsync({ id, data: { isActive: status } });
-            toast.success(status ? 'User activated' : 'User deactivated');
+            toast.success(status ? L.messages.activateSuccess : L.messages.deactivateSuccess);
         } catch (error) {
-            toast.error('Failed to toggle user status: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(`${L.messages.toggleStatusError}: ` + (error instanceof Error ? error.message : 'Unknown error'));
             throw error;
         }
-    }, [updateUserMutation]);
+    }, [updateUserMutation, L.messages]);
 
     // Pagination and search handlers
     const goToPage = useCallback((page: number) => {
@@ -215,20 +217,20 @@ const Users: React.FC = () => {
     // Dropdown action handlers
     const handleViewUser = useCallback((user: User) => {
         setSelectedUser(user);
-        setModalTitle('User Details');
+        setModalTitle(L.modals.userDetails);
         setShowViewModal(true);
         setOpenDropdownId(null);
         setDropdownPosition(null);
-    }, []);
+    }, [L.modals]);
 
     const handleEditUser = useCallback((user: User) => {
         setSelectedUser(user);
-        setModalTitle('Edit User');
+        setModalTitle(L.modals.editUser);
         setModalFooter(null);
         setShowEditModal(true);
         setOpenDropdownId(null);
         setDropdownPosition(null);
-    }, []);
+    }, [L.modals]);
 
     const handleToggleUserStatus = useCallback((user: User) => {
         toggleUserStatus(user.id, !user.isActive);
@@ -238,18 +240,18 @@ const Users: React.FC = () => {
 
     const handleDeleteUser = useCallback((user: User) => {
         setSelectedUser(user);
-        setModalTitle('Delete User');
+        setModalTitle(L.modals.deleteUser);
         setShowDeleteModal(true);
         setOpenDropdownId(null);
         setDropdownPosition(null);
-    }, []);
+    }, [L.modals]);
 
     // Table configuration
     const tableConfig: TableConfig<User> = useMemo(() => ({
         columns: [
             {
                 key: 'firstName',
-                label: 'First Name',
+                label: L.table.firstName,
                 sortable: true,
                 render: (user: User) => (
                     <div className="flex items-center">
@@ -267,7 +269,7 @@ const Users: React.FC = () => {
             },
             {
                 key: 'email',
-                label: 'Email',
+                label: L.table.email,
                 sortable: true,
                 render: (email: string, user: User) => (
                     <span className="text-sm text-gray-900 dark:text-gray-100">{email}</span>
@@ -275,7 +277,7 @@ const Users: React.FC = () => {
             },
             {
                 key: 'roles',
-                label: 'Roles',
+                label: L.table.roles,
                 sortable: false,
                 render: (roles: any[]) => (
                     <div className="flex flex-wrap gap-1">
@@ -292,20 +294,20 @@ const Users: React.FC = () => {
             },
             {
                 key: 'isActive',
-                label: 'Status',
+                label: L.table.status,
                 sortable: true,
                 render: (isActive: boolean) => (
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isActive
                         ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400'
                         : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400'
                         }`}>
-                        {isActive ? 'Active' : 'Inactive'}
+                        {isActive ? L.status.active : L.status.inactive}
                     </span>
                 ),
             },
             {
                 key: 'createdAt',
-                label: 'Created',
+                label: L.table.created,
                 sortable: true,
                 render: (date: string) => (
                     <span className="text-sm text-gray-900 dark:text-gray-100">
@@ -315,7 +317,7 @@ const Users: React.FC = () => {
             },
             {
                 key: 'actions',
-                label: 'Actions',
+                label: L.table.actions,
                 sortable: false,
                 render: (_: any, user: User) => {
                     const isOpen = openDropdownId === user.id;
@@ -360,8 +362,8 @@ const Users: React.FC = () => {
             enabled: true,
             multiSelect: true,
         },
-        emptyMessage: 'No users found',
-    }), [openDropdownId]);
+        emptyMessage: L.table.emptyMessage,
+    }), [openDropdownId, L.table, L.status]);
 
     // Note: Filtering is now handled server-side through search and sorting
 
@@ -373,30 +375,30 @@ const Users: React.FC = () => {
                 filename: `users-export.${format}`,
                 includeHeaders: true,
             });
-            toast.success(`Users exported as ${format.toUpperCase()}`);
+            toast.success(L.messages.exportSuccess.replace('{format}', format.toUpperCase()));
         } catch (error) {
-            toast.error('Failed to export users: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(`${L.messages.exportError}: ` + (error instanceof Error ? error.message : 'Unknown error'));
         }
-    }, [users, tableConfig.columns]);
+    }, [users, tableConfig.columns, L.messages]);
 
     return (
         <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Users</h1>
-                    <p className="text-gray-600 dark:text-gray-400">Manage your user database</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{L.page.title}</h1>
+                    <p className="text-gray-600 dark:text-gray-400">{L.page.subtitle}</p>
                 </div>
                 <Button
                     onClick={() => {
-                        setModalTitle('Create New User');
+                        setModalTitle(L.modals.createUser);
                         setModalFooter(null);
                         setShowCreateModal(true);
                     }}
                     className="flex items-center space-x-2"
                 >
                     <PlusIcon className="h-4 w-4" />
-                    Create User
+                    {L.buttons.createUser}
                 </Button>
             </div>
 
@@ -410,7 +412,7 @@ const Users: React.FC = () => {
                                 searchTerm={searchTerm}
                                 onSearchChange={setSearch}
                                 loading={loading}
-                                placeholder="Search users by name, email, or role..."
+                                placeholder={L.search.placeholder}
                                 className="w-full sm:w-80"
                             />
                             <ServerSorting
@@ -428,7 +430,7 @@ const Users: React.FC = () => {
                                 size="sm"
                                 disabled={loading}
                             >
-                                Export CSV
+                                {L.buttons.exportCsv}
                             </Button>
                             <Button
                                 onClick={handleRefresh}
@@ -436,7 +438,7 @@ const Users: React.FC = () => {
                                 size="sm"
                                 disabled={loading}
                             >
-                                Refresh
+                                {L.buttons.refresh}
                             </Button>
                         </div>
                     </div>
@@ -542,20 +544,20 @@ const Users: React.FC = () => {
                 >
                     <div className="p-6">
                         <p className="text-gray-600 mb-4">
-                            {'Are you sure you want to delete this user? This action cannot be undone.'}
+                            {L.delete.confirmMessage}
                         </p>
                         <div className="flex justify-end space-x-3">
                             <Button
                                 variant="secondary"
                                 onClick={() => setShowDeleteModal(false)}
                             >
-                                {'Cancel'}
+                                {L.buttons.cancel}
                             </Button>
                             <Button
                                 variant="danger"
                                 onClick={() => deleteUser(selectedUser.id)}
                             >
-                                {'Delete'}
+                                {L.buttons.delete}
                             </Button>
                         </div>
                     </div>
@@ -578,14 +580,14 @@ const Users: React.FC = () => {
                             className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
                             <EyeIcon className="h-4 w-4 mr-3" />
-                            View Details
+                            {L.actions.viewDetails}
                         </button>
                         <button
                             onClick={() => handleEditUser(selectedDropdownUser)}
                             className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
                             <PencilIcon className="h-4 w-4 mr-3" />
-                            Edit
+                            {L.actions.edit}
                         </button>
                         <button
                             onClick={() => handleToggleUserStatus(selectedDropdownUser)}
@@ -594,12 +596,12 @@ const Users: React.FC = () => {
                             {selectedDropdownUser.isActive ? (
                                 <>
                                     <XMarkIcon className="h-4 w-4 mr-3" />
-                                    Deactivate
+                                    {L.actions.deactivate}
                                 </>
                             ) : (
                                 <>
                                     <CheckIcon className="h-4 w-4 mr-3" />
-                                    Activate
+                                    {L.actions.activate}
                                 </>
                             )}
                         </button>
@@ -608,7 +610,7 @@ const Users: React.FC = () => {
                             className="w-full flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
                             <TrashIcon className="h-4 w-4 mr-3" />
-                            Delete
+                            {L.actions.delete}
                         </button>
                     </div>
                 </div>,
