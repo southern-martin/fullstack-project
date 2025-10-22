@@ -125,6 +125,36 @@ react-admin/dist/
 # Docker volumes
 docker-data/
 
+# ==========================================
+# SECRETS AND SENSITIVE CONFIGURATION
+# ==========================================
+# NEVER commit actual secrets!
+infrastructure/secrets/secrets.yaml
+infrastructure/secrets/secrets.*.yaml
+infrastructure/secrets/*.secrets.yaml
+infrastructure/secrets/.secrets/
+
+# Keep only templates
+!infrastructure/secrets/secrets.example.yaml
+!infrastructure/secrets/README.md
+!infrastructure/secrets/.gitignore
+
+# Cloud provider credentials
+**/service-account-key.json
+**/credentials.json
+**/.gcp/
+**/.aws/
+
+# Terraform state files (should be in remote backend)
+**/*.tfstate
+**/*.tfstate.*
+**/.terraform/
+**/.terraform.lock.hcl
+
+# Kubernetes secrets
+**/k8s-secrets.yaml
+**/secrets.enc.yaml
+
 
 
 
