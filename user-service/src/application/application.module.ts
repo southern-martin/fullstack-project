@@ -10,6 +10,12 @@ import { GetUserUseCase } from "./use-cases/get-user.use-case";
 import { UpdateRoleUseCase } from "./use-cases/update-role.use-case";
 import { UpdateUserUseCase } from "./use-cases/update-user.use-case";
 
+// Profile Use Cases
+import { CreateProfileUseCase } from "./use-cases/profile/create-profile.use-case";
+import { DeleteProfileUseCase } from "./use-cases/profile/delete-profile.use-case";
+import { GetProfileUseCase } from "./use-cases/profile/get-profile.use-case";
+import { UpdateProfileUseCase } from "./use-cases/profile/update-profile.use-case";
+
 // Domain Services
 import { UserDomainService } from "../domain/services/user.domain.service";
 
@@ -38,26 +44,42 @@ import { InfrastructureModule } from "../infrastructure/infrastructure.module";
     // Application Services
     PasswordService,
 
-    // Use Cases
+    // User Use Cases
     CreateUserUseCase,
     GetUserUseCase,
     UpdateUserUseCase,
     DeleteUserUseCase,
+    
+    // Role Use Cases
     CreateRoleUseCase,
     GetRoleUseCase,
     UpdateRoleUseCase,
     DeleteRoleUseCase,
+
+    // Profile Use Cases
+    CreateProfileUseCase,
+    GetProfileUseCase,
+    UpdateProfileUseCase,
+    DeleteProfileUseCase,
   ],
   exports: [
-    // Export use cases for controllers
+    // Export user use cases
     CreateUserUseCase,
     GetUserUseCase,
     UpdateUserUseCase,
     DeleteUserUseCase,
+    
+    // Export role use cases
     CreateRoleUseCase,
     GetRoleUseCase,
     UpdateRoleUseCase,
     DeleteRoleUseCase,
+
+    // Export profile use cases
+    CreateProfileUseCase,
+    GetProfileUseCase,
+    UpdateProfileUseCase,
+    DeleteProfileUseCase,
 
     // Export domain services
     "UserDomainService",
