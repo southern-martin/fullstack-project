@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import Button from '../../../shared/components/ui/Button';
 import { FormField } from '../../../shared/components/ui/FormField';
 import { CreateCustomerRequest, Customer, UpdateCustomerRequest } from '../services/customerApiService';
+import { useCustomerLabels } from '../hooks/useCustomerLabels';
 
 interface CustomerFormProps {
     customer?: Customer;
@@ -13,6 +14,8 @@ interface CustomerFormProps {
 }
 
 const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCancel, onFooterReady }) => {
+    // Translation hook
+    const { labels: L } = useCustomerLabels();
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -56,22 +59,22 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCance
         const currentFormData = formDataRef.current;
 
         if (!currentFormData.firstName.trim()) {
-            newErrors.firstName = 'First name is required';
+            newErrors.firstName = L.ERROR_FIRST_NAME_REQUIRED;
         }
 
         if (!currentFormData.lastName.trim()) {
-            newErrors.lastName = 'Last name is required';
+            newErrors.lastName = L.ERROR_LAST_NAME_REQUIRED;
         }
 
         if (!currentFormData.email.trim()) {
-            newErrors.email = 'Email is required';
+            newErrors.email = L.ERROR_EMAIL_REQUIRED;
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(currentFormData.email)) {
-            newErrors.email = 'Please enter a valid email address';
+            newErrors.email = L.ERROR_EMAIL_INVALID;
         }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
-    }, []);
+    }, [L]);
 
     const handleSubmit = useCallback(async (e?: React.FormEvent) => {
         if (e) {
@@ -100,12 +103,12 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCance
             if (error && typeof error === 'object' && 'validationErrors' in error) {
                 setErrors((error as { validationErrors: Record<string, string> }).validationErrors);
             } else {
-                toast.error('An error occurred while saving the customer');
+                toast.error(L.ERROR_SAVE_FAILED);
             }
         } finally {
             setIsSubmitting(false);
         }
-    }, [validateForm, onSubmit]);
+    }, [validateForm, onSubmit, L]);
 
     // Memoize footer to prevent infinite re-renders
     const footer = useMemo(() => (
@@ -116,7 +119,7 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCance
                 onClick={onCancel}
                 disabled={isSubmitting}
             >
-                {'Cancel'}
+                {L.BUTTON_CANCEL}
             </Button>
             <Button
                 type="submit"
@@ -125,14 +128,14 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCance
                 onClick={handleSubmit}
             >
                 {isSubmitting
-                    ? 'Saving...'
+                    ? L.BUTTON_SAVING
                     : customer
-                        ? 'Update Customer'
-                        : 'Create Customer'
+                        ? L.BUTTON_UPDATE_CUSTOMER
+                        : L.BUTTON_CREATE_CUSTOMER
                 }
             </Button>
         </div>
-    ), [onCancel, isSubmitting, handleSubmit, customer]);
+    ), [onCancel, isSubmitting, handleSubmit, customer, L]);
 
     // Pass footer to parent component only once when component mounts
     useEffect(() => {
@@ -147,50 +150,50 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCance
             <div className="space-y-6 p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField
-                        label={'First Name'}
+                        label={L.LABEL_FIRST_NAME}
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleInputChange('firstName')}
                         error={errors.firstName}
-                        placeholder={'Enter first name'}
+                        placeholder={L.PLACEHOLDER_FIRST_NAME}
                     />
 
                     <FormField
-                        label={'Last Name'}
+                        label={L.LABEL_LAST_NAME}
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleInputChange('lastName')}
                         error={errors.lastName}
-                        placeholder={'Enter last name'}
+                        placeholder={L.PLACEHOLDER_LAST_NAME}
                     />
 
                     <FormField
-                        label={'Email'}
+                        label={L.LABEL_EMAIL}
                         name="email"
                         type="email"
                         value={formData.email}
                         onChange={handleInputChange('email')}
                         error={errors.email}
-                        placeholder={'Enter email address'}
+                        placeholder={L.PLACEHOLDER_EMAIL}
                     />
 
                     <FormField
-                        label={'Phone'}
+                        label={L.LABEL_PHONE}
                         name="phone"
                         type="tel"
                         value={formData.phone}
                         onChange={handleInputChange('phone')}
                         error={errors.phone}
-                        placeholder={'Enter phone number'}
+                        placeholder={L.PLACEHOLDER_PHONE}
                     />
 
                     <FormField
-                        label={'Company'}
+                        label={L.LABEL_COMPANY}
                         name="company"
                         value={formData.company}
                         onChange={handleInputChange('company')}
                         error={errors.company}
-                        placeholder={'Enter company name'}
+                        placeholder={L.PLACEHOLDER_COMPANY}
                     />
                 </div>
             </div>

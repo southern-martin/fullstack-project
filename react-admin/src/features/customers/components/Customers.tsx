@@ -28,11 +28,14 @@ import {
     useDeleteCustomer,
     useUpdateCustomer
 } from '../hooks/useCustomerQueries';
+import { useCustomerLabels } from '../hooks/useCustomerLabels';
 
 import CustomerDetails from './CustomerDetails';
 import CustomerForm from './CustomerForm';
 
 const Customers: React.FC = () => {
+    // Translation hooks
+    const { labels: L } = useCustomerLabels();
     // Dropdown state
     const DROPDOWN_WIDTH = 192; // w-48 in pixels
     const DROPDOWN_OFFSET = 4; // gap between button and dropdown
@@ -127,76 +130,76 @@ const Customers: React.FC = () => {
 
     // Sort options for the sorting component
     const sortOptions: SortOption[] = useMemo(() => [
-        { key: 'firstName', label: 'First Name', defaultOrder: 'asc' },
-        { key: 'lastName', label: 'Last Name', defaultOrder: 'asc' },
-        { key: 'email', label: 'Email', defaultOrder: 'asc' },
-        { key: 'createdAt', label: 'Created Date', defaultOrder: 'desc' },
-        { key: 'isActive', label: 'Status', defaultOrder: 'asc' },
-    ], []);
+        { key: 'firstName', label: L.TABLE_HEADER_FIRST_NAME, defaultOrder: 'asc' },
+        { key: 'lastName', label: L.TABLE_HEADER_LAST_NAME, defaultOrder: 'asc' },
+        { key: 'email', label: L.TABLE_HEADER_EMAIL, defaultOrder: 'asc' },
+        { key: 'createdAt', label: L.TABLE_HEADER_CREATED_DATE, defaultOrder: 'desc' },
+        { key: 'isActive', label: L.LABEL_STATUS, defaultOrder: 'asc' },
+    ], [L]);
 
     // CRUD actions using TanStack Query mutations
     const createCustomer = useCallback(async (customerData: CreateCustomerData) => {
         try {
             await createCustomerMutation.mutateAsync(customerData);
-            toast.success('Customer created successfully');
+            toast.success(L.SUCCESS_CREATED);
             setShowCreateModal(false);
             setModalFooter(null);
         } catch (error) {
-            toast.error('Failed to create customer: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(`${L.ERROR_CREATE_FAILED}: ${error instanceof Error ? error.message : L.ERROR_UNKNOWN}`);
             throw error;
         }
-    }, [createCustomerMutation]);
+    }, [createCustomerMutation, L]);
 
     const updateCustomer = useCallback(async (id: number, customerData: UpdateCustomerData) => {
         try {
             await updateCustomerMutation.mutateAsync({ id, data: customerData });
-            toast.success('Customer updated successfully');
+            toast.success(L.SUCCESS_UPDATED);
             setShowEditModal(false);
             setModalFooter(null);
         } catch (error) {
-            toast.error('Failed to update customer: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(`${L.ERROR_UPDATE_FAILED}: ${error instanceof Error ? error.message : L.ERROR_UNKNOWN}`);
             throw error;
         }
-    }, [updateCustomerMutation]);
+    }, [updateCustomerMutation, L]);
 
     const deleteCustomer = useCallback(async (id: number) => {
         try {
             await deleteCustomerMutation.mutateAsync(id);
-            toast.success('Customer deleted successfully');
+            toast.success(L.SUCCESS_DELETED);
             setShowDeleteModal(false);
         } catch (error) {
-            toast.error('Failed to delete customer: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(`${L.ERROR_DELETE_FAILED}: ${error instanceof Error ? error.message : L.ERROR_UNKNOWN}`);
             throw error;
         }
-    }, [deleteCustomerMutation]);
+    }, [deleteCustomerMutation, L]);
 
     const toggleCustomerStatus = useCallback(async (id: number, status: boolean) => {
         try {
             await updateCustomerMutation.mutateAsync({ id, data: { isActive: status } });
-            toast.success(status ? 'Customer activated' : 'Customer deactivated');
+            toast.success(status ? L.SUCCESS_ACTIVATED : L.SUCCESS_DEACTIVATED);
         } catch (error) {
-            toast.error('Failed to toggle customer status: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(`${L.ERROR_TOGGLE_STATUS_FAILED}: ${error instanceof Error ? error.message : L.ERROR_UNKNOWN}`);
             throw error;
         }
-    }, [updateCustomerMutation]);
+    }, [updateCustomerMutation, L]);
 
     // Dropdown action handlers
     const handleViewCustomer = useCallback((customer: Customer) => {
         setSelectedCustomer(customer);
-        setModalTitle('Customer Details');
+        setModalTitle(L.MODAL_TITLE_VIEW);
         setShowViewModal(true);
         setOpenDropdownId(null);
         setDropdownPosition(null);
-    }, []);
+    }, [L]);
 
     const handleEditCustomer = useCallback((customer: Customer) => {
         setSelectedCustomer(customer);
-        setModalTitle('Edit Customer');
+        setModalTitle(L.MODAL_TITLE_EDIT);
         setModalFooter(null);
         setShowEditModal(true);
         setOpenDropdownId(null);
         setDropdownPosition(null);
-    }, []);
+    }, [L]);
 
     const handleToggleCustomerStatus = useCallback((customer: Customer) => {
         toggleCustomerStatus(customer.id, !customer.isActive);
@@ -206,11 +209,11 @@ const Customers: React.FC = () => {
 
     const handleDeleteCustomer = useCallback((customer: Customer) => {
         setSelectedCustomer(customer);
-        setModalTitle('Delete Customer');
+        setModalTitle(L.MODAL_TITLE_DELETE);
         setShowDeleteModal(true);
         setOpenDropdownId(null);
         setDropdownPosition(null);
-    }, []);
+    }, [L]);
 
     // Pagination and search handlers
     const goToPage = useCallback((page: number) => {
@@ -243,7 +246,7 @@ const Customers: React.FC = () => {
         columns: [
             {
                 key: 'firstName',
-                label: 'Name',
+                label: L.LABEL_NAME,
                 sortable: true,
                 render: (firstName: string, customer: Customer) => (
                     <div className="flex items-center">
@@ -261,7 +264,7 @@ const Customers: React.FC = () => {
             },
             {
                 key: 'phone',
-                label: 'Phone',
+                label: L.LABEL_PHONE,
                 sortable: true,
                 render: (phone: string) => (
                     <span className="text-sm text-gray-900 dark:text-gray-100">{phone || '-'}</span>
@@ -269,7 +272,7 @@ const Customers: React.FC = () => {
             },
             {
                 key: 'preferences',
-                label: 'Company',
+                label: L.LABEL_COMPANY,
                 sortable: true,
                 render: (preferences: any) => (
                     <span className="text-sm text-gray-900 dark:text-gray-100">{preferences?.company || '-'}</span>
@@ -277,7 +280,7 @@ const Customers: React.FC = () => {
             },
             {
                 key: 'isActive',
-                label: 'Status',
+                label: L.LABEL_STATUS,
                 sortable: true,
                 render: (isActive: boolean) => (
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isActive
@@ -290,7 +293,7 @@ const Customers: React.FC = () => {
             },
             {
                 key: 'createdAt',
-                label: 'Created',
+                label: L.LABEL_CREATED,
                 sortable: true,
                 render: (date: string) => (
                     <span className="text-sm text-gray-900 dark:text-gray-100">
@@ -300,7 +303,7 @@ const Customers: React.FC = () => {
             },
             {
                 key: 'actions',
-                label: 'Actions',
+                label: L.TABLE_HEADER_ACTIONS,
                 sortable: false,
                 render: (_: any, customer: Customer) => {
                     const isOpen = openDropdownId === customer.id;
@@ -342,8 +345,8 @@ const Customers: React.FC = () => {
             enabled: true,
             multiSelect: true,
         },
-        emptyMessage: 'No customers found',
-    }), [openDropdownId, DROPDOWN_OFFSET, DROPDOWN_WIDTH]);
+        emptyMessage: L.EMPTY_MESSAGE,
+    }), [openDropdownId, DROPDOWN_OFFSET, DROPDOWN_WIDTH, L]);
 
     // Note: Filtering is now handled server-side through search and sorting
 
@@ -357,28 +360,28 @@ const Customers: React.FC = () => {
             });
             toast.success(`Customers exported as ${format.toUpperCase()}`);
         } catch (error) {
-            toast.error('Failed to export customers: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(`${L.ERROR_EXPORT_FAILED}: ${error instanceof Error ? error.message : L.ERROR_UNKNOWN}`);
         }
-    }, [customers, tableConfig.columns]);
+    }, [customers, tableConfig.columns, L]);
 
     return (
         <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{'Customers'}</h1>
-                    <p className="text-gray-600 dark:text-gray-400">{'Manage your customer database'}</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{L.PAGE_TITLE}</h1>
+                    <p className="text-gray-600 dark:text-gray-400">{L.PAGE_SUBTITLE}</p>
                 </div>
                 <Button
                     onClick={() => {
-                        setModalTitle('Create New Customer');
+                        setModalTitle(L.MODAL_TITLE_CREATE);
                         setModalFooter(null);
                         setShowCreateModal(true);
                     }}
                     className="flex items-center space-x-2"
                 >
                     <PlusIcon className="h-4 w-4" />
-                    {'Add Customer'}
+                    {L.ADD_CUSTOMER}
                 </Button>
             </div>
 
@@ -392,7 +395,7 @@ const Customers: React.FC = () => {
                                 searchTerm={searchTerm}
                                 onSearchChange={setSearch}
                                 loading={loading}
-                                placeholder="Search customers by name, email, or company..."
+                                placeholder={L.PLACEHOLDER_SEARCH}
                                 className="w-full sm:w-80"
                             />
                             <ServerSorting
@@ -410,7 +413,7 @@ const Customers: React.FC = () => {
                                 size="sm"
                                 disabled={loading}
                             >
-                                Export CSV
+                                {L.BUTTON_EXPORT_CSV}
                             </Button>
                             <Button
                                 onClick={handleRefresh}
@@ -418,7 +421,7 @@ const Customers: React.FC = () => {
                                 size="sm"
                                 disabled={loading}
                             >
-                                Refresh
+                                {L.BUTTON_REFRESH}
                             </Button>
                         </div>
                     </div>
@@ -524,20 +527,20 @@ const Customers: React.FC = () => {
                 >
                     <div className="p-6">
                         <p className="text-gray-600 mb-4">
-                            {'Are you sure you want to delete this customer? This action cannot be undone.'}
+                            {L.DELETE_CONFIRMATION_MESSAGE}
                         </p>
                         <div className="flex justify-end space-x-3">
                             <Button
                                 variant="secondary"
                                 onClick={() => setShowDeleteModal(false)}
                             >
-                                {'Cancel'}
+                                {L.BUTTON_CANCEL}
                             </Button>
                             <Button
                                 variant="danger"
                                 onClick={() => deleteCustomer(selectedCustomer.id)}
                             >
-                                {'Delete'}
+                                {L.BUTTON_DELETE}
                             </Button>
                         </div>
                     </div>
@@ -560,14 +563,14 @@ const Customers: React.FC = () => {
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center transition-colors"
                         >
                             <EyeIcon className="h-4 w-4 mr-3" />
-                            View Details
+                            {L.ACTION_VIEW_DETAILS}
                         </button>
                         <button
                             onClick={() => handleEditCustomer(selectedDropdownCustomer)}
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center transition-colors"
                         >
                             <PencilIcon className="h-4 w-4 mr-3" />
-                            Edit
+                            {L.ACTION_EDIT}
                         </button>
                         <button
                             onClick={() => handleToggleCustomerStatus(selectedDropdownCustomer)}
@@ -576,12 +579,12 @@ const Customers: React.FC = () => {
                             {selectedDropdownCustomer.isActive ? (
                                 <>
                                     <XMarkIcon className="h-4 w-4 mr-3" />
-                                    Deactivate
+                                    {L.ACTION_DEACTIVATE}
                                 </>
                             ) : (
                                 <>
                                     <CheckIcon className="h-4 w-4 mr-3" />
-                                    Activate
+                                    {L.ACTION_ACTIVATE}
                                 </>
                             )}
                         </button>
@@ -590,7 +593,7 @@ const Customers: React.FC = () => {
                             className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center transition-colors"
                         >
                             <TrashIcon className="h-4 w-4 mr-3" />
-                            Delete
+                            {L.ACTION_DELETE}
                         </button>
                     </div>
                 </div>,
