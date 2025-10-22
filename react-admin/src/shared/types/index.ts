@@ -8,12 +8,63 @@ export interface User {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  profile?: UserProfile; // Optional profile data
 }
 
 export interface Role {
   id: number;
   name: string;
   description?: string;
+}
+
+// User Profile types
+export interface ProfileAddress {
+  street?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+}
+
+export interface SocialLinks {
+  linkedin?: string;
+  github?: string;
+  twitter?: string;
+  website?: string;
+}
+
+export interface UserProfile {
+  id: number;
+  userId: number;
+  dateOfBirth?: string; // ISO date string
+  bio?: string;
+  avatar?: string; // URL
+  address?: ProfileAddress;
+  socialLinks?: SocialLinks;
+  preferences?: Record<string, any>;
+  metadata?: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateProfileRequest {
+  dateOfBirth?: string;
+  bio?: string;
+  avatar?: string;
+  address?: ProfileAddress;
+  socialLinks?: SocialLinks;
+  preferences?: Record<string, any>;
+  metadata?: Record<string, any>;
+}
+
+export interface UpdateProfileRequest {
+  dateOfBirth?: string;
+  bio?: string;
+  avatar?: string;
+  address?: ProfileAddress;
+  socialLinks?: SocialLinks;
+  preferences?: Record<string, any>;
+  metadata?: Record<string, any>;
 }
 
 export interface AuthResponse {
