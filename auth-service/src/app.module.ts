@@ -11,6 +11,9 @@ import { InterfacesModule } from "./interfaces/interfaces.module";
 import { RoleTypeOrmEntity } from "./infrastructure/database/typeorm/entities/role.typeorm.entity";
 import { UserTypeOrmEntity } from "./infrastructure/database/typeorm/entities/user.typeorm.entity";
 
+// Logging
+import { WinstonLoggerModule, TypeOrmWinstonLogger } from "@shared/infrastructure/logging";
+
 /**
  * Main Application Module
  * Follows Clean Architecture principles
@@ -24,6 +27,9 @@ import { UserTypeOrmEntity } from "./infrastructure/database/typeorm/entities/us
       envFilePath: ".env",
     }),
 
+    // Structured Logging
+    WinstonLoggerModule,
+
     // Database
     TypeOrmModule.forRoot({
       type: "mysql",
@@ -34,7 +40,8 @@ import { UserTypeOrmEntity } from "./infrastructure/database/typeorm/entities/us
       database: process.env.DB_NAME || "shared_user_db",
       entities: [UserTypeOrmEntity, RoleTypeOrmEntity],
       synchronize: process.env.DB_SYNCHRONIZE === 'true' || false,
-      logging: process.env.NODE_ENV === "development",
+      logging: process.env.DB_LOGGING === 'true' || process.env.NODE_ENV === "development",
+      maxQueryExecutionTime: 1000, // Log slow queries > 1s
     }),
 
     // Clean Architecture Layers

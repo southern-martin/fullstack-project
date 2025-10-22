@@ -14,6 +14,7 @@ import { UserDomainService } from "../../../domain/services/user.domain.service"
 import { AuthResponseDto } from "../../dto/auth/auth-response.dto";
 import { LoginRequestDto } from "../../dto/auth/login-request.dto";
 import { UserResponseDto } from "../../dto/auth/user-response.dto";
+import { WinstonLoggerService } from "@shared/infrastructure/logging";
 
 /**
  * Login Use Case
@@ -22,6 +23,8 @@ import { UserResponseDto } from "../../dto/auth/user-response.dto";
  */
 @Injectable()
 export class LoginUseCase {
+  private readonly logger = new WinstonLoggerService();
+
   constructor(
     @Inject("UserRepositoryInterface")
     private readonly userRepository: UserRepositoryInterface,
@@ -30,7 +33,9 @@ export class LoginUseCase {
     private readonly jwtService: JwtService,
     @Inject("EventBusInterface")
     private readonly eventBus: EventBusInterface
-  ) {}
+  ) {
+    this.logger.setContext('LoginUseCase');
+  }
 
   /**
    * Executes the login use case
@@ -81,8 +86,9 @@ export class LoginUseCase {
         new LoginFailedEvent(loginDto.email, "Invalid password")
       );
       // Note: Failed login attempts tracking not available with current schema
-      console.warn(
-        "Failed login attempt tracking disabled due to simplified schema"
+      this.logger.warn(
+        "Failed login attempt tracking disabled due to simplified schema",
+        { email: loginDto.email }
       );
       throw new UnauthorizedException("Invalid credentials");
     }
