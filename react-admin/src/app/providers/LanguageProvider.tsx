@@ -14,13 +14,24 @@ interface LanguageProviderProps {
 }
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
-    const [currentLanguage, setCurrentLanguageState] = useState<Language | null>(null);
+    // Default English language object
+    const [defaultEnglishLanguage] = useState<Language>({
+        code: 'en',
+        name: 'English',
+        localName: 'English',
+        status: 'active',
+        isDefault: true,
+        isActive: true,
+        isRTL: false,
+        metadata: {
+            direction: 'ltr',
+        },
+    });
+
+    const [currentLanguage, setCurrentLanguageState] = useState<Language | null>(defaultEnglishLanguage);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Load saved language from localStorage
-        const savedLanguageCode = localStorage.getItem('current_language') || 'en';
-
         // Try to get language from localStorage or use default
         const savedLanguageData = localStorage.getItem('current_language_data');
         if (savedLanguageData) {
@@ -29,11 +40,16 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
                 setCurrentLanguageState(language);
             } catch (error) {
                 console.error('Error parsing saved language data:', error);
+                // Fall back to default English
+                setCurrentLanguageState(defaultEnglishLanguage);
             }
+        } else {
+            // No saved language, use default English
+            setCurrentLanguageState(defaultEnglishLanguage);
         }
 
         setIsLoading(false);
-    }, []);
+    }, [defaultEnglishLanguage]);
 
     const setCurrentLanguage = (language: Language) => {
         setCurrentLanguageState(language);
