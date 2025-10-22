@@ -84,19 +84,22 @@ services:
     container_name: konga
     environment:
       NODE_ENV: development
-      DB_ADAPTER: postgres
-      DB_HOST: kong-database
-      DB_PORT: 5432
-      DB_USER: kong
-      DB_PASSWORD: kong_password
-      DB_DATABASE: konga
+      # Use SQLite instead of PostgreSQL for Konga (compatibility fix)
+      # DB_ADAPTER: postgres
+      # DB_HOST: kong-database
+      # DB_PORT: 5432
+      # DB_USER: kong
+      # DB_PASSWORD: kong_password
+      # DB_DATABASE: konga
       TOKEN_SECRET: some-secret-token
     ports:
       - "1337:1337"
+    volumes:
+      - konga-data:/app/kongadata
     networks:
       - fullstack-network
     depends_on:
-      kong-database:
+      kong:
         condition: service_healthy
     restart: unless-stopped
 
@@ -107,4 +110,6 @@ networks:
 
 volumes:
   kong-db-data:
+    driver: local
+  konga-data:
     driver: local
