@@ -16,7 +16,7 @@ export interface Language {
   };
   createdAt?: string;
   updatedAt?: string;
-  
+
   // Computed property for backward compatibility
   isActive?: boolean; // derived from status === 'active'
   isRTL?: boolean; // derived from metadata.direction === 'rtl'
@@ -26,7 +26,7 @@ export interface Translation {
   id: number;
   key: string;
   original: string; // Changed from originalText
-  destination: string; // Changed from translatedText  
+  destination: string; // Changed from translatedText
   languageCode: string; // Changed from languageId (number)
   language?: {
     code: string;
@@ -47,7 +47,7 @@ export interface Translation {
   lastUsedAt?: string;
   createdAt: string;
   updatedAt: string;
-  
+
   // Backward compatibility aliases
   languageId?: number; // deprecated
   value?: string; // deprecated, use destination
@@ -67,7 +67,7 @@ export interface CreateLanguageDto {
     currency?: string;
     dateFormat?: string;
   };
-  
+
   // Backward compatibility (will be converted)
   nativeName?: string; // deprecated, use localName
   isRTL?: boolean; // deprecated, use metadata.direction
@@ -87,7 +87,7 @@ export interface UpdateLanguageDto {
     currency?: string;
     dateFormat?: string;
   };
-  
+
   // Backward compatibility
   nativeName?: string; // deprecated, use localName
   isRTL?: boolean; // deprecated, use metadata.direction
@@ -106,7 +106,7 @@ export interface CreateTranslationDto {
     field?: string;
   };
   isApproved?: boolean;
-  
+
   // Backward compatibility
   languageId?: number; // deprecated, use languageCode
   value?: string; // deprecated, use destination
@@ -125,7 +125,7 @@ export interface UpdateTranslationDto {
     field?: string;
   };
   isApproved?: boolean;
-  
+
   // Backward compatibility
   languageId?: number; // deprecated, use languageCode
   value?: string; // deprecated, use destination
@@ -189,7 +189,8 @@ class TranslationService {
   async getLanguages(): Promise<Language[]> {
     try {
       const response = await translationApiClient.getLanguages();
-      const languages = response.data?.languages || response.data?.data || response.data || [];
+      const languages =
+        response.data?.languages || response.data?.data || response.data || [];
       return languages.map((lang: any) => this.transformLanguage(lang));
     } catch (error) {
       console.error('Error fetching languages:', error);
@@ -200,7 +201,8 @@ class TranslationService {
   async getActiveLanguages(): Promise<Language[]> {
     try {
       const response = await translationApiClient.getActiveLanguages();
-      const languages = response.data?.languages || response.data?.data || response.data || [];
+      const languages =
+        response.data?.languages || response.data?.data || response.data || [];
       return languages.map((lang: any) => this.transformLanguage(lang));
     } catch (error) {
       console.error('Error fetching active languages:', error);
@@ -241,7 +243,10 @@ class TranslationService {
     }
   }
 
-  async updateLanguage(code: string, data: UpdateLanguageDto): Promise<Language> {
+  async updateLanguage(
+    code: string,
+    data: UpdateLanguageDto
+  ): Promise<Language> {
     try {
       const response = await translationApiClient.updateLanguage(code, data);
       const lang = response.data?.data || response.data;
@@ -281,17 +286,21 @@ class TranslationService {
       const response = await translationApiClient.getTranslations(params);
       // Backend returns { translations: [...], total: ... } directly
       const responseData = response.data || response;
-      
+
       // Transform translations
       const translations = responseData.translations || responseData.data || [];
-      const transformedTranslations = translations.map((trans: any) => this.transformTranslation(trans));
-      
+      const transformedTranslations = translations.map((trans: any) =>
+        this.transformTranslation(trans)
+      );
+
       return {
         data: transformedTranslations,
         total: responseData.total || 0,
         page: params?.page || 1,
         limit: params?.limit || 10,
-        totalPages: Math.ceil((responseData.total || 0) / (params?.limit || 10))
+        totalPages: Math.ceil(
+          (responseData.total || 0) / (params?.limit || 10)
+        ),
       };
     } catch (error) {
       console.error('Error fetching translations:', error);

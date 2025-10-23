@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
+import { WinstonLoggerService } from "@shared/infrastructure/logging";
 import { EventBusInterface } from "../../../domain/events/event-bus.interface";
 import { LoginFailedEvent } from "../../../domain/events/login-failed.event";
 import { UserLoggedInEvent } from "../../../domain/events/user-logged-in.event";
@@ -14,7 +15,6 @@ import { UserDomainService } from "../../../domain/services/user.domain.service"
 import { AuthResponseDto } from "../../dto/auth/auth-response.dto";
 import { LoginRequestDto } from "../../dto/auth/login-request.dto";
 import { UserResponseDto } from "../../dto/auth/user-response.dto";
-import { WinstonLoggerService } from "@shared/infrastructure/logging";
 
 /**
  * Login Use Case
@@ -34,7 +34,7 @@ export class LoginUseCase {
     @Inject("EventBusInterface")
     private readonly eventBus: EventBusInterface
   ) {
-    this.logger.setContext('LoginUseCase');
+    this.logger.setContext("LoginUseCase");
   }
 
   /**
@@ -152,7 +152,7 @@ export class LoginUseCase {
     const payload = {
       sub: user.id,
       email: user.email,
-      iss: 'auth-service', // Issuer claim for Kong JWT validation
+      iss: "auth-service", // Issuer claim for Kong JWT validation
       roles: user.roles?.map((role: any) => role.name) || [],
       permissions: this.getUserPermissions(user),
     };

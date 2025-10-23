@@ -49,7 +49,7 @@ import { InfrastructureModule } from "../infrastructure/infrastructure.module";
     GetUserUseCase,
     UpdateUserUseCase,
     DeleteUserUseCase,
-    
+
     // Role Use Cases
     CreateRoleUseCase,
     GetRoleUseCase,
@@ -68,7 +68,7 @@ import { InfrastructureModule } from "../infrastructure/infrastructure.module";
     GetUserUseCase,
     UpdateUserUseCase,
     DeleteUserUseCase,
-    
+
     // Export role use cases
     CreateRoleUseCase,
     GetRoleUseCase,

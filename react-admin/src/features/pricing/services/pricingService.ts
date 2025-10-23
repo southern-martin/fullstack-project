@@ -261,7 +261,9 @@ class PricingService {
       return response.data;
     } catch (error) {
       // Don't log connection errors when service is not running
-      const isConnectionError = error instanceof TypeError && (error as Error).message.includes('fetch');
+      const isConnectionError =
+        error instanceof TypeError &&
+        (error as Error).message.includes('fetch');
       if (!isConnectionError) {
         console.error('Error fetching pricing rule count:', error);
       }
@@ -303,7 +305,9 @@ class PricingService {
       return response.data;
     } catch (error) {
       // Don't log connection errors when service is not running
-      const isConnectionError = error instanceof TypeError && (error as Error).message.includes('fetch');
+      const isConnectionError =
+        error instanceof TypeError &&
+        (error as Error).message.includes('fetch');
       if (!isConnectionError) {
         console.error('Error fetching price calculation count:', error);
       }
@@ -318,7 +322,9 @@ class PricingService {
       return true;
     } catch (error) {
       // Don't log connection errors when service is not running
-      const isConnectionError = error instanceof TypeError && (error as Error).message.includes('fetch');
+      const isConnectionError =
+        error instanceof TypeError &&
+        (error as Error).message.includes('fetch');
       if (!isConnectionError) {
         console.error('Pricing service health check failed:', error);
       }

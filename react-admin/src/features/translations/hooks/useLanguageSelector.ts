@@ -1,21 +1,25 @@
-import { useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { translationService, Language } from '../services/translationService';
+import { useEffect, useMemo } from 'react';
 import { useLanguage } from '../../../app/providers/LanguageProvider';
+import { Language, translationService } from '../services/translationService';
 
 /**
  * Hook to fetch and manage available languages for translation
- * 
+ *
  * Features:
  * - Fetches active languages from Translation Service
  * - Integrates with LanguageProvider for global language state
  * - Auto-selects default language if none is selected
  * - Provides language switching functionality
- * 
+ *
  * @returns {Object} Languages data and control functions
  */
 export const useLanguageSelector = () => {
-  const { currentLanguage, setCurrentLanguage, isLoading: isLanguageLoading } = useLanguage();
+  const {
+    currentLanguage,
+    setCurrentLanguage,
+    isLoading: isLanguageLoading,
+  } = useLanguage();
 
   // Fetch available languages from Translation Service
   const {
@@ -43,7 +47,8 @@ export const useLanguageSelector = () => {
   useEffect(() => {
     if (!currentLanguage && languages.length > 0 && !isLoading) {
       // Find default language or use first active language
-      const defaultLang = languages.find((lang: Language) => lang.isDefault) || languages[0];
+      const defaultLang =
+        languages.find((lang: Language) => lang.isDefault) || languages[0];
       if (defaultLang) {
         setCurrentLanguage(defaultLang);
       }
@@ -55,12 +60,16 @@ export const useLanguageSelector = () => {
    * @param languageCode - The language code to switch to
    */
   const changeLanguage = (languageCode: string) => {
-    const selectedLanguage = languages.find((lang: Language) => lang.code === languageCode);
+    const selectedLanguage = languages.find(
+      (lang: Language) => lang.code === languageCode
+    );
     if (selectedLanguage) {
       setCurrentLanguage(selectedLanguage);
-      
+
       // Log language change for analytics/debugging
-      console.log(`Language changed to: ${selectedLanguage.name} (${selectedLanguage.code})`);
+      console.log(
+        `Language changed to: ${selectedLanguage.name} (${selectedLanguage.code})`
+      );
     }
   };
 
@@ -79,7 +88,7 @@ export const useLanguageSelector = () => {
     languages,
     isLoading,
     error,
-    
+
     // Actions
     changeLanguage,
     setCurrentLanguage,

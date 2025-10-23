@@ -1,6 +1,7 @@
 // Service-specific API configurations
 export const AUTH_API_CONFIG = {
-  BASE_URL: (process.env.REACT_APP_AUTH_API_URL || 'http://localhost:3001') + '/api/v1',
+  BASE_URL:
+    (process.env.REACT_APP_AUTH_API_URL || 'http://localhost:3001') + '/api/v1',
   HEADERS: {
     'Content-Type': 'application/json',
     'Accept-Language': 'en',

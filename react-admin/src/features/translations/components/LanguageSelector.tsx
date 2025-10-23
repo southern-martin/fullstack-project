@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDownIcon, LanguageIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon, GlobeAltIcon, LanguageIcon } from '@heroicons/react/24/outline';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLanguageSelector } from '../hooks/useLanguageSelector';
 import { Language } from '../services/translationService';
 
@@ -79,7 +79,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   const handleLanguageSelect = (languageCode: string) => {
     changeLanguage(languageCode);
     setIsOpen(false);
-    
+
     // Call custom onChange if provided
     if (onChange) {
       const selectedLang = languages.find((lang) => lang.code === languageCode);
@@ -136,24 +136,23 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
           <span className="text-lg">{currentLanguage.flag}</span>
         )}
         {!showFlags && <GlobeAltIcon className="h-5 w-5 text-gray-500" />}
-        
+
         {!minimal && (
           <span className="text-sm font-medium text-gray-700">
             {currentLanguage?.name || 'Select Language'}
             {showCode && currentLanguage && ` (${currentLanguage.code.toUpperCase()})`}
           </span>
         )}
-        
+
         {minimal && showCode && currentLanguage && (
           <span className="text-sm font-medium text-gray-700">
             {currentLanguage.code.toUpperCase()}
           </span>
         )}
-        
+
         <ChevronDownIcon
-          className={`h-4 w-4 text-gray-500 transition-transform ${
-            isOpen ? 'transform rotate-180' : ''
-          }`}
+          className={`h-4 w-4 text-gray-500 transition-transform ${isOpen ? 'transform rotate-180' : ''
+            }`}
         />
       </button>
 

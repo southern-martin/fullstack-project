@@ -29,9 +29,9 @@ import {
     useUsers
 } from '../hooks/useUserQueries';
 
+import { useUserLabels } from '../hooks/useUserLabels';
 import UserDetails from './UserDetails';
 import UserForm from './UserForm';
-import { useUserLabels } from '../hooks/useUserLabels';
 
 // Constants
 const DROPDOWN_WIDTH = 192; // w-48 in pixels

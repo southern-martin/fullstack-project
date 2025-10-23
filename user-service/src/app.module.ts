@@ -25,6 +25,7 @@ import { WinstonLoggerModule } from "@shared/infrastructure/logging";
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ".env",
+      ignoreEnvFile: !!process.env.DB_HOST, // Ignore .env if DB_HOST env var exists (Docker)
     }),
 
     // Structured Logging
@@ -40,7 +41,7 @@ import { WinstonLoggerModule } from "@shared/infrastructure/logging";
       database: process.env.DB_NAME || "shared_user_db",
       entities: [UserTypeOrmEntity, RoleTypeOrmEntity],
       synchronize: process.env.DB_SYNCHRONIZE === "true" || false,
-      logging: process.env.DB_LOGGING === 'true' || process.env.NODE_ENV === "development",
+      logging: false, // Disable SQL logging (use Winston for structured logs)
       maxQueryExecutionTime: 1000, // Log slow queries > 1s
     }),
 

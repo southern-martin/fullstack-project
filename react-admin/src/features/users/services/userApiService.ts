@@ -116,10 +116,7 @@ class UserApiService {
       data: User;
       message: string;
       statusCode: number;
-    }>(
-      USERS_API_CONFIG.ENDPOINTS.UPDATE(id),
-      userData
-    );
+    }>(USERS_API_CONFIG.ENDPOINTS.UPDATE(id), userData);
     return response.data;
   }
 
@@ -135,10 +132,7 @@ class UserApiService {
       data: User;
       message: string;
       statusCode: number;
-    }>(
-      USERS_API_CONFIG.ENDPOINTS.ASSIGN_ROLES(id),
-      roles
-    );
+    }>(USERS_API_CONFIG.ENDPOINTS.ASSIGN_ROLES(id), roles);
     return response.data;
   }
 
@@ -174,9 +168,7 @@ class UserApiService {
       data: { exists: boolean };
       message: string;
       statusCode: number;
-    }>(
-      USERS_API_CONFIG.ENDPOINTS.EXISTS(email)
-    );
+    }>(USERS_API_CONFIG.ENDPOINTS.EXISTS(email));
     return response.data;
   }
 }

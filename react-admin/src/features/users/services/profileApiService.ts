@@ -1,9 +1,13 @@
-import { CreateProfileRequest, UpdateProfileRequest, UserProfile } from '../../../shared/types';
+import {
+  CreateProfileRequest,
+  UpdateProfileRequest,
+  UserProfile,
+} from '../../../shared/types';
 import { userApiClient } from './userApiClient';
 
 /**
  * ProfileApiService - Handles all user profile-related API calls
- * 
+ *
  * Endpoints:
  * - GET /profiles/:userId - Get profile by user ID
  * - POST /profiles/:userId - Create profile for user
@@ -48,7 +52,10 @@ class ProfileApiService {
       return null;
     } catch (error: any) {
       // Return null if profile doesn't exist (404 or "not found" message)
-      if (error.response?.status === 404 || error.response?.data?.data?.message === 'Profile not found') {
+      if (
+        error.response?.status === 404 ||
+        error.response?.data?.data?.message === 'Profile not found'
+      ) {
         return null;
       }
       throw error;
@@ -58,7 +65,10 @@ class ProfileApiService {
   /**
    * Create a new profile for a user
    */
-  async createProfile(userId: number, data: CreateProfileRequest): Promise<UserProfile> {
+  async createProfile(
+    userId: number,
+    data: CreateProfileRequest
+  ): Promise<UserProfile> {
     const response = await userApiClient.post<{
       data: {
         success: boolean;
@@ -77,14 +87,17 @@ class ProfileApiService {
     if (responseData?.data) {
       return responseData.data;
     }
-    
+
     return response.data.data;
   }
 
   /**
    * Update an existing profile
    */
-  async updateProfile(userId: number, data: UpdateProfileRequest): Promise<UserProfile> {
+  async updateProfile(
+    userId: number,
+    data: UpdateProfileRequest
+  ): Promise<UserProfile> {
     const response = await userApiClient.patch<{
       data: {
         success: boolean;
@@ -118,13 +131,19 @@ class ProfileApiService {
    * Create or update profile (upsert)
    * Tries to update first, if not found, creates new profile
    */
-  async upsertProfile(userId: number, data: CreateProfileRequest | UpdateProfileRequest): Promise<UserProfile> {
+  async upsertProfile(
+    userId: number,
+    data: CreateProfileRequest | UpdateProfileRequest
+  ): Promise<UserProfile> {
     try {
       // Try to update first
       return await this.updateProfile(userId, data);
     } catch (error: any) {
       // If profile doesn't exist, create it
-      if (error.response?.status === 404 || error.response?.data?.data?.message === 'Profile not found') {
+      if (
+        error.response?.status === 404 ||
+        error.response?.data?.data?.message === 'Profile not found'
+      ) {
         return await this.createProfile(userId, data);
       }
       throw error;

@@ -7,9 +7,12 @@ WORKDIR /app
 # Copy shared infrastructure first (needed for auth-service build)
 COPY shared/infrastructure ./shared/infrastructure
 
-# Build shared infrastructure
+# Build shared infrastructure  
 WORKDIR /app/shared/infrastructure
 RUN npm ci && npm run build
+
+# Keep production dependencies for runtime
+RUN npm ci --only=production
 
 # Switch to auth-service directory
 WORKDIR /app/auth-service
@@ -39,7 +42,7 @@ RUN addgroup -g 1001 -S nodejs && \
 # Set working directory
 WORKDIR /app/auth-service
 
-# Copy shared infrastructure to parent directory (for file: dependency resolution)
+# Copy built shared infrastructure with node_modules
 COPY --from=builder /app/shared/infrastructure /app/shared/infrastructure
 
 # Copy package files

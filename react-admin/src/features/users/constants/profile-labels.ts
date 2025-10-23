@@ -1,9 +1,9 @@
 /**
  * Profile Module - Centralized Label Constants
- * 
+ *
  * This file contains all static UI text labels for the User Profile module.
  * Labels are organized by category for easy maintenance.
- * 
+ *
  * These labels will be translated using the MD5-based Translation Service.
  */
 

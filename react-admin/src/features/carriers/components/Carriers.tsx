@@ -23,13 +23,13 @@ import Modal from '../../../shared/components/ui/Modal';
 import { ServerPagination } from '../../../shared/components/ui/ServerPagination';
 import { ServerSearch } from '../../../shared/components/ui/ServerSearch';
 import { ServerSorting, SortOption } from '../../../shared/components/ui/ServerSorting';
+import { useCarrierLabels } from '../hooks/useCarrierLabels';
 import {
     useCarriers,
     useCreateCarrier,
     useDeleteCarrier,
     useUpdateCarrier
 } from '../hooks/useCarrierQueries';
-import { useCarrierLabels } from '../hooks/useCarrierLabels';
 import { useCarrierTranslation } from '../hooks/useCarrierTranslation';
 import { Carrier, CreateCarrierRequest, UpdateCarrierRequest } from '../services/carrierApiService';
 
@@ -82,10 +82,10 @@ const Carriers: React.FC = () => {
     const { translateCarriers, isTranslating } = useCarrierTranslation();
     const [translatedCarriers, setTranslatedCarriers] = useState<Carrier[]>([]);
     const [isTranslated, setIsTranslated] = useState(false);
-    
+
     // Label translation hook
     const { L, isLoading: labelsLoading } = useCarrierLabels();
-    
+
     // Get current language to trigger re-translation on language change
     const { currentLanguage } = useLanguage();
 
@@ -126,7 +126,7 @@ const Carriers: React.FC = () => {
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
-            
+
             // Check if click is on dropdown portal
             const isDropdownPortal = target.closest('[data-dropdown-portal]');
             if (isDropdownPortal) return;

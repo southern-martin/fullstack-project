@@ -54,7 +54,7 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({
   onFooterReady,
 }) => {
   const { L } = useProfileLabels();
-  
+
   // Form state
   const [formData, setFormData] = useState<CreateProfileRequest>(initialFormData);
   const [errors, setErrors] = useState<Record<string, string>>({});

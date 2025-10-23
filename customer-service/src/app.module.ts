@@ -7,9 +7,9 @@ import { WinstonLoggerModule } from "@shared/infrastructure/logging/winston-logg
 
 // Clean Architecture Modules
 import { ApplicationModule } from "./application/application.module";
-import { InterfacesModule } from "./interfaces/interfaces.module";
 import { DatabaseModule } from "./infrastructure/database/database.module";
 import { CustomerTypeOrmEntity } from "./infrastructure/database/typeorm/entities/customer.typeorm.entity";
+import { InterfacesModule } from "./interfaces/interfaces.module";
 
 /**
  * Main Application Module
@@ -22,6 +22,7 @@ import { CustomerTypeOrmEntity } from "./infrastructure/database/typeorm/entitie
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [".env.local", ".env"],
+      ignoreEnvFile: !!process.env.DB_HOST, // Ignore .env if DB_HOST env var exists (Docker)
     }),
 
     // Structured Logging
@@ -37,7 +38,7 @@ import { CustomerTypeOrmEntity } from "./infrastructure/database/typeorm/entitie
       database: process.env.DB_NAME || "customer_service_db",
       entities: [CustomerTypeOrmEntity],
       synchronize: process.env.NODE_ENV !== "production",
-      logging: process.env.NODE_ENV === "development",
+      logging: false, // Disable SQL logging (use Winston for structured logs)
     }),
 
     // Infrastructure Layer

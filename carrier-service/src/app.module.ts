@@ -1,16 +1,16 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+import { TypeOrmModule } from "@nestjs/typeorm";
 
 // Shared Infrastructure
-import { WinstonLoggerModule } from '@shared/infrastructure/logging/winston-logger.module';
+import { WinstonLoggerModule } from "@shared/infrastructure/logging/winston-logger.module";
 
 // Clean Architecture Modules
-import { ApplicationModule } from './application/application.module';
-import { InterfacesModule } from './interfaces/interfaces.module';
+import { ApplicationModule } from "./application/application.module";
+import { InterfacesModule } from "./interfaces/interfaces.module";
 
 // TypeORM Entities
-import { CarrierTypeOrmEntity } from './infrastructure/database/typeorm/entities/carrier.typeorm.entity';
+import { CarrierTypeOrmEntity } from "./infrastructure/database/typeorm/entities/carrier.typeorm.entity";
 
 /**
  * Main Application Module
@@ -22,7 +22,7 @@ import { CarrierTypeOrmEntity } from './infrastructure/database/typeorm/entities
     // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env.local', '.env'],
+      envFilePath: [".env.local", ".env"],
     }),
 
     // Structured Logging
@@ -30,16 +30,16 @@ import { CarrierTypeOrmEntity } from './infrastructure/database/typeorm/entities
 
     // Database
     TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DB_HOST || 'localhost',
+      type: "mysql",
+      host: process.env.DB_HOST || "localhost",
       port: parseInt(process.env.DB_PORT) || 3306,
-      username: process.env.DB_USERNAME || 'carrier_user',
-      password: process.env.DB_PASSWORD || 'carrier_password',
-      database: process.env.DB_NAME || 'carrier_service_db',
+      username: process.env.DB_USERNAME || "carrier_user",
+      password: process.env.DB_PASSWORD || "carrier_password",
+      database: process.env.DB_NAME || "carrier_service_db",
       entities: [CarrierTypeOrmEntity],
-      synchronize: process.env.NODE_ENV !== 'production',
-      logging: process.env.NODE_ENV === 'development',
-      charset: 'utf8mb4',
+      synchronize: process.env.NODE_ENV !== "production",
+      logging: process.env.NODE_ENV === "development",
+      charset: "utf8mb4",
     }),
 
     // Clean Architecture Layers

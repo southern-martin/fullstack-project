@@ -1,19 +1,18 @@
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
-import { AppModule } from "./app.module";
 import { HttpExceptionFilter } from "@shared/infrastructure/filters/http-exception.filter";
 import { TransformInterceptor } from "@shared/infrastructure/interceptors/transform.interceptor";
-import { WinstonLoggerService } from "@shared/infrastructure/logging/winston-logger.service";
 import { LoggingInterceptor } from "@shared/infrastructure/logging/logging.interceptor";
+import { WinstonLoggerService } from "@shared/infrastructure/logging/winston-logger.service";
+import { AppModule } from "./app.module";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    bufferLogs: true,
-  });
+  // ✅ Create app without logger option (prevents scoped provider issues)
+  const app = await NestFactory.create(AppModule);
 
-  // Set up Winston logger
-  const logger = app.get(WinstonLoggerService);
-  app.useLogger(logger);
+  // ✅ Direct instantiation of WinstonLoggerService for bootstrap context
+  const logger = new WinstonLoggerService();
+  logger.setContext("Bootstrap");
 
   // Enable CORS
   app.enableCors({
@@ -45,20 +44,15 @@ async function bootstrap() {
   const port = process.env.PORT || 3005;
   await app.listen(port);
 
+  logger.log(`🚀 Carrier Service is running on: http://localhost:${port}`);
+  logger.log(`📊 Health check: http://localhost:${port}/api/v1/health`);
   logger.log(
-    `🚀 Carrier Service is running on: http://localhost:${port}/api/v1`,
-    "Bootstrap"
+    `✅ API Standards: Enabled (HttpExceptionFilter + TransformInterceptor)`
   );
-  logger.log(`📊 Health check: http://localhost:${port}/api/v1/health`, "Bootstrap");
-  logger.log(`✅ API Standards: Enabled (HttpExceptionFilter + TransformInterceptor)`, "Bootstrap");
-  logger.log(`📝 Structured Logging: Enabled (Winston + Correlation IDs)`, "Bootstrap");
+  logger.log(`📝 Structured Logging: Enabled (Winston + Correlation IDs)`);
 }
 
-bootstrap();
-
-
-
-
-
-
-
+bootstrap().catch((err) => {
+  console.error("❌ Failed to start Carrier Service:", err);
+  process.exit(1);
+});

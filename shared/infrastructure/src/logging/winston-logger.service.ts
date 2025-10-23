@@ -1,6 +1,6 @@
-import { Injectable, LoggerService, Scope } from '@nestjs/common';
-import * as winston from 'winston';
-import { AsyncLocalStorage } from 'async_hooks';
+import { Injectable, LoggerService, Scope } from "@nestjs/common";
+import { AsyncLocalStorage } from "async_hooks";
+import * as winston from "winston";
 
 /**
  * Context storage for request tracking
@@ -18,41 +18,28 @@ export class WinstonLoggerService implements LoggerService {
   private serviceName: string;
 
   constructor() {
-    this.serviceName = process.env.SERVICE_NAME || 'unknown-service';
-    
+    this.serviceName = process.env.SERVICE_NAME || "unknown-service";
+
     const logFormat = winston.format.combine(
-      winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+      winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss.SSS" }),
       winston.format.errors({ stack: true }),
-      winston.format.metadata({ fillExcept: ['message', 'level', 'timestamp', 'service'] }),
+      winston.format.metadata({
+        fillExcept: ["message", "level", "timestamp", "service"],
+      }),
       winston.format.json()
     );
 
     this.logger = winston.createLogger({
-      level: process.env.LOG_LEVEL || 'info',
+      level: process.env.LOG_LEVEL || "info",
       format: logFormat,
       defaultMeta: {
         service: this.serviceName,
-        environment: process.env.NODE_ENV || 'development',
+        environment: process.env.NODE_ENV || "development",
       },
       transports: [
+        // JSON console transport for Promtail/Loki parsing
         new winston.transports.Console({
-          format: winston.format.combine(
-            winston.format.colorize({ all: process.env.NODE_ENV !== 'production' }),
-            winston.format.printf(({ timestamp, level, message, service, metadata }) => {
-              const correlationId = this.getCorrelationId();
-              const userId = this.getUserId();
-              const contextStr = this.context ? `[${this.context}]` : '';
-              const correlationStr = correlationId ? `[${correlationId}]` : '';
-              const userStr = userId ? `[User: ${userId}]` : '';
-              
-              let metaStr = '';
-              if (metadata && Object.keys(metadata).length > 0) {
-                metaStr = `\n${JSON.stringify(metadata, null, 2)}`;
-              }
-              
-              return `${timestamp} [${service}] ${level} ${correlationStr}${userStr}${contextStr}: ${message}${metaStr}`;
-            })
-          ),
+          format: winston.format.json(), // Output as JSON for structured logging
         }),
       ],
     });
@@ -70,7 +57,7 @@ export class WinstonLoggerService implements LoggerService {
    */
   private getCorrelationId(): string | undefined {
     const store = asyncLocalStorage.getStore();
-    return store?.get('correlationId');
+    return store?.get("correlationId");
   }
 
   /**
@@ -78,7 +65,7 @@ export class WinstonLoggerService implements LoggerService {
    */
   private getUserId(): string | undefined {
     const store = asyncLocalStorage.getStore();
-    return store?.get('userId');
+    return store?.get("userId");
   }
 
   /**
@@ -86,7 +73,7 @@ export class WinstonLoggerService implements LoggerService {
    */
   private getRequestPath(): string | undefined {
     const store = asyncLocalStorage.getStore();
-    return store?.get('requestPath');
+    return store?.get("requestPath");
   }
 
   /**
@@ -112,7 +99,7 @@ export class WinstonLoggerService implements LoggerService {
   private logMessage(level: string, message: any, meta?: any) {
     const metadata = this.buildMetadata(meta);
 
-    if (typeof message === 'object') {
+    if (typeof message === "object") {
       this.logger.log(level, JSON.stringify(message), metadata);
     } else {
       this.logger.log(level, message, metadata);
@@ -121,40 +108,46 @@ export class WinstonLoggerService implements LoggerService {
 
   log(message: any, meta?: any, context?: string) {
     if (context) this.setContext(context);
-    this.logMessage('info', message, meta);
+    this.logMessage("info", message, meta);
   }
 
   error(message: any, trace?: string, context?: string) {
     if (context) this.setContext(context);
-    this.logMessage('error', message, { trace });
+    this.logMessage("error", message, { trace });
   }
 
   warn(message: any, meta?: any, context?: string) {
     if (context) this.setContext(context);
-    this.logMessage('warn', message, meta);
+    this.logMessage("warn", message, meta);
   }
 
   debug(message: any, meta?: any, context?: string) {
     if (context) this.setContext(context);
-    this.logMessage('debug', message, meta);
+    this.logMessage("debug", message, meta);
   }
 
   verbose(message: any, meta?: any, context?: string) {
     if (context) this.setContext(context);
-    this.logMessage('verbose', message, meta);
+    this.logMessage("verbose", message, meta);
   }
 
   /**
    * Log HTTP request
    */
-  logRequest(method: string, url: string, statusCode: number, responseTime: number, userId?: string) {
-    this.logMessage('info', 'HTTP Request', {
+  logRequest(
+    method: string,
+    url: string,
+    statusCode: number,
+    responseTime: number,
+    userId?: string
+  ) {
+    this.logMessage("info", "HTTP Request", {
       method,
       url,
       statusCode,
       responseTime,
       userId,
-      type: 'http_request',
+      type: "http_request",
     });
   }
 
@@ -162,13 +155,13 @@ export class WinstonLoggerService implements LoggerService {
    * Log database query
    */
   logQuery(query: string, parameters: any[], duration: number, error?: Error) {
-    const level = error ? 'error' : duration > 1000 ? 'warn' : 'debug';
-    this.logMessage(level, 'Database Query', {
+    const level = error ? "error" : duration > 1000 ? "warn" : "debug";
+    this.logMessage(level, "Database Query", {
       query,
       parameters,
       duration,
       error: error?.message,
-      type: 'database_query',
+      type: "database_query",
     });
   }
 
@@ -176,11 +169,11 @@ export class WinstonLoggerService implements LoggerService {
    * Log business event
    */
   logEvent(eventName: string, eventData: any, userId?: string) {
-    this.logMessage('info', `Event: ${eventName}`, {
+    this.logMessage("info", `Event: ${eventName}`, {
       eventName,
       eventData,
       userId,
-      type: 'business_event',
+      type: "business_event",
     });
   }
 
@@ -188,13 +181,13 @@ export class WinstonLoggerService implements LoggerService {
    * Log authentication event
    */
   logAuth(action: string, userId?: string, success?: boolean, metadata?: any) {
-    const level = success === false ? 'warn' : 'info';
+    const level = success === false ? "warn" : "info";
     this.logMessage(level, `Auth: ${action}`, {
       action,
       userId,
       success,
       ...metadata,
-      type: 'authentication',
+      type: "authentication",
     });
   }
 }

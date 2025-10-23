@@ -1315,7 +1315,13 @@
             "url": {
               "raw": "{{translation_service_url}}/api/v1/translation/translations/abc123def456",
               "host": ["{{translation_service_url}}"],
-              "path": ["api", "v1", "translation", "translations", "abc123def456"]
+              "path": [
+                "api",
+                "v1",
+                "translation",
+                "translations",
+                "abc123def456"
+              ]
             },
             "description": "Update translation by MD5 key"
           },
@@ -1329,7 +1335,13 @@
             "url": {
               "raw": "{{translation_service_url}}/api/v1/translation/translations/abc123def456",
               "host": ["{{translation_service_url}}"],
-              "path": ["api", "v1", "translation", "translations", "abc123def456"]
+              "path": [
+                "api",
+                "v1",
+                "translation",
+                "translations",
+                "abc123def456"
+              ]
             },
             "description": "Delete translation by MD5 key"
           },

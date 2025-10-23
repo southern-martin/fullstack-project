@@ -1,21 +1,22 @@
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
-import { AppModule } from "./app.module";
 import { HttpExceptionFilter } from "@shared/infrastructure/filters/http-exception.filter";
 import { TransformInterceptor } from "@shared/infrastructure/interceptors/transform.interceptor";
-import { WinstonLoggerService, LoggingInterceptor } from "@shared/infrastructure/logging";
+import {
+  LoggingInterceptor,
+  WinstonLoggerService,
+} from "@shared/infrastructure/logging";
+import { AppModule } from "./app.module";
 
 async function bootstrap() {
-  // Create logger instance
+  // Create the NestJS app (use default logger for NestJS internal logging)
+  const app = await NestFactory.create(AppModule);
+
+  // Create Winston logger instance for application logging
   const logger = new WinstonLoggerService();
-  logger.setContext('Bootstrap');
+  logger.setContext("Bootstrap");
 
-  const app = await NestFactory.create(AppModule, {
-    logger: logger, // Use Winston logger for NestJS
-  });
-
-  // Get logger service from DI container
-  const appLogger = app.get(WinstonLoggerService);
+  logger.log("NestFactory.create() completed");
 
   // Enable CORS
   app.enableCors({
@@ -32,13 +33,13 @@ async function bootstrap() {
     })
   );
 
-  // Global exception filter - Standardizes all error responses
+  // Global exception filter
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // Global logging interceptor - Request/response tracking with correlation IDs
-  app.useGlobalInterceptors(new LoggingInterceptor(appLogger));
+  // Global logging interceptor (creates its own logger instance)
+  app.useGlobalInterceptors(new LoggingInterceptor(logger));
 
-  // Global transform interceptor - Wraps all successful responses
+  // Global transform interceptor
   app.useGlobalInterceptors(new TransformInterceptor());
 
   // Set global prefix
@@ -48,17 +49,16 @@ async function bootstrap() {
   await app.listen(port);
 
   logger.log(`🚀 Auth Service is running on: http://localhost:${port}`);
-  logger.log(`📚 API Documentation: http://localhost:${port}/api/v1/auth/health`);
-  logger.log(`✅ API Standards: Global Exception Filter & Transform Interceptor enabled`);
-  logger.log(`📝 Structured Logging: Winston with JSON format enabled`);
+  logger.log(
+    `📚 API Documentation: http://localhost:${port}/api/v1/auth/health`
+  );
+  logger.log(`✅ Structured Logging: Winston JSON format enabled`);
+  logger.log(`✅ Request/Response logging with correlation IDs enabled`);
 }
 
-bootstrap();
-
-
-
-
-
-
-
-
+bootstrap().catch((err) => {
+  console.error("========== BOOTSTRAP ERROR ==========");
+  console.error(err);
+  console.error("=====================================");
+  process.exit(1);
+});

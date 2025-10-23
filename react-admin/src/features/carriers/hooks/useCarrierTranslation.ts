@@ -18,7 +18,7 @@ export interface TranslatedCarrier extends Carrier {
 export const useCarrierTranslation = () => {
   const [isTranslating, setIsTranslating] = useState(false);
   const [translationError, setTranslationError] = useState<string | null>(null);
-  
+
   // Get current language from LanguageProvider
   const { currentLanguage: languageObj } = useLanguage();
   const currentLanguage = languageObj?.code || 'en';
@@ -27,99 +27,116 @@ export const useCarrierTranslation = () => {
    * Translates an array of carriers using BATCH translation endpoint.
    * This is the MAIN method - translates ALL carriers in ONE request.
    */
-  const translateCarriers = useCallback(async (
-    carriers: Carrier[]
-  ): Promise<TranslatedCarrier[]> => {
-    if (!carriers?.length) return [];
-    
-    // Skip translation if English or no language selected
-    if (!currentLanguage || currentLanguage === 'en') {
-      return carriers;
-    }
+  const translateCarriers = useCallback(
+    async (carriers: Carrier[]): Promise<TranslatedCarrier[]> => {
+      if (!carriers?.length) return [];
 
-    setIsTranslating(true);
-    setTranslationError(null);
+      // Skip translation if English or no language selected
+      if (!currentLanguage || currentLanguage === 'en') {
+        return carriers;
+      }
 
-    try {
-      // Step 1: Extract all texts that need translation
-      const textsToTranslate: string[] = [];
-      const textIndexMap: Map<number, { nameIndex: number; descIndex?: number }> = new Map();
+      setIsTranslating(true);
+      setTranslationError(null);
 
-      carriers.forEach((carrier, index) => {
-        const nameIndex = textsToTranslate.length;
-        textsToTranslate.push(carrier.name);
+      try {
+        // Step 1: Extract all texts that need translation
+        const textsToTranslate: string[] = [];
+        const textIndexMap: Map<
+          number,
+          { nameIndex: number; descIndex?: number }
+        > = new Map();
 
-        const indices: { nameIndex: number; descIndex?: number } = { nameIndex };
+        carriers.forEach((carrier, index) => {
+          const nameIndex = textsToTranslate.length;
+          textsToTranslate.push(carrier.name);
 
-        if (carrier.description) {
-          const descIndex = textsToTranslate.length;
-          textsToTranslate.push(carrier.description);
-          indices.descIndex = descIndex;
-        }
+          const indices: { nameIndex: number; descIndex?: number } = {
+            nameIndex,
+          };
 
-        textIndexMap.set(index, indices);
-      });
+          if (carrier.description) {
+            const descIndex = textsToTranslate.length;
+            textsToTranslate.push(carrier.description);
+            indices.descIndex = descIndex;
+          }
 
-      console.log(`🔄 Translating ${textsToTranslate.length} texts for ${carriers.length} carriers in batch to ${currentLanguage}...`);
-      const startTime = Date.now();
+          textIndexMap.set(index, indices);
+        });
 
-      // Step 2: Make SINGLE batch translation request
-      const batchResponse = await translationApiClient.translateBatch({
-        texts: textsToTranslate,
-        targetLanguage: currentLanguage,
-        sourceLanguage: 'en',
-      });
+        console.log(
+          `🔄 Translating ${textsToTranslate.length} texts for ${carriers.length} carriers in batch to ${currentLanguage}...`
+        );
+        const startTime = Date.now();
 
-      const translations = batchResponse.translations;
-      const duration = Date.now() - startTime;
+        // Step 2: Make SINGLE batch translation request
+        const batchResponse = await translationApiClient.translateBatch({
+          texts: textsToTranslate,
+          targetLanguage: currentLanguage,
+          sourceLanguage: 'en',
+        });
 
-      console.log(`✅ Batch translation complete in ${duration}ms. Cache hits: ${translations.filter(t => t.fromCache).length}/${translations.length}`);
+        const translations = batchResponse.translations;
+        const duration = Date.now() - startTime;
 
-      // Step 3: Map translations back to carriers
-      const translatedCarriers: TranslatedCarrier[] = carriers.map((carrier, index) => {
-        const indices = textIndexMap.get(index)!;
-        const nameTranslation = translations[indices.nameIndex];
-        const descTranslation = indices.descIndex !== undefined 
-          ? translations[indices.descIndex] 
-          : undefined;
+        console.log(
+          `✅ Batch translation complete in ${duration}ms. Cache hits: ${
+            translations.filter(t => t.fromCache).length
+          }/${translations.length}`
+        );
 
-        return {
-          ...carrier,
-          name: nameTranslation.translatedText,
-          description: descTranslation ? descTranslation.translatedText : carrier.description,
-          _original: {
-            name: carrier.name,
-            description: carrier.description,
-          },
-          _isTranslated: true,
-          _translationMeta: {
-            nameFromCache: nameTranslation.fromCache,
-            descriptionFromCache: descTranslation?.fromCache,
-          },
-        };
-      });
+        // Step 3: Map translations back to carriers
+        const translatedCarriers: TranslatedCarrier[] = carriers.map(
+          (carrier, index) => {
+            const indices = textIndexMap.get(index)!;
+            const nameTranslation = translations[indices.nameIndex];
+            const descTranslation =
+              indices.descIndex !== undefined
+                ? translations[indices.descIndex]
+                : undefined;
 
-      return translatedCarriers;
+            return {
+              ...carrier,
+              name: nameTranslation.translatedText,
+              description: descTranslation
+                ? descTranslation.translatedText
+                : carrier.description,
+              _original: {
+                name: carrier.name,
+                description: carrier.description,
+              },
+              _isTranslated: true,
+              _translationMeta: {
+                nameFromCache: nameTranslation.fromCache,
+                descriptionFromCache: descTranslation?.fromCache,
+              },
+            };
+          }
+        );
 
-    } catch (error) {
-      console.error('❌ Failed to translate carriers:', error);
-      setTranslationError('Failed to translate carriers');
-      return carriers; // Fallback to original
-    } finally {
-      setIsTranslating(false);
-    }
-  }, [currentLanguage]);
+        return translatedCarriers;
+      } catch (error) {
+        console.error('❌ Failed to translate carriers:', error);
+        setTranslationError('Failed to translate carriers');
+        return carriers; // Fallback to original
+      } finally {
+        setIsTranslating(false);
+      }
+    },
+    [currentLanguage]
+  );
 
   /**
    * Translates a single carrier (uses batch endpoint with 1 item).
    * Useful for real-time translation of newly created carriers.
    */
-  const translateCarrier = useCallback(async (
-    carrier: Carrier
-  ): Promise<TranslatedCarrier> => {
-    const [translated] = await translateCarriers([carrier]);
-    return translated || carrier;
-  }, [translateCarriers]);
+  const translateCarrier = useCallback(
+    async (carrier: Carrier): Promise<TranslatedCarrier> => {
+      const [translated] = await translateCarriers([carrier]);
+      return translated || carrier;
+    },
+    [translateCarriers]
+  );
 
   return {
     translateCarrier,

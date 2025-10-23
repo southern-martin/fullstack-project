@@ -35,10 +35,10 @@ export * from "./validation/custom-validators";
 export * from "./validation/validation-utils";
 
 // Logging - New Winston-based structured logging
-export * from "./logging/winston-logger.module";
-export * from "./logging/winston-logger.service";
 export * from "./logging/logging.interceptor";
 export * from "./logging/typeorm-logger";
+export * from "./logging/winston-logger.module";
+export * from "./logging/winston-logger.service";
 
 // Legacy Logging (deprecated)
 export * from "./logging/log-level";

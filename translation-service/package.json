@@ -18,6 +18,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed": "node scripts/seed-data.js",
     "seed:dev": "ts-node scripts/seed-data.ts --dev",
+    "seed:comprehensive": "ts-node -r tsconfig-paths/register scripts/seed-comprehensive.ts",
     "seed:carrier": "ts-node -r tsconfig-paths/register scripts/seed-carrier-translations.ts"
   },
   "dependencies": {
@@ -39,7 +40,9 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "tsconfig-paths": "^4.1.0",
-    "typeorm": "^0.3.17"
+    "typeorm": "^0.3.17",
+    "uuid": "^9.0.1",
+    "winston": "^3.18.3"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

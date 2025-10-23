@@ -6,8 +6,8 @@ import { WinstonLoggerModule } from "@shared/infrastructure/logging/winston-logg
 
 // Clean Architecture Modules
 import { ApplicationModule } from "./application/application.module";
-import { InterfacesModule } from "./interfaces/interfaces.module";
 import { DatabaseModule } from "./infrastructure/database/database.module";
+import { InterfacesModule } from "./interfaces/interfaces.module";
 
 /**
  * Main application module for the Translation Service.

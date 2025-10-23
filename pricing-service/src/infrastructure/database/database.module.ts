@@ -1,5 +1,4 @@
 import { Module } from "@nestjs/common";
-import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { PriceCalculationTypeOrmEntity } from "./typeorm/entities/price-calculation.typeorm.entity";
 import { PricingRuleTypeOrmEntity } from "./typeorm/entities/pricing-rule.typeorm.entity";

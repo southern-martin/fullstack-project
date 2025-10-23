@@ -110,7 +110,9 @@ class AuthService {
   }
 
   async getProfile(): Promise<User> {
-    const response = await apiClient.get<User>(AUTH_API_CONFIG.ENDPOINTS.PROFILE);
+    const response = await apiClient.get<User>(
+      AUTH_API_CONFIG.ENDPOINTS.PROFILE
+    );
     return response;
   }
 

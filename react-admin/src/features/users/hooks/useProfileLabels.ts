@@ -3,23 +3,23 @@ import { PROFILE_LABELS, ProfileLabels } from '../constants/profile-labels';
 
 /**
  * Hook for accessing translated Profile module labels
- * 
+ *
  * This is a convenience wrapper around the generic useLabels hook,
  * pre-configured with Profile module labels.
- * 
+ *
  * Features:
  * - Type-safe access to all Profile labels
  * - Automatic translation based on current language
  * - English bypass (no API call for English)
  * - Caching via React Query
  * - Graceful fallback to English
- * 
+ *
  * @returns {Object} Translated labels and loading state
- * 
+ *
  * @example
  * ```typescript
  * const { labels: L, isLoading } = useProfileLabels();
- * 
+ *
  * return (
  *   <div>
  *     <h3>{L.sections.basicInfo}</h3>

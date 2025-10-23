@@ -67,8 +67,13 @@ class PricingApiClient {
       return data;
     } catch (error) {
       // Don't log connection errors (service not running) or validation errors or 404s
-      const isConnectionError = error instanceof TypeError && error.message.includes('fetch');
-      if (!isConnectionError && !(error as any).validationErrors && (error as any).status !== 404) {
+      const isConnectionError =
+        error instanceof TypeError && error.message.includes('fetch');
+      if (
+        !isConnectionError &&
+        !(error as any).validationErrors &&
+        (error as any).status !== 404
+      ) {
         console.error('Pricing API request failed:', error);
       }
       throw error;

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
+import { LanguageSelector } from '../../../features/translations/components/LanguageSelector';
 import ThemeToggle from '../ThemeToggle';
 import Navigation from './Navigation';
-import { LanguageSelector } from '../../../features/translations/components/LanguageSelector';
 
 const Layout: React.FC = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);

@@ -1,12 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { EventBusInterface } from "../../domain/events/event-bus.interface";
 import { WinstonLoggerService } from "@shared/infrastructure/logging";
+import { EventBusInterface } from "../../domain/events/event-bus.interface";
 
 /**
  * In-Memory Event Bus Implementation
  * Simple implementation for development/testing
  * In production, replace with RabbitMQ, Kafka, or EventEmitter2
- * 
+ *
  * Security Note: Auth events are critical for security monitoring
  * Ensure production event bus has:
  * - Reliable delivery
@@ -21,7 +21,7 @@ export class InMemoryEventBus implements EventBusInterface {
   private readonly logger = new WinstonLoggerService();
 
   constructor() {
-    this.logger.setContext('Auth-EventBus');
+    this.logger.setContext("Auth-EventBus");
   }
 
   /**
@@ -43,7 +43,7 @@ export class InMemoryEventBus implements EventBusInterface {
         this.logger.error(
           `Error handling event ${eventName}`,
           error.stack,
-          'Auth-EventBus'
+          "Auth-EventBus"
         );
         // Don't throw - continue processing other handlers
         // In production, send to error monitoring service
@@ -66,10 +66,7 @@ export class InMemoryEventBus implements EventBusInterface {
    * @param eventName - The name of the event to subscribe to
    * @param handler - The handler function to execute
    */
-  subscribe(
-    eventName: string,
-    handler: (event: any) => Promise<void>
-  ): void {
+  subscribe(eventName: string, handler: (event: any) => Promise<void>): void {
     if (!this.handlers.has(eventName)) {
       this.handlers.set(eventName, []);
     }

@@ -12,7 +12,7 @@ import { RoleTypeOrmEntity } from "./infrastructure/database/typeorm/entities/ro
 import { UserTypeOrmEntity } from "./infrastructure/database/typeorm/entities/user.typeorm.entity";
 
 // Logging
-import { WinstonLoggerModule, TypeOrmWinstonLogger } from "@shared/infrastructure/logging";
+import { WinstonLoggerModule } from "@shared/infrastructure/logging";
 
 /**
  * Main Application Module
@@ -25,6 +25,7 @@ import { WinstonLoggerModule, TypeOrmWinstonLogger } from "@shared/infrastructur
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ".env",
+      ignoreEnvFile: !!process.env.DB_HOST, // If DB_HOST is set (Docker), ignore .env file
     }),
 
     // Structured Logging
@@ -39,8 +40,8 @@ import { WinstonLoggerModule, TypeOrmWinstonLogger } from "@shared/infrastructur
       password: process.env.DB_PASSWORD || "shared_password_2024",
       database: process.env.DB_NAME || "shared_user_db",
       entities: [UserTypeOrmEntity, RoleTypeOrmEntity],
-      synchronize: process.env.DB_SYNCHRONIZE === 'true' || false,
-      logging: process.env.DB_LOGGING === 'true' || process.env.NODE_ENV === "development",
+      synchronize: process.env.DB_SYNCHRONIZE === "true" || false,
+      logging: false, // Disable TypeORM default logging, use Winston instead
       maxQueryExecutionTime: 1000, // Log slow queries > 1s
     }),
 

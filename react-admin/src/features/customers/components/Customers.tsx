@@ -22,13 +22,13 @@ import { ServerPagination } from '../../../shared/components/ui/ServerPagination
 import { ServerSearch } from '../../../shared/components/ui/ServerSearch';
 import { ServerSorting, SortOption } from '../../../shared/components/ui/ServerSorting';
 import { CreateCustomerData, Customer, UpdateCustomerData } from '../../../shared/types';
+import { useCustomerLabels } from '../hooks/useCustomerLabels';
 import {
     useCreateCustomer,
     useCustomers,
     useDeleteCustomer,
     useUpdateCustomer
 } from '../hooks/useCustomerQueries';
-import { useCustomerLabels } from '../hooks/useCustomerLabels';
 
 import CustomerDetails from './CustomerDetails';
 import CustomerForm from './CustomerForm';
@@ -96,7 +96,7 @@ const Customers: React.FC = () => {
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
-            
+
             // Check if click is on dropdown portal
             const isDropdownPortal = target.closest('[data-dropdown-portal]');
             if (isDropdownPortal) return;
