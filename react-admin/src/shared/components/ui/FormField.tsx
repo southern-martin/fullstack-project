@@ -1,5 +1,7 @@
 import React from 'react';
 
+export { CheckboxGroup } from './CheckboxGroup';
+
 interface FormFieldProps {
     label: string;
     name: string;

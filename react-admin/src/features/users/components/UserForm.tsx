@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import Button from '../../../shared/components/ui/Button';
-import { CheckboxField, FormField, SelectField } from '../../../shared/components/ui/FormField';
+import { CheckboxField, CheckboxGroup, FormField } from '../../../shared/components/ui/FormField';
 import { User } from '../../../shared/types';
 import { CreateUserRequest, UpdateUserRequest } from '../services/userApiService';
 import { useActiveRoles } from '../../roles/hooks/useRoleQueries';
@@ -118,9 +118,8 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
         }
     };
 
-    const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedOptions = Array.from(e.target.selectedOptions).map(option => parseInt(option.value));
-        setFormData(prev => ({ ...prev, roleIds: selectedOptions }));
+    const handleRoleChange = (selectedRoleIds: number[]) => {
+        setFormData(prev => ({ ...prev, roleIds: selectedRoleIds }));
 
         // Clear role error when user selects roles
         if (errors.roleIds) {
@@ -307,15 +306,19 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
                     />
                 )}
 
-                <SelectField
+                <CheckboxGroup
                     label="Roles"
                     name="roleIds"
-                    value={formData.roleIds.map(String)}
+                    options={roles.map(role => ({ 
+                        value: role.id, 
+                        label: role.name,
+                        description: role.description || `${role.name} role`
+                    }))}
+                    selectedValues={formData.roleIds}
                     onChange={handleRoleChange}
-                    options={roles.map(role => ({ value: role.id, label: role.name }))}
                     error={errors.roleIds}
-                    multiple
                     disabled={loadingRoles}
+                    columns={2}
                 />
 
                 <CheckboxField
