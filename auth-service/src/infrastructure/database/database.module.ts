@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { PermissionTypeOrmEntity } from "./typeorm/entities/permission.typeorm.entity";
 import { RoleTypeOrmEntity } from "./typeorm/entities/role.typeorm.entity";
 import { UserTypeOrmEntity } from "./typeorm/entities/user.typeorm.entity";
 import { RoleRepository } from "./typeorm/repositories/role.repository";
@@ -17,13 +18,13 @@ import { UserRepository } from "./typeorm/repositories/user.repository";
         username: configService.get<string>("DB_USERNAME", "root"),
         password: configService.get<string>("DB_PASSWORD", ""),
         database: configService.get<string>("DB_NAME", "auth_service_db"),
-        entities: [UserTypeOrmEntity, RoleTypeOrmEntity],
+        entities: [UserTypeOrmEntity, RoleTypeOrmEntity, PermissionTypeOrmEntity],
         synchronize: configService.get<string>("NODE_ENV") === "development",
         logging: configService.get<string>("NODE_ENV") === "development",
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([UserTypeOrmEntity, RoleTypeOrmEntity]),
+    TypeOrmModule.forFeature([UserTypeOrmEntity, RoleTypeOrmEntity, PermissionTypeOrmEntity]),
   ],
   providers: [
     {

@@ -14,12 +14,18 @@ export class RoleRepository implements RoleRepositoryInterface {
   ) {}
 
   async findById(id: number): Promise<Role | null> {
-    const entity = await this.repository.findOne({ where: { id } });
+    const entity = await this.repository.findOne({ 
+      where: { id },
+      relations: ['permissionEntities']
+    });
     return entity ? this.toDomainEntity(entity) : null;
   }
 
   async findByName(name: string): Promise<Role | null> {
-    const entity = await this.repository.findOne({ where: { name } });
+    const entity = await this.repository.findOne({ 
+      where: { name },
+      relations: ['permissionEntities']
+    });
     return entity ? this.toDomainEntity(entity) : null;
   }
 
@@ -46,12 +52,16 @@ export class RoleRepository implements RoleRepositoryInterface {
       take: limit,
       skip: offset,
       order: { createdAt: "DESC" },
+      relations: ['permissionEntities']
     });
     return entities.map((entity) => this.toDomainEntity(entity));
   }
 
   async findByIds(ids: number[]): Promise<Role[]> {
-    const entities = await this.repository.findByIds(ids);
+    const entities = await this.repository.find({
+      where: ids.map(id => ({ id })),
+      relations: ['permissionEntities']
+    });
     return entities.map((entity) => this.toDomainEntity(entity));
   }
 
@@ -96,14 +106,18 @@ export class RoleRepository implements RoleRepositoryInterface {
   }
 
   async findActive(): Promise<Role[]> {
-    const entities = await this.repository.find({ where: { isActive: true } });
+    const entities = await this.repository.find({ 
+      where: { isActive: true },
+      relations: ['permissionEntities']
+    });
     return entities.map((entity) => this.toDomainEntity(entity));
   }
 
   async findByPermission(permission: string): Promise<Role[]> {
     const entities = await this.repository
       .createQueryBuilder("role")
-      .where("role.permissions::jsonb ? :permission", { permission })
+      .leftJoinAndSelect("role.permissionEntities", "permission")
+      .where("permission.name = :permission", { permission })
       .getMany();
 
     return entities.map((entity) => this.toDomainEntity(entity));
@@ -138,15 +152,18 @@ export class RoleRepository implements RoleRepositoryInterface {
   }
 
   private toDomainEntity(entity: RoleTypeOrmEntity): Role {
-    return new Role({
+    // Map relational permissions to domain entity's permissions array
+    const role = new Role({
       id: entity.id,
       name: entity.name,
       description: entity.description,
       isActive: entity.isActive,
-      permissions: entity.permissions,
+      permissions: (entity.permissionEntities || []).map(p => p.name),
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     });
+    
+    return role;
   }
 
   private toTypeOrmEntity(role: Role): RoleTypeOrmEntity {
@@ -155,7 +172,7 @@ export class RoleRepository implements RoleRepositoryInterface {
     entity.name = role.name;
     entity.description = role.description;
     entity.isActive = role.isActive;
-    entity.permissions = role.permissions || [];
+    // permissions are handled via permissionEntities (relational system)
     entity.createdAt = role.createdAt;
     entity.updatedAt = role.updatedAt;
     return entity;

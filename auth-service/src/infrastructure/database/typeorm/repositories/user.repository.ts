@@ -17,7 +17,7 @@ export class UserRepository implements UserRepositoryInterface {
   async findById(id: number): Promise<User | null> {
     const entity = await this.repository.findOne({
       where: { id },
-      relations: ["roles"],
+      relations: ["roles", "roles.permissionEntities"],
     });
     return entity ? this.toDomainEntity(entity) : null;
   }
@@ -25,7 +25,7 @@ export class UserRepository implements UserRepositoryInterface {
   async findByEmail(email: string): Promise<User | null> {
     const entity = await this.repository.findOne({
       where: { email },
-      relations: ["roles"],
+      relations: ["roles", "roles.permissionEntities"],
     });
     return entity ? this.toDomainEntity(entity) : null;
   }
@@ -59,7 +59,7 @@ export class UserRepository implements UserRepositoryInterface {
     const entities = await this.repository.find({
       take: limit,
       skip: offset,
-      relations: ["roles"],
+      relations: ["roles", "roles.permissionEntities"],
       order: { createdAt: "DESC" },
     });
     return entities.map((entity) => this.toDomainEntity(entity));
@@ -87,7 +87,8 @@ export class UserRepository implements UserRepositoryInterface {
   ): Promise<{ users: User[]; total: number }> {
     const queryBuilder = this.repository
       .createQueryBuilder("user")
-      .leftJoinAndSelect("user.roles", "roles");
+      .leftJoinAndSelect("user.roles", "roles")
+      .leftJoinAndSelect("roles.permissionEntities", "permissions");
 
     if (search) {
       queryBuilder.where(
@@ -117,7 +118,7 @@ export class UserRepository implements UserRepositoryInterface {
   async findActive(): Promise<User[]> {
     const entities = await this.repository.find({
       where: { isActive: true },
-      relations: ["roles"],
+      relations: ["roles", "roles.permissionEntities"],
     });
     return entities.map((entity) => this.toDomainEntity(entity));
   }
@@ -133,7 +134,8 @@ export class UserRepository implements UserRepositoryInterface {
   ): Promise<{ users: User[]; total: number }> {
     const queryBuilder = this.repository
       .createQueryBuilder("user")
-      .leftJoinAndSelect("user.roles", "roles");
+      .leftJoinAndSelect("user.roles", "roles")
+      .leftJoinAndSelect("roles.permissionEntities", "permissions");
 
     if (search) {
       queryBuilder.where(

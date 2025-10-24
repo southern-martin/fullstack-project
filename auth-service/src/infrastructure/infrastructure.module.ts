@@ -3,6 +3,7 @@ import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
 // TypeORM Entities
+import { PermissionTypeOrmEntity } from "./database/typeorm/entities/permission.typeorm.entity";
 import { RoleTypeOrmEntity } from "./database/typeorm/entities/role.typeorm.entity";
 import { UserTypeOrmEntity } from "./database/typeorm/entities/user.typeorm.entity";
 
@@ -31,7 +32,7 @@ import { KongService } from "./external-services/kong.service";
 @Module({
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([UserTypeOrmEntity, RoleTypeOrmEntity]),
+    TypeOrmModule.forFeature([UserTypeOrmEntity, RoleTypeOrmEntity, PermissionTypeOrmEntity]),
   ],
   providers: [
     // Repository Implementations
