@@ -47,7 +47,7 @@ echo "✅ user-service created"
 # Carrier Service
 curl -s -X POST "$KONG_ADMIN_URL/services" \
   -d "name=carrier-service" \
-  -d "url=http://carrier-service:3004" \
+  -d "url=http://carrier-service:3005" \
   -d "tags=microservice" \
   -d "tags=carrier" > /dev/null
 echo "✅ carrier-service created"
@@ -55,7 +55,7 @@ echo "✅ carrier-service created"
 # Customer Service
 curl -s -X POST "$KONG_ADMIN_URL/services" \
   -d "name=customer-service" \
-  -d "url=http://customer-service:3005" \
+  -d "url=http://customer-service:3004" \
   -d "tags=microservice" \
   -d "tags=customer" > /dev/null
 echo "✅ customer-service created"
@@ -161,15 +161,15 @@ echo "✅ /api/v1/roles/*"
 
 curl -s -X POST "$KONG_ADMIN_URL/services/carrier-service/routes" \
   -d "name=carriers-routes" \
-  -d "paths[]=/api/carriers" \
-  -d "paths[]=/api/carriers/.*" \
+  -d "paths[]=/api/v1/carriers" \
+  -d "paths[]=/api/v1/carriers/.*" \
   -d "methods[]=GET" \
   -d "methods[]=POST" \
   -d "methods[]=PUT" \
   -d "methods[]=PATCH" \
   -d "methods[]=DELETE" \
   -d "strip_path=false" > /dev/null
-echo "✅ /api/carriers/*"
+echo "✅ /api/v1/carriers/*"
 
 # ============================================
 # CREATE ROUTES - CUSTOMER SERVICE (Protected)
@@ -177,15 +177,15 @@ echo "✅ /api/carriers/*"
 
 curl -s -X POST "$KONG_ADMIN_URL/services/customer-service/routes" \
   -d "name=customers-routes" \
-  -d "paths[]=/api/customers" \
-  -d "paths[]=/api/customers/.*" \
+  -d "paths[]=/api/v1/customers" \
+  -d "paths[]=/api/v1/customers/.*" \
   -d "methods[]=GET" \
   -d "methods[]=POST" \
   -d "methods[]=PUT" \
   -d "methods[]=PATCH" \
   -d "methods[]=DELETE" \
   -d "strip_path=false" > /dev/null
-echo "✅ /api/customers/*"
+echo "✅ /api/v1/customers/*"
 
 # ============================================
 # CREATE ROUTES - PRICING SERVICE (Protected)
@@ -193,15 +193,15 @@ echo "✅ /api/customers/*"
 
 curl -s -X POST "$KONG_ADMIN_URL/services/pricing-service/routes" \
   -d "name=pricing-routes" \
-  -d "paths[]=/api/pricing" \
-  -d "paths[]=/api/pricing/.*" \
+  -d "paths[]=/api/v1/pricing" \
+  -d "paths[]=/api/v1/pricing/.*" \
   -d "methods[]=GET" \
   -d "methods[]=POST" \
   -d "methods[]=PUT" \
   -d "methods[]=PATCH" \
   -d "methods[]=DELETE" \
   -d "strip_path=false" > /dev/null
-echo "✅ /api/pricing/*"
+echo "✅ /api/v1/pricing/*"
 
 # ============================================
 # CREATE ROUTES - TRANSLATION SERVICE (Protected)
@@ -209,15 +209,15 @@ echo "✅ /api/pricing/*"
 
 curl -s -X POST "$KONG_ADMIN_URL/services/translation-service/routes" \
   -d "name=translations-routes" \
-  -d "paths[]=/api/v1/translations" \
-  -d "paths[]=/api/v1/translations/.*" \
+  -d "paths[]=/api/v1/translation" \
+  -d "paths[]=/api/v1/translation/.*" \
   -d "methods[]=GET" \
   -d "methods[]=POST" \
   -d "methods[]=PUT" \
   -d "methods[]=PATCH" \
   -d "methods[]=DELETE" \
   -d "strip_path=false" > /dev/null
-echo "✅ /api/v1/translations/*"
+echo "✅ /api/v1/translation/*"
 
 echo ""
 
