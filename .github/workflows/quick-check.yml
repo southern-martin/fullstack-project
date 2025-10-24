@@ -1,0 +1,51 @@
+name: Quick Integration Check
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+  push:
+    branches:
+      - develop
+
+jobs:
+  quick-check:
+    name: Quick Integration Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Start Infrastructure
+        run: |
+          cd shared-database && docker-compose up -d
+          cd ../shared-redis && docker-compose up -d
+          sleep 20
+      
+      - name: Start Core Services
+        run: |
+          docker-compose -f docker-compose.hybrid.yml up -d auth-service user-service customer-service
+          sleep 20
+      
+      - name: Run Quick Health Checks
+        run: |
+          echo "Testing Auth Service..."
+          curl -f http://localhost:3001/api/v1/auth/health || exit 1
+          
+          echo "Testing User Service..."
+          curl -f http://localhost:3003/health || exit 1
+          
+          echo "Testing Customer Service..."
+          curl -f http://localhost:3002/health || exit 1
+          
+          echo "✅ All core services healthy"
+      
+      - name: Cleanup
+        if: always()
+        run: |
+          docker-compose -f docker-compose.hybrid.yml down -v
+          cd shared-database && docker-compose down -v
+          cd ../shared-redis && docker-compose down -v

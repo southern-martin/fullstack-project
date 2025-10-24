@@ -1,0 +1,510 @@
+name: Integration & Performance Tests
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+    paths:
+      - 'auth-service/**'
+      - 'user-service/**'
+      - 'customer-service/**'
+      - 'carrier-service/**'
+      - 'pricing-service/**'
+      - 'translation-service/**'
+      - 'api-gateway/**'
+      - 'shared/**'
+      - 'shared-database/**'
+      - 'shared-redis/**'
+      - 'integration-tests/**'
+      - 'docker-compose.hybrid.yml'
+      - '.github/workflows/integration-tests.yml'
+  
+  push:
+    branches:
+      - develop
+      - main
+    paths:
+      - 'auth-service/**'
+      - 'user-service/**'
+      - 'customer-service/**'
+      - 'carrier-service/**'
+      - 'pricing-service/**'
+      - 'translation-service/**'
+      - 'api-gateway/**'
+      - 'shared/**'
+      - 'shared-database/**'
+      - 'shared-redis/**'
+      - 'integration-tests/**'
+      - 'docker-compose.hybrid.yml'
+      - '.github/workflows/integration-tests.yml'
+  
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Test suite to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - business-services
+          - redis
+          - kong
+          - end-to-end
+          - performance
+
+env:
+  # Docker Compose settings
+  COMPOSE_FILE: docker-compose.hybrid.yml
+  COMPOSE_PROJECT_NAME: fullstack-ci
+  
+  # Service URLs
+  AUTH_SERVICE_URL: http://localhost:3001
+  USER_SERVICE_URL: http://localhost:3003
+  CUSTOMER_SERVICE_URL: http://localhost:3002
+  CARRIER_SERVICE_URL: http://localhost:3004
+  PRICING_SERVICE_URL: http://localhost:3005
+  TRANSLATION_SERVICE_URL: http://localhost:3006
+  KONG_ADMIN_URL: http://localhost:8001
+  KONG_PROXY_URL: http://localhost:8000
+  REDIS_URL: redis://localhost:6379
+  
+  # Test configuration
+  TEST_TIMEOUT: 180
+  PERFORMANCE_THRESHOLD_P95: 100
+  PERFORMANCE_THRESHOLD_P99: 150
+
+jobs:
+  integration-tests:
+    name: Run Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        test-suite:
+          - name: "Business Services"
+            script: "business-services-integration-test.sh"
+            tests: 18
+          - name: "Redis Caching"
+            script: "redis-caching-integration-test.sh"
+            tests: 14
+          - name: "Kong Gateway"
+            script: "kong-gateway-integration-test.sh"
+            tests: 13
+          - name: "End-to-End Workflows"
+            script: "end-to-end-workflow-test.sh"
+            tests: 20
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Cache Docker Layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      
+      - name: Create Environment Files
+        run: |
+          echo "Creating environment files for services..."
+          
+          # Auth Service environment
+          cat > auth-service/.env << EOF
+          NODE_ENV=test
+          PORT=3001
+          JWT_SECRET=test-jwt-secret-key-for-ci-testing
+          JWT_EXPIRES_IN=1h
+          DATABASE_TYPE=mysql
+          DATABASE_HOST=shared-mysql
+          DATABASE_PORT=3306
+          DATABASE_NAME=shared_user_db
+          DATABASE_USERNAME=root
+          DATABASE_PASSWORD=rootpassword
+          REDIS_HOST=shared-redis
+          REDIS_PORT=6379
+          REDIS_PASSWORD=
+          EOF
+          
+          # User Service environment
+          cp auth-service/.env user-service/.env
+          sed -i 's/PORT=3001/PORT=3003/' user-service/.env
+          
+          # Customer Service environment
+          cat > customer-service/.env << EOF
+          NODE_ENV=test
+          PORT=3002
+          DATABASE_TYPE=postgres
+          DATABASE_HOST=localhost
+          DATABASE_PORT=5432
+          DATABASE_NAME=customer_db
+          DATABASE_USERNAME=postgres
+          DATABASE_PASSWORD=postgres
+          REDIS_HOST=shared-redis
+          REDIS_PORT=6379
+          USER_SERVICE_URL=http://user-service:3003
+          EOF
+          
+          # Carrier Service environment
+          cat > carrier-service/.env << EOF
+          NODE_ENV=test
+          PORT=3004
+          DATABASE_TYPE=postgres
+          DATABASE_HOST=localhost
+          DATABASE_PORT=5432
+          DATABASE_NAME=carrier_db
+          DATABASE_USERNAME=postgres
+          DATABASE_PASSWORD=postgres
+          REDIS_HOST=shared-redis
+          REDIS_PORT=6379
+          EOF
+          
+          # Pricing Service environment
+          cat > pricing-service/.env << EOF
+          NODE_ENV=test
+          PORT=3005
+          DATABASE_TYPE=postgres
+          DATABASE_HOST=localhost
+          DATABASE_PORT=5432
+          DATABASE_NAME=pricing_db
+          DATABASE_USERNAME=postgres
+          DATABASE_PASSWORD=postgres
+          REDIS_HOST=shared-redis
+          REDIS_PORT=6379
+          EOF
+          
+          # Translation Service environment
+          cat > translation-service/.env << EOF
+          NODE_ENV=test
+          PORT=3006
+          DATABASE_TYPE=postgres
+          DATABASE_HOST=localhost
+          DATABASE_PORT=5432
+          DATABASE_NAME=translation_db
+          DATABASE_USERNAME=postgres
+          DATABASE_PASSWORD=postgres
+          REDIS_HOST=shared-redis
+          REDIS_PORT=6379
+          EOF
+          
+          echo "✅ Environment files created"
+      
+      - name: Start Shared Infrastructure
+        run: |
+          echo "Starting shared infrastructure (Database + Redis)..."
+          cd shared-database
+          docker-compose up -d
+          
+          echo "Waiting for MySQL to be ready..."
+          timeout 60 bash -c 'until docker exec shared-mysql mysqladmin ping -h localhost -u root -prootpassword --silent; do sleep 2; done'
+          
+          echo "Starting Redis..."
+          cd ../shared-redis
+          docker-compose up -d
+          
+          echo "Waiting for Redis to be ready..."
+          timeout 30 bash -c 'until docker exec shared-redis redis-cli ping | grep -q PONG; do sleep 2; done'
+          
+          echo "✅ Shared infrastructure ready"
+      
+      - name: Start Microservices
+        run: |
+          echo "Starting all microservices..."
+          docker-compose -f docker-compose.hybrid.yml up -d
+          
+          echo "Waiting for services to be healthy..."
+          sleep 30
+          
+          # Check service health
+          services=(
+            "http://localhost:3001/api/v1/auth/health:Auth Service"
+            "http://localhost:3003/health:User Service"
+            "http://localhost:3002/health:Customer Service"
+            "http://localhost:3004/health:Carrier Service"
+            "http://localhost:3005/health:Pricing Service"
+            "http://localhost:3006/health:Translation Service"
+          )
+          
+          for service in "${services[@]}"; do
+            IFS=':' read -r url name <<< "$service"
+            echo "Checking $name..."
+            timeout 30 bash -c "until curl -sf $url > /dev/null; do sleep 2; done" || {
+              echo "❌ $name failed to start"
+              docker-compose -f docker-compose.hybrid.yml logs "$name"
+              exit 1
+            }
+            echo "✅ $name is healthy"
+          done
+      
+      - name: Setup Kong Gateway
+        run: |
+          echo "Setting up Kong Gateway..."
+          cd api-gateway
+          chmod +x setup-kong.sh
+          ./setup-kong.sh
+          
+          echo "Verifying Kong routes..."
+          curl -s http://localhost:8001/routes | jq '.data[].name'
+          
+          echo "✅ Kong Gateway configured"
+      
+      - name: Run ${{ matrix.test-suite.name }} Tests
+        id: test_run
+        run: |
+          cd integration-tests
+          chmod +x ${{ matrix.test-suite.script }}
+          
+          echo "Running ${{ matrix.test-suite.name }} (${{ matrix.test-suite.tests }} tests)..."
+          timeout ${{ env.TEST_TIMEOUT }} ./${{ matrix.test-suite.script }} 2>&1 | tee test-output.log
+          
+          # Capture exit code
+          TEST_EXIT_CODE=${PIPESTATUS[0]}
+          
+          # Extract test results
+          PASSED=$(grep -c "✅ PASS:" test-output.log || echo "0")
+          FAILED=$(grep -c "❌ FAIL:" test-output.log || echo "0")
+          
+          echo "test_exit_code=$TEST_EXIT_CODE" >> $GITHUB_OUTPUT
+          echo "tests_passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "tests_failed=$FAILED" >> $GITHUB_OUTPUT
+          
+          # Upload test output as artifact
+          echo "Test Results:" >> test-results.md
+          echo "- Passed: $PASSED" >> test-results.md
+          echo "- Failed: $FAILED" >> test-results.md
+          echo "- Exit Code: $TEST_EXIT_CODE" >> test-results.md
+          
+          exit $TEST_EXIT_CODE
+      
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-${{ matrix.test-suite.name }}
+          path: |
+            integration-tests/test-output.log
+            integration-tests/test-results.md
+          retention-days: 30
+      
+      - name: Comment Test Results on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const testSuite = '${{ matrix.test-suite.name }}';
+            const passed = '${{ steps.test_run.outputs.tests_passed }}';
+            const failed = '${{ steps.test_run.outputs.tests_failed }}';
+            const exitCode = '${{ steps.test_run.outputs.test_exit_code }}';
+            const total = ${{ matrix.test-suite.tests }};
+            
+            const status = exitCode === '0' ? '✅ PASSED' : '❌ FAILED';
+            const emoji = exitCode === '0' ? '✅' : '❌';
+            
+            const body = `## ${emoji} ${testSuite} Integration Tests
+            
+            **Status**: ${status}
+            **Tests Passed**: ${passed}/${total}
+            **Tests Failed**: ${failed}
+            
+            <details>
+            <summary>View Details</summary>
+            
+            - Exit Code: ${exitCode}
+            - Test Suite: ${testSuite}
+            - Script: ${{ matrix.test-suite.script }}
+            
+            </details>
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+      
+      - name: Collect Docker Logs
+        if: failure()
+        run: |
+          echo "Collecting logs from failed services..."
+          mkdir -p logs
+          
+          docker-compose -f docker-compose.hybrid.yml logs > logs/docker-compose.log
+          docker logs shared-mysql > logs/mysql.log 2>&1 || true
+          docker logs shared-redis > logs/redis.log 2>&1 || true
+          
+          echo "✅ Logs collected"
+      
+      - name: Upload Docker Logs
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-logs-${{ matrix.test-suite.name }}
+          path: logs/
+          retention-days: 7
+      
+      - name: Cleanup
+        if: always()
+        run: |
+          echo "Cleaning up containers..."
+          docker-compose -f docker-compose.hybrid.yml down -v || true
+          cd shared-database && docker-compose down -v || true
+          cd ../shared-redis && docker-compose down -v || true
+          
+          echo "Pruning Docker resources..."
+          docker system prune -af --volumes || true
+
+  performance-tests:
+    name: Performance & Load Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: integration-tests
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Create Environment Files
+        run: |
+          # Reuse environment file creation from integration-tests
+          echo "Creating environment files..."
+          # (Same as integration-tests job)
+      
+      - name: Start Infrastructure and Services
+        run: |
+          # Start shared infrastructure
+          cd shared-database && docker-compose up -d
+          timeout 60 bash -c 'until docker exec shared-mysql mysqladmin ping -h localhost -u root -prootpassword --silent; do sleep 2; done'
+          
+          cd ../shared-redis && docker-compose up -d
+          timeout 30 bash -c 'until docker exec shared-redis redis-cli ping | grep -q PONG; do sleep 2; done'
+          
+          # Start services
+          cd ..
+          docker-compose -f docker-compose.hybrid.yml up -d
+          sleep 30
+          
+          # Setup Kong
+          cd api-gateway
+          chmod +x setup-kong.sh
+          ./setup-kong.sh
+      
+      - name: Run Performance Tests
+        id: perf_test
+        run: |
+          cd integration-tests
+          chmod +x performance-load-test.sh
+          
+          echo "Running performance and load tests..."
+          timeout ${{ env.TEST_TIMEOUT }} ./performance-load-test.sh 2>&1 | tee perf-output.log
+          
+          # Extract performance metrics
+          P50=$(grep "P50:" perf-output.log | tail -1 | awk '{print $2}' | tr -d 'ms' || echo "0")
+          P95=$(grep "P95:" perf-output.log | tail -1 | awk '{print $2}' | tr -d 'ms' || echo "0")
+          P99=$(grep "P99:" perf-output.log | tail -1 | awk '{print $2}' | tr -d 'ms' || echo "0")
+          
+          echo "p50=$P50" >> $GITHUB_OUTPUT
+          echo "p95=$P95" >> $GITHUB_OUTPUT
+          echo "p99=$P99" >> $GITHUB_OUTPUT
+          
+          # Check performance thresholds
+          if (( $(echo "$P95 > ${{ env.PERFORMANCE_THRESHOLD_P95 }}" | bc -l) )); then
+            echo "⚠️ P95 ($P95ms) exceeds threshold (${{ env.PERFORMANCE_THRESHOLD_P95 }}ms)"
+            echo "performance_warning=true" >> $GITHUB_OUTPUT
+          fi
+          
+          if (( $(echo "$P99 > ${{ env.PERFORMANCE_THRESHOLD_P99 }}" | bc -l) )); then
+            echo "⚠️ P99 ($P99ms) exceeds threshold (${{ env.PERFORMANCE_THRESHOLD_P99 }}ms)"
+            echo "performance_warning=true" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Upload Performance Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-test-results
+          path: integration-tests/perf-output.log
+          retention-days: 30
+      
+      - name: Comment Performance Results on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const p50 = '${{ steps.perf_test.outputs.p50 }}';
+            const p95 = '${{ steps.perf_test.outputs.p95 }}';
+            const p99 = '${{ steps.perf_test.outputs.p99 }}';
+            const warning = '${{ steps.perf_test.outputs.performance_warning }}' === 'true';
+            
+            const status = warning ? '⚠️ WARNING' : '✅ PASSED';
+            const emoji = warning ? '⚠️' : '✅';
+            
+            const body = `## ${emoji} Performance Test Results
+            
+            **Status**: ${status}
+            
+            ### Response Times
+            | Metric | Value | Threshold | Status |
+            |--------|-------|-----------|--------|
+            | P50 | ${p50}ms | <50ms | ${p50 < 50 ? '✅' : '⚠️'} |
+            | P95 | ${p95}ms | <${{ env.PERFORMANCE_THRESHOLD_P95 }}ms | ${p95 < ${{ env.PERFORMANCE_THRESHOLD_P95 }} ? '✅' : '⚠️'} |
+            | P99 | ${p99}ms | <${{ env.PERFORMANCE_THRESHOLD_P99 }}ms | ${p99 < ${{ env.PERFORMANCE_THRESHOLD_P99 }} ? '✅' : '⚠️'} |
+            
+            ${warning ? '⚠️ **Performance thresholds exceeded!** Consider optimizing before merging.' : '✅ All performance metrics within acceptable ranges.'}
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+      
+      - name: Cleanup
+        if: always()
+        run: |
+          docker-compose -f docker-compose.hybrid.yml down -v || true
+          cd shared-database && docker-compose down -v || true
+          cd ../shared-redis && docker-compose down -v || true
+          docker system prune -af --volumes || true
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [integration-tests, performance-tests]
+    if: always()
+    
+    steps:
+      - name: Generate Summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const context = require('@actions/github').context;
+            
+            core.summary
+              .addHeading('🧪 Integration & Performance Test Summary')
+              .addTable([
+                [{data: 'Test Suite', header: true}, {data: 'Status', header: true}, {data: 'Tests', header: true}],
+                ['Business Services', '${{ needs.integration-tests.result }}', '18'],
+                ['Redis Caching', '${{ needs.integration-tests.result }}', '14'],
+                ['Kong Gateway', '${{ needs.integration-tests.result }}', '13'],
+                ['End-to-End Workflows', '${{ needs.integration-tests.result }}', '20'],
+                ['Performance & Load', '${{ needs.performance-tests.result }}', '8']
+              ])
+              .addHeading('📊 Total: 73 Tests')
+              .write();

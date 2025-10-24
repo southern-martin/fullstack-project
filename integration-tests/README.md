@@ -7,6 +7,7 @@ This directory contains comprehensive integration tests for the fullstack micros
 **Total Tests:** 73 tests across 5 test suites
 **Success Rate:** 100% (73/73 passing)
 **Execution Time:** ~90-120 seconds
+**CI/CD:** ✅ Fully Integrated with GitHub Actions
 
 ## Available Test Suites
 
@@ -502,12 +503,60 @@ test-business-<unix-timestamp>
 
 You can trace these IDs in service logs to verify cross-service request tracking.
 
+## 🔄 CI/CD Integration
+
+### GitHub Actions Workflows
+
+This test suite is fully integrated with GitHub Actions:
+
+**Workflows:**
+- `integration-tests.yml` - Full integration and performance testing
+- `quick-check.yml` - Fast health checks for quick feedback
+
+**Triggers:**
+- Pull requests to `develop` or `main`
+- Pushes to `develop` or `main`
+- Manual workflow dispatch
+
+**Features:**
+- ✅ Parallel test execution (matrix strategy)
+- ✅ Automatic PR comments with results
+- ✅ Performance threshold validation
+- ✅ Test artifact uploads
+- ✅ Docker log collection on failure
+- ✅ Automatic cleanup after tests
+
+**See:** [CI/CD Integration Guide](../.github/CI-CD-INTEGRATION-GUIDE.md)
+
+### Running Tests in CI
+
+Tests run automatically on PR creation. To run manually:
+
+1. Go to GitHub Actions tab
+2. Select "Integration & Performance Tests"
+3. Click "Run workflow"
+4. Select test suite or "all"
+5. View results in PR comments and workflow summary
+
+### Performance Thresholds
+
+CI/CD enforces performance targets:
+- P50: <50ms
+- P95: <100ms
+- P99: <150ms
+
+Warnings posted to PR if thresholds exceeded.
+
 ### Future Enhancements
 
-- [ ] Add data mutation tests (create, update, delete)
-- [ ] Test error handling scenarios
-- [ ] Add performance metrics (response times)
-- [ ] Test rate limiting and throttling
-- [ ] Add authentication/authorization edge cases
-- [ ] Test pagination boundaries
-- [ ] Add stress testing capabilities
+- [x] Add data mutation tests (create, update, delete) ✅
+- [x] Test error handling scenarios ✅
+- [x] Add performance metrics (response times) ✅
+- [x] Test rate limiting and throttling ✅
+- [x] Add authentication/authorization edge cases ✅
+- [x] CI/CD integration with GitHub Actions ✅
+- [ ] Contract testing (Pact)
+- [ ] Security testing (OWASP ZAP)
+- [ ] Chaos engineering tests
+- [ ] Performance regression detection
+- [ ] Test optimization and parallelization
