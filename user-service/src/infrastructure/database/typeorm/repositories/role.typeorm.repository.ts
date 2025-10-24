@@ -5,6 +5,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { PaginationDto } from "@fullstack-project/shared-infrastructure";
 import { Between, Repository } from "typeorm";
 import { RoleTypeOrmEntity } from "../entities/role.typeorm.entity";
+import { PermissionTypeOrmEntity } from "../entities/permission.typeorm.entity";
 
 /**
  * RoleTypeOrmRepository
@@ -16,13 +17,35 @@ import { RoleTypeOrmEntity } from "../entities/role.typeorm.entity";
 export class RoleTypeOrmRepository implements RoleRepositoryInterface {
   constructor(
     @InjectRepository(RoleTypeOrmEntity)
-    private readonly roleRepository: Repository<RoleTypeOrmEntity>
+    private readonly roleRepository: Repository<RoleTypeOrmEntity>,
+    @InjectRepository(PermissionTypeOrmEntity)
+    private readonly permissionRepository: Repository<PermissionTypeOrmEntity>
   ) {}
 
-  async create(role: Role): Promise<Role> {
-    const roleEntity = this.toTypeOrmEntity(role);
+  async create(role: Role, permissionIds?: number[]): Promise<Role> {
+    const roleEntity = this.roleRepository.create({
+      name: role.name,
+      description: role.description,
+      isActive: role.isActive,
+    });
+    
+    // Save the role first to get the ID
     const savedEntity = await this.roleRepository.save(roleEntity);
-    return this.toDomainEntity(savedEntity);
+    
+    // If permissionIds are provided, fetch and associate them
+    if (permissionIds && permissionIds.length > 0) {
+      const permissions = await this.permissionRepository.findByIds(permissionIds);
+      savedEntity.permissionEntities = permissions;
+      await this.roleRepository.save(savedEntity);
+    }
+    
+    // Fetch the complete role with permissions
+    const completeEntity = await this.roleRepository.findOne({
+      where: { id: savedEntity.id },
+      relations: ['permissionEntities'],
+    });
+    
+    return this.toDomainEntity(completeEntity);
   }
 
   async findById(id: number): Promise<Role | null> {
@@ -95,8 +118,29 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
     };
   }
 
-  async update(id: number, role: Partial<Role>): Promise<Role> {
+  async update(id: number, role: Partial<Role>, permissionIds?: number[]): Promise<Role> {
+    // Update basic role properties
     await this.roleRepository.update(id, this.toTypeOrmEntity(role as Role));
+    
+    // If permissionIds are provided, update the permissions
+    if (permissionIds !== undefined) {
+      const roleEntity = await this.roleRepository.findOne({
+        where: { id },
+        relations: ['permissionEntities'],
+      });
+      
+      if (roleEntity) {
+        if (permissionIds.length > 0) {
+          const permissions = await this.permissionRepository.findByIds(permissionIds);
+          roleEntity.permissionEntities = permissions;
+        } else {
+          roleEntity.permissionEntities = [];
+        }
+        await this.roleRepository.save(roleEntity);
+      }
+    }
+    
+    // Fetch and return the updated role with permissions
     const updatedEntity = await this.roleRepository.findOne({
       where: { id },
       relations: ['permissionEntities'],

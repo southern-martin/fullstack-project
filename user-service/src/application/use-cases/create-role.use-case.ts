@@ -6,6 +6,7 @@ import {
 } from "@nestjs/common";
 import { Role } from "../../domain/entities/role.entity";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
+import { PermissionRepositoryInterface } from "../../domain/repositories/permission.repository.interface";
 import { CreateRoleDto } from "../dto/create-role.dto";
 import { RoleResponseDto } from "../dto/role-response.dto";
 
@@ -18,7 +19,9 @@ import { RoleResponseDto } from "../dto/role-response.dto";
 export class CreateRoleUseCase {
   constructor(
     @Inject("RoleRepositoryInterface")
-    private readonly roleRepository: RoleRepositoryInterface
+    private readonly roleRepository: RoleRepositoryInterface,
+    @Inject("PermissionRepositoryInterface")
+    private readonly permissionRepository: PermissionRepositoryInterface
   ) {}
 
   /**
@@ -33,7 +36,15 @@ export class CreateRoleUseCase {
       throw new BadRequestException(validation.errors.join(", "));
     }
 
-    // 2. Check if role name already exists
+    // 2. If permissionIds are provided, validate they exist
+    if (createRoleDto.permissionIds && createRoleDto.permissionIds.length > 0) {
+      const permissions = await this.permissionRepository.findByIds(createRoleDto.permissionIds);
+      if (permissions.length !== createRoleDto.permissionIds.length) {
+        throw new BadRequestException("One or more permission IDs are invalid");
+      }
+    }
+
+    // 3. Check if role name already exists
     const existingRole = await this.roleRepository.findByName(
       createRoleDto.name
     );
@@ -41,18 +52,17 @@ export class CreateRoleUseCase {
       throw new ConflictException("Role name already exists");
     }
 
-    // 3. Create role entity
+    // 4. Create role entity
     const role = new Role({
       name: createRoleDto.name,
       description: createRoleDto.description,
-      permissions: createRoleDto.permissions || [],
       isActive: createRoleDto.isActive ?? true,
     });
 
-    // 4. Save role in repository
-    const savedRole = await this.roleRepository.create(role);
+    // 5. Save role in repository with permissions
+    const savedRole = await this.roleRepository.create(role, createRoleDto.permissionIds);
 
-    // 5. Return response
+    // 6. Return response
     return this.mapToResponseDto(savedRole);
   }
 
@@ -79,8 +89,12 @@ export class CreateRoleUseCase {
       errors.push("Role description must not exceed 200 characters");
     }
 
-    if (roleData.permissions && !Array.isArray(roleData.permissions)) {
-      errors.push("Permissions must be an array");
+    if (roleData.permissionIds && !Array.isArray(roleData.permissionIds)) {
+      errors.push("Permission IDs must be an array");
+    }
+
+    if (roleData.permissionIds && roleData.permissionIds.some(id => typeof id !== 'number' || id <= 0)) {
+      errors.push("All permission IDs must be positive numbers");
     }
 
     return {

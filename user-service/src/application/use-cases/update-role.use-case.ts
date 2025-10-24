@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
+import { PermissionRepositoryInterface } from "../../domain/repositories/permission.repository.interface";
 import { RoleResponseDto } from "../dto/role-response.dto";
 import { UpdateRoleDto } from "../dto/update-role.dto";
 
@@ -18,7 +19,9 @@ import { UpdateRoleDto } from "../dto/update-role.dto";
 export class UpdateRoleUseCase {
   constructor(
     @Inject('RoleRepositoryInterface')
-    private readonly roleRepository: RoleRepositoryInterface
+    private readonly roleRepository: RoleRepositoryInterface,
+    @Inject('PermissionRepositoryInterface')
+    private readonly permissionRepository: PermissionRepositoryInterface
   ) {}
 
   /**
@@ -43,7 +46,15 @@ export class UpdateRoleUseCase {
       throw new BadRequestException(validation.errors.join(", "));
     }
 
-    // 3. Check if name is being changed and if it already exists
+    // 3. If permissionIds are provided, validate they exist
+    if (updateRoleDto.permissionIds !== undefined && updateRoleDto.permissionIds.length > 0) {
+      const permissions = await this.permissionRepository.findByIds(updateRoleDto.permissionIds);
+      if (permissions.length !== updateRoleDto.permissionIds.length) {
+        throw new BadRequestException("One or more permission IDs are invalid");
+      }
+    }
+
+    // 4. Check if name is being changed and if it already exists
     if (updateRoleDto.name && updateRoleDto.name !== existingRole.name) {
       const roleWithSameName = await this.roleRepository.findByName(
         updateRoleDto.name
@@ -53,21 +64,19 @@ export class UpdateRoleUseCase {
       }
     }
 
-    // 4. Prepare update data
+    // 5. Prepare update data
     const updateData: Partial<any> = {};
 
     if (updateRoleDto.name !== undefined) updateData.name = updateRoleDto.name;
     if (updateRoleDto.description !== undefined)
       updateData.description = updateRoleDto.description;
-    if (updateRoleDto.permissions !== undefined)
-      updateData.permissions = updateRoleDto.permissions;
     if (updateRoleDto.isActive !== undefined)
       updateData.isActive = updateRoleDto.isActive;
 
-    // 5. Update role in repository
-    const updatedRole = await this.roleRepository.update(id, updateData);
+    // 6. Update role in repository (permissionIds handled separately)
+    const updatedRole = await this.roleRepository.update(id, updateData, updateRoleDto.permissionIds);
 
-    // 6. Return response
+    // 7. Return response
     return this.mapToResponseDto(updatedRole);
   }
 
@@ -99,10 +108,17 @@ export class UpdateRoleUseCase {
     }
 
     if (
-      updateData.permissions !== undefined &&
-      !Array.isArray(updateData.permissions)
+      updateData.permissionIds !== undefined &&
+      !Array.isArray(updateData.permissionIds)
     ) {
-      errors.push("Permissions must be an array");
+      errors.push("Permission IDs must be an array");
+    }
+
+    if (
+      updateData.permissionIds &&
+      updateData.permissionIds.some(id => typeof id !== 'number' || id <= 0)
+    ) {
+      errors.push("All permission IDs must be positive numbers");
     }
 
     return {

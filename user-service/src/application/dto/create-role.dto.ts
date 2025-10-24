@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsBoolean, IsArray, MinLength, MaxLength } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsArray, MinLength, MaxLength, IsNumber, ArrayNotEmpty } from 'class-validator';
 
 export class CreateRoleDto {
   @IsString()
@@ -17,8 +17,8 @@ export class CreateRoleDto {
 
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
-  permissions?: string[];
+  @IsNumber({}, { each: true })
+  permissionIds?: number[];
 
   @IsOptional()
   metadata?: Record<string, any>;
