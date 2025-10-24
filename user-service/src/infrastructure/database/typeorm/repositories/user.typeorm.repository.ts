@@ -5,6 +5,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { PaginationDto } from "@fullstack-project/shared-infrastructure";
 import { Between, Repository } from "typeorm";
 import { UserTypeOrmEntity } from "../entities/user.typeorm.entity";
+import { RoleTypeOrmEntity } from "../entities/role.typeorm.entity";
 
 /**
  * UserTypeOrmRepository
@@ -93,12 +94,49 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
   }
 
   async update(id: number, user: Partial<User>): Promise<User> {
-    await this.userRepository.update(id, this.toTypeOrmEntity(user as User));
-    const updatedEntity = await this.userRepository.findOne({
+    // Separate roles from other user data
+    const { roles, ...userData } = user;
+
+    // Find the existing user entity with relations
+    const userEntity = await this.userRepository.findOne({
       where: { id },
       relations: ["roles"],
     });
-    return this.toDomainEntity(updatedEntity);
+
+    if (!userEntity) {
+      throw new Error(`User with id ${id} not found`);
+    }
+
+    // Update basic user fields manually to avoid overwriting password and other fields
+    if (Object.keys(userData).length > 0) {
+      const updates = this.toTypeOrmEntity(userData as User);
+      // Only update fields that are actually provided
+      Object.keys(updates).forEach(key => {
+        if (updates[key] !== undefined) {
+          userEntity[key] = updates[key];
+        }
+      });
+    }
+
+    // Update roles if provided (convert domain Role entities to TypeORM entities)
+    if (roles !== undefined) {
+      // Map domain Role entities to TypeORM RoleTypeOrmEntity
+      userEntity.roles = roles.map((role) => {
+        const roleEntity = new RoleTypeOrmEntity();
+        roleEntity.id = role.id;
+        roleEntity.name = role.name;
+        roleEntity.description = role.description;
+        roleEntity.isActive = role.isActive;
+        roleEntity.permissions = role.permissions;
+        return roleEntity;
+      });
+    }
+
+    // Save the entity (cascade will handle roles)
+    const savedEntity = await this.userRepository.save(userEntity);
+
+    // Return the updated user as domain entity
+    return this.toDomainEntity(savedEntity);
   }
 
   async delete(id: number): Promise<void> {

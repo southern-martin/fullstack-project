@@ -19,6 +19,7 @@ export interface UpdateUserRequest {
   firstName?: string;
   lastName?: string;
   isActive?: boolean;
+  roleIds?: number[]; // Add roleIds to allow updating user roles
 }
 
 export interface AssignRolesRequest {

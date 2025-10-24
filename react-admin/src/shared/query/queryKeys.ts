@@ -86,6 +86,22 @@ export const translationKeys = {
   language: (code: string) => [...translationKeys.languages(), code] as const,
 } as const;
 
+// Role Service Query Keys
+export const roleKeys = {
+  all: ['roles'] as const,
+  lists: () => [...roleKeys.all, 'list'] as const,
+  list: (filters: Record<string, any>) =>
+    [...roleKeys.lists(), filters] as const,
+  details: () => [...roleKeys.all, 'detail'] as const,
+  detail: (id: string | number) => [...roleKeys.details(), id] as const,
+  count: () => [...roleKeys.all, 'count'] as const,
+  stats: () => [...roleKeys.all, 'stats'] as const,
+  active: () => [...roleKeys.all, 'active'] as const,
+  permissions: () => [...roleKeys.all, 'permissions'] as const,
+  permissionCategories: () => [...roleKeys.all, 'permission-categories'] as const,
+  usersByRole: (roleId: number) => [...roleKeys.all, 'users', roleId] as const,
+} as const;
+
 // Dashboard Query Keys
 export const dashboardKeys = {
   all: ['dashboard'] as const,
@@ -102,5 +118,6 @@ export const queryKeys = {
   carriers: carrierKeys,
   pricing: pricingKeys,
   translations: translationKeys,
+  roles: roleKeys,
   dashboard: dashboardKeys,
 } as const;

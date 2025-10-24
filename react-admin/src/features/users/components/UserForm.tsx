@@ -2,15 +2,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import Button from '../../../shared/components/ui/Button';
 import { CheckboxField, FormField, SelectField } from '../../../shared/components/ui/FormField';
-import { Role, User } from '../../../shared/types';
+import { User } from '../../../shared/types';
 import { CreateUserRequest, UpdateUserRequest } from '../services/userApiService';
-
-
-const MOCK_ROLES: Role[] = [
-    { id: 1, name: 'Admin', description: 'Administrator role' },
-    { id: 2, name: 'Editor', description: 'Editor role' },
-    { id: 3, name: 'Viewer', description: 'Viewer role' },
-];
+import { useActiveRoles } from '../../roles/hooks/useRoleQueries';
 
 const initialFormData = {
     firstName: '',
@@ -41,12 +35,13 @@ const createSubmissionData = (
     user?: User
 ): CreateUserRequest | UpdateUserRequest => {
     if (user) {
-        // For updates, exclude roleIds and password
+        // For updates, include roleIds to allow changing user roles
         return {
             firstName: formData.firstName,
             lastName: formData.lastName,
             email: formData.email,
             isActive: formData.isActive,
+            roleIds: formData.roleIds, // Include roleIds for updates
         };
     } else {
         // For creation, include roleIds and password
@@ -71,11 +66,12 @@ const createSubmissionData = (
  */
 const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterReady }) => {
 
+    // Fetch active roles
+    const { data: roles = [], isLoading: loadingRoles } = useActiveRoles();
+
     // Form state
     const [formData, setFormData] = useState(initialFormData);
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const [roles, setRoles] = useState<Role[]>([]);
-    const [loadingRoles, setLoadingRoles] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Use ref to access current form data without causing re-renders
@@ -105,11 +101,6 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
             // Error initializing form data - use default values
             setFormData(initialFormData);
         }
-
-        // In a real app, you'd fetch roles here
-        // For now, use mock roles
-        setRoles(MOCK_ROLES);
-        setLoadingRoles(false);
     }, [user]);
 
     // Event handlers

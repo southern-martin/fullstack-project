@@ -9,7 +9,9 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from "@nestjs/common";
+import { ListRolesQueryDto } from "../../application/dto/list-roles-query.dto";
 import { CreateRoleDto } from "../../application/dto/create-role.dto";
 import { RoleResponseDto } from "../../application/dto/role-response.dto";
 import { UpdateRoleDto } from "../../application/dto/update-role.dto";
@@ -43,12 +45,64 @@ export class RoleController {
   }
 
   /**
-   * Get all roles endpoint
+   * Get all roles endpoint with pagination
    * GET /roles
    */
   @Get()
-  async findAll(): Promise<RoleResponseDto[]> {
-    return this.getRoleUseCase.executeAll();
+  async findAll(@Query() query: ListRolesQueryDto): Promise<{ 
+    data: RoleResponseDto[]; 
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    return this.getRoleUseCase.executeAll(query);
+  }
+
+  /**
+   * Get active roles only
+   * GET /roles/active
+   */
+  @Get("active")
+  async findActive(): Promise<RoleResponseDto[]> {
+    return this.getRoleUseCase.executeActive();
+  }
+
+  /**
+   * Get role statistics
+   * GET /roles/stats
+   */
+  @Get("stats")
+  async getStats(): Promise<{
+    totalRoles: number;
+    activeRoles: number;
+    inactiveRoles: number;
+    totalPermissions: number;
+    averagePermissionsPerRole: number;
+  }> {
+    return this.getRoleUseCase.executeStats();
+  }
+
+  /**
+   * Get role by name endpoint
+   * GET /roles/name/:name
+   */
+  @Get("name/:name")
+  async findByName(
+    @Param("name") name: string
+  ): Promise<RoleResponseDto> {
+    return this.getRoleUseCase.executeByName(name);
+  }
+
+  /**
+   * Get users with a specific role
+   * GET /roles/:id/users
+   */
+  @Get(":id/users")
+  async getUsersByRole(
+    @Param("id", ParseIntPipe) id: number
+  ): Promise<any[]> {
+    return this.getRoleUseCase.executeUsersByRole(id);
   }
 
   /**

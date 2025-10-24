@@ -1,8 +1,10 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { PermissionTypeOrmEntity } from "./database/typeorm/entities/permission.typeorm.entity";
 import { RoleTypeOrmEntity } from "./database/typeorm/entities/role.typeorm.entity";
 import { UserProfileTypeOrmEntity } from "./database/typeorm/entities/user-profile.typeorm.entity";
 import { UserTypeOrmEntity } from "./database/typeorm/entities/user.typeorm.entity";
+import { PermissionTypeOrmRepository } from "./database/typeorm/repositories/permission.typeorm.repository";
 import { RoleTypeOrmRepository } from "./database/typeorm/repositories/role.typeorm.repository";
 import { UserProfileTypeOrmRepository } from "./database/typeorm/repositories/user-profile.typeorm.repository";
 import { UserTypeOrmRepository } from "./database/typeorm/repositories/user.typeorm.repository";
@@ -23,6 +25,7 @@ import { InMemoryEventBus } from "./events/in-memory-event-bus";
       UserTypeOrmEntity,
       RoleTypeOrmEntity,
       UserProfileTypeOrmEntity,
+      PermissionTypeOrmEntity,
     ]),
   ],
   providers: [
@@ -39,6 +42,10 @@ import { InMemoryEventBus } from "./events/in-memory-event-bus";
       useClass: UserProfileTypeOrmRepository,
     },
     {
+      provide: "PermissionRepositoryInterface",
+      useClass: PermissionTypeOrmRepository,
+    },
+    {
       provide: "EventBusInterface",
       useClass: InMemoryEventBus,
     },
@@ -47,6 +54,7 @@ import { InMemoryEventBus } from "./events/in-memory-event-bus";
     "UserRepositoryInterface",
     "RoleRepositoryInterface",
     "UserProfileRepositoryInterface",
+    "PermissionRepositoryInterface",
     "EventBusInterface",
   ],
 })

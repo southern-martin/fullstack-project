@@ -8,6 +8,7 @@ import {
     HomeIcon,
     MoonIcon,
     ServerIcon,
+    ShieldCheckIcon,
     SunIcon,
     TruckIcon,
     UserCircleIcon,
@@ -52,6 +53,12 @@ const Navigation: React.FC<NavigationProps> = ({ isOpen, onToggle }) => {
             href: ROUTES.USERS,
             icon: UsersIcon,
             current: location.pathname === ROUTES.USERS,
+        },
+        {
+            name: 'Roles',
+            href: '/roles',
+            icon: ShieldCheckIcon,
+            current: location.pathname.startsWith('/roles'),
         },
         {
             name: 'Customers',

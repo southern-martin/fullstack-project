@@ -47,7 +47,7 @@ export class UserTypeOrmEntity {
   @Column({ nullable: true, name: 'password_changed_at' })
   passwordChangedAt: Date;
 
-  @ManyToMany(() => RoleTypeOrmEntity, { eager: true })
+  @ManyToMany(() => RoleTypeOrmEntity, { eager: true, cascade: true })
   @JoinTable({
     name: "user_roles",
     joinColumn: { name: "user_id", referencedColumnName: "id" },

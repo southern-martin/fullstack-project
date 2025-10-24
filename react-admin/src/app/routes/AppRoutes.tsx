@@ -8,6 +8,7 @@ import LoginForm from '../../features/auth/components/LoginForm';
 import Carriers from '../../features/carriers/components/Carriers';
 import Customers from '../../features/customers/components/Customers';
 import Dashboard from '../../features/dashboard/components/Dashboard';
+import { Roles, RoleDetails, RoleCreate, RoleEdit } from '../../features/roles';
 import Settings from '../../features/settings/components/Settings';
 import Translations from '../../features/translations/components/Translations';
 import Users from '../../features/users/components/Users';
@@ -38,6 +39,10 @@ const AppRoutes: React.FC = () => {
                 <Route index element={<Navigate to="/dashboard" replace />} />
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="users" element={<Users />} />
+                <Route path="roles" element={<Roles />} />
+                <Route path="roles/create" element={<RoleCreate />} />
+                <Route path="roles/:id" element={<RoleDetails />} />
+                <Route path="roles/:id/edit" element={<RoleEdit />} />
                 <Route path="customers" element={<Customers />} />
                 <Route path="carriers" element={<Carriers />} />
                 <Route path="microservices" element={<MicroservicesDashboard />} />

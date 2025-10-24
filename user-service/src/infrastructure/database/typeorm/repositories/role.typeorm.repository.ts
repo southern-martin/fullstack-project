@@ -28,6 +28,7 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
   async findById(id: number): Promise<Role | null> {
     const entity = await this.roleRepository.findOne({
       where: { id },
+      relations: ['permissionEntities'],
     });
     return entity ? this.toDomainEntity(entity) : null;
   }
@@ -35,6 +36,7 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
   async findByName(name: string): Promise<Role | null> {
     const entity = await this.roleRepository.findOne({
       where: { name },
+      relations: ['permissionEntities'],
     });
     return entity ? this.toDomainEntity(entity) : null;
   }
@@ -49,6 +51,7 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
       skip: (page - 1) * limit,
       take: limit,
       order: { createdAt: "DESC" },
+      relations: ['permissionEntities'],
     });
 
     return {
@@ -61,6 +64,7 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
     const entities = await this.roleRepository.find({
       where: { isActive: true },
       order: { createdAt: "DESC" },
+      relations: ['permissionEntities'],
     });
 
     return entities.map((entity) => this.toDomainEntity(entity));
@@ -70,7 +74,8 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
     searchTerm: string,
     paginationDto: PaginationDto
   ): Promise<{ roles: Role[]; total: number }> {
-    const queryBuilder = this.roleRepository.createQueryBuilder("role");
+    const queryBuilder = this.roleRepository.createQueryBuilder("role")
+      .leftJoinAndSelect("role.permissionEntities", "permission");
 
     queryBuilder
       .where(
@@ -94,6 +99,7 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
     await this.roleRepository.update(id, this.toTypeOrmEntity(role as Role));
     const updatedEntity = await this.roleRepository.findOne({
       where: { id },
+      relations: ['permissionEntities'],
     });
     return this.toDomainEntity(updatedEntity);
   }
@@ -147,7 +153,11 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
     role.name = entity.name;
     role.description = entity.description;
     role.isActive = entity.isActive;
-    role.permissions = entity.permissions;
+    
+    // ALWAYS use relational permissions from permissionEntities (relational system migration complete)
+    // The JSON permissions column is deprecated and only kept for backward compatibility
+    role.permissions = (entity.permissionEntities || []).map(p => p.name);
+    
     role.createdAt = entity.createdAt;
     role.updatedAt = entity.updatedAt;
 
@@ -157,7 +167,8 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
   async findByPermission(permission: string): Promise<Role[]> {
     const entities = await this.roleRepository
       .createQueryBuilder("role")
-      .where("role.permissions::jsonb ? :permission", { permission })
+      .leftJoinAndSelect("role.permissionEntities", "permission")
+      .where("permission.name = :permission", { permission })
       .getMany();
 
     return entities.map((entity) => this.toDomainEntity(entity));
@@ -168,7 +179,8 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
     limit: number,
     search?: string
   ): Promise<{ roles: Role[]; total: number }> {
-    const queryBuilder = this.roleRepository.createQueryBuilder("role");
+    const queryBuilder = this.roleRepository.createQueryBuilder("role")
+      .leftJoinAndSelect("role.permissionEntities", "permission");
 
     if (search) {
       queryBuilder.where(

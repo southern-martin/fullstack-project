@@ -7,6 +7,7 @@ import { DeleteRoleUseCase } from "./use-cases/delete-role.use-case";
 import { DeleteUserUseCase } from "./use-cases/delete-user.use-case";
 import { GetRoleUseCase } from "./use-cases/get-role.use-case";
 import { GetUserUseCase } from "./use-cases/get-user.use-case";
+import { GetPermissionsUseCase } from "./use-cases/get-permissions.use-case";
 import { UpdateRoleUseCase } from "./use-cases/update-role.use-case";
 import { UpdateUserUseCase } from "./use-cases/update-user.use-case";
 
@@ -56,6 +57,9 @@ import { InfrastructureModule } from "../infrastructure/infrastructure.module";
     UpdateRoleUseCase,
     DeleteRoleUseCase,
 
+    // Permission Use Cases
+    GetPermissionsUseCase,
+
     // Profile Use Cases
     CreateProfileUseCase,
     GetProfileUseCase,
@@ -74,6 +78,9 @@ import { InfrastructureModule } from "../infrastructure/infrastructure.module";
     GetRoleUseCase,
     UpdateRoleUseCase,
     DeleteRoleUseCase,
+
+    // Export permission use cases
+    GetPermissionsUseCase,
 
     // Export profile use cases
     CreateProfileUseCase,

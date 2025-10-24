@@ -2,9 +2,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { PermissionTypeOrmEntity } from "./permission.typeorm.entity";
 
 /**
  * TypeORM Role Entity
@@ -25,6 +28,17 @@ export class RoleTypeOrmEntity {
 
   @Column("json", { nullable: true })
   permissions: string[];
+
+  @ManyToMany(() => PermissionTypeOrmEntity, (permission) => permission.roles, {
+    eager: false,  // Set to false to use explicit relations loading
+    cascade: false,
+  })
+  @JoinTable({
+    name: "role_permissions",
+    joinColumn: { name: "role_id", referencedColumnName: "id" },
+    inverseJoinColumn: { name: "permission_id", referencedColumnName: "id" },
+  })
+  permissionEntities: PermissionTypeOrmEntity[];
 
   @Column({ default: true, name: 'is_active' })
   isActive: boolean;

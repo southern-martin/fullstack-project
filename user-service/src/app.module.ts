@@ -8,7 +8,9 @@ import { InfrastructureModule } from "./infrastructure/infrastructure.module";
 import { InterfacesModule } from "./interfaces/interfaces.module";
 
 // TypeORM Entities
+import { PermissionTypeOrmEntity } from "./infrastructure/database/typeorm/entities/permission.typeorm.entity";
 import { RoleTypeOrmEntity } from "./infrastructure/database/typeorm/entities/role.typeorm.entity";
+import { UserProfileTypeOrmEntity } from "./infrastructure/database/typeorm/entities/user-profile.typeorm.entity";
 import { UserTypeOrmEntity } from "./infrastructure/database/typeorm/entities/user.typeorm.entity";
 
 // Logging
@@ -39,7 +41,12 @@ import { WinstonLoggerModule } from "@shared/infrastructure/logging";
       username: process.env.DB_USERNAME || "shared_user",
       password: process.env.DB_PASSWORD || "shared_password_2024",
       database: process.env.DB_NAME || "shared_user_db",
-      entities: [UserTypeOrmEntity, RoleTypeOrmEntity],
+      entities: [
+        UserTypeOrmEntity,
+        RoleTypeOrmEntity,
+        PermissionTypeOrmEntity,
+        UserProfileTypeOrmEntity,
+      ],
       synchronize: process.env.DB_SYNCHRONIZE === "true" || false,
       logging: false, // Disable SQL logging (use Winston for structured logs)
       maxQueryExecutionTime: 1000, // Log slow queries > 1s

@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 
 // Controllers
 import { HealthController } from "./controllers/health.controller";
+import { PermissionController } from "./controllers/permission.controller";
 import { ProfileController } from "./controllers/profile.controller";
 import { RoleController } from "./controllers/role.controller";
 import { UserController } from "./controllers/user.controller";
@@ -28,7 +29,8 @@ import { InfrastructureModule } from "../infrastructure/infrastructure.module";
   ],
   controllers: [
     UserController, 
-    RoleController, 
+    RoleController,
+    PermissionController,
     ProfileController, 
     HealthController
   ],

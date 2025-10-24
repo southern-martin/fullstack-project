@@ -16,6 +16,7 @@ export interface UserRepositoryInterface {
   update(id: number, user: Partial<User>): Promise<User>;
   delete(id: number): Promise<void>;
   findActive(): Promise<User[]>;
+  findByRole(roleName: string): Promise<User[]>;
   count(): Promise<number>;
   countActive(): Promise<number>;
   findPaginated(
