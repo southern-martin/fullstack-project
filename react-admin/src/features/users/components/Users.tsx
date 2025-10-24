@@ -253,19 +253,28 @@ const Users: React.FC = () => {
                 key: 'firstName',
                 label: L.table.firstName,
                 sortable: true,
-                render: (user: User) => (
-                    <div className="flex items-center">
-                        <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-                            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                                {user.firstName?.charAt(0).toUpperCase()}
-                            </span>
+                render: (user: User) => {
+                    // Combine firstName and lastName
+                    const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+                    const displayName = fullName || 'N/A';
+                    const initial = user.firstName?.[0]?.toUpperCase() || user.lastName?.[0]?.toUpperCase() || '?';
+                    
+                    return (
+                        <div className="flex items-center">
+                            <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                                <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                                    {initial}
+                                </span>
+                            </div>
+                            <div className="ml-3">
+                                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    {displayName}
+                                </div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
+                            </div>
                         </div>
-                        <div className="ml-3">
-                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.firstName} {user.lastName}</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
-                        </div>
-                    </div>
-                ),
+                    );
+                },
             },
             {
                 key: 'email',

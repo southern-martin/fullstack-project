@@ -120,7 +120,7 @@ export const userLabels: UserLabels = {
   },
 
   table: {
-    firstName: 'First Name',
+    firstName: 'Full Name',
     email: 'Email',
     roles: 'Roles',
     status: 'Status',
