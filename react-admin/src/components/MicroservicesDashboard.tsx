@@ -1,8 +1,7 @@
-import { Calculator, DollarSign, Globe, Package, RefreshCw, Truck, Users } from 'lucide-react';
+import { Globe, Package, RefreshCw, Truck, Users } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { carrierService } from '../features/carriers/services/carrierService';
 import { customerService } from '../features/customers/services/customerService';
-import { pricingService } from '../features/pricing/services/pricingService';
 import { translationService } from '../features/translations/services/translationService';
 import { userService } from '../features/users/services/userService';
 import MicroservicesStatus from './MicroservicesStatus';
@@ -12,8 +11,6 @@ interface ServiceStats {
     users: { count: number };
     customers: { count: number };
     carriers: { count: number };
-    pricingRules: { count: number };
-    priceCalculations: { count: number };
     languages: { count: number };
     translations: { count: number };
 }
@@ -23,8 +20,6 @@ const MicroservicesDashboard: React.FC = () => {
         users: { count: 0 },
         customers: { count: 0 },
         carriers: { count: 0 },
-        pricingRules: { count: 0 },
-        priceCalculations: { count: 0 },
         languages: { count: 0 },
         translations: { count: 0 },
     });
@@ -38,16 +33,12 @@ const MicroservicesDashboard: React.FC = () => {
                 usersCount,
                 customersCount,
                 carriersCount,
-                pricingRulesCount,
-                priceCalculationsCount,
                 languagesCount,
                 translationsCount,
             ] = await Promise.allSettled([
                 userService.getUserCount(),
                 customerService.getCustomerCount(),
                 carrierService.getCarrierCount(),
-                pricingService.getPricingRuleCount(),
-                pricingService.getPriceCalculationCount(),
                 translationService.getLanguageCount(),
                 translationService.getTranslationCount(),
             ]);
@@ -56,8 +47,6 @@ const MicroservicesDashboard: React.FC = () => {
                 users: usersCount.status === 'fulfilled' ? usersCount.value : { count: 0 },
                 customers: customersCount.status === 'fulfilled' ? customersCount.value : { count: 0 },
                 carriers: carriersCount.status === 'fulfilled' ? carriersCount.value : { count: 0 },
-                pricingRules: pricingRulesCount.status === 'fulfilled' ? pricingRulesCount.value : { count: 0 },
-                priceCalculations: priceCalculationsCount.status === 'fulfilled' ? priceCalculationsCount.value : { count: 0 },
                 languages: languagesCount.status === 'fulfilled' ? languagesCount.value : { count: 0 },
                 translations: translationsCount.status === 'fulfilled' ? translationsCount.value : { count: 0 },
             });
@@ -99,20 +88,6 @@ const MicroservicesDashboard: React.FC = () => {
             icon: Truck,
             color: 'text-orange-600 dark:text-orange-400',
             bgColor: 'bg-orange-100 dark:bg-orange-900/20',
-        },
-        {
-            title: 'Pricing Rules',
-            value: stats.pricingRules.count,
-            icon: Calculator,
-            color: 'text-purple-600 dark:text-purple-400',
-            bgColor: 'bg-purple-100 dark:bg-purple-900/20',
-        },
-        {
-            title: 'Price Calculations',
-            value: stats.priceCalculations.count,
-            icon: DollarSign,
-            color: 'text-emerald-600 dark:text-emerald-400',
-            bgColor: 'bg-emerald-100 dark:bg-emerald-900/20',
         },
         {
             title: 'Languages',
@@ -197,17 +172,9 @@ const MicroservicesDashboard: React.FC = () => {
                             <Truck className="h-6 w-6 mb-2 text-purple-600 dark:text-purple-400" />
                             <span className="text-gray-700 dark:text-gray-300">Manage Carriers</span>
                         </Button>
-                        <Button variant="outline" className="h-20 flex flex-col items-center justify-center hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:border-orange-200 dark:hover:border-orange-800 transition-colors duration-200">
-                            <Calculator className="h-6 w-6 mb-2 text-orange-600 dark:text-orange-400" />
-                            <span className="text-gray-700 dark:text-gray-300">Manage Pricing</span>
-                        </Button>
                         <Button variant="outline" className="h-20 flex flex-col items-center justify-center hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:border-teal-200 dark:hover:border-teal-800 transition-colors duration-200">
                             <Globe className="h-6 w-6 mb-2 text-teal-600 dark:text-teal-400" />
                             <span className="text-gray-700 dark:text-gray-300">Manage Translations</span>
-                        </Button>
-                        <Button variant="outline" className="h-20 flex flex-col items-center justify-center hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:border-indigo-200 dark:hover:border-indigo-800 transition-colors duration-200">
-                            <DollarSign className="h-6 w-6 mb-2 text-indigo-600 dark:text-indigo-400" />
-                            <span className="text-gray-700 dark:text-gray-300">Calculate Price</span>
                         </Button>
                     </div>
                 </div>

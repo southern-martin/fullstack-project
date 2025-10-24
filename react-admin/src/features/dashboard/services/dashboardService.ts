@@ -35,19 +35,19 @@ class DashboardService {
         carriers: carriersResponse,
       });
 
-      // Extract data from settled promises
+      // Extract data from settled promises with safe navigation
       // Note: userApiService.getUsers() already returns PaginatedResponse<User> with {data, total, page, limit, totalPages}
       // customerApiClient and carrierApiClient return standardized API responses with {data: {items, total}, ...}
       const usersData =
-        usersResponse.status === 'fulfilled'
+        usersResponse.status === 'fulfilled' && usersResponse.value
           ? usersResponse.value
           : { total: 0, data: [] };
       const customersData =
-        customersResponse.status === 'fulfilled'
+        customersResponse.status === 'fulfilled' && customersResponse.value?.data
           ? customersResponse.value.data
           : { total: 0 };
       const carriersData =
-        carriersResponse.status === 'fulfilled'
+        carriersResponse.status === 'fulfilled' && carriersResponse.value?.data
           ? carriersResponse.value.data
           : { total: 0 };
 
