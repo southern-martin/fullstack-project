@@ -26,9 +26,6 @@ export class RoleTypeOrmEntity {
   @Column({ nullable: true })
   description: string;
 
-  @Column("json", { nullable: true })
-  permissions: string[];
-
   @ManyToMany(() => PermissionTypeOrmEntity, (permission) => permission.roles, {
     eager: false,  // Set to false to use explicit relations loading
     cascade: false,

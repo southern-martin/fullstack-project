@@ -127,7 +127,8 @@ export class UserTypeOrmRepository implements UserRepositoryInterface {
         roleEntity.name = role.name;
         roleEntity.description = role.description;
         roleEntity.isActive = role.isActive;
-        roleEntity.permissions = role.permissions;
+        // Note: permissions are handled via permissionEntities (relational system)
+        // No need to set permissions field as it's been removed
         return roleEntity;
       });
     }

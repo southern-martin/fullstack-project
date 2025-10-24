@@ -143,7 +143,8 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
       name: role.name,
       description: role.description,
       isActive: role.isActive,
-      permissions: role.permissions,
+      // Note: permissions are handled via permissionEntities (relational system)
+      // No need to set permissions field as it's been removed
     };
   }
 
