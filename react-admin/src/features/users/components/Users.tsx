@@ -253,7 +253,7 @@ const Users: React.FC = () => {
                 key: 'firstName',
                 label: L.table.firstName,
                 sortable: true,
-                render: (user: User) => {
+                render: (value: string, user: User) => {
                     // Combine firstName and lastName
                     const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
                     const displayName = fullName || 'N/A';
