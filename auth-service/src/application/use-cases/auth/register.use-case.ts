@@ -12,6 +12,7 @@ import { RoleRepositoryInterface } from "../../../domain/repositories/role.repos
 import { UserRepositoryInterface } from "../../../domain/repositories/user.repository.interface";
 import { AuthDomainService } from "../../../domain/services/auth.domain.service";
 import { UserDomainService } from "../../../domain/services/user.domain.service";
+import { KongService } from "../../../infrastructure/external-services/kong.service";
 import { AuthResponseDto } from "../../dto/auth/auth-response.dto";
 import { RegisterRequestDto } from "../../dto/auth/register-request.dto";
 import { UserResponseDto } from "../../dto/auth/user-response.dto";
@@ -32,7 +33,8 @@ export class RegisterUseCase {
     private readonly userDomainService: UserDomainService,
     private readonly jwtService: JwtService,
     @Inject("EventBusInterface")
-    private readonly eventBus: EventBusInterface
+    private readonly eventBus: EventBusInterface,
+    private readonly kongService: KongService
   ) {}
 
   /**
@@ -78,7 +80,14 @@ export class RegisterUseCase {
     // 5. Create user in repository
     const newUser = await this.userRepository.create(userData);
 
-    // 6. Publish UserRegisteredEvent
+    // 6. Create Kong consumer for new user
+    await this.kongService.createKongConsumer(
+      newUser.id!,
+      newUser.email,
+      newUser.roles || []
+    );
+
+    // 7. Publish UserRegisteredEvent
     await this.eventBus.publish(
       new UserRegisteredEvent(
         newUser.id,
@@ -90,10 +99,10 @@ export class RegisterUseCase {
       )
     );
 
-    // 7. Generate JWT token
+    // 8. Generate JWT token
     const token = await this.generateToken(newUser);
 
-    // 8. Return response
+    // 9. Return response
     return {
       access_token: token,
       token: token,

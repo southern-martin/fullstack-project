@@ -12,6 +12,7 @@ import { UserLoggedInEvent } from "../../../domain/events/user-logged-in.event";
 import { UserRepositoryInterface } from "../../../domain/repositories/user.repository.interface";
 import { AuthDomainService } from "../../../domain/services/auth.domain.service";
 import { UserDomainService } from "../../../domain/services/user.domain.service";
+import { KongService } from "../../../infrastructure/external-services/kong.service";
 import { AuthResponseDto } from "../../dto/auth/auth-response.dto";
 import { LoginRequestDto } from "../../dto/auth/login-request.dto";
 import { UserResponseDto } from "../../dto/auth/user-response.dto";
@@ -32,7 +33,8 @@ export class LoginUseCase {
     private readonly userDomainService: UserDomainService,
     private readonly jwtService: JwtService,
     @Inject("EventBusInterface")
-    private readonly eventBus: EventBusInterface
+    private readonly eventBus: EventBusInterface,
+    private readonly kongService: KongService
   ) {
     this.logger.setContext("LoginUseCase");
   }
@@ -106,7 +108,13 @@ export class LoginUseCase {
     // 7. Update last login
     await this.userRepository.updateLastLogin(user.id);
 
-    // 8. Publish UserLoggedInEvent
+    // 8. Sync Kong consumer ACL groups (in case roles changed)
+    await this.kongService.updateKongConsumerGroups(
+      user.id!,
+      user.roles || []
+    );
+
+    // 9. Publish UserLoggedInEvent
     await this.eventBus.publish(
       new UserLoggedInEvent(
         user.id,
@@ -117,10 +125,10 @@ export class LoginUseCase {
       )
     );
 
-    // 9. Generate JWT token
+    // 10. Generate JWT token
     const token = await this.generateToken(user);
 
-    // 10. Return response
+    // 11. Return response
     return {
       access_token: token,
       token: token,
