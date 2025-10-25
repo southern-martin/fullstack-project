@@ -323,6 +323,8 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
                     error={errors.roleIds}
                     disabled={loadingRoles}
                     columns={2}
+                    selectAllLabel={L.form.selectAll}
+                    deselectAllLabel={L.form.deselectAll}
                 />
 
                 <CheckboxField

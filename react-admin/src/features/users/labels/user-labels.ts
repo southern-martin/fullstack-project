@@ -115,6 +115,8 @@ export interface UserLabels {
     password: string;
     roles: string;
     isActive: string;
+    selectAll: string;
+    deselectAll: string;
   };
 }
 
@@ -218,5 +220,7 @@ export const userLabels: UserLabels = {
     password: 'Password',
     roles: 'Roles',
     isActive: 'Is Active',
+    selectAll: 'Select All',
+    deselectAll: 'Deselect All',
   },
 };
