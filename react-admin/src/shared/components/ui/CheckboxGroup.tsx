@@ -17,6 +17,8 @@ interface CheckboxGroupProps {
     disabled?: boolean;
     className?: string;
     columns?: 1 | 2 | 3;
+    selectAllLabel?: string;
+    deselectAllLabel?: string;
 }
 
 export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
@@ -30,6 +32,8 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
     disabled = false,
     className = '',
     columns = 1,
+    selectAllLabel = 'Select All',
+    deselectAllLabel = 'Deselect All',
 }) => {
     const handleCheckboxChange = (value: string | number) => {
         const numValue = typeof value === 'string' ? parseInt(value) : value;
@@ -75,7 +79,7 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
                         disabled={disabled}
                         className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {allSelected ? 'Deselect All' : 'Select All'}
+                        {allSelected ? deselectAllLabel : selectAllLabel}
                     </button>
                 )}
             </div>
