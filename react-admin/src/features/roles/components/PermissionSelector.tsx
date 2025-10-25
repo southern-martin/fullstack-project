@@ -104,7 +104,7 @@ export const PermissionSelector: React.FC<PermissionSelectorProps> = ({
       <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
         <div className="flex items-center space-x-4">
           <span className="text-sm font-medium text-gray-700">
-            {L.PERMISSIONS.SELECTED_COUNT(selectedCount)} / {totalCount}
+            {selectedCount} {L.PERMISSIONS.SELECTED_COUNT} / {totalCount}
           </span>
         </div>
         <div className="flex space-x-2">

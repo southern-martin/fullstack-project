@@ -59,7 +59,7 @@ export const roleLabels = {
     TITLE: 'Permissions',
     SELECT_ALL: 'Select All',
     DESELECT_ALL: 'Deselect All',
-    SELECTED_COUNT: (count: number) => `${count} permission(s) selected`,
+    SELECTED_COUNT: 'permission(s) selected',
     NO_PERMISSIONS: 'No permissions assigned',
     
     // Categories
@@ -89,8 +89,7 @@ export const roleLabels = {
     UPDATE_SUCCESS: 'Role updated successfully',
     DELETE_SUCCESS: 'Role deleted successfully',
     DELETE_CONFIRM: 'Are you sure you want to delete this role?',
-    DELETE_WARNING: (userCount: number) =>
-      `This role is assigned to ${userCount} user(s). Deleting it will remove the role from all users.`,
+    DELETE_WARNING: 'This role is assigned to users. Deleting it will remove the role from all users.',
     NO_ROLES: 'No roles found',
     LOADING: 'Loading roles...',
     ERROR_LOADING: 'Failed to load roles',
