@@ -106,6 +106,16 @@ export interface UserLabels {
     lastUpdated: string;
     noRoles: string;
   };
+
+  // Form Field Labels
+  form: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    roles: string;
+    isActive: string;
+  };
 }
 
 /**
@@ -199,5 +209,14 @@ export const userLabels: UserLabels = {
     created: 'Created',
     lastUpdated: 'Last Updated',
     noRoles: 'No roles assigned',
+  },
+
+  form: {
+    firstName: 'First Name',
+    lastName: 'Last Name',
+    email: 'Email',
+    password: 'Password',
+    roles: 'Roles',
+    isActive: 'Is Active',
   },
 };
