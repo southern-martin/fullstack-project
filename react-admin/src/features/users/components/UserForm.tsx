@@ -5,6 +5,7 @@ import { CheckboxField, CheckboxGroup, FormField } from '../../../shared/compone
 import { User } from '../../../shared/types';
 import { CreateUserRequest, UpdateUserRequest } from '../services/userApiService';
 import { useActiveRoles } from '../../roles/hooks/useRoleQueries';
+import { useUserLabels } from '../hooks/useUserLabels';
 
 const initialFormData = {
     firstName: '',
@@ -65,6 +66,9 @@ const createSubmissionData = (
  * - Provides smooth user experience without text flashing
  */
 const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterReady }) => {
+
+    // Translation labels
+    const { L } = useUserLabels();
 
     // Fetch active roles
     const { data: roles = [], isLoading: loadingRoles } = useActiveRoles();
@@ -265,7 +269,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
 
             <div className="space-y-4 p-6">
                 <FormField
-                    label="First Name"
+                    label={L.form.firstName}
                     name="firstName"
                     type="text"
                     value={formData.firstName}
@@ -275,7 +279,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
                 />
 
                 <FormField
-                    label="Last Name"
+                    label={L.form.lastName}
                     name="lastName"
                     type="text"
                     value={formData.lastName}
@@ -285,7 +289,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
                 />
 
                 <FormField
-                    label="Email"
+                    label={L.form.email}
                     name="email"
                     type="email"
                     value={formData.email}
@@ -296,7 +300,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
 
                 {!user && (
                     <FormField
-                        label="Password"
+                        label={L.form.password}
                         name="password"
                         type="password"
                         value={formData.password}
@@ -307,7 +311,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
                 )}
 
                 <CheckboxGroup
-                    label="Roles"
+                    label={L.form.roles}
                     name="roleIds"
                     options={roles.map(role => ({ 
                         value: role.id, 
@@ -322,7 +326,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
                 />
 
                 <CheckboxField
-                    label="Is Active"
+                    label={L.form.isActive}
                     name="isActive"
                     checked={formData.isActive}
                     onChange={handleChange}
