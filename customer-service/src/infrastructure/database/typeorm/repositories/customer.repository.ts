@@ -42,6 +42,9 @@ export class CustomerRepository implements CustomerRepositoryInterface {
       );
     }
 
+    // Always sort by newest first for consistent pagination
+    queryBuilder.orderBy("customer.createdAt", "DESC").addOrderBy("customer.id", "DESC");
+
     if (pagination) {
       queryBuilder
         .skip((pagination.page - 1) * pagination.limit)
