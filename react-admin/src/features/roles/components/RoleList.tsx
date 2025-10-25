@@ -329,9 +329,7 @@ export const RoleList: React.FC = () => {
                 </div>
                 <div className="ml-3">
                   <p className="text-sm text-yellow-700">
-                    {typeof L?.MESSAGES?.DELETE_WARNING === 'function'
-                      ? L.MESSAGES.DELETE_WARNING(roleToDelete.userCount ?? 0)
-                      : `This role is assigned to ${roleToDelete.userCount ?? 0} user(s). Deleting it will remove the role from all users.`}
+                    {L.MESSAGES.DELETE_WARNING}
                   </p>
                 </div>
               </div>
