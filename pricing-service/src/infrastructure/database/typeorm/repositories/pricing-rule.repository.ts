@@ -37,6 +37,9 @@ export class PricingRuleRepository implements PricingRuleRepositoryInterface {
       );
     }
 
+    // Always sort by newest first for consistent pagination
+    queryBuilder.orderBy("pricingRule.createdAt", "DESC").addOrderBy("pricingRule.id", "DESC");
+
     if (pagination) {
       queryBuilder
         .skip((pagination.page - 1) * pagination.limit)

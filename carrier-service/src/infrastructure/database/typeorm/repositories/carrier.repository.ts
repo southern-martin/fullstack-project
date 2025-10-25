@@ -42,6 +42,9 @@ export class CarrierRepository implements CarrierRepositoryInterface {
       );
     }
 
+    // Always sort by newest first for consistent pagination
+    queryBuilder.orderBy("carrier.createdAt", "DESC").addOrderBy("carrier.id", "DESC");
+
     if (pagination) {
       queryBuilder
         .skip((pagination.page - 1) * pagination.limit)
