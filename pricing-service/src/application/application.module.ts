@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
 // Use Cases
@@ -27,6 +28,7 @@ import { PricingRuleTypeOrmEntity } from "../infrastructure/database/typeorm/ent
  */
 @Module({
   imports: [
+    ConfigModule,
     // Register TypeORM entities for dependency injection
     TypeOrmModule.forFeature([
       PricingRuleTypeOrmEntity,

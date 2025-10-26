@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
 
 // Use Cases
 import { CreateCustomerUseCase } from "./use-cases/create-customer.use-case";
@@ -22,7 +23,7 @@ import { RedisEventBus } from "../infrastructure/events/redis-event-bus";
  * Follows Clean Architecture principles
  */
 @Module({
-  imports: [DatabaseModule],
+  imports: [ConfigModule, DatabaseModule],
   providers: [
     // Domain Services
     CustomerDomainService,
@@ -41,7 +42,7 @@ import { RedisEventBus } from "../infrastructure/events/redis-event-bus";
 
     // Event Bus Implementation
     {
-      provide: "EventBusInterface",
+      provide: "IEventBus",
       useClass: RedisEventBus,
     },
   ],
@@ -56,7 +57,7 @@ import { RedisEventBus } from "../infrastructure/events/redis-event-bus";
     CustomerDomainService,
 
     // Export event bus for controllers
-    "EventBusInterface",
+    "IEventBus",
   ],
 })
 export class ApplicationModule {}

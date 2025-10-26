@@ -89,6 +89,7 @@ curl -s -X POST "$KONG_ADMIN_URL/services/auth-service/routes" \
   -d "name=auth-login" \
   -d "paths[]=/api/v1/auth/login" \
   -d "methods[]=POST" \
+  -d "methods[]=OPTIONS" \
   -d "strip_path=false" > /dev/null
 echo "✅ /api/v1/auth/login"
 
@@ -97,6 +98,7 @@ curl -s -X POST "$KONG_ADMIN_URL/services/auth-service/routes" \
   -d "name=auth-register" \
   -d "paths[]=/api/v1/auth/register" \
   -d "methods[]=POST" \
+  -d "methods[]=OPTIONS" \
   -d "strip_path=false" > /dev/null
 echo "✅ /api/v1/auth/register"
 
@@ -105,6 +107,7 @@ curl -s -X POST "$KONG_ADMIN_URL/services/auth-service/routes" \
   -d "name=auth-refresh" \
   -d "paths[]=/api/v1/auth/refresh" \
   -d "methods[]=POST" \
+  -d "methods[]=OPTIONS" \
   -d "strip_path=false" > /dev/null
 echo "✅ /api/v1/auth/refresh"
 
@@ -113,6 +116,7 @@ curl -s -X POST "$KONG_ADMIN_URL/services/auth-service/routes" \
   -d "name=auth-logout" \
   -d "paths[]=/api/v1/auth/logout" \
   -d "methods[]=POST" \
+  -d "methods[]=OPTIONS" \
   -d "strip_path=false" > /dev/null
 echo "✅ /api/v1/auth/logout"
 
@@ -122,6 +126,7 @@ curl -s -X POST "$KONG_ADMIN_URL/services/auth-service/routes" \
   -d "paths[]=/api/v1/auth/profile" \
   -d "methods[]=GET" \
   -d "methods[]=PUT" \
+  -d "methods[]=OPTIONS" \
   -d "strip_path=false" > /dev/null
 echo "✅ /api/v1/auth/profile"
 
@@ -139,6 +144,7 @@ curl -s -X POST "$KONG_ADMIN_URL/services/user-service/routes" \
   -d "methods[]=PUT" \
   -d "methods[]=PATCH" \
   -d "methods[]=DELETE" \
+  -d "methods[]=OPTIONS" \
   -d "strip_path=false" > /dev/null
 echo "✅ /api/v1/users/*"
 
@@ -152,6 +158,7 @@ curl -s -X POST "$KONG_ADMIN_URL/services/user-service/routes" \
   -d "methods[]=PUT" \
   -d "methods[]=PATCH" \
   -d "methods[]=DELETE" \
+  -d "methods[]=OPTIONS" \
   -d "strip_path=false" > /dev/null
 echo "✅ /api/v1/roles/*"
 
@@ -168,6 +175,7 @@ curl -s -X POST "$KONG_ADMIN_URL/services/carrier-service/routes" \
   -d "methods[]=PUT" \
   -d "methods[]=PATCH" \
   -d "methods[]=DELETE" \
+  -d "methods[]=OPTIONS" \
   -d "strip_path=false" > /dev/null
 echo "✅ /api/v1/carriers/*"
 
@@ -184,6 +192,7 @@ curl -s -X POST "$KONG_ADMIN_URL/services/customer-service/routes" \
   -d "methods[]=PUT" \
   -d "methods[]=PATCH" \
   -d "methods[]=DELETE" \
+  -d "methods[]=OPTIONS" \
   -d "strip_path=false" > /dev/null
 echo "✅ /api/v1/customers/*"
 
@@ -200,6 +209,7 @@ curl -s -X POST "$KONG_ADMIN_URL/services/pricing-service/routes" \
   -d "methods[]=PUT" \
   -d "methods[]=PATCH" \
   -d "methods[]=DELETE" \
+  -d "methods[]=OPTIONS" \
   -d "strip_path=false" > /dev/null
 echo "✅ /api/v1/pricing/*"
 
@@ -214,6 +224,9 @@ curl -s -X POST "$KONG_ADMIN_URL/services/translation-service/routes" \
   -d "methods[]=GET" \
   -d "methods[]=POST" \
   -d "methods[]=PUT" \
+  -d "methods[]=PATCH" \
+  -d "methods[]=DELETE" \
+  -d "methods[]=OPTIONS" \
   -d "methods[]=PATCH" \
   -d "methods[]=DELETE" \
   -d "strip_path=false" > /dev/null

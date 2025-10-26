@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { RedisCacheService } from "@shared/infrastructure";
 import { CarrierTypeOrmEntity } from "./typeorm/entities/carrier.typeorm.entity";
 import { CarrierRepository } from "./typeorm/repositories/carrier.repository";
 
@@ -24,6 +25,7 @@ import { CarrierRepository } from "./typeorm/repositories/carrier.repository";
     TypeOrmModule.forFeature([CarrierTypeOrmEntity]),
   ],
   providers: [
+    RedisCacheService,
     {
       provide: "CarrierRepositoryInterface",
       useClass: CarrierRepository,
