@@ -1,5 +1,6 @@
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import { randomUUID } from "crypto";
+import { WinstonLoggerService } from "@shared/infrastructure/logging/winston-logger.service";
 import { PriceCalculation } from "../../domain/entities/price-calculation.entity";
 import { PriceCalculationRepositoryInterface } from "../../domain/repositories/price-calculation.repository.interface";
 import { PricingRuleRepositoryInterface } from "../../domain/repositories/pricing-rule.repository.interface";
@@ -14,13 +15,17 @@ import { PriceCalculationResponseDto } from "../dto/price-calculation-response.d
  */
 @Injectable()
 export class CalculatePriceUseCase {
+  private readonly logger = new WinstonLoggerService();
+
   constructor(
     @Inject("PricingRuleRepositoryInterface")
     private readonly pricingRuleRepository: PricingRuleRepositoryInterface,
     @Inject("PriceCalculationRepositoryInterface")
     private readonly priceCalculationRepository: PriceCalculationRepositoryInterface,
     private readonly pricingDomainService: PricingDomainService
-  ) {}
+  ) {
+    this.logger.setContext(CalculatePriceUseCase.name);
+  }
 
   /**
    * Executes the calculate price use case
@@ -30,45 +35,30 @@ export class CalculatePriceUseCase {
   async execute(
     calculatePriceDto: CalculatePriceDto
   ): Promise<PriceCalculationResponseDto> {
-    // 1. Validate input using domain service
-    const validation =
-      this.pricingDomainService.validatePriceCalculationRequest(
-        calculatePriceDto
-      );
-    if (!validation.isValid) {
-      throw new BadRequestException(validation.errors.join(", "));
-    }
+    try {
+      this.logger.log("Calculating price", {
+        carrierId: calculatePriceDto.carrierId,
+        serviceType: calculatePriceDto.serviceType,
+        weight: calculatePriceDto.weight,
+        distance: calculatePriceDto.distance,
+        customerId: calculatePriceDto.customerId,
+      });
 
-    // 2. Prepare conditions for rule matching
-    const conditions = {
-      carrierId: calculatePriceDto.carrierId,
-      serviceType: calculatePriceDto.serviceType,
-      weight: calculatePriceDto.weight,
-      distance: calculatePriceDto.distance,
-      originCountry: calculatePriceDto.originCountry,
-      destinationCountry: calculatePriceDto.destinationCountry,
-      customerType: calculatePriceDto.customerType,
-    };
+      // 1. Validate input using domain service
+      const validation =
+        this.pricingDomainService.validatePriceCalculationRequest(
+          calculatePriceDto
+        );
+      if (!validation.isValid) {
+        this.logger.warn("Price calculation validation failed", {
+          errors: validation.errors,
+          request: calculatePriceDto,
+        });
+        throw new BadRequestException(validation.errors.join(", "));
+      }
 
-    // 3. Find applicable pricing rules
-    const applicableRules =
-      await this.pricingRuleRepository.findByConditions(conditions);
-
-    // 4. Sort rules by priority
-    const sortedRules =
-      this.pricingDomainService.sortRulesByPriority(applicableRules);
-
-    // 5. Calculate price using domain service
-    const calculation = this.calculatePriceFromRules(
-      sortedRules,
-      calculatePriceDto
-    );
-
-    // 6. Create price calculation record
-    const requestId = randomUUID();
-    const priceCalculation = new PriceCalculation({
-      requestId,
-      request: {
+      // 2. Prepare conditions for rule matching
+      const conditions = {
         carrierId: calculatePriceDto.carrierId,
         serviceType: calculatePriceDto.serviceType,
         weight: calculatePriceDto.weight,
@@ -76,18 +66,65 @@ export class CalculatePriceUseCase {
         originCountry: calculatePriceDto.originCountry,
         destinationCountry: calculatePriceDto.destinationCountry,
         customerType: calculatePriceDto.customerType,
-        customerId: calculatePriceDto.customerId,
-      },
-      calculation: calculation.calculation,
-      appliedRules: calculation.appliedRules,
-    });
+      };
 
-    // 7. Save calculation in repository
-    const savedCalculation =
-      await this.priceCalculationRepository.create(priceCalculation);
+      // 3. Find applicable pricing rules
+      const applicableRules =
+        await this.pricingRuleRepository.findByConditions(conditions);
 
-    // 8. Return response
-    return this.mapToResponseDto(savedCalculation);
+      this.logger.debug("Found applicable pricing rules", {
+        count: applicableRules.length,
+        conditions,
+      });
+
+      // 4. Sort rules by priority
+      const sortedRules =
+        this.pricingDomainService.sortRulesByPriority(applicableRules);
+
+      // 5. Calculate price using domain service
+      const calculation = this.calculatePriceFromRules(
+        sortedRules,
+        calculatePriceDto
+      );
+
+      // 6. Create price calculation record
+      const requestId = randomUUID();
+      const priceCalculation = new PriceCalculation({
+        requestId,
+        request: {
+          carrierId: calculatePriceDto.carrierId,
+          serviceType: calculatePriceDto.serviceType,
+          weight: calculatePriceDto.weight,
+          distance: calculatePriceDto.distance,
+          originCountry: calculatePriceDto.originCountry,
+          destinationCountry: calculatePriceDto.destinationCountry,
+          customerType: calculatePriceDto.customerType,
+          customerId: calculatePriceDto.customerId,
+        },
+        calculation: calculation.calculation,
+        appliedRules: calculation.appliedRules,
+      });
+
+      // 7. Save calculation in repository
+      const savedCalculation =
+        await this.priceCalculationRepository.create(priceCalculation);
+
+      this.logger.log("Price calculated successfully", {
+        requestId: savedCalculation.requestId,
+        total: calculation.calculation.total,
+        currency: calculation.calculation.currency,
+        appliedRulesCount: calculation.appliedRules.length,
+      });
+
+      // 8. Return response
+      return this.mapToResponseDto(savedCalculation);
+    } catch (error) {
+      this.logger.error(
+        `Failed to calculate price: ${error.message}`,
+        error.stack
+      );
+      throw error;
+    }
   }
 
   /**

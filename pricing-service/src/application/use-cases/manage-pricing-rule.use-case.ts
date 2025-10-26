@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { WinstonLoggerService } from "@shared/infrastructure/logging/winston-logger.service";
 import { PricingRule } from "../../domain/entities/pricing-rule.entity";
 import { PricingRuleRepositoryInterface } from "../../domain/repositories/pricing-rule.repository.interface";
 import { PricingDomainService } from "../../domain/services/pricing.domain.service";
@@ -18,11 +19,15 @@ import { UpdatePricingRuleDto } from "../dto/update-pricing-rule.dto";
  */
 @Injectable()
 export class ManagePricingRuleUseCase {
+  private readonly logger = new WinstonLoggerService();
+
   constructor(
     @Inject("PricingRuleRepositoryInterface")
     private readonly pricingRuleRepository: PricingRuleRepositoryInterface,
     private readonly pricingDomainService: PricingDomainService
-  ) {}
+  ) {
+    this.logger.setContext(ManagePricingRuleUseCase.name);
+  }
 
   /**
    * Creates a new pricing rule
@@ -32,36 +37,59 @@ export class ManagePricingRuleUseCase {
   async create(
     createPricingRuleDto: CreatePricingRuleDto
   ): Promise<PricingRuleResponseDto> {
-    // 1. Validate input using domain service
-    const validation =
-      this.pricingDomainService.validatePricingRuleCreationData(
-        createPricingRuleDto
+    try {
+      this.logger.log("Creating new pricing rule", {
+        name: createPricingRuleDto.name,
+        priority: createPricingRuleDto.priority,
+        isActive: createPricingRuleDto.isActive,
+      });
+
+      // 1. Validate input using domain service
+      const validation =
+        this.pricingDomainService.validatePricingRuleCreationData(
+          createPricingRuleDto
+        );
+      if (!validation.isValid) {
+        this.logger.warn("Pricing rule validation failed", {
+          errors: validation.errors,
+        });
+        throw new BadRequestException(validation.errors.join(", "));
+      }
+
+      // 2. Create pricing rule entity
+      const pricingRule = new PricingRule({
+        name: createPricingRuleDto.name,
+        description: createPricingRuleDto.description,
+        isActive: createPricingRuleDto.isActive ?? true,
+        conditions: createPricingRuleDto.conditions,
+        pricing: createPricingRuleDto.pricing,
+        priority: createPricingRuleDto.priority ?? 0,
+        validFrom: createPricingRuleDto.validFrom
+          ? new Date(createPricingRuleDto.validFrom)
+          : undefined,
+        validTo: createPricingRuleDto.validTo
+          ? new Date(createPricingRuleDto.validTo)
+          : undefined,
+      });
+
+      // 3. Save pricing rule in repository
+      const savedRule = await this.pricingRuleRepository.create(pricingRule);
+
+      this.logger.log("Pricing rule created successfully", {
+        ruleId: savedRule.id,
+        name: savedRule.name,
+        priority: savedRule.priority,
+      });
+
+      // 4. Return response
+      return this.mapToResponseDto(savedRule);
+    } catch (error) {
+      this.logger.error(
+        `Failed to create pricing rule: ${error.message}`,
+        error.stack
       );
-    if (!validation.isValid) {
-      throw new BadRequestException(validation.errors.join(", "));
+      throw error;
     }
-
-    // 2. Create pricing rule entity
-    const pricingRule = new PricingRule({
-      name: createPricingRuleDto.name,
-      description: createPricingRuleDto.description,
-      isActive: createPricingRuleDto.isActive ?? true,
-      conditions: createPricingRuleDto.conditions,
-      pricing: createPricingRuleDto.pricing,
-      priority: createPricingRuleDto.priority ?? 0,
-      validFrom: createPricingRuleDto.validFrom
-        ? new Date(createPricingRuleDto.validFrom)
-        : undefined,
-      validTo: createPricingRuleDto.validTo
-        ? new Date(createPricingRuleDto.validTo)
-        : undefined,
-    });
-
-    // 3. Save pricing rule in repository
-    const savedRule = await this.pricingRuleRepository.create(pricingRule);
-
-    // 4. Return response
-    return this.mapToResponseDto(savedRule);
   }
 
   /**
@@ -70,12 +98,30 @@ export class ManagePricingRuleUseCase {
    * @returns Pricing rule response
    */
   async getById(id: number): Promise<PricingRuleResponseDto> {
-    const rule = await this.pricingRuleRepository.findById(id);
-    if (!rule) {
-      throw new NotFoundException("Pricing rule not found");
-    }
+    try {
+      this.logger.debug("Getting pricing rule by ID", { ruleId: id });
 
-    return this.mapToResponseDto(rule);
+      const rule = await this.pricingRuleRepository.findById(id);
+      if (!rule) {
+        this.logger.warn("Pricing rule not found", { ruleId: id });
+        throw new NotFoundException("Pricing rule not found");
+      }
+
+      this.logger.debug("Pricing rule found", {
+        ruleId: rule.id,
+        name: rule.name,
+      });
+
+      return this.mapToResponseDto(rule);
+    } catch (error) {
+      if (!(error instanceof NotFoundException)) {
+        this.logger.error(
+          `Failed to get pricing rule: ${error.message}`,
+          error.stack
+        );
+      }
+      throw error;
+    }
   }
 
   /**
@@ -96,17 +142,34 @@ export class ManagePricingRuleUseCase {
     limit: number;
     totalPages: number;
   }> {
-    const { pricingRules, total } =
-      await this.pricingRuleRepository.findPaginated(page, limit, search);
-    const totalPages = Math.ceil(total / limit);
+    try {
+      this.logger.debug("Getting all pricing rules", { page, limit, search });
 
-    return {
-      pricingRules: pricingRules.map((rule) => this.mapToResponseDto(rule)),
-      total,
-      page,
-      limit,
-      totalPages,
-    };
+      const { pricingRules, total } =
+        await this.pricingRuleRepository.findPaginated(page, limit, search);
+      const totalPages = Math.ceil(total / limit);
+
+      this.logger.debug("Retrieved pricing rules", {
+        total,
+        returned: pricingRules.length,
+        page,
+        totalPages,
+      });
+
+      return {
+        pricingRules: pricingRules.map((rule) => this.mapToResponseDto(rule)),
+        total,
+        page,
+        limit,
+        totalPages,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to get pricing rules: ${error.message}`,
+        error.stack
+      );
+      throw error;
+    }
   }
 
   /**
@@ -119,62 +182,87 @@ export class ManagePricingRuleUseCase {
     id: number,
     updatePricingRuleDto: UpdatePricingRuleDto
   ): Promise<PricingRuleResponseDto> {
-    // 1. Find existing rule
-    const existingRule = await this.pricingRuleRepository.findById(id);
-    if (!existingRule) {
-      throw new NotFoundException("Pricing rule not found");
+    try {
+      this.logger.log("Updating pricing rule", {
+        ruleId: id,
+        fields: Object.keys(updatePricingRuleDto),
+      });
+
+      // 1. Find existing rule
+      const existingRule = await this.pricingRuleRepository.findById(id);
+      if (!existingRule) {
+        this.logger.warn("Pricing rule not found", { ruleId: id });
+        throw new NotFoundException("Pricing rule not found");
+      }
+
+      // 2. Prepare update data for validation
+      const updateDataForValidation: Partial<PricingRule> = {
+        ...updatePricingRuleDto,
+        validFrom: updatePricingRuleDto.validFrom
+          ? new Date(updatePricingRuleDto.validFrom)
+          : undefined,
+        validTo: updatePricingRuleDto.validTo
+          ? new Date(updatePricingRuleDto.validTo)
+          : undefined,
+      };
+
+      // 3. Validate update data using domain service
+      const validation = this.pricingDomainService.validatePricingRuleUpdateData(
+        updateDataForValidation
+      );
+      if (!validation.isValid) {
+        this.logger.warn("Pricing rule update validation failed", {
+          ruleId: id,
+          errors: validation.errors,
+        });
+        throw new BadRequestException(validation.errors.join(", "));
+      }
+
+      // 4. Prepare update data
+      const updateData: Partial<any> = {};
+
+      if (updatePricingRuleDto.name !== undefined)
+        updateData.name = updatePricingRuleDto.name;
+      if (updatePricingRuleDto.description !== undefined)
+        updateData.description = updatePricingRuleDto.description;
+      if (updatePricingRuleDto.isActive !== undefined)
+        updateData.isActive = updatePricingRuleDto.isActive;
+      if (updatePricingRuleDto.conditions !== undefined)
+        updateData.conditions = updatePricingRuleDto.conditions;
+      if (updatePricingRuleDto.pricing !== undefined)
+        updateData.pricing = updatePricingRuleDto.pricing;
+      if (updatePricingRuleDto.priority !== undefined)
+        updateData.priority = updatePricingRuleDto.priority;
+      if (updatePricingRuleDto.validFrom !== undefined) {
+        updateData.validFrom = updatePricingRuleDto.validFrom
+          ? new Date(updatePricingRuleDto.validFrom)
+          : null;
+      }
+      if (updatePricingRuleDto.validTo !== undefined) {
+        updateData.validTo = updatePricingRuleDto.validTo
+          ? new Date(updatePricingRuleDto.validTo)
+          : null;
+      }
+
+      // 5. Update rule in repository
+      const updatedRule = await this.pricingRuleRepository.update(id, updateData);
+
+      this.logger.log("Pricing rule updated successfully", {
+        ruleId: id,
+        updatedFields: Object.keys(updateData),
+      });
+
+      // 6. Return response
+      return this.mapToResponseDto(updatedRule);
+    } catch (error) {
+      if (!(error instanceof NotFoundException)) {
+        this.logger.error(
+          `Failed to update pricing rule ${id}: ${error.message}`,
+          error.stack
+        );
+      }
+      throw error;
     }
-
-    // 2. Prepare update data for validation
-    const updateDataForValidation: Partial<PricingRule> = {
-      ...updatePricingRuleDto,
-      validFrom: updatePricingRuleDto.validFrom
-        ? new Date(updatePricingRuleDto.validFrom)
-        : undefined,
-      validTo: updatePricingRuleDto.validTo
-        ? new Date(updatePricingRuleDto.validTo)
-        : undefined,
-    };
-
-    // 3. Validate update data using domain service
-    const validation = this.pricingDomainService.validatePricingRuleUpdateData(
-      updateDataForValidation
-    );
-    if (!validation.isValid) {
-      throw new BadRequestException(validation.errors.join(", "));
-    }
-
-    // 4. Prepare update data
-    const updateData: Partial<any> = {};
-
-    if (updatePricingRuleDto.name !== undefined)
-      updateData.name = updatePricingRuleDto.name;
-    if (updatePricingRuleDto.description !== undefined)
-      updateData.description = updatePricingRuleDto.description;
-    if (updatePricingRuleDto.isActive !== undefined)
-      updateData.isActive = updatePricingRuleDto.isActive;
-    if (updatePricingRuleDto.conditions !== undefined)
-      updateData.conditions = updatePricingRuleDto.conditions;
-    if (updatePricingRuleDto.pricing !== undefined)
-      updateData.pricing = updatePricingRuleDto.pricing;
-    if (updatePricingRuleDto.priority !== undefined)
-      updateData.priority = updatePricingRuleDto.priority;
-    if (updatePricingRuleDto.validFrom !== undefined) {
-      updateData.validFrom = updatePricingRuleDto.validFrom
-        ? new Date(updatePricingRuleDto.validFrom)
-        : null;
-    }
-    if (updatePricingRuleDto.validTo !== undefined) {
-      updateData.validTo = updatePricingRuleDto.validTo
-        ? new Date(updatePricingRuleDto.validTo)
-        : null;
-    }
-
-    // 5. Update rule in repository
-    const updatedRule = await this.pricingRuleRepository.update(id, updateData);
-
-    // 6. Return response
-    return this.mapToResponseDto(updatedRule);
   }
 
   /**
@@ -182,26 +270,48 @@ export class ManagePricingRuleUseCase {
    * @param id - Pricing rule ID
    */
   async delete(id: number): Promise<void> {
-    // 1. Find existing rule
-    const existingRule = await this.pricingRuleRepository.findById(id);
-    if (!existingRule) {
-      throw new NotFoundException("Pricing rule not found");
+    try {
+      this.logger.log("Deleting pricing rule", { ruleId: id });
+
+      // 1. Find existing rule
+      const existingRule = await this.pricingRuleRepository.findById(id);
+      if (!existingRule) {
+        this.logger.warn("Pricing rule not found", { ruleId: id });
+        throw new NotFoundException("Pricing rule not found");
+      }
+
+      // 2. Check if rule can be deleted (business rule)
+      // Note: In a real application, you would check if rule has been used in calculations
+      const hasBeenUsed = false; // This would come from price calculation repository
+
+      if (
+        !this.pricingDomainService.canDeletePricingRule(existingRule, hasBeenUsed)
+      ) {
+        this.logger.warn(
+          "Cannot delete pricing rule that has been used in calculations",
+          { ruleId: id }
+        );
+        throw new BadRequestException(
+          "Cannot delete pricing rule that has been used in calculations"
+        );
+      }
+
+      // 3. Delete rule from repository
+      await this.pricingRuleRepository.delete(id);
+
+      this.logger.log("Pricing rule deleted successfully", {
+        ruleId: id,
+        name: existingRule.name,
+      });
+    } catch (error) {
+      if (!(error instanceof NotFoundException)) {
+        this.logger.error(
+          `Failed to delete pricing rule ${id}: ${error.message}`,
+          error.stack
+        );
+      }
+      throw error;
     }
-
-    // 2. Check if rule can be deleted (business rule)
-    // Note: In a real application, you would check if rule has been used in calculations
-    const hasBeenUsed = false; // This would come from price calculation repository
-
-    if (
-      !this.pricingDomainService.canDeletePricingRule(existingRule, hasBeenUsed)
-    ) {
-      throw new BadRequestException(
-        "Cannot delete pricing rule that has been used in calculations"
-      );
-    }
-
-    // 3. Delete rule from repository
-    await this.pricingRuleRepository.delete(id);
   }
 
   /**
@@ -209,8 +319,21 @@ export class ManagePricingRuleUseCase {
    * @returns Pricing rule count
    */
   async getCount(): Promise<{ count: number }> {
-    const count = await this.pricingRuleRepository.count();
-    return { count };
+    try {
+      this.logger.debug("Getting pricing rule count");
+
+      const count = await this.pricingRuleRepository.count();
+
+      this.logger.debug("Retrieved pricing rule count", { count });
+
+      return { count };
+    } catch (error) {
+      this.logger.error(
+        `Failed to get pricing rule count: ${error.message}`,
+        error.stack
+      );
+      throw error;
+    }
   }
 
   /**
