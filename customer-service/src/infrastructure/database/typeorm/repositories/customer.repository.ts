@@ -1,61 +1,78 @@
 import { Customer } from "@/domain/entities/customer.entity";
 import { CustomerRepositoryInterface } from "@/domain/repositories/customer.repository.interface";
-import { Injectable } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { PaginationDto } from "@shared/infrastructure";
+import { PaginationDto, RedisCacheService, BaseTypeOrmRepository } from "@shared/infrastructure";
 import { Repository } from "typeorm";
 import { CustomerTypeOrmEntity } from "../entities/customer.typeorm.entity";
 
+/**
+ * Customer Repository Implementation
+ * Extends BaseTypeOrmRepository for common CRUD and caching operations
+ */
 @Injectable()
-export class CustomerRepository implements CustomerRepositoryInterface {
+export class CustomerRepository 
+  extends BaseTypeOrmRepository<Customer, CustomerTypeOrmEntity>
+  implements CustomerRepositoryInterface 
+{
   constructor(
     @InjectRepository(CustomerTypeOrmEntity)
-    private readonly repository: Repository<CustomerTypeOrmEntity>
-  ) {}
-
-  async create(customer: Customer): Promise<Customer> {
-    const entity = this.toTypeOrmEntity(customer);
-    const savedEntity = await this.repository.save(entity);
-    return this.toDomainEntity(savedEntity);
+    repository: Repository<CustomerTypeOrmEntity>,
+    @Inject(RedisCacheService)
+    cacheService: RedisCacheService
+  ) {
+    super(repository, cacheService, 'customers', 300); // 5 min TTL
   }
 
-  async findById(id: number): Promise<Customer | null> {
-    const entity = await this.repository.findOne({ where: { id } });
-    return entity ? this.toDomainEntity(entity) : null;
-  }
-
+  /**
+   * Find customer by email
+   * Business-specific query method
+   */
   async findByEmail(email: string): Promise<Customer | null> {
     const entity = await this.repository.findOne({ where: { email } });
     return entity ? this.toDomainEntity(entity) : null;
   }
 
+  /**
+   * Find all customers with pagination and search
+   * Uses base repository caching
+   */
   async findAll(
     pagination?: PaginationDto,
     search?: string
   ): Promise<{ customers: Customer[]; total: number }> {
-    const queryBuilder = this.repository.createQueryBuilder("customer");
-
-    if (search) {
-      queryBuilder.where(
-        "customer.firstName ILIKE :search OR customer.lastName ILIKE :search OR customer.email ILIKE :search",
-        { search: `%${search}%` }
-      );
-    }
+    const result = await this.findAllWithCache(
+      pagination,
+      search,
+      (qb, searchTerm) => {
+        qb.where(
+          "entity.firstName ILIKE :search OR entity.lastName ILIKE :search OR entity.email ILIKE :search",
+          { search: `%${searchTerm}%` }
+        );
+      }
+    );
 
     // Always sort by newest first for consistent pagination
-    queryBuilder.orderBy("customer.createdAt", "DESC").addOrderBy("customer.id", "DESC");
+    result.entities = await this.repository
+      .createQueryBuilder("customer")
+      .where(search ? 
+        "customer.firstName ILIKE :search OR customer.lastName ILIKE :search OR customer.email ILIKE :search" : 
+        "1=1", 
+        { search: `%${search}%` }
+      )
+      .orderBy("customer.createdAt", "DESC")
+      .addOrderBy("customer.id", "DESC")
+      .skip(((pagination?.page || 1) - 1) * (pagination?.limit || 20))
+      .take(pagination?.limit || 20)
+      .getMany()
+      .then(entities => entities.map(e => this.toDomainEntity(e)));
 
-    if (pagination) {
-      queryBuilder
-        .skip((pagination.page - 1) * pagination.limit)
-        .take(pagination.limit);
-    }
-
-    const [entities, total] = await queryBuilder.getManyAndCount();
-    const customers = entities.map((entity) => this.toDomainEntity(entity));
-    return { customers, total };
+    return { customers: result.entities, total: result.total };
   }
 
+  /**
+   * Search customers (alias for findAll with search)
+   */
   async search(
     searchTerm: string,
     pagination: PaginationDto
@@ -63,57 +80,47 @@ export class CustomerRepository implements CustomerRepositoryInterface {
     return this.findAll(pagination, searchTerm);
   }
 
-  async update(id: number, customer: Partial<Customer>): Promise<Customer> {
-    await this.repository.update(id, customer);
-    const updatedCustomer = await this.findById(id);
-    if (!updatedCustomer) {
-      throw new Error("Customer not found after update");
-    }
-    return updatedCustomer;
-  }
-
-  async delete(id: number): Promise<void> {
-    await this.repository.delete(id);
-  }
-
+  /**
+   * Find active customers only
+   */
   async findActive(): Promise<Customer[]> {
     const entities = await this.repository.find({ where: { isActive: true } });
     return entities.map((entity) => this.toDomainEntity(entity));
   }
 
+  /**
+   * Count total customers
+   */
   async count(): Promise<number> {
     return this.repository.count();
   }
 
+  /**
+   * Count active customers
+   */
   async countActive(): Promise<number> {
     return this.repository.count({ where: { isActive: true } });
   }
 
+  /**
+   * Find paginated customers (interface requirement)
+   */
   async findPaginated(
     page: number,
     limit: number,
     search?: string
   ): Promise<{ customers: Customer[]; total: number }> {
-    const queryBuilder = this.repository.createQueryBuilder("customer");
-
-    if (search) {
-      queryBuilder.where(
-        "customer.firstName ILIKE :search OR customer.lastName ILIKE :search OR customer.email ILIKE :search",
-        { search: `%${search}%` }
-      );
-    }
-
-    const [entities, total] = await queryBuilder
-      .skip((page - 1) * limit)
-      .take(limit)
-      .getManyAndCount();
-
-    const customers = entities.map((entity) => this.toDomainEntity(entity));
-
-    return { customers, total };
+    const pagination = Object.assign(
+      Object.create(Object.getPrototypeOf(new PaginationDto())),
+      { page, limit }
+    );
+    return this.findAll(pagination, search);
   }
 
-  private toDomainEntity(entity: CustomerTypeOrmEntity): Customer {
+  /**
+   * Convert TypeORM entity to domain entity
+   */
+  protected toDomainEntity(entity: CustomerTypeOrmEntity): Customer {
     return new Customer({
       id: entity.id,
       email: entity.email,
@@ -129,7 +136,10 @@ export class CustomerRepository implements CustomerRepositoryInterface {
     });
   }
 
-  private toTypeOrmEntity(customer: Customer): CustomerTypeOrmEntity {
+  /**
+   * Convert domain entity to TypeORM entity
+   */
+  protected toTypeOrmEntity(customer: Customer): Partial<CustomerTypeOrmEntity> {
     const entity = new CustomerTypeOrmEntity();
     entity.id = customer.id;
     entity.email = customer.email;
