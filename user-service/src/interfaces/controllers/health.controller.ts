@@ -1,4 +1,5 @@
 import { Controller, Get, Inject } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { UserRepositoryInterface } from '../../domain/repositories/user.repository.interface';
 import { RoleRepositoryInterface } from '../../domain/repositories/role.repository.interface';
 
@@ -7,6 +8,7 @@ import { RoleRepositoryInterface } from '../../domain/repositories/role.reposito
  * Interface adapter for health check requests
  * Follows Clean Architecture principles by using repository interfaces
  */
+@ApiTags("health")
 @Controller("health")
 export class HealthController {
   constructor(
@@ -21,6 +23,8 @@ export class HealthController {
    * GET /api/v1/health
    */
   @Get()
+  @ApiOperation({ summary: "Health check", description: "Check if the service is running" })
+  @ApiResponse({ status: 200, description: "Service is healthy" })
   async healthCheck(): Promise<{
     status: string;
     timestamp: string;

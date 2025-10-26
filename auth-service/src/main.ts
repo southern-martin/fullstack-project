@@ -1,5 +1,6 @@
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { HttpExceptionFilter } from "@shared/infrastructure/filters/http-exception.filter";
 import { TransformInterceptor } from "@shared/infrastructure/interceptors/transform.interceptor";
 import {
@@ -45,13 +46,33 @@ async function bootstrap() {
   // Set global prefix
   app.setGlobalPrefix("api/v1");
 
+  // Swagger API Documentation
+  const config = new DocumentBuilder()
+    .setTitle("Auth Service API")
+    .setDescription("Authentication and Authorization Service - Clean Architecture Microservice")
+    .setVersion("1.0")
+    .addTag("auth", "Authentication endpoints")
+    .addBearerAuth(
+      {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+        name: "JWT",
+        description: "Enter JWT token",
+        in: "header",
+      },
+      "JWT-auth"
+    )
+    .build();
+  
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup("api/docs", app, document);
+
   const port = process.env.PORT || 3001;
   await app.listen(port);
 
   logger.log(`🚀 Auth Service is running on: http://localhost:${port}`);
-  logger.log(
-    `📚 API Documentation: http://localhost:${port}/api/v1/auth/health`
-  );
+  logger.log(`📚 API Documentation: http://localhost:${port}/api/docs`);
   logger.log(`✅ Structured Logging: Winston JSON format enabled`);
   logger.log(`✅ Request/Response logging with correlation IDs enabled`);
 }

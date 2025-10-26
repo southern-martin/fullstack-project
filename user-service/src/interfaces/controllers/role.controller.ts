@@ -11,9 +11,17 @@ import {
   Post,
   Query,
 } from "@nestjs/common";
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+} from "@nestjs/swagger";
 import { ListRolesQueryDto } from "../../application/dto/list-roles-query.dto";
 import { CreateRoleDto } from "../../application/dto/create-role.dto";
 import { RoleResponseDto } from "../../application/dto/role-response.dto";
+import { UserResponseDto } from "../../application/dto/user-response.dto";
 import { UpdateRoleDto } from "../../application/dto/update-role.dto";
 import { CreateRoleUseCase } from "../../application/use-cases/create-role.use-case";
 import { DeleteRoleUseCase } from "../../application/use-cases/delete-role.use-case";
@@ -25,6 +33,8 @@ import { UpdateRoleUseCase } from "../../application/use-cases/update-role.use-c
  * Interface adapter for HTTP requests
  * Follows Clean Architecture principles
  */
+@ApiTags("roles")
+@ApiBearerAuth("JWT-auth")
 @Controller("roles")
 export class RoleController {
   constructor(
@@ -101,7 +111,7 @@ export class RoleController {
   @Get(":id/users")
   async getUsersByRole(
     @Param("id", ParseIntPipe) id: number
-  ): Promise<any[]> {
+  ): Promise<Partial<UserResponseDto>[]> {
     return this.getRoleUseCase.executeUsersByRole(id);
   }
 
