@@ -67,19 +67,53 @@ export class HttpExceptionFilter implements ExceptionFilter {
         if (responseObj.errors && Array.isArray(responseObj.errors)) {
           fieldErrors = this.extractFieldErrors(responseObj.errors);
         }
+        
+        // Extract field errors if present (ValidationException format)
+        if (responseObj.fieldErrors) {
+          fieldErrors = responseObj.fieldErrors;
+        }
       } else {
         message = exceptionResponse as string;
         error = this.getErrorType(status);
       }
     } 
+    // Handle errors with statusCode property (like ValidationException)
+    // This handles cases where instanceof check fails due to serialization
+    else if (exception && typeof exception === 'object' && ('statusCode' in exception || 'status' in exception)) {
+      const exceptionObj = exception as any;
+      
+      // Try to get status from multiple possible locations
+      status = exceptionObj.status || exceptionObj.statusCode || HttpStatus.INTERNAL_SERVER_ERROR;
+      
+      // Try to get response object if it exists
+      const responseObj = exceptionObj.response || exceptionObj;
+      
+      message = responseObj.message || exceptionObj.message || 'An error occurred';
+      error = responseObj.error || exceptionObj.error || this.getErrorType(status);
+      fieldErrors = responseObj.fieldErrors || exceptionObj.fieldErrors;
+
+      // Log for debugging
+      this.logger.warn(`Exception with status property: ${exceptionObj.name || 'Unknown'}`, {
+        status,
+        message,
+        hasFieldErrors: !!fieldErrors,
+      });
+    }
     // Handle unknown errors (500 Internal Server Error)
     else {
       status = HttpStatus.INTERNAL_SERVER_ERROR;
       message = 'Internal server error';
       error = 'Internal Server Error';
 
-      // Log the full error for debugging
+      // Log the full error for debugging (including structure)
       this.logger.error('Unhandled exception:', exception);
+      this.logger.error('Exception type check:', {
+        isHttpException: exception instanceof HttpException,
+        hasStatusCode: exception && typeof exception === 'object' && 'statusCode' in exception,
+        exceptionKeys: exception && typeof exception === 'object' ? Object.keys(exception) : [],
+        exceptionName: (exception as any)?.name,
+        exceptionConstructor: (exception as any)?.constructor?.name,
+      });
 
       // Include error details in development mode
       if (process.env.NODE_ENV === 'development') {
