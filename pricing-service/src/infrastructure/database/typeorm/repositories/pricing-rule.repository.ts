@@ -1,56 +1,58 @@
 import { PricingRule } from "@/domain/entities/pricing-rule.entity";
 import { PricingRuleRepositoryInterface } from "@/domain/repositories/pricing-rule.repository.interface";
-import { Injectable } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { PaginationDto } from "@shared/infrastructure";
+import { PaginationDto, RedisCacheService, BaseTypeOrmRepository } from "@shared/infrastructure";
 import { Repository } from "typeorm";
 import { PricingRuleTypeOrmEntity } from "../entities/pricing-rule.typeorm.entity";
 
+/**
+ * Pricing Rule Repository Implementation
+ * Extends BaseTypeOrmRepository for common CRUD and caching operations
+ */
 @Injectable()
-export class PricingRuleRepository implements PricingRuleRepositoryInterface {
+export class PricingRuleRepository 
+  extends BaseTypeOrmRepository<PricingRule, PricingRuleTypeOrmEntity>
+  implements PricingRuleRepositoryInterface 
+{
   constructor(
     @InjectRepository(PricingRuleTypeOrmEntity)
-    private readonly repository: Repository<PricingRuleTypeOrmEntity>
-  ) {}
-
-  async create(pricingRule: PricingRule): Promise<PricingRule> {
-    const entity = this.toTypeOrmEntity(pricingRule);
-    const savedEntity = await this.repository.save(entity);
-    return this.toDomainEntity(savedEntity);
+    repository: Repository<PricingRuleTypeOrmEntity>,
+    @Inject(RedisCacheService)
+    cacheService: RedisCacheService
+  ) {
+    super(repository, cacheService, 'pricing', 300); // 5 min TTL
   }
 
-  async findById(id: number): Promise<PricingRule | null> {
-    const entity = await this.repository.findOne({ where: { id } });
-    return entity ? this.toDomainEntity(entity) : null;
-  }
-
+  /**
+   * Find all pricing rules with pagination and search
+   * Uses base class findAllWithCache with custom query builder
+   */
   async findAll(
     pagination?: PaginationDto,
     search?: string
   ): Promise<{ pricingRules: PricingRule[]; total: number }> {
-    const queryBuilder = this.repository.createQueryBuilder("pricingRule");
-
-    if (search) {
-      queryBuilder.where(
-        "pricingRule.name ILIKE :search OR pricingRule.description ILIKE :search",
-        { search: `%${search}%` }
-      );
-    }
-
-    // Always sort by newest first for consistent pagination
-    queryBuilder.orderBy("pricingRule.createdAt", "DESC").addOrderBy("pricingRule.id", "DESC");
-
-    if (pagination) {
-      queryBuilder
-        .skip((pagination.page - 1) * pagination.limit)
-        .take(pagination.limit);
-    }
-
-    const [entities, total] = await queryBuilder.getManyAndCount();
-    const pricingRules = entities.map((entity) => this.toDomainEntity(entity));
-    return { pricingRules, total };
+    const paginationDto = pagination || Object.assign(new PaginationDto(), { page: 1, limit: 20 });
+    const result = await this.findAllWithCache(
+      paginationDto,
+      search,
+      (queryBuilder, searchTerm) => {
+        if (searchTerm) {
+          queryBuilder.where(
+            "pricingRule.name ILIKE :search OR pricingRule.description ILIKE :search",
+            { search: `%${searchTerm}%` }
+          );
+        }
+        // Always sort by newest first for consistent pagination
+        queryBuilder.orderBy("pricingRule.createdAt", "DESC").addOrderBy("pricingRule.id", "DESC");
+      }
+    );
+    return { pricingRules: result.entities, total: result.total };
   }
 
+  /**
+   * Search pricing rules (delegates to findAll)
+   */
   async search(
     searchTerm: string,
     pagination: PaginationDto
@@ -58,27 +60,18 @@ export class PricingRuleRepository implements PricingRuleRepositoryInterface {
     return this.findAll(pagination, searchTerm);
   }
 
-  async update(
-    id: number,
-    pricingRuleData: Partial<PricingRule>
-  ): Promise<PricingRule> {
-    await this.repository.update(id, pricingRuleData);
-    const updatedPricingRule = await this.findById(id);
-    if (!updatedPricingRule) {
-      throw new Error("PricingRule not found after update");
-    }
-    return updatedPricingRule;
-  }
-
-  async delete(id: number): Promise<void> {
-    await this.repository.delete(id);
-  }
-
+  /**
+   * Find active pricing rules only
+   */
   async findActive(): Promise<PricingRule[]> {
     const entities = await this.repository.find({ where: { isActive: true } });
     return entities.map((entity) => this.toDomainEntity(entity));
   }
 
+  /**
+   * Find pricing rules by specific conditions
+   * Business-specific query with JSON extraction
+   */
   async findByConditions(conditions: any): Promise<PricingRule[]> {
     const queryBuilder = this.repository.createQueryBuilder("pricingRule");
 
@@ -135,39 +128,36 @@ export class PricingRuleRepository implements PricingRuleRepositoryInterface {
     return entities.map((entity) => this.toDomainEntity(entity));
   }
 
+  /**
+   * Count all pricing rules
+   */
   async count(): Promise<number> {
     return this.repository.count();
   }
 
+  /**
+   * Count only active pricing rules
+   */
   async countActive(): Promise<number> {
     return this.repository.count({ where: { isActive: true } });
   }
 
+  /**
+   * Find pricing rules with pagination (delegates to findAll)
+   */
   async findPaginated(
     page: number,
     limit: number,
     search?: string
   ): Promise<{ pricingRules: PricingRule[]; total: number }> {
-    const queryBuilder = this.repository.createQueryBuilder("pricingRule");
-
-    if (search) {
-      queryBuilder.where(
-        "pricingRule.name ILIKE :search OR pricingRule.description ILIKE :search",
-        { search: `%${search}%` }
-      );
-    }
-
-    const [entities, total] = await queryBuilder
-      .skip((page - 1) * limit)
-      .take(limit)
-      .getManyAndCount();
-
-    const pricingRules = entities.map((entity) => this.toDomainEntity(entity));
-
-    return { pricingRules, total };
+    const pagination = Object.assign(new PaginationDto(), { page, limit });
+    return this.findAll(pagination, search);
   }
 
-  private toDomainEntity(entity: PricingRuleTypeOrmEntity): PricingRule {
+  /**
+   * Map TypeORM entity to domain entity
+   */
+  protected toDomainEntity(entity: PricingRuleTypeOrmEntity): PricingRule {
     return new PricingRule({
       id: entity.id,
       name: entity.name,
@@ -183,19 +173,22 @@ export class PricingRuleRepository implements PricingRuleRepositoryInterface {
     });
   }
 
-  private toTypeOrmEntity(pricingRule: PricingRule): PricingRuleTypeOrmEntity {
-    const entity = new PricingRuleTypeOrmEntity();
-    entity.id = pricingRule.id;
-    entity.name = pricingRule.name;
-    entity.description = pricingRule.description;
-    entity.isActive = pricingRule.isActive;
-    entity.conditions = pricingRule.conditions;
-    entity.pricing = pricingRule.pricing;
-    entity.priority = pricingRule.priority;
-    entity.validFrom = pricingRule.validFrom;
-    entity.validTo = pricingRule.validTo;
-    entity.createdAt = pricingRule.createdAt;
-    entity.updatedAt = pricingRule.updatedAt;
-    return entity;
+  /**
+   * Map domain entity to TypeORM entity
+   */
+  protected toTypeOrmEntity(pricingRule: PricingRule): Partial<PricingRuleTypeOrmEntity> {
+    return {
+      id: pricingRule.id,
+      name: pricingRule.name,
+      description: pricingRule.description,
+      isActive: pricingRule.isActive,
+      conditions: pricingRule.conditions,
+      pricing: pricingRule.pricing,
+      priority: pricingRule.priority,
+      validFrom: pricingRule.validFrom,
+      validTo: pricingRule.validTo,
+      createdAt: pricingRule.createdAt,
+      updatedAt: pricingRule.updatedAt,
+    };
   }
 }

@@ -2,7 +2,11 @@ import { Role } from "@/domain/entities/role.entity";
 import { RoleRepositoryInterface } from "@/domain/repositories/role.repository.interface";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { PaginationDto } from "@fullstack-project/shared-infrastructure";
+import { 
+  PaginationDto,
+  BaseTypeOrmRepository,
+  RedisCacheService
+} from "@fullstack-project/shared-infrastructure";
 import { Between, Repository } from "typeorm";
 import { RoleTypeOrmEntity } from "../entities/role.typeorm.entity";
 import { PermissionTypeOrmEntity } from "../entities/permission.typeorm.entity";
@@ -11,36 +15,49 @@ import { PermissionTypeOrmEntity } from "../entities/permission.typeorm.entity";
  * RoleTypeOrmRepository
  *
  * This class provides the concrete TypeORM implementation for the RoleRepositoryInterface.
- * It handles all database operations for role entities.
+ * It handles all database operations for role entities with Redis caching support.
+ * Extends BaseTypeOrmRepository for common CRUD operations.
  */
 @Injectable()
-export class RoleTypeOrmRepository implements RoleRepositoryInterface {
+export class RoleTypeOrmRepository 
+  extends BaseTypeOrmRepository<Role, RoleTypeOrmEntity>
+  implements RoleRepositoryInterface 
+{
   constructor(
     @InjectRepository(RoleTypeOrmEntity)
-    private readonly roleRepository: Repository<RoleTypeOrmEntity>,
+    protected readonly repository: Repository<RoleTypeOrmEntity>,
     @InjectRepository(PermissionTypeOrmEntity)
-    private readonly permissionRepository: Repository<PermissionTypeOrmEntity>
-  ) {}
+    private readonly permissionRepository: Repository<PermissionTypeOrmEntity>,
+    protected readonly cacheService: RedisCacheService
+  ) {
+    super(repository, cacheService, 'role', 300); // 5-minute cache TTL
+  }
 
+  /**
+   * Create role with optional permission associations
+   */
   async create(role: Role, permissionIds?: number[]): Promise<Role> {
-    const roleEntity = this.roleRepository.create({
+    const roleEntity = this.repository.create({
       name: role.name,
       description: role.description,
       isActive: role.isActive,
     });
     
     // Save the role first to get the ID
-    const savedEntity = await this.roleRepository.save(roleEntity);
+    const savedEntity = await this.repository.save(roleEntity);
     
     // If permissionIds are provided, fetch and associate them
     if (permissionIds && permissionIds.length > 0) {
       const permissions = await this.permissionRepository.findByIds(permissionIds);
       savedEntity.permissionEntities = permissions;
-      await this.roleRepository.save(savedEntity);
+      await this.repository.save(savedEntity);
     }
     
+    // Invalidate cache
+    await this.invalidateListCache();
+    
     // Fetch the complete role with permissions
-    const completeEntity = await this.roleRepository.findOne({
+    const completeEntity = await this.repository.findOne({
       where: { id: savedEntity.id },
       relations: ['permissionEntities'],
     });
@@ -48,20 +65,44 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
     return this.toDomainEntity(completeEntity);
   }
 
+  /**
+   * Find role by ID with permissions (overrides base to include relations)
+   */
   async findById(id: number): Promise<Role | null> {
-    const entity = await this.roleRepository.findOne({
+    const entity = await this.repository.findOne({
       where: { id },
       relations: ['permissionEntities'],
     });
     return entity ? this.toDomainEntity(entity) : null;
   }
 
+  /**
+   * Find role by name (cached)
+   */
   async findByName(name: string): Promise<Role | null> {
-    const entity = await this.roleRepository.findOne({
+    const cacheKey = `name:${name.toLowerCase()}`;
+    
+    // Try cache first
+    const cached = await this.cacheService.get<Role>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const entity = await this.repository.findOne({
       where: { name },
       relations: ['permissionEntities'],
     });
-    return entity ? this.toDomainEntity(entity) : null;
+    
+    if (!entity) {
+      return null;
+    }
+
+    const role = this.toDomainEntity(entity);
+    
+    // Cache the result
+    await this.cacheService.set(cacheKey, role, { ttl: this.cacheTTL });
+    
+    return role;
   }
 
   async findAll(
@@ -70,7 +111,7 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
     const page = paginationDto?.page || 1;
     const limit = paginationDto?.limit || 100;
     
-    const [entities, total] = await this.roleRepository.findAndCount({
+    const [entities, total] = await this.repository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
       order: { createdAt: "DESC" },
@@ -84,9 +125,9 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
   }
 
   async findActive(): Promise<Role[]> {
-    const entities = await this.roleRepository.find({
+    const entities = await this.repository.find({
       where: { isActive: true },
-      order: { createdAt: "DESC" },
+      order: { name: "ASC" },
       relations: ['permissionEntities'],
     });
 
@@ -94,21 +135,24 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
   }
 
   async search(
-    searchTerm: string,
-    paginationDto: PaginationDto
+    query: string,
+    paginationDto?: PaginationDto
   ): Promise<{ roles: Role[]; total: number }> {
-    const queryBuilder = this.roleRepository.createQueryBuilder("role")
+    const page = paginationDto?.page || 1;
+    const limit = paginationDto?.limit || 100;
+
+    const queryBuilder = this.repository.createQueryBuilder("role")
       .leftJoinAndSelect("role.permissionEntities", "permission");
 
     queryBuilder
       .where(
         "(role.name LIKE :searchTerm OR role.description LIKE :searchTerm)",
-        { searchTerm: `%${searchTerm}%` }
+        { searchTerm: `%${query}%` }
       );
 
     const [entities, total] = await queryBuilder
-      .skip((paginationDto.page - 1) * paginationDto.limit)
-      .take(paginationDto.limit)
+      .skip((page - 1) * limit)
+      .take(limit)
       .orderBy("role.createdAt", "DESC")
       .getManyAndCount();
 
@@ -118,13 +162,16 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
     };
   }
 
+  /**
+   * Update role with cache invalidation
+   */
   async update(id: number, role: Partial<Role>, permissionIds?: number[]): Promise<Role> {
     // Update basic role properties
-    await this.roleRepository.update(id, this.toTypeOrmEntity(role as Role));
+    await this.repository.update(id, this.toTypeOrmEntity(role as Role));
     
     // If permissionIds are provided, update the permissions
     if (permissionIds !== undefined) {
-      const roleEntity = await this.roleRepository.findOne({
+      const roleEntity = await this.repository.findOne({
         where: { id },
         relations: ['permissionEntities'],
       });
@@ -136,12 +183,12 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
         } else {
           roleEntity.permissionEntities = [];
         }
-        await this.roleRepository.save(roleEntity);
+        await this.repository.save(roleEntity);
       }
     }
     
     // Fetch and return the updated role with permissions
-    const updatedEntity = await this.roleRepository.findOne({
+    const updatedEntity = await this.repository.findOne({
       where: { id },
       relations: ['permissionEntities'],
     });
@@ -149,28 +196,28 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
   }
 
   async delete(id: number): Promise<void> {
-    await this.roleRepository.delete(id);
+    await this.repository.delete(id);
   }
 
   async existsByName(name: string): Promise<boolean> {
-    const count = await this.roleRepository.count({
+    const count = await this.repository.count({
       where: { name },
     });
     return count > 0;
   }
 
   async count(): Promise<number> {
-    return await this.roleRepository.count();
+    return await this.repository.count();
   }
 
   async countActive(): Promise<number> {
-    return await this.roleRepository.count({
+    return await this.repository.count({
       where: { isActive: true },
     });
   }
 
   async findByDateRange(startDate: Date, endDate: Date): Promise<Role[]> {
-    const entities = await this.roleRepository.find({
+    const entities = await this.repository.find({
       where: {
         createdAt: Between(startDate, endDate),
       },
@@ -181,7 +228,7 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
   }
 
   // Helper methods for entity conversion
-  private toTypeOrmEntity(role: Role): Partial<RoleTypeOrmEntity> {
+  protected toTypeOrmEntity(role: Role): Partial<RoleTypeOrmEntity> {
     return {
       id: role.id,
       name: role.name,
@@ -192,7 +239,7 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
     };
   }
 
-  private toDomainEntity(entity: RoleTypeOrmEntity): Role {
+  protected toDomainEntity(entity: RoleTypeOrmEntity): Role {
     const role = new Role();
     role.id = entity.id;
     role.name = entity.name;
@@ -210,7 +257,7 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
   }
 
   async findByPermission(permission: string): Promise<Role[]> {
-    const entities = await this.roleRepository
+    const entities = await this.repository
       .createQueryBuilder("role")
       .leftJoinAndSelect("role.permissionEntities", "permission")
       .where("permission.name = :permission", { permission })
@@ -224,7 +271,7 @@ export class RoleTypeOrmRepository implements RoleRepositoryInterface {
     limit: number,
     search?: string
   ): Promise<{ roles: Role[]; total: number }> {
-    const queryBuilder = this.roleRepository.createQueryBuilder("role")
+    const queryBuilder = this.repository.createQueryBuilder("role")
       .leftJoinAndSelect("role.permissionEntities", "permission");
 
     if (search) {

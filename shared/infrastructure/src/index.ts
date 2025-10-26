@@ -28,6 +28,13 @@ export * from "./interceptors/transform.interceptor";
 
 // Communication
 export * from "./communication/http-client";
+
+// Database
+export * from "./database/base-typeorm.repository";
+
+// Cache
+export * from "./cache/redis-cache.service";
+export { CacheErrorStrategy, CacheSetOptions, CacheServiceOptions } from "./cache/redis-cache.service";
 export * from "./communication/service-communicator";
 
 // Validation
@@ -55,3 +62,4 @@ export * from "./config/service-config";
 // Health
 export * from "./health/health-check";
 export * from "./health/health-indicator";
+export * from './cache/redis-cache.service';
