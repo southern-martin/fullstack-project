@@ -12,11 +12,20 @@
 
 ## 🎯 Quick Links
 
-- **[📖 Documentation Index](DOCUMENTATION-INDEX.md)** - ⭐ Complete navigation
+### 📚 Essential Documentation
+- **[🏗️ Architecture Guide](ARCHITECTURE-GUIDE.md)** - ⭐ **NEW!** Complete architecture, patterns, and AI prompts
+- **[⚡ Developer Quick Reference](DEVELOPER-QUICK-REFERENCE.md)** - ⭐ **NEW!** Fast command reference
+- **[📖 Documentation Index](DOCUMENTATION-INDEX.md)** - Complete navigation
 - **[🚀 Quick Start](QUICK-START.md)** - Get running in 5 minutes
+
+### 🚀 Deployment Guides
 - **[☁️ GCP Deployment](QUICK-REFERENCE-GCP.md)** - Deploy to Google Cloud
 - **[🖥️ VM Deployment](infrastructure/vm/README.md)** - Deploy to custom VMs
+
+### 🧪 Testing & API
 - **[📮 Postman Collection](Fullstack-Project-API.postman_collection.json)** - API testing
+- **[🤖 AI Instructions](.github/copilot-instructions.md)** - Copilot guidelines
+- **[📊 Swagger Index](swagger-index.html)** - ⭐ **NEW!** Central API documentation hub
 
 ---
 
