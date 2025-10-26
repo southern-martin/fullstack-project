@@ -1,4 +1,5 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { WinstonLoggerService } from "@shared/infrastructure/logging/winston-logger.service";
 import { CarrierRepositoryInterface } from "../../domain/repositories/carrier.repository.interface";
 import { CarrierResponseDto } from "../dto/carrier-response.dto";
 
@@ -9,10 +10,14 @@ import { CarrierResponseDto } from "../dto/carrier-response.dto";
  */
 @Injectable()
 export class GetCarrierUseCase {
+  private readonly logger = new WinstonLoggerService();
+
   constructor(
     @Inject("CarrierRepositoryInterface")
     private readonly carrierRepository: CarrierRepositoryInterface
-  ) {}
+  ) {
+    this.logger.setContext(GetCarrierUseCase.name);
+  }
 
   /**
    * Executes the get carrier by ID use case
@@ -20,12 +25,30 @@ export class GetCarrierUseCase {
    * @returns Carrier response
    */
   async executeById(id: number): Promise<CarrierResponseDto> {
-    const carrier = await this.carrierRepository.findById(id);
-    if (!carrier) {
-      throw new NotFoundException("Carrier not found");
-    }
+    try {
+      this.logger.debug("Getting carrier by ID", { carrierId: id });
 
-    return this.mapToResponseDto(carrier);
+      const carrier = await this.carrierRepository.findById(id);
+      if (!carrier) {
+        this.logger.warn("Carrier not found", { carrierId: id });
+        throw new NotFoundException("Carrier not found");
+      }
+
+      this.logger.debug("Carrier found", {
+        carrierId: carrier.id,
+        name: carrier.name,
+      });
+
+      return this.mapToResponseDto(carrier);
+    } catch (error) {
+      if (!(error instanceof NotFoundException)) {
+        this.logger.error(
+          `Failed to get carrier by ID: ${error.message}`,
+          error.stack
+        );
+      }
+      throw error;
+    }
   }
 
   /**
@@ -34,12 +57,30 @@ export class GetCarrierUseCase {
    * @returns Carrier response
    */
   async executeByName(name: string): Promise<CarrierResponseDto> {
-    const carrier = await this.carrierRepository.findByName(name);
-    if (!carrier) {
-      throw new NotFoundException("Carrier not found");
-    }
+    try {
+      this.logger.debug("Getting carrier by name", { name });
 
-    return this.mapToResponseDto(carrier);
+      const carrier = await this.carrierRepository.findByName(name);
+      if (!carrier) {
+        this.logger.warn("Carrier not found with name", { name });
+        throw new NotFoundException("Carrier not found");
+      }
+
+      this.logger.debug("Carrier found", {
+        carrierId: carrier.id,
+        name: carrier.name,
+      });
+
+      return this.mapToResponseDto(carrier);
+    } catch (error) {
+      if (!(error instanceof NotFoundException)) {
+        this.logger.error(
+          `Failed to get carrier by name: ${error.message}`,
+          error.stack
+        );
+      }
+      throw error;
+    }
   }
 
   /**
@@ -60,20 +101,37 @@ export class GetCarrierUseCase {
     limit: number;
     totalPages: number;
   }> {
-    const { carriers, total } = await this.carrierRepository.findPaginated(
-      page,
-      limit,
-      search
-    );
-    const totalPages = Math.ceil(total / limit);
+    try {
+      this.logger.debug("Getting all carriers", { page, limit, search });
 
-    return {
-      carriers: carriers.map((carrier) => this.mapToResponseDto(carrier)),
-      total,
-      page,
-      limit,
-      totalPages,
-    };
+      const { carriers, total } = await this.carrierRepository.findPaginated(
+        page,
+        limit,
+        search
+      );
+      const totalPages = Math.ceil(total / limit);
+
+      this.logger.debug("Retrieved carriers", {
+        total,
+        returned: carriers.length,
+        page,
+        totalPages,
+      });
+
+      return {
+        carriers: carriers.map((carrier) => this.mapToResponseDto(carrier)),
+        total,
+        page,
+        limit,
+        totalPages,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to get all carriers: ${error.message}`,
+        error.stack
+      );
+      throw error;
+    }
   }
 
   /**
@@ -81,8 +139,23 @@ export class GetCarrierUseCase {
    * @returns Active carriers
    */
   async executeActive(): Promise<CarrierResponseDto[]> {
-    const carriers = await this.carrierRepository.findActive();
-    return carriers.map((carrier) => this.mapToResponseDto(carrier));
+    try {
+      this.logger.debug("Getting active carriers");
+
+      const carriers = await this.carrierRepository.findActive();
+
+      this.logger.debug("Retrieved active carriers", {
+        count: carriers.length,
+      });
+
+      return carriers.map((carrier) => this.mapToResponseDto(carrier));
+    } catch (error) {
+      this.logger.error(
+        `Failed to get active carriers: ${error.message}`,
+        error.stack
+      );
+      throw error;
+    }
   }
 
   /**
@@ -90,8 +163,21 @@ export class GetCarrierUseCase {
    * @returns Carrier count
    */
   async executeCount(): Promise<{ count: number }> {
-    const count = await this.carrierRepository.count();
-    return { count };
+    try {
+      this.logger.debug("Getting carrier count");
+
+      const count = await this.carrierRepository.count();
+
+      this.logger.debug("Retrieved carrier count", { count });
+
+      return { count };
+    } catch (error) {
+      this.logger.error(
+        `Failed to get carrier count: ${error.message}`,
+        error.stack
+      );
+      throw error;
+    }
   }
 
   /**

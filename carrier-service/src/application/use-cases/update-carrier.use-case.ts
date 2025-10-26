@@ -5,6 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { WinstonLoggerService } from "@shared/infrastructure/logging/winston-logger.service";
 import {
   CarrierActivatedEvent,
   CarrierDeactivatedEvent,
@@ -23,13 +24,17 @@ import { UpdateCarrierDto } from "../dto/update-carrier.dto";
  */
 @Injectable()
 export class UpdateCarrierUseCase {
+  private readonly logger = new WinstonLoggerService();
+
   constructor(
     @Inject("CarrierRepositoryInterface")
     private readonly carrierRepository: CarrierRepositoryInterface,
     private readonly carrierDomainService: CarrierDomainService,
     @Inject("IEventBus")
     private readonly eventBus: IEventBus
-  ) {}
+  ) {
+    this.logger.setContext(UpdateCarrierUseCase.name);
+  }
 
   /**
    * Executes the update carrier use case
@@ -41,83 +46,120 @@ export class UpdateCarrierUseCase {
     id: number,
     updateCarrierDto: UpdateCarrierDto
   ): Promise<CarrierResponseDto> {
-    // 1. Find existing carrier
-    const existingCarrier = await this.carrierRepository.findById(id);
-    if (!existingCarrier) {
-      throw new NotFoundException("Carrier not found");
-    }
+    try {
+      this.logger.log("Updating carrier", {
+        carrierId: id,
+        fields: Object.keys(updateCarrierDto),
+      });
 
-    // 2. Validate update data using domain service
-    const validation =
-      this.carrierDomainService.validateCarrierUpdateData(updateCarrierDto);
-    if (!validation.isValid) {
-      throw new BadRequestException(validation.errors.join(", "));
-    }
-
-    // 3. Check if name is being changed and if it already exists
-    if (
-      updateCarrierDto.name &&
-      updateCarrierDto.name !== existingCarrier.name
-    ) {
-      const carrierWithSameName = await this.carrierRepository.findByName(
-        updateCarrierDto.name
-      );
-      if (carrierWithSameName) {
-        throw new ConflictException("Carrier name already exists");
+      // 1. Find existing carrier
+      const existingCarrier = await this.carrierRepository.findById(id);
+      if (!existingCarrier) {
+        this.logger.warn("Carrier not found", { carrierId: id });
+        throw new NotFoundException("Carrier not found");
       }
-    }
 
-    // 4. Validate metadata if provided
-    if (updateCarrierDto.metadata !== undefined) {
-      const metadataValidation = this.carrierDomainService.validateMetadata(
-        updateCarrierDto.metadata
-      );
-      if (!metadataValidation.isValid) {
-        throw new BadRequestException(metadataValidation.errors.join(", "));
+      // 2. Validate update data using domain service
+      const validation =
+        this.carrierDomainService.validateCarrierUpdateData(updateCarrierDto);
+      if (!validation.isValid) {
+        this.logger.warn("Carrier update validation failed", {
+          carrierId: id,
+          errors: validation.errors,
+        });
+        throw new BadRequestException(validation.errors.join(", "));
       }
-    }
 
-    // 5. Prepare update data and track status change
-    const updateData: Partial<any> = {};
-    const previousData = { ...existingCarrier };
-    const isStatusChanging =
-      updateCarrierDto.isActive !== undefined &&
-      updateCarrierDto.isActive !== existingCarrier.isActive;
+      // 3. Check if name is being changed and if it already exists
+      if (
+        updateCarrierDto.name &&
+        updateCarrierDto.name !== existingCarrier.name
+      ) {
+        const carrierWithSameName = await this.carrierRepository.findByName(
+          updateCarrierDto.name
+        );
+        if (carrierWithSameName) {
+          this.logger.warn("Carrier name already exists", {
+            carrierId: id,
+            newName: updateCarrierDto.name,
+            conflictingCarrierId: carrierWithSameName.id,
+          });
+          throw new ConflictException("Carrier name already exists");
+        }
+      }
 
-    if (updateCarrierDto.name !== undefined)
-      updateData.name = updateCarrierDto.name;
-    if (updateCarrierDto.description !== undefined)
-      updateData.description = updateCarrierDto.description;
-    if (updateCarrierDto.isActive !== undefined)
-      updateData.isActive = updateCarrierDto.isActive;
-    if (updateCarrierDto.contactEmail !== undefined)
-      updateData.contactEmail = updateCarrierDto.contactEmail;
-    if (updateCarrierDto.contactPhone !== undefined)
-      updateData.contactPhone = updateCarrierDto.contactPhone;
-    if (updateCarrierDto.metadata !== undefined)
-      updateData.metadata = updateCarrierDto.metadata;
+      // 4. Validate metadata if provided
+      if (updateCarrierDto.metadata !== undefined) {
+        const metadataValidation = this.carrierDomainService.validateMetadata(
+          updateCarrierDto.metadata
+        );
+        if (!metadataValidation.isValid) {
+          this.logger.warn("Carrier metadata validation failed", {
+            carrierId: id,
+            errors: metadataValidation.errors,
+          });
+          throw new BadRequestException(metadataValidation.errors.join(", "));
+        }
+      }
 
-    // 6. Update carrier in repository
-    const updatedCarrier = await this.carrierRepository.update(id, updateData);
+      // 5. Prepare update data and track status change
+      const updateData: Partial<any> = {};
+      const previousData = { ...existingCarrier };
+      const isStatusChanging =
+        updateCarrierDto.isActive !== undefined &&
+        updateCarrierDto.isActive !== existingCarrier.isActive;
 
-    // 7. Publish CarrierUpdatedEvent
-    await this.eventBus.publish(
-      new CarrierUpdatedEvent(updatedCarrier, previousData)
-    );
+      if (updateCarrierDto.name !== undefined)
+        updateData.name = updateCarrierDto.name;
+      if (updateCarrierDto.description !== undefined)
+        updateData.description = updateCarrierDto.description;
+      if (updateCarrierDto.isActive !== undefined)
+        updateData.isActive = updateCarrierDto.isActive;
+      if (updateCarrierDto.contactEmail !== undefined)
+        updateData.contactEmail = updateCarrierDto.contactEmail;
+      if (updateCarrierDto.contactPhone !== undefined)
+        updateData.contactPhone = updateCarrierDto.contactPhone;
+      if (updateCarrierDto.metadata !== undefined)
+        updateData.metadata = updateCarrierDto.metadata;
 
-    // 8. Publish activation/deactivation events if status changed
-    if (isStatusChanging) {
-      if (updateCarrierDto.isActive) {
-        await this.eventBus.publish(new CarrierActivatedEvent(updatedCarrier));
-      } else {
-        await this.eventBus.publish(
-          new CarrierDeactivatedEvent(updatedCarrier)
+      // 6. Update carrier in repository
+      const updatedCarrier = await this.carrierRepository.update(id, updateData);
+
+      this.logger.log("Carrier updated successfully", {
+        carrierId: id,
+        updatedFields: Object.keys(updateData),
+      });
+
+      // 7. Publish CarrierUpdatedEvent
+      await this.eventBus.publish(
+        new CarrierUpdatedEvent(updatedCarrier, previousData)
+      );
+      this.logger.debug("CarrierUpdatedEvent published", { carrierId: id });
+
+      // 8. Publish activation/deactivation events if status changed
+      if (isStatusChanging) {
+        if (updateCarrierDto.isActive) {
+          await this.eventBus.publish(new CarrierActivatedEvent(updatedCarrier));
+          this.logger.log("Carrier activated", { carrierId: id });
+        } else {
+          await this.eventBus.publish(
+            new CarrierDeactivatedEvent(updatedCarrier)
+          );
+          this.logger.log("Carrier deactivated", { carrierId: id });
+        }
+      }
+
+      // 9. Return response
+      return this.mapToResponseDto(updatedCarrier);
+    } catch (error) {
+      if (!(error instanceof NotFoundException)) {
+        this.logger.error(
+          `Failed to update carrier ${id}: ${error.message}`,
+          error.stack
         );
       }
+      throw error;
     }
-
-    // 9. Return response
-    return this.mapToResponseDto(updatedCarrier);
   }
 
   /**
