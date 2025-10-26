@@ -13,7 +13,9 @@ import {
  * Maps to domain Customer entity
  */
 @Entity("customers")
-@Index(["isActive"])
+@Index(["email"], { unique: true })
+@Index(["isActive", "createdAt"])
+@Index(["lastName"])
 @Index(["createdAt"])
 export class CustomerTypeOrmEntity {
   @PrimaryGeneratedColumn()

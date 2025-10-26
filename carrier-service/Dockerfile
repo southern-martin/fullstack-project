@@ -16,7 +16,7 @@ WORKDIR /app/carrier-service
 COPY carrier-service/package*.json ./
 
 # Install all dependencies (including dev dependencies for build)
-RUN npm ci && npm cache clean --force
+RUN npm ci --legacy-peer-deps && npm cache clean --force
 
 # Copy carrier-service source code
 COPY carrier-service/ ./
@@ -40,11 +40,16 @@ WORKDIR /app/carrier-service
 # Copy shared infrastructure to parent directory for NPM resolution
 COPY --from=builder /app/shared/infrastructure /app/shared/infrastructure
 
+# Remove the src directory and create symlink for TypeScript path resolution (dist as src for runtime)
+RUN rm -rf /app/shared/infrastructure/src && \
+    ln -s /app/shared/infrastructure/dist /app/shared/infrastructure/src && \
+    ln -s /app/shared/infrastructure/node_modules /app/shared/infrastructure/dist/node_modules
+
 # Copy package files
 COPY --from=builder /app/carrier-service/package*.json ./
 
 # Install only production dependencies (creates symlink to ../shared/infrastructure)
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci --only=production --legacy-peer-deps && npm cache clean --force
 
 # Copy built application from builder stage
 COPY --from=builder /app/carrier-service/dist ./dist
@@ -55,6 +60,9 @@ COPY --from=builder /app/carrier-service/scripts ./scripts
 # Change ownership to app user
 RUN chown -R nestjs:nodejs /app
 USER nestjs
+
+# Set NODE_PATH to help Node.js resolve shared infrastructure dependencies
+ENV NODE_PATH=/app/shared/infrastructure/node_modules:/app/carrier-service/node_modules
 
 # Expose port
 EXPOSE 3005

@@ -1,5 +1,9 @@
 import { Module } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
+
+// Shared Infrastructure
+import { RedisCacheService } from "@shared/infrastructure";
 
 // Use Cases
 import { CreateCarrierUseCase } from "./use-cases/create-carrier.use-case";
@@ -24,10 +28,30 @@ import { RedisEventBus } from "../infrastructure/events/redis-event-bus";
  */
 @Module({
   imports: [
+    ConfigModule,
     // Register TypeORM entity for dependency injection
     TypeOrmModule.forFeature([CarrierTypeOrmEntity]),
   ],
   providers: [
+    // Redis Cache Service
+    {
+      provide: RedisCacheService,
+      useFactory: (configService: ConfigService) => {
+        const redisHost = configService.get("REDIS_HOST", "shared-redis");
+        const redisPort = configService.get("REDIS_PORT", 6379);
+        const redisPassword = configService.get("REDIS_PASSWORD", "");
+        const redisUrl = redisPassword
+          ? `redis://:${redisPassword}@${redisHost}:${redisPort}`
+          : `redis://${redisHost}:${redisPort}`;
+        
+        return new RedisCacheService({
+          redisUrl,
+          prefix: configService.get("REDIS_KEY_PREFIX", "carrier:"),
+        });
+      },
+      inject: [ConfigService],
+    },
+
     // Domain Services
     CarrierDomainService,
 

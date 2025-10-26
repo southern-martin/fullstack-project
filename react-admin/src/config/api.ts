@@ -1,7 +1,22 @@
+// ============================================
+// KONG API GATEWAY CONFIGURATION
+// ============================================
+// All services now route through Kong Gateway (port 8000)
+// This provides centralized:
+// - JWT Authentication & Authorization
+// - Rate Limiting (300/min public, 50/min protected)
+// - CORS handling
+// - Request logging and monitoring
+// - Load balancing (when scaled)
+// ============================================
+
+// Kong Gateway Base URL
+const KONG_GATEWAY_URL = process.env.REACT_APP_KONG_GATEWAY_URL || 'http://localhost:8000';
+
 // Service-specific API configurations
+// All services use Kong Gateway as the entry point
 export const AUTH_API_CONFIG = {
-  BASE_URL:
-    (process.env.REACT_APP_AUTH_API_URL || 'http://localhost:3001') + '/api/v1',
+  BASE_URL: KONG_GATEWAY_URL + '/api/v1',
   HEADERS: {
     'Content-Type': 'application/json',
     'Accept-Language': 'en',
@@ -10,8 +25,7 @@ export const AUTH_API_CONFIG = {
 } as const;
 
 export const USER_API_CONFIG = {
-  BASE_URL:
-    (process.env.REACT_APP_USER_API_URL || 'http://localhost:3003') + '/api/v1',
+  BASE_URL: KONG_GATEWAY_URL + '/api/v1',
   HEADERS: {
     'Content-Type': 'application/json',
     'Accept-Language': 'en',
@@ -20,9 +34,7 @@ export const USER_API_CONFIG = {
 } as const;
 
 export const CUSTOMER_API_CONFIG = {
-  BASE_URL:
-    (process.env.REACT_APP_CUSTOMER_API_URL || 'http://localhost:3004') +
-    '/api/v1',
+  BASE_URL: KONG_GATEWAY_URL + '/api/v1',
   HEADERS: {
     'Content-Type': 'application/json',
     'Accept-Language': 'en',
@@ -31,9 +43,7 @@ export const CUSTOMER_API_CONFIG = {
 } as const;
 
 export const CARRIER_API_CONFIG = {
-  BASE_URL:
-    (process.env.REACT_APP_CARRIER_API_URL || 'http://localhost:3005') +
-    '/api/v1',
+  BASE_URL: KONG_GATEWAY_URL + '/api/v1',
   HEADERS: {
     'Content-Type': 'application/json',
     'Accept-Language': 'en',
@@ -42,9 +52,7 @@ export const CARRIER_API_CONFIG = {
 } as const;
 
 export const PRICING_API_CONFIG = {
-  BASE_URL:
-    (process.env.REACT_APP_PRICING_API_URL || 'http://localhost:3006') +
-    '/api/v1',
+  BASE_URL: KONG_GATEWAY_URL + '/api/v1',
   HEADERS: {
     'Content-Type': 'application/json',
     'Accept-Language': 'en',
@@ -53,9 +61,7 @@ export const PRICING_API_CONFIG = {
 } as const;
 
 export const TRANSLATION_API_CONFIG = {
-  BASE_URL:
-    (process.env.REACT_APP_TRANSLATION_API_URL || 'http://localhost:3007') +
-    '/api/v1/translation',
+  BASE_URL: KONG_GATEWAY_URL + '/api/v1/translation',
   HEADERS: {
     'Content-Type': 'application/json',
     'Accept-Language': 'en',
