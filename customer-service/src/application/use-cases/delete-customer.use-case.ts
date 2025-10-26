@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { CustomerDeletedEvent } from "../../domain/events/customer-deleted.event";
-import { EventBusInterface } from "../../domain/events/event-bus.interface";
+import { IEventBus } from "../../domain/events/event-bus.interface";
 import { CustomerRepositoryInterface } from "../../domain/repositories/customer.repository.interface";
 import { CustomerDomainService } from "../../domain/services/customer.domain.service";
 
@@ -20,8 +20,8 @@ export class DeleteCustomerUseCase {
     @Inject("CustomerRepositoryInterface")
     private readonly customerRepository: CustomerRepositoryInterface,
     private readonly customerDomainService: CustomerDomainService,
-    @Inject("EventBusInterface")
-    private readonly eventBus: EventBusInterface
+    @Inject("IEventBus")
+    private readonly eventBus: IEventBus
   ) {}
 
   /**

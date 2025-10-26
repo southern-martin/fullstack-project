@@ -4,6 +4,7 @@ import { RoleRepositoryInterface } from "../../domain/repositories/role.reposito
 import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
 import { ListRolesQueryDto } from "../dto/list-roles-query.dto";
 import { RoleResponseDto } from "../dto/role-response.dto";
+import { UserResponseDto } from "../dto/user-response.dto";
 
 /**
  * Get Role Use Case
@@ -156,7 +157,7 @@ export class GetRoleUseCase {
   /**
    * Get users assigned to a role
    */
-  async executeUsersByRole(roleId: number): Promise<any[]> {
+  async executeUsersByRole(roleId: number): Promise<Partial<UserResponseDto>[]> {
     const role = await this.roleRepository.findById(roleId);
     if (!role) {
       throw new NotFoundException("Role not found");

@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException, Logger } from "@nestjs/common";
 import { ValidationException } from "@fullstack-project/shared-infrastructure";
-import { EventBusInterface } from "../../domain/events/event-bus.interface";
+import { IEventBus } from "../../domain/events/event-bus.interface";
 import { UserUpdatedEvent } from "../../domain/events/user-updated.event";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
 import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
@@ -26,8 +26,8 @@ export class UpdateUserUseCase {
     @Inject("UserDomainService")
     private readonly userDomainService: UserDomainService,
     private readonly passwordService: PasswordService,
-    @Inject("EventBusInterface")
-    private readonly eventBus: EventBusInterface
+    @Inject("IEventBus")
+    private readonly eventBus: IEventBus
   ) {}
 
   /**

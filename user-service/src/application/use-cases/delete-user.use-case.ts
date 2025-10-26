@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { EventBusInterface } from "../../domain/events/event-bus.interface";
+import { IEventBus } from "../../domain/events/event-bus.interface";
 import { UserDeletedEvent } from "../../domain/events/user-deleted.event";
 import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
 import { UserDomainService } from "../../domain/services/user.domain.service";
@@ -21,8 +21,8 @@ export class DeleteUserUseCase {
     private readonly userRepository: UserRepositoryInterface,
     @Inject("UserDomainService")
     private readonly userDomainService: UserDomainService,
-    @Inject("EventBusInterface")
-    private readonly eventBus: EventBusInterface
+    @Inject("IEventBus")
+    private readonly eventBus: IEventBus
   ) {}
 
   /**

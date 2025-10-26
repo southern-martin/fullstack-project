@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { WinstonLoggerService } from "@shared/infrastructure/logging";
-import { EventBusInterface } from "../../domain/events/event-bus.interface";
+import { DomainEvent } from "@fullstack-project/shared-infrastructure";
+import { IEventBus } from "../../domain/events/event-bus.interface";
 
 /**
  * In-Memory Event Bus Implementation
@@ -15,8 +16,8 @@ import { EventBusInterface } from "../../domain/events/event-bus.interface";
  * - Alerting capabilities
  */
 @Injectable()
-export class InMemoryEventBus implements EventBusInterface {
-  private handlers: Map<string, Array<(event: any) => Promise<void>>> =
+export class InMemoryEventBus implements IEventBus {
+  private handlers: Map<string, Array<(event: DomainEvent) => Promise<void>>> =
     new Map();
   private readonly logger = new WinstonLoggerService();
 
@@ -28,7 +29,7 @@ export class InMemoryEventBus implements EventBusInterface {
    * Publish a domain event
    * @param event - The domain event to publish
    */
-  async publish(event: any): Promise<void> {
+  async publish(event: DomainEvent): Promise<void> {
     const eventName = event.constructor.name;
     const handlers = this.handlers.get(eventName) || [];
     const eventData = event.getEventData ? event.getEventData() : event;
@@ -55,7 +56,7 @@ export class InMemoryEventBus implements EventBusInterface {
    * Publish multiple domain events
    * @param events - Array of domain events to publish
    */
-  async publishAll(events: any[]): Promise<void> {
+  async publishAll(events: DomainEvent[]): Promise<void> {
     for (const event of events) {
       await this.publish(event);
     }
@@ -66,7 +67,7 @@ export class InMemoryEventBus implements EventBusInterface {
    * @param eventName - The name of the event to subscribe to
    * @param handler - The handler function to execute
    */
-  subscribe(eventName: string, handler: (event: any) => Promise<void>): void {
+  subscribe(eventName: string, handler: (event: DomainEvent) => Promise<void>): void {
     if (!this.handlers.has(eventName)) {
       this.handlers.set(eventName, []);
     }

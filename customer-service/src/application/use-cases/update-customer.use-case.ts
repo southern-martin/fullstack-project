@@ -8,7 +8,7 @@ import {
 import { CustomerActivatedEvent } from "../../domain/events/customer-activated.event";
 import { CustomerDeactivatedEvent } from "../../domain/events/customer-deactivated.event";
 import { CustomerUpdatedEvent } from "../../domain/events/customer-updated.event";
-import { EventBusInterface } from "../../domain/events/event-bus.interface";
+import { IEventBus } from "../../domain/events/event-bus.interface";
 import { CustomerRepositoryInterface } from "../../domain/repositories/customer.repository.interface";
 import { CustomerDomainService } from "../../domain/services/customer.domain.service";
 import { CustomerResponseDto } from "../dto/customer-response.dto";
@@ -25,8 +25,8 @@ export class UpdateCustomerUseCase {
     @Inject("CustomerRepositoryInterface")
     private readonly customerRepository: CustomerRepositoryInterface,
     private readonly customerDomainService: CustomerDomainService,
-    @Inject("EventBusInterface")
-    private readonly eventBus: EventBusInterface
+    @Inject("IEventBus")
+    private readonly eventBus: IEventBus
   ) {}
 
   /**

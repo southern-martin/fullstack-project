@@ -1,5 +1,7 @@
 import { Module } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { RedisCacheService } from "@fullstack-project/shared-infrastructure";
 import { PermissionTypeOrmEntity } from "./database/typeorm/entities/permission.typeorm.entity";
 import { RoleTypeOrmEntity } from "./database/typeorm/entities/role.typeorm.entity";
 import { UserProfileTypeOrmEntity } from "./database/typeorm/entities/user-profile.typeorm.entity";
@@ -14,7 +16,7 @@ import { InMemoryEventBus } from "./events/in-memory-event-bus";
  * Infrastructure Module
  *
  * This module configures all infrastructure layer dependencies including:
- * - Database entities and repositories
+ * - Database entities and repositories with Redis caching
  * - Event bus for domain events
  * - External service integrations
  * - Infrastructure-specific configurations
@@ -29,6 +31,23 @@ import { InMemoryEventBus } from "./events/in-memory-event-bus";
     ]),
   ],
   providers: [
+    {
+      provide: RedisCacheService,
+      useFactory: (configService: ConfigService) => {
+        const redisHost = configService.get("REDIS_HOST", "shared-redis");
+        const redisPort = configService.get("REDIS_PORT", 6379);
+        const redisPassword = configService.get("REDIS_PASSWORD", "");
+        const redisUrl = redisPassword
+          ? `redis://:${redisPassword}@${redisHost}:${redisPort}`
+          : `redis://${redisHost}:${redisPort}`;
+        
+        return new RedisCacheService({
+          redisUrl,
+          prefix: configService.get("REDIS_KEY_PREFIX", "user:"),
+        });
+      },
+      inject: [ConfigService],
+    },
     {
       provide: "UserRepositoryInterface",
       useClass: UserTypeOrmRepository,
@@ -46,7 +65,7 @@ import { InMemoryEventBus } from "./events/in-memory-event-bus";
       useClass: PermissionTypeOrmRepository,
     },
     {
-      provide: "EventBusInterface",
+      provide: "IEventBus",
       useClass: InMemoryEventBus,
     },
   ],
@@ -55,7 +74,8 @@ import { InMemoryEventBus } from "./events/in-memory-event-bus";
     "RoleRepositoryInterface",
     "UserProfileRepositoryInterface",
     "PermissionRepositoryInterface",
-    "EventBusInterface",
+    "IEventBus",
+    RedisCacheService,
   ],
 })
 export class InfrastructureModule {}

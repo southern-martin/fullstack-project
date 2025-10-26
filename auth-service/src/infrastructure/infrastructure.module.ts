@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { RedisCacheService } from "@fullstack-project/shared-infrastructure";
 
 // TypeORM Entities
 import { PermissionTypeOrmEntity } from "./database/typeorm/entities/permission.typeorm.entity";
@@ -28,6 +29,7 @@ import { KongService } from "./external-services/kong.service";
  * - Database repositories (User, Role)
  * - Event bus for domain events
  * - External services (Kong Gateway)
+ * - Redis caching service
  */
 @Module({
   imports: [
@@ -35,6 +37,24 @@ import { KongService } from "./external-services/kong.service";
     TypeOrmModule.forFeature([UserTypeOrmEntity, RoleTypeOrmEntity, PermissionTypeOrmEntity]),
   ],
   providers: [
+    // Redis Cache Service
+    {
+      provide: RedisCacheService,
+      useFactory: (configService: ConfigService) => {
+        const redisHost = configService.get("REDIS_HOST", "shared-redis");
+        const redisPort = configService.get("REDIS_PORT", 6379);
+        const redisPassword = configService.get("REDIS_PASSWORD", "");
+        const redisUrl = redisPassword
+          ? `redis://:${redisPassword}@${redisHost}:${redisPort}`
+          : `redis://${redisHost}:${redisPort}`;
+        
+        return new RedisCacheService({
+          redisUrl,
+          prefix: configService.get("REDIS_KEY_PREFIX", "auth:"),
+        });
+      },
+      inject: [ConfigService],
+    },
     // Repository Implementations
     {
       provide: "UserRepositoryInterface",
@@ -46,7 +66,7 @@ import { KongService } from "./external-services/kong.service";
     },
     // Event Bus Implementation
     {
-      provide: "EventBusInterface",
+      provide: "IEventBus",
       useClass: InMemoryEventBus,
     },
     // External Services
@@ -57,7 +77,7 @@ import { KongService } from "./external-services/kong.service";
     "UserRepositoryInterface",
     "RoleRepositoryInterface",
     // Export event bus
-    "EventBusInterface",
+    "IEventBus",
     // Export external services
     KongService,
   ],

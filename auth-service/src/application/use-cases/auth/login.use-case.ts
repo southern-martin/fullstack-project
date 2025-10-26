@@ -6,7 +6,7 @@ import {
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { WinstonLoggerService } from "@shared/infrastructure/logging";
-import { EventBusInterface } from "../../../domain/events/event-bus.interface";
+import { IEventBus } from "../../../domain/events/event-bus.interface";
 import { LoginFailedEvent } from "../../../domain/events/login-failed.event";
 import { UserLoggedInEvent } from "../../../domain/events/user-logged-in.event";
 import { UserRepositoryInterface } from "../../../domain/repositories/user.repository.interface";
@@ -32,8 +32,8 @@ export class LoginUseCase {
     private readonly authDomainService: AuthDomainService,
     private readonly userDomainService: UserDomainService,
     private readonly jwtService: JwtService,
-    @Inject("EventBusInterface")
-    private readonly eventBus: EventBusInterface,
+    @Inject("IEventBus")
+    private readonly eventBus: IEventBus,
     private readonly kongService: KongService
   ) {
     this.logger.setContext("LoginUseCase");

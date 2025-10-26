@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { createClient, RedisClientType } from "redis";
-import { EventBusInterface } from "../../domain/events/event-bus.interface";
+import { IEventBus } from "../../domain/events/event-bus.interface";
 
 /**
  * Redis Event Bus
@@ -8,7 +8,7 @@ import { EventBusInterface } from "../../domain/events/event-bus.interface";
  * Uses shared Redis instance for cross-service communication
  */
 @Injectable()
-export class RedisEventBus implements EventBusInterface {
+export class RedisEventBus implements IEventBus {
   private readonly logger = new Logger(RedisEventBus.name);
   private readonly client: RedisClientType;
   private readonly channel = "customer-service-events";

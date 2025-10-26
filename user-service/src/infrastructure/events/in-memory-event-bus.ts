@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { EventBusInterface } from "../../domain/events/event-bus.interface";
+import { IEventBus } from "../../domain/events/event-bus.interface";
 
 /**
  * In-Memory Event Bus Implementation
@@ -7,7 +7,7 @@ import { EventBusInterface } from "../../domain/events/event-bus.interface";
  * In production, replace with RabbitMQ, Kafka, or EventEmitter2
  */
 @Injectable()
-export class InMemoryEventBus implements EventBusInterface {
+export class InMemoryEventBus implements IEventBus {
   private handlers: Map<string, Array<(event: any) => Promise<void>>> =
     new Map();
 
