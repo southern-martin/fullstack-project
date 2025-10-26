@@ -2,7 +2,7 @@
  * Domain Events Index
  * Export all auth-related domain events
  */
-export { EventBusInterface } from "./event-bus.interface";
+export { IEventBus } from "./event-bus.interface";
 export { UserRegisteredEvent } from "./user-registered.event";
 export { UserLoggedInEvent } from "./user-logged-in.event";
 export { LoginFailedEvent } from "./login-failed.event";

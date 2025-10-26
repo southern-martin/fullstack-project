@@ -6,7 +6,7 @@ import {
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { User } from "../../../domain/entities/user.entity";
-import { EventBusInterface } from "../../../domain/events/event-bus.interface";
+import { IEventBus } from "../../../domain/events/event-bus.interface";
 import { UserRegisteredEvent } from "../../../domain/events/user-registered.event";
 import { RoleRepositoryInterface } from "../../../domain/repositories/role.repository.interface";
 import { UserRepositoryInterface } from "../../../domain/repositories/user.repository.interface";
@@ -32,8 +32,8 @@ export class RegisterUseCase {
     private readonly authDomainService: AuthDomainService,
     private readonly userDomainService: UserDomainService,
     private readonly jwtService: JwtService,
-    @Inject("EventBusInterface")
-    private readonly eventBus: EventBusInterface,
+    @Inject("IEventBus")
+    private readonly eventBus: IEventBus,
     private readonly kongService: KongService
   ) {}
 

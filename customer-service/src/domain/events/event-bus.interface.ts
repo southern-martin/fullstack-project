@@ -3,7 +3,7 @@
  * Defines the contract for publishing domain events
  * Framework-independent interface for event dispatching
  */
-export interface EventBusInterface {
+export interface IEventBus {
   /**
    * Publish a domain event
    * @param event - The domain event to publish

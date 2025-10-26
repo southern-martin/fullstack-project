@@ -6,7 +6,7 @@ import {
 } from "@nestjs/common";
 import { Customer } from "../../domain/entities/customer.entity";
 import { CustomerCreatedEvent } from "../../domain/events/customer-created.event";
-import { EventBusInterface } from "../../domain/events/event-bus.interface";
+import { IEventBus } from "../../domain/events/event-bus.interface";
 import { CustomerRepositoryInterface } from "../../domain/repositories/customer.repository.interface";
 import { CustomerDomainService } from "../../domain/services/customer.domain.service";
 import { CreateCustomerDto } from "../dto/create-customer.dto";
@@ -23,8 +23,8 @@ export class CreateCustomerUseCase {
     @Inject("CustomerRepositoryInterface")
     private readonly customerRepository: CustomerRepositoryInterface,
     private readonly customerDomainService: CustomerDomainService,
-    @Inject("EventBusInterface")
-    private readonly eventBus: EventBusInterface
+    @Inject("IEventBus")
+    private readonly eventBus: IEventBus
   ) {}
 
   /**
