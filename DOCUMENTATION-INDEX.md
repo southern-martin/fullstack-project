@@ -8,9 +8,23 @@ Welcome to the Fullstack Microservices Project documentation. This index provide
 
 **New to this project? Start here:**
 
-1. **[Quick Start Guide](QUICK-START.md)** - Get the project running in 5 minutes
-2. **[Startup Guide](START-SERVICES-GUIDE.md)** - Understanding service startup
-3. **[README](README.md)** - Main project overview
+1. **[🏗️ Architecture Guide](ARCHITECTURE-GUIDE.md)** - ⭐ **NEW!** Complete architecture reference
+2. **[⚡ Developer Quick Reference](DEVELOPER-QUICK-REFERENCE.md)** - ⭐ **NEW!** Daily command reference
+3. **[Quick Start Guide](QUICK-START.md)** - Get the project running in 5 minutes
+4. **[Startup Guide](START-SERVICES-GUIDE.md)** - Understanding service startup
+5. **[README](README.md)** - Main project overview
+
+### 🎯 What to Read First
+
+**For New Developers:**
+1. Read [ARCHITECTURE-GUIDE.md](ARCHITECTURE-GUIDE.md) - Understand the complete system
+2. Follow [QUICK-START.md](QUICK-START.md) - Get services running
+3. Bookmark [DEVELOPER-QUICK-REFERENCE.md](DEVELOPER-QUICK-REFERENCE.md) - Daily commands
+
+**For AI Agents:**
+1. Read [ARCHITECTURE-GUIDE.md](ARCHITECTURE-GUIDE.md) - Architecture patterns and AI prompts
+2. Read [.github/copilot-instructions.md](.github/copilot-instructions.md) - AI-specific guidelines
+3. Use **AI Agent Prompts** section for common tasks
 
 ## 📖 Documentation Structure
 
