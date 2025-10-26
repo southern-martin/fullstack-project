@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
+import { WinstonLoggerService } from "@shared/infrastructure/logging/winston-logger.service";
 import { PriceCalculationRepositoryInterface } from "../../domain/repositories/price-calculation.repository.interface";
 import { PriceCalculationResponseDto } from "../dto/price-calculation-response.dto";
 
@@ -9,10 +10,14 @@ import { PriceCalculationResponseDto } from "../dto/price-calculation-response.d
  */
 @Injectable()
 export class GetPriceCalculationHistoryUseCase {
+  private readonly logger = new WinstonLoggerService();
+
   constructor(
     @Inject("PriceCalculationRepositoryInterface")
     private readonly priceCalculationRepository: PriceCalculationRepositoryInterface
-  ) {}
+  ) {
+    this.logger.setContext(GetPriceCalculationHistoryUseCase.name);
+  }
 
   /**
    * Gets price calculation history with pagination
@@ -32,19 +37,40 @@ export class GetPriceCalculationHistoryUseCase {
     limit: number;
     totalPages: number;
   }> {
-    const { priceCalculations, total } =
-      await this.priceCalculationRepository.findPaginated(page, limit, search);
-    const totalPages = Math.ceil(total / limit);
+    try {
+      this.logger.debug("Getting price calculation history", {
+        page,
+        limit,
+        search,
+      });
 
-    return {
-      priceCalculations: priceCalculations.map((calculation) =>
-        this.mapToResponseDto(calculation)
-      ),
-      total,
-      page,
-      limit,
-      totalPages,
-    };
+      const { priceCalculations, total } =
+        await this.priceCalculationRepository.findPaginated(page, limit, search);
+      const totalPages = Math.ceil(total / limit);
+
+      this.logger.debug("Retrieved price calculation history", {
+        total,
+        returned: priceCalculations.length,
+        page,
+        totalPages,
+      });
+
+      return {
+        priceCalculations: priceCalculations.map((calculation) =>
+          this.mapToResponseDto(calculation)
+        ),
+        total,
+        page,
+        limit,
+        totalPages,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to get price calculation history: ${error.message}`,
+        error.stack
+      );
+      throw error;
+    }
   }
 
   /**
@@ -52,8 +78,21 @@ export class GetPriceCalculationHistoryUseCase {
    * @returns Price calculation count
    */
   async getCount(): Promise<{ count: number }> {
-    const count = await this.priceCalculationRepository.count();
-    return { count };
+    try {
+      this.logger.debug("Getting price calculation count");
+
+      const count = await this.priceCalculationRepository.count();
+
+      this.logger.debug("Retrieved price calculation count", { count });
+
+      return { count };
+    } catch (error) {
+      this.logger.error(
+        `Failed to get price calculation count: ${error.message}`,
+        error.stack
+      );
+      throw error;
+    }
   }
 
   /**
