@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fullstack Project - API Documentation Index</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .service-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .service-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .service-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .service-title {
+            flex: 1;
+        }
+
+        .service-title h2 {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .service-port {
+            font-size: 0.9em;
+            color: #666;
+            font-family: 'Courier New', monospace;
+        }
+
+        .service-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .service-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-running {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .info-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .info-section h3 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .info-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-item strong {
+            display: block;
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .info-item span {
+            color: #666;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            opacity: 0.9;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .quick-links {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .quick-links h3 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .quick-links ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .quick-links li {
+            padding: 0;
+        }
+
+        .quick-links a {
+            display: block;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            color: #667eea;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .quick-links a:hover {
+            background: #667eea;
+            color: white;
+            transform: translateX(5px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Fullstack Microservices Project</h1>
+            <p>API Documentation & Service Index</p>
+        </header>
+
+        <div class="info-section">
+            <h3>📊 System Overview</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <strong>Architecture</strong>
+                    <span>Hybrid Microservices with Clean Architecture</span>
+                </div>
+                <div class="info-item">
+                    <strong>Total Services</strong>
+                    <span>6 Microservices + API Gateway</span>
+                </div>
+                <div class="info-item">
+                    <strong>Database Strategy</strong>
+                    <span>Shared + Separate MySQL Databases</span>
+                </div>
+                <div class="info-item">
+                    <strong>Caching</strong>
+                    <span>Shared Redis (Port 6379)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-links">
+            <h3>📚 Documentation Quick Links</h3>
+            <ul>
+                <li><a href="./README.md">📖 Project README</a></li>
+                <li><a href="./ARCHITECTURE-GUIDE.md">🏗️ Architecture Guide</a></li>
+                <li><a href="./DEVELOPER-QUICK-REFERENCE.md">⚡ Developer Reference</a></li>
+                <li><a href="./AI-AGENT-PROMPTS.md">🤖 AI Agent Prompts</a></li>
+                <li><a href="./QUICK-START.md">🚀 Quick Start Guide</a></li>
+                <li><a href="./DOCUMENTATION-INDEX.md">📑 Documentation Index</a></li>
+            </ul>
+        </div>
+
+        <h2 style="color: white; text-align: center; margin-bottom: 30px; font-size: 2em;">
+            🎯 Microservices API Documentation
+        </h2>
+
+        <div class="services-grid">
+            <!-- Auth Service -->
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon">🔐</div>
+                    <div class="service-title">
+                        <h2>Auth Service</h2>
+                        <div class="service-port">Port: 3001</div>
+                    </div>
+                </div>
+                <p class="service-description">
+                    Authentication and authorization service. Handles user login, registration, JWT token management, and session control.
+                </p>
+                <div class="service-links">
+                    <a href="http://localhost:3001/api/docs" class="btn btn-primary" target="_blank">
+                        📖 Swagger Docs
+                    </a>
+                    <a href="http://localhost:3001/health" class="btn btn-secondary" target="_blank">
+                        ❤️ Health Check
+                    </a>
+                </div>
+            </div>
+
+            <!-- User Service -->
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon">👤</div>
+                    <div class="service-title">
+                        <h2>User Service</h2>
+                        <div class="service-port">Port: 3003</div>
+                    </div>
+                </div>
+                <p class="service-description">
+                    User management service. Manages user profiles, roles, permissions, and user-related data operations.
+                </p>
+                <div class="service-links">
+                    <a href="http://localhost:3003/api/docs" class="btn btn-primary" target="_blank">
+                        📖 Swagger Docs
+                    </a>
+                    <a href="http://localhost:3003/health" class="btn btn-secondary" target="_blank">
+                        ❤️ Health Check
+                    </a>
+                </div>
+            </div>
+
+            <!-- Customer Service -->
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon">🛍️</div>
+                    <div class="service-title">
+                        <h2>Customer Service</h2>
+                        <div class="service-port">Port: 3004</div>
+                    </div>
+                </div>
+                <p class="service-description">
+                    Customer management service. Handles customer data, profiles, preferences, and customer-related business logic.
+                </p>
+                <div class="service-links">
+                    <a href="http://localhost:3004/api/docs" class="btn btn-primary" target="_blank">
+                        📖 Swagger Docs
+                    </a>
+                    <a href="http://localhost:3004/health" class="btn btn-secondary" target="_blank">
+                        ❤️ Health Check
+                    </a>
+                </div>
+            </div>
+
+            <!-- Carrier Service -->
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon">🚚</div>
+                    <div class="service-title">
+                        <h2>Carrier Service</h2>
+                        <div class="service-port">Port: 3005</div>
+                    </div>
+                </div>
+                <p class="service-description">
+                    Shipping carrier management service. Manages carrier information, shipping methods, rates, and delivery tracking.
+                </p>
+                <div class="service-links">
+                    <a href="http://localhost:3005/api/docs" class="btn btn-primary" target="_blank">
+                        📖 Swagger Docs
+                    </a>
+                    <a href="http://localhost:3005/health" class="btn btn-secondary" target="_blank">
+                        ❤️ Health Check
+                    </a>
+                </div>
+            </div>
+
+            <!-- Pricing Service -->
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon">💰</div>
+                    <div class="service-title">
+                        <h2>Pricing Service</h2>
+                        <div class="service-port">Port: 3006</div>
+                    </div>
+                </div>
+                <p class="service-description">
+                    Pricing and quote management service. Handles pricing calculations, quotes, discounts, and pricing rules.
+                </p>
+                <div class="service-links">
+                    <a href="http://localhost:3006/api/docs" class="btn btn-primary" target="_blank">
+                        📖 Swagger Docs
+                    </a>
+                    <a href="http://localhost:3006/health" class="btn btn-secondary" target="_blank">
+                        ❤️ Health Check
+                    </a>
+                </div>
+            </div>
+
+            <!-- Translation Service -->
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon">🌐</div>
+                    <div class="service-title">
+                        <h2>Translation Service</h2>
+                        <div class="service-port">Port: 3007</div>
+                    </div>
+                </div>
+                <p class="service-description">
+                    Multi-language translation service. Provides internationalization (i18n) support and manages translations across the platform.
+                </p>
+                <div class="service-links">
+                    <a href="http://localhost:3007/api/docs" class="btn btn-primary" target="_blank">
+                        📖 Swagger Docs
+                    </a>
+                    <a href="http://localhost:3007/health" class="btn btn-secondary" target="_blank">
+                        ❤️ Health Check
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>🔧 Quick Commands</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <strong>Start All Services</strong>
+                    <span>docker-compose -f docker-compose.hybrid.yml up -d</span>
+                </div>
+                <div class="info-item">
+                    <strong>Stop All Services</strong>
+                    <span>docker-compose -f docker-compose.hybrid.yml down</span>
+                </div>
+                <div class="info-item">
+                    <strong>View Logs</strong>
+                    <span>docker-compose -f docker-compose.hybrid.yml logs -f [service-name]</span>
+                </div>
+                <div class="info-item">
+                    <strong>Check Service Status</strong>
+                    <span>docker-compose -f docker-compose.hybrid.yml ps</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>🔑 Default Credentials</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <strong>Admin User</strong>
+                    <span>admin@example.com / Admin123!</span>
+                </div>
+                <div class="info-item">
+                    <strong>MySQL Database</strong>
+                    <span>root / rootpassword</span>
+                </div>
+                <div class="info-item">
+                    <strong>Redis</strong>
+                    <span>localhost:6379 (password: redispassword)</span>
+                </div>
+                <div class="info-item">
+                    <strong>PostgreSQL (Dev)</strong>
+                    <span>postgres / postgres</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>⚙️ Infrastructure Services</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <strong>Shared MySQL Database</strong>
+                    <span>Port 3306 (auth + user services)</span>
+                </div>
+                <div class="info-item">
+                    <strong>Business MySQL Databases</strong>
+                    <span>Separate DBs for carrier, customer, pricing</span>
+                </div>
+                <div class="info-item">
+                    <strong>Redis Cache</strong>
+                    <span>Port 6379 (shared across all services)</span>
+                </div>
+                <div class="info-item">
+                    <strong>API Gateway (Kong)</strong>
+                    <span>Port 8000 (optional - see api-gateway/)</span>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>📅 Last Updated: October 26, 2025</p>
+            <p>Built with ❤️ using NestJS + Clean Architecture</p>
+            <p>
+                <a href="./ARCHITECTURE-GUIDE.md">Architecture Guide</a> |
+                <a href="./DEVELOPER-QUICK-REFERENCE.md">Developer Reference</a> |
+                <a href="./AI-AGENT-PROMPTS.md">AI Prompts</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Check service health status on page load
+        const services = [
+            { name: 'auth-service', port: 3001, element: null },
+            { name: 'user-service', port: 3003, element: null },
+            { name: 'customer-service', port: 3004, element: null },
+            { name: 'carrier-service', port: 3005, element: null },
+            { name: 'pricing-service', port: 3006, element: null },
+            { name: 'translation-service', port: 3007, element: null }
+        ];
+
+        async function checkServiceHealth(service) {
+            try {
+                const response = await fetch(`http://localhost:${service.port}/health`, {
+                    method: 'GET',
+                    mode: 'no-cors' // Allow requests even if CORS is not configured
+                });
+                // With no-cors, we can't read the response, but we can detect if the request succeeded
+                return true;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        // Add visual indicators for service status
+        window.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.service-card');
+            cards.forEach((card, index) => {
+                const header = card.querySelector('.service-title h2');
+                if (header) {
+                    const badge = document.createElement('span');
+                    badge.className = 'status-badge status-info';
+                    badge.textContent = 'Checking...';
+                    header.appendChild(badge);
+                    
+                    // Check health after a short delay
+                    setTimeout(async () => {
+                        const isHealthy = await checkServiceHealth(services[index]);
+                        if (isHealthy) {
+                            badge.className = 'status-badge status-running';
+                            badge.textContent = '● Running';
+                        } else {
+                            badge.className = 'status-badge';
+                            badge.style.background = '#f8d7da';
+                            badge.style.color = '#721c24';
+                            badge.textContent = '○ Offline';
+                        }
+                    }, 1000);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
