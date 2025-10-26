@@ -5,9 +5,11 @@ import Button from '../../../shared/components/ui/Button';
 import Card from '../../../shared/components/ui/Card';
 import Input from '../../../shared/components/ui/Input';
 import { LoginCredentials } from '../types';
+import { useAuthLabels } from '../hooks/useAuthTranslation';
 
 const LoginForm: React.FC = () => {
     const { login, isLoading, error, clearError, isAuthenticated } = useAuthContext();
+    const { L } = useAuthLabels();
     const [formData, setFormData] = useState<LoginCredentials>({
         email: 'admin@example.com',
         password: 'Admin123!',
@@ -21,7 +23,7 @@ const LoginForm: React.FC = () => {
 
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Redirecting to dashboard...</p>
+                    <p className="mt-4 text-gray-600">{L.status.redirecting}</p>
                 </div>
             </div>
         );
@@ -58,10 +60,10 @@ const LoginForm: React.FC = () => {
             <div className="max-w-md w-full space-y-8">
                 <div>
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100">
-                        Sign in to your account
+                        {L.page.signInTitle}
                     </h2>
                     <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                        Enter your credentials to access the admin dashboard
+                        {L.page.signInSubtitle}
                     </p>
                 </div>
                 <Card className="mt-8 space-y-6">
@@ -72,24 +74,24 @@ const LoginForm: React.FC = () => {
                     )}
                     <form className="space-y-6" onSubmit={handleSubmit}>
                         <Input
-                            label="Email Address"
+                            label={L.form.emailAddress}
                             name="email"
                             type="email"
                             value={formData.email}
                             onChange={handleInputChange}
                             error={validationErrors.email}
-                            placeholder="Enter your email"
+                            placeholder={L.placeholders.enterEmail}
                             required
                         />
 
                         <Input
-                            label="Password"
+                            label={L.form.password}
                             name="password"
                             type="password"
                             value={formData.password}
                             onChange={handleInputChange}
                             error={validationErrors.password}
-                            placeholder="Enter your password"
+                            placeholder={L.placeholders.enterPassword}
                             required
                         />
 
@@ -100,7 +102,7 @@ const LoginForm: React.FC = () => {
                             isLoading={isLoading}
                             fullWidth
                         >
-                            {isLoading ? 'Signing in...' : 'Sign In'}
+                            {isLoading ? L.buttons.signingIn : L.buttons.signIn}
                         </Button>
                     </form>
                 </Card>

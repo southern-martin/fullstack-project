@@ -35,7 +35,10 @@
     "restart": "npm run stop:all && sleep 2 && npm start",
     "restart:debug": "npm run stop:all && sleep 2 && DEBUG=* npm start",
     "start:debug": "DEBUG=* react-scripts start",
-    "dev": "npm run restart"
+    "dev": "npm run restart",
+    "seed:auth-translations": "ts-node scripts/seed-auth-translations.ts",
+    "seed:user-translations": "ts-node scripts/seed-user-translations.ts",
+    "seed:roles-translations": "ts-node scripts/seed-roles-tab-translation.ts"
   },
   "eslintConfig": {
     "extends": [
