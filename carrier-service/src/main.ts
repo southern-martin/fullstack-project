@@ -1,5 +1,6 @@
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { HttpExceptionFilter } from "@shared/infrastructure/filters/http-exception.filter";
 import { TransformInterceptor } from "@shared/infrastructure/interceptors/transform.interceptor";
 import { LoggingInterceptor } from "@shared/infrastructure/logging/logging.interceptor";
@@ -41,10 +42,30 @@ async function bootstrap() {
   // Global prefix
   app.setGlobalPrefix("api/v1");
 
+  // Swagger/OpenAPI Configuration
+  const config = new DocumentBuilder()
+    .setTitle("Carrier Service API")
+    .setDescription(
+      "Carrier Management Service - Clean Architecture Microservice\n\n" +
+        "Manages carrier information, contact details, and service capabilities."
+    )
+    .setVersion("1.0")
+    .addBearerAuth(
+      { type: "http", scheme: "bearer", bearerFormat: "JWT" },
+      "JWT-auth"
+    )
+    .addTag("carriers", "Carrier management endpoints")
+    .addTag("health", "Health check endpoints")
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup("api/docs", app, document);
+
   const port = process.env.PORT || 3005;
   await app.listen(port);
 
   logger.log(`🚀 Carrier Service is running on: http://localhost:${port}`);
+  logger.log(`📚 API Documentation: http://localhost:${port}/api/docs`);
   logger.log(`📊 Health check: http://localhost:${port}/api/v1/health`);
   logger.log(
     `✅ API Standards: Enabled (HttpExceptionFilter + TransformInterceptor)`

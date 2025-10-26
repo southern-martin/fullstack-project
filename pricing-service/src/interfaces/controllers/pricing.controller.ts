@@ -11,6 +11,13 @@ import {
   Post,
   Query,
 } from "@nestjs/common";
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from "@nestjs/swagger";
 import { CalculatePriceDto } from "../../application/dto/calculate-price.dto";
 import { CreatePricingRuleDto } from "../../application/dto/create-pricing-rule.dto";
 import { PriceCalculationResponseDto } from "../../application/dto/price-calculation-response.dto";
@@ -25,6 +32,7 @@ import { ManagePricingRuleUseCase } from "../../application/use-cases/manage-pri
  * Interface adapter for HTTP requests
  * Follows Clean Architecture principles
  */
+@ApiTags("pricing")
 @Controller("pricing")
 export class PricingController {
   constructor(
@@ -40,6 +48,14 @@ export class PricingController {
    */
   @Post("rules")
   @HttpCode(HttpStatus.CREATED)
+  @ApiBearerAuth("JWT-auth")
+  @ApiOperation({ summary: "Create a new pricing rule" })
+  @ApiResponse({
+    status: 201,
+    description: "Pricing rule successfully created",
+    type: PricingRuleResponseDto,
+  })
+  @ApiResponse({ status: 400, description: "Invalid input data" })
   async createPricingRule(
     @Body() createPricingRuleDto: CreatePricingRuleDto
   ): Promise<PricingRuleResponseDto> {
@@ -51,6 +67,11 @@ export class PricingController {
    * GET /pricing/rules
    */
   @Get("rules")
+  @ApiOperation({ summary: "Get all pricing rules with pagination" })
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
+  @ApiQuery({ name: "search", required: false, type: String })
+  @ApiResponse({ status: 200, description: "List of pricing rules" })
   async findAllPricingRules(
     @Query("page") page: string = "1",
     @Query("limit") limit: string = "10",
@@ -66,6 +87,8 @@ export class PricingController {
    * GET /pricing/rules/count
    */
   @Get("rules/count")
+  @ApiOperation({ summary: "Get total pricing rule count" })
+  @ApiResponse({ status: 200, description: "Total number of pricing rules" })
   async getPricingRuleCount(): Promise<{ count: number }> {
     return this.managePricingRuleUseCase.getCount();
   }
@@ -75,6 +98,13 @@ export class PricingController {
    * GET /pricing/rules/:id
    */
   @Get("rules/:id")
+  @ApiOperation({ summary: "Get pricing rule by ID" })
+  @ApiResponse({
+    status: 200,
+    description: "Pricing rule found",
+    type: PricingRuleResponseDto,
+  })
+  @ApiResponse({ status: 404, description: "Pricing rule not found" })
   async findPricingRuleById(
     @Param("id", ParseIntPipe) id: number
   ): Promise<PricingRuleResponseDto> {
@@ -86,6 +116,14 @@ export class PricingController {
    * PATCH /pricing/rules/:id
    */
   @Patch("rules/:id")
+  @ApiBearerAuth("JWT-auth")
+  @ApiOperation({ summary: "Update pricing rule by ID" })
+  @ApiResponse({
+    status: 200,
+    description: "Pricing rule successfully updated",
+    type: PricingRuleResponseDto,
+  })
+  @ApiResponse({ status: 404, description: "Pricing rule not found" })
   async updatePricingRule(
     @Param("id", ParseIntPipe) id: number,
     @Body() updatePricingRuleDto: UpdatePricingRuleDto
@@ -99,6 +137,10 @@ export class PricingController {
    */
   @Delete("rules/:id")
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiBearerAuth("JWT-auth")
+  @ApiOperation({ summary: "Delete pricing rule by ID" })
+  @ApiResponse({ status: 204, description: "Pricing rule successfully deleted" })
+  @ApiResponse({ status: 404, description: "Pricing rule not found" })
   async deletePricingRule(
     @Param("id", ParseIntPipe) id: number
   ): Promise<void> {
@@ -111,6 +153,13 @@ export class PricingController {
    * POST /pricing/calculate
    */
   @Post("calculate")
+  @ApiOperation({ summary: "Calculate price based on input parameters" })
+  @ApiResponse({
+    status: 200,
+    description: "Price successfully calculated",
+    type: PriceCalculationResponseDto,
+  })
+  @ApiResponse({ status: 400, description: "Invalid calculation parameters" })
   async calculatePrice(
     @Body() calculatePriceDto: CalculatePriceDto
   ): Promise<PriceCalculationResponseDto> {
@@ -123,6 +172,11 @@ export class PricingController {
    * GET /pricing/calculations
    */
   @Get("calculations")
+  @ApiOperation({ summary: "Get price calculation history with pagination" })
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
+  @ApiQuery({ name: "search", required: false, type: String })
+  @ApiResponse({ status: 200, description: "List of price calculations" })
   async getPriceCalculationHistory(
     @Query("page") page: string = "1",
     @Query("limit") limit: string = "10",
@@ -145,6 +199,8 @@ export class PricingController {
    * GET /pricing/calculations/count
    */
   @Get("calculations/count")
+  @ApiOperation({ summary: "Get total price calculation count" })
+  @ApiResponse({ status: 200, description: "Total number of price calculations" })
   async getPriceCalculationCount(): Promise<{ count: number }> {
     return this.getPriceCalculationHistoryUseCase.getCount();
   }

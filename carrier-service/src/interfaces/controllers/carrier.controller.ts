@@ -11,6 +11,13 @@ import {
   Post,
   Query,
 } from "@nestjs/common";
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiQuery,
+} from "@nestjs/swagger";
 import { CarrierResponseDto } from "../../application/dto/carrier-response.dto";
 import { CreateCarrierDto } from "../../application/dto/create-carrier.dto";
 import { UpdateCarrierDto } from "../../application/dto/update-carrier.dto";
@@ -24,6 +31,7 @@ import { UpdateCarrierUseCase } from "../../application/use-cases/update-carrier
  * Interface adapter for HTTP requests
  * Follows Clean Architecture principles
  */
+@ApiTags("carriers")
 @Controller("carriers")
 export class CarrierController {
   constructor(
@@ -39,6 +47,14 @@ export class CarrierController {
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "Create a new carrier" })
+  @ApiResponse({
+    status: 201,
+    description: "Carrier successfully created",
+    type: CarrierResponseDto,
+  })
+  @ApiResponse({ status: 400, description: "Invalid input data" })
+  @ApiResponse({ status: 409, description: "Carrier already exists" })
   async create(
     @Body() createCarrierDto: CreateCarrierDto
   ): Promise<CarrierResponseDto> {
@@ -50,6 +66,29 @@ export class CarrierController {
    * GET /carriers
    */
   @Get()
+  @ApiOperation({ summary: "Get all carriers with pagination" })
+  @ApiQuery({
+    name: "page",
+    required: false,
+    type: Number,
+    description: "Page number",
+  })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    type: Number,
+    description: "Items per page",
+  })
+  @ApiQuery({
+    name: "search",
+    required: false,
+    type: String,
+    description: "Search by carrier name",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "List of carriers with pagination",
+  })
   async findAll(
     @Query("page") page: string = "1",
     @Query("limit") limit: string = "10",
@@ -65,6 +104,12 @@ export class CarrierController {
    * GET /carriers/active
    */
   @Get("active")
+  @ApiOperation({ summary: "Get all active carriers" })
+  @ApiResponse({
+    status: 200,
+    description: "List of active carriers",
+    type: [CarrierResponseDto],
+  })
   async findActive(): Promise<CarrierResponseDto[]> {
     return this.getCarrierUseCase.executeActive();
   }
@@ -74,6 +119,8 @@ export class CarrierController {
    * GET /carriers/count
    */
   @Get("count")
+  @ApiOperation({ summary: "Get total carrier count" })
+  @ApiResponse({ status: 200, description: "Total number of carriers" })
   async getCount(): Promise<{ count: number }> {
     return this.getCarrierUseCase.executeCount();
   }
@@ -83,6 +130,13 @@ export class CarrierController {
    * GET /carriers/name/:name
    */
   @Get("name/:name")
+  @ApiOperation({ summary: "Get carrier by name" })
+  @ApiResponse({
+    status: 200,
+    description: "Carrier found",
+    type: CarrierResponseDto,
+  })
+  @ApiResponse({ status: 404, description: "Carrier not found" })
   async findByName(@Param("name") name: string): Promise<CarrierResponseDto> {
     return this.getCarrierUseCase.executeByName(name);
   }
@@ -92,6 +146,13 @@ export class CarrierController {
    * GET /carriers/:id
    */
   @Get(":id")
+  @ApiOperation({ summary: "Get carrier by ID" })
+  @ApiResponse({
+    status: 200,
+    description: "Carrier found",
+    type: CarrierResponseDto,
+  })
+  @ApiResponse({ status: 404, description: "Carrier not found" })
   async findById(
     @Param("id", ParseIntPipe) id: number
   ): Promise<CarrierResponseDto> {
@@ -103,6 +164,14 @@ export class CarrierController {
    * PATCH /carriers/:id
    */
   @Patch(":id")
+  @ApiBearerAuth("JWT-auth")
+  @ApiOperation({ summary: "Update carrier by ID" })
+  @ApiResponse({
+    status: 200,
+    description: "Carrier successfully updated",
+    type: CarrierResponseDto,
+  })
+  @ApiResponse({ status: 404, description: "Carrier not found" })
   async update(
     @Param("id", ParseIntPipe) id: number,
     @Body() updateCarrierDto: UpdateCarrierDto
@@ -116,6 +185,10 @@ export class CarrierController {
    */
   @Delete(":id")
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiBearerAuth("JWT-auth")
+  @ApiOperation({ summary: "Delete carrier by ID" })
+  @ApiResponse({ status: 204, description: "Carrier successfully deleted" })
+  @ApiResponse({ status: 404, description: "Carrier not found" })
   async delete(@Param("id", ParseIntPipe) id: number): Promise<void> {
     return this.deleteCarrierUseCase.execute(id);
   }
