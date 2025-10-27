@@ -1,8 +1,12 @@
 import { Customer } from "@/domain/entities/customer.entity";
 import { CustomerRepositoryInterface } from "@/domain/repositories/customer.repository.interface";
-import { Injectable, Inject } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { PaginationDto, RedisCacheService, BaseTypeOrmRepository } from "@shared/infrastructure";
+import {
+  BaseTypeOrmRepository,
+  PaginationDto,
+  RedisCacheService,
+} from "@shared/infrastructure";
 import { Repository } from "typeorm";
 import { CustomerTypeOrmEntity } from "../entities/customer.typeorm.entity";
 
@@ -11,9 +15,9 @@ import { CustomerTypeOrmEntity } from "../entities/customer.typeorm.entity";
  * Extends BaseTypeOrmRepository for common CRUD and caching operations
  */
 @Injectable()
-export class CustomerRepository 
+export class CustomerRepository
   extends BaseTypeOrmRepository<Customer, CustomerTypeOrmEntity>
-  implements CustomerRepositoryInterface 
+  implements CustomerRepositoryInterface
 {
   constructor(
     @InjectRepository(CustomerTypeOrmEntity)
@@ -21,7 +25,7 @@ export class CustomerRepository
     @Inject(RedisCacheService)
     cacheService: RedisCacheService
   ) {
-    super(repository, cacheService, 'customers', 300); // 5 min TTL
+    super(repository, cacheService, "customers", 300); // 5 min TTL
   }
 
   /**
@@ -55,9 +59,10 @@ export class CustomerRepository
     // Always sort by newest first for consistent pagination
     result.entities = await this.repository
       .createQueryBuilder("customer")
-      .where(search ? 
-        "customer.firstName ILIKE :search OR customer.lastName ILIKE :search OR customer.email ILIKE :search" : 
-        "1=1", 
+      .where(
+        search
+          ? "customer.firstName ILIKE :search OR customer.lastName ILIKE :search OR customer.email ILIKE :search"
+          : "1=1",
         { search: `%${search}%` }
       )
       .orderBy("customer.createdAt", "DESC")
@@ -65,7 +70,7 @@ export class CustomerRepository
       .skip(((pagination?.page || 1) - 1) * (pagination?.limit || 20))
       .take(pagination?.limit || 20)
       .getMany()
-      .then(entities => entities.map(e => this.toDomainEntity(e)));
+      .then((entities) => entities.map((e) => this.toDomainEntity(e)));
 
     return { customers: result.entities, total: result.total };
   }
@@ -139,7 +144,9 @@ export class CustomerRepository
   /**
    * Convert domain entity to TypeORM entity
    */
-  protected toTypeOrmEntity(customer: Customer): Partial<CustomerTypeOrmEntity> {
+  protected toTypeOrmEntity(
+    customer: Customer
+  ): Partial<CustomerTypeOrmEntity> {
     const entity = new CustomerTypeOrmEntity();
     entity.id = customer.id;
     entity.email = customer.email;

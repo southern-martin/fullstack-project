@@ -5,8 +5,8 @@ import {
   Injectable,
 } from "@nestjs/common";
 import { Role } from "../../domain/entities/role.entity";
-import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
 import { PermissionRepositoryInterface } from "../../domain/repositories/permission.repository.interface";
+import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
 import { CreateRoleDto } from "../dto/create-role.dto";
 import { RoleResponseDto } from "../dto/role-response.dto";
 
@@ -38,7 +38,9 @@ export class CreateRoleUseCase {
 
     // 2. If permissionIds are provided, validate they exist
     if (createRoleDto.permissionIds && createRoleDto.permissionIds.length > 0) {
-      const permissions = await this.permissionRepository.findByIds(createRoleDto.permissionIds);
+      const permissions = await this.permissionRepository.findByIds(
+        createRoleDto.permissionIds
+      );
       if (permissions.length !== createRoleDto.permissionIds.length) {
         throw new BadRequestException("One or more permission IDs are invalid");
       }
@@ -60,7 +62,10 @@ export class CreateRoleUseCase {
     });
 
     // 5. Save role in repository with permissions
-    const savedRole = await this.roleRepository.create(role, createRoleDto.permissionIds);
+    const savedRole = await this.roleRepository.create(
+      role,
+      createRoleDto.permissionIds
+    );
 
     // 6. Return response
     return this.mapToResponseDto(savedRole);
@@ -93,7 +98,10 @@ export class CreateRoleUseCase {
       errors.push("Permission IDs must be an array");
     }
 
-    if (roleData.permissionIds && roleData.permissionIds.some(id => typeof id !== 'number' || id <= 0)) {
+    if (
+      roleData.permissionIds &&
+      roleData.permissionIds.some((id) => typeof id !== "number" || id <= 0)
+    ) {
       errors.push("All permission IDs must be positive numbers");
     }
 

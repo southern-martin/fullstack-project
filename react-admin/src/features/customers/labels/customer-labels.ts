@@ -1,9 +1,9 @@
 /**
  * Customer Module Translation Labels
- * 
+ *
  * This file contains all static UI labels used in the Customer module.
  * Labels are organized by category for better maintainability.
- * 
+ *
  * Usage with useCustomerLabels hook:
  * const { L } = useCustomerLabels();
  * <h1>{L.page.title}</h1>
@@ -194,7 +194,8 @@ export const customerLabels: CustomerLabels = {
     edit: 'Edit Customer',
     view: 'Customer Details',
     delete: 'Delete Customer',
-    deleteConfirm: 'Are you sure you want to delete this customer? This action cannot be undone.',
+    deleteConfirm:
+      'Are you sure you want to delete this customer? This action cannot be undone.',
   },
 
   form: {

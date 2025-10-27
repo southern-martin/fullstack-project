@@ -10,8 +10,8 @@ import {
 import React from 'react';
 
 import Button from '../../../shared/components/ui/Button';
-import { Customer } from '../services/customerApiService';
 import { useCustomerLabels } from '../hooks/useCustomerLabels';
+import { Customer } from '../services/customerApiService';
 
 interface CustomerDetailsProps {
     customer: Customer;

@@ -1,7 +1,7 @@
+import { RedisCacheService } from "@fullstack-project/shared-infrastructure";
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { RedisCacheService } from "@fullstack-project/shared-infrastructure";
 
 // TypeORM Entities
 import { PermissionTypeOrmEntity } from "./database/typeorm/entities/permission.typeorm.entity";
@@ -24,7 +24,7 @@ import { KongService } from "./external-services/kong.service";
  * Infrastructure Module
  * Configures infrastructure layer dependencies
  * Follows Clean Architecture principles
- * 
+ *
  * Provides:
  * - Database repositories (User, Role)
  * - Event bus for domain events
@@ -34,7 +34,11 @@ import { KongService } from "./external-services/kong.service";
 @Module({
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([UserTypeOrmEntity, RoleTypeOrmEntity, PermissionTypeOrmEntity]),
+    TypeOrmModule.forFeature([
+      UserTypeOrmEntity,
+      RoleTypeOrmEntity,
+      PermissionTypeOrmEntity,
+    ]),
   ],
   providers: [
     // Redis Cache Service
@@ -47,7 +51,7 @@ import { KongService } from "./external-services/kong.service";
         const redisUrl = redisPassword
           ? `redis://:${redisPassword}@${redisHost}:${redisPort}`
           : `redis://${redisHost}:${redisPort}`;
-        
+
         return new RedisCacheService({
           redisUrl,
           prefix: configService.get("REDIS_KEY_PREFIX", "auth:"),

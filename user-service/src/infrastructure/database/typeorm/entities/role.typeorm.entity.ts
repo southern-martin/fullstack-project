@@ -27,7 +27,7 @@ export class RoleTypeOrmEntity {
   description: string;
 
   @ManyToMany(() => PermissionTypeOrmEntity, (permission) => permission.roles, {
-    eager: false,  // Set to false to use explicit relations loading
+    eager: false, // Set to false to use explicit relations loading
     cascade: false,
   })
   @JoinTable({
@@ -37,12 +37,12 @@ export class RoleTypeOrmEntity {
   })
   permissionEntities: PermissionTypeOrmEntity[];
 
-  @Column({ default: true, name: 'is_active' })
+  @Column({ default: true, name: "is_active" })
   isActive: boolean;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: "created_at" })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: "updated_at" })
   updatedAt: Date;
 }

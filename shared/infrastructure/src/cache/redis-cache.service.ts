@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { createClient, RedisClientType } from 'redis';
+import { Injectable, Logger } from "@nestjs/common";
+import { createClient, RedisClientType } from "redis";
 
 export interface CacheSetOptions {
   ttl?: number; // seconds
@@ -14,19 +14,19 @@ export enum CacheErrorStrategy {
    * Throw exceptions when errors occur
    * Use in critical paths where cache must work
    */
-  THROW = 'throw',
-  
+  THROW = "throw",
+
   /**
    * Log errors and continue (default)
    * Best for most use cases - degrades gracefully
    */
-  LOG_AND_CONTINUE = 'log_continue',
-  
+  LOG_AND_CONTINUE = "log_continue",
+
   /**
    * Return fallback values on error
    * Useful when you want to provide default values
    */
-  FALLBACK = 'fallback'
+  FALLBACK = "fallback",
 }
 
 export interface CacheServiceOptions {
@@ -43,15 +43,23 @@ export class RedisCacheService {
   private readonly errorStrategy: CacheErrorStrategy;
 
   constructor(options: CacheServiceOptions = {}) {
-    this.prefix = options.prefix || 'cache:';
-    this.errorStrategy = options.errorStrategy || CacheErrorStrategy.LOG_AND_CONTINUE;
-    
+    this.prefix = options.prefix || "cache:";
+    this.errorStrategy =
+      options.errorStrategy || CacheErrorStrategy.LOG_AND_CONTINUE;
+
     this.client = createClient({
-      url: options.redisUrl || process.env.REDIS_URL || 'redis://shared-redis:6379',
+      url:
+        options.redisUrl ||
+        process.env.REDIS_URL ||
+        "redis://shared-redis:6379",
     });
-    
-    this.client.on('error', (err) => this.handleError('Redis connection error', err));
-    this.client.connect().catch((err) => this.handleError('Redis connect error', err));
+
+    this.client.on("error", (err) =>
+      this.handleError("Redis connection error", err)
+    );
+    this.client
+      .connect()
+      .catch((err) => this.handleError("Redis connect error", err));
   }
 
   /**
@@ -59,7 +67,7 @@ export class RedisCacheService {
    */
   private handleError(message: string, error: any, throwError = false): void {
     const errorMessage = `${message}: ${error?.message || error}`;
-    
+
     switch (this.errorStrategy) {
       case CacheErrorStrategy.THROW:
         this.logger.error(errorMessage, error?.stack);
@@ -67,15 +75,15 @@ export class RedisCacheService {
           throw new Error(errorMessage);
         }
         break;
-        
+
       case CacheErrorStrategy.LOG_AND_CONTINUE:
         this.logger.warn(errorMessage);
         break;
-        
+
       case CacheErrorStrategy.FALLBACK:
         this.logger.debug(errorMessage);
         break;
-        
+
       default:
         this.logger.warn(errorMessage);
     }
@@ -96,7 +104,11 @@ export class RedisCacheService {
       if (!value) return null;
       return JSON.parse(value) as T;
     } catch (err) {
-      this.handleError(`Redis get error for key: ${key}`, err, this.errorStrategy === CacheErrorStrategy.THROW);
+      this.handleError(
+        `Redis get error for key: ${key}`,
+        err,
+        this.errorStrategy === CacheErrorStrategy.THROW
+      );
       return null;
     }
   }
@@ -107,7 +119,11 @@ export class RedisCacheService {
    * @param value - Value to cache
    * @param options - Cache options (TTL, etc.)
    */
-  async set<T = any>(key: string, value: T, options?: CacheSetOptions): Promise<void> {
+  async set<T = any>(
+    key: string,
+    value: T,
+    options?: CacheSetOptions
+  ): Promise<void> {
     try {
       const str = JSON.stringify(value);
       if (options?.ttl) {
@@ -116,7 +132,11 @@ export class RedisCacheService {
         await this.client.set(this.getKey(key), str);
       }
     } catch (err) {
-      this.handleError(`Redis set error for key: ${key}`, err, this.errorStrategy === CacheErrorStrategy.THROW);
+      this.handleError(
+        `Redis set error for key: ${key}`,
+        err,
+        this.errorStrategy === CacheErrorStrategy.THROW
+      );
     }
   }
 
@@ -128,7 +148,11 @@ export class RedisCacheService {
     try {
       await this.client.del(this.getKey(key));
     } catch (err) {
-      this.handleError(`Redis del error for key: ${key}`, err, this.errorStrategy === CacheErrorStrategy.THROW);
+      this.handleError(
+        `Redis del error for key: ${key}`,
+        err,
+        this.errorStrategy === CacheErrorStrategy.THROW
+      );
     }
   }
 
@@ -141,10 +165,16 @@ export class RedisCacheService {
       const keys = await this.client.keys(this.getKey(pattern));
       if (keys.length > 0) {
         await this.client.del(keys);
-        this.logger.debug(`Invalidated ${keys.length} keys matching pattern: ${pattern}`);
+        this.logger.debug(
+          `Invalidated ${keys.length} keys matching pattern: ${pattern}`
+        );
       }
     } catch (err) {
-      this.handleError(`Redis invalidatePattern error for pattern: ${pattern}`, err, this.errorStrategy === CacheErrorStrategy.THROW);
+      this.handleError(
+        `Redis invalidatePattern error for pattern: ${pattern}`,
+        err,
+        this.errorStrategy === CacheErrorStrategy.THROW
+      );
     }
   }
 
@@ -157,7 +187,7 @@ export class RedisCacheService {
       await this.client.ping();
       return true;
     } catch (err) {
-      this.handleError('Redis health check failed', err, false);
+      this.handleError("Redis health check failed", err, false);
       return false;
     }
   }
@@ -169,16 +199,16 @@ export class RedisCacheService {
   async getStats(): Promise<Record<string, any>> {
     try {
       const info = await this.client.info();
-      return { 
+      return {
         connected: true,
-        info: info.split('\r\n').reduce((acc, line) => {
-          const [key, value] = line.split(':');
+        info: info.split("\r\n").reduce((acc, line) => {
+          const [key, value] = line.split(":");
           if (key && value) acc[key] = value;
           return acc;
-        }, {} as Record<string, string>)
+        }, {} as Record<string, string>),
       };
     } catch (err) {
-      this.handleError('Redis stats error', err, false);
+      this.handleError("Redis stats error", err, false);
       return { connected: false, error: err?.message };
     }
   }
@@ -189,9 +219,9 @@ export class RedisCacheService {
   async disconnect(): Promise<void> {
     try {
       await this.client.quit();
-      this.logger.log('Redis client disconnected gracefully');
+      this.logger.log("Redis client disconnected gracefully");
     } catch (err) {
-      this.handleError('Redis disconnect error', err, false);
+      this.handleError("Redis disconnect error", err, false);
     }
   }
 }

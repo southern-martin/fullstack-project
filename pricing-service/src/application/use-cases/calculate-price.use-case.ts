@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
-import { randomUUID } from "crypto";
 import { WinstonLoggerService } from "@shared/infrastructure/logging/winston-logger.service";
+import { randomUUID } from "crypto";
 import { PriceCalculation } from "../../domain/entities/price-calculation.entity";
 import { PriceCalculationRepositoryInterface } from "../../domain/repositories/price-calculation.repository.interface";
 import { PricingRuleRepositoryInterface } from "../../domain/repositories/pricing-rule.repository.interface";

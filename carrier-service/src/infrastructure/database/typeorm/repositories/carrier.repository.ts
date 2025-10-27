@@ -1,8 +1,12 @@
 import { Carrier } from "@/domain/entities/carrier.entity";
 import { CarrierRepositoryInterface } from "@/domain/repositories/carrier.repository.interface";
-import { Injectable, Inject } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { PaginationDto, RedisCacheService, BaseTypeOrmRepository } from "@shared/infrastructure";
+import {
+  BaseTypeOrmRepository,
+  PaginationDto,
+  RedisCacheService,
+} from "@shared/infrastructure";
 import { Repository } from "typeorm";
 import { CarrierTypeOrmEntity } from "../entities/carrier.typeorm.entity";
 
@@ -11,9 +15,9 @@ import { CarrierTypeOrmEntity } from "../entities/carrier.typeorm.entity";
  * Extends BaseTypeOrmRepository for common CRUD and caching operations
  */
 @Injectable()
-export class CarrierRepository 
+export class CarrierRepository
   extends BaseTypeOrmRepository<Carrier, CarrierTypeOrmEntity>
-  implements CarrierRepositoryInterface 
+  implements CarrierRepositoryInterface
 {
   constructor(
     @InjectRepository(CarrierTypeOrmEntity)
@@ -21,7 +25,7 @@ export class CarrierRepository
     @Inject(RedisCacheService)
     cacheService: RedisCacheService
   ) {
-    super(repository, cacheService, 'carriers', 300); // 5 min TTL
+    super(repository, cacheService, "carriers", 300); // 5 min TTL
   }
 
   /**
@@ -41,7 +45,8 @@ export class CarrierRepository
     pagination?: PaginationDto,
     search?: string
   ): Promise<{ carriers: Carrier[]; total: number }> {
-    const paginationDto = pagination || Object.assign(new PaginationDto(), { page: 1, limit: 20 });
+    const paginationDto =
+      pagination || Object.assign(new PaginationDto(), { page: 1, limit: 20 });
     const result = await this.findAllWithCache(
       paginationDto,
       search,
@@ -53,7 +58,9 @@ export class CarrierRepository
           );
         }
         // Always sort by newest first for consistent pagination
-        queryBuilder.orderBy("carrier.createdAt", "DESC").addOrderBy("carrier.id", "DESC");
+        queryBuilder
+          .orderBy("carrier.createdAt", "DESC")
+          .addOrderBy("carrier.id", "DESC");
       }
     );
     return { carriers: result.entities, total: result.total };

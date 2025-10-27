@@ -11,18 +11,12 @@ import {
   Post,
   Query,
 } from "@nestjs/common";
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiParam,
-} from "@nestjs/swagger";
-import { ListRolesQueryDto } from "../../application/dto/list-roles-query.dto";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { CreateRoleDto } from "../../application/dto/create-role.dto";
+import { ListRolesQueryDto } from "../../application/dto/list-roles-query.dto";
 import { RoleResponseDto } from "../../application/dto/role-response.dto";
-import { UserResponseDto } from "../../application/dto/user-response.dto";
 import { UpdateRoleDto } from "../../application/dto/update-role.dto";
+import { UserResponseDto } from "../../application/dto/user-response.dto";
 import { CreateRoleUseCase } from "../../application/use-cases/create-role.use-case";
 import { DeleteRoleUseCase } from "../../application/use-cases/delete-role.use-case";
 import { GetRoleUseCase } from "../../application/use-cases/get-role.use-case";
@@ -59,8 +53,8 @@ export class RoleController {
    * GET /roles
    */
   @Get()
-  async findAll(@Query() query: ListRolesQueryDto): Promise<{ 
-    data: RoleResponseDto[]; 
+  async findAll(@Query() query: ListRolesQueryDto): Promise<{
+    data: RoleResponseDto[];
     total: number;
     page: number;
     limit: number;
@@ -98,9 +92,7 @@ export class RoleController {
    * GET /roles/name/:name
    */
   @Get("name/:name")
-  async findByName(
-    @Param("name") name: string
-  ): Promise<RoleResponseDto> {
+  async findByName(@Param("name") name: string): Promise<RoleResponseDto> {
     return this.getRoleUseCase.executeByName(name);
   }
 

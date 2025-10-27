@@ -5,8 +5,8 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
 import { PermissionRepositoryInterface } from "../../domain/repositories/permission.repository.interface";
+import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
 import { RoleResponseDto } from "../dto/role-response.dto";
 import { UpdateRoleDto } from "../dto/update-role.dto";
 
@@ -18,9 +18,9 @@ import { UpdateRoleDto } from "../dto/update-role.dto";
 @Injectable()
 export class UpdateRoleUseCase {
   constructor(
-    @Inject('RoleRepositoryInterface')
+    @Inject("RoleRepositoryInterface")
     private readonly roleRepository: RoleRepositoryInterface,
-    @Inject('PermissionRepositoryInterface')
+    @Inject("PermissionRepositoryInterface")
     private readonly permissionRepository: PermissionRepositoryInterface
   ) {}
 
@@ -47,8 +47,13 @@ export class UpdateRoleUseCase {
     }
 
     // 3. If permissionIds are provided, validate they exist
-    if (updateRoleDto.permissionIds !== undefined && updateRoleDto.permissionIds.length > 0) {
-      const permissions = await this.permissionRepository.findByIds(updateRoleDto.permissionIds);
+    if (
+      updateRoleDto.permissionIds !== undefined &&
+      updateRoleDto.permissionIds.length > 0
+    ) {
+      const permissions = await this.permissionRepository.findByIds(
+        updateRoleDto.permissionIds
+      );
       if (permissions.length !== updateRoleDto.permissionIds.length) {
         throw new BadRequestException("One or more permission IDs are invalid");
       }
@@ -74,7 +79,11 @@ export class UpdateRoleUseCase {
       updateData.isActive = updateRoleDto.isActive;
 
     // 6. Update role in repository (permissionIds handled separately)
-    const updatedRole = await this.roleRepository.update(id, updateData, updateRoleDto.permissionIds);
+    const updatedRole = await this.roleRepository.update(
+      id,
+      updateData,
+      updateRoleDto.permissionIds
+    );
 
     // 7. Return response
     return this.mapToResponseDto(updatedRole);
@@ -116,7 +125,7 @@ export class UpdateRoleUseCase {
 
     if (
       updateData.permissionIds &&
-      updateData.permissionIds.some(id => typeof id !== 'number' || id <= 0)
+      updateData.permissionIds.some((id) => typeof id !== "number" || id <= 0)
     ) {
       errors.push("All permission IDs must be positive numbers");
     }

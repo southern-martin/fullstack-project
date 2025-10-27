@@ -1,4 +1,12 @@
-import { IsString, IsOptional, IsBoolean, IsArray, MinLength, MaxLength, IsNumber } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from "class-validator";
 
 export class UpdateRoleDto {
   @IsOptional()
@@ -24,11 +32,3 @@ export class UpdateRoleDto {
   @IsOptional()
   metadata?: Record<string, any>;
 }
-
-
-
-
-
-
-
-

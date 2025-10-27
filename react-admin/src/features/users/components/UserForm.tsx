@@ -3,9 +3,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Button from '../../../shared/components/ui/Button';
 import { CheckboxField, CheckboxGroup, FormField } from '../../../shared/components/ui/FormField';
 import { User } from '../../../shared/types';
-import { CreateUserRequest, UpdateUserRequest } from '../services/userApiService';
 import { useActiveRoles } from '../../roles/hooks/useRoleQueries';
 import { useUserLabels } from '../hooks/useUserLabels';
+import { CreateUserRequest, UpdateUserRequest } from '../services/userApiService';
 
 const initialFormData = {
     firstName: '',
@@ -313,8 +313,8 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
                 <CheckboxGroup
                     label={L.form.roles}
                     name="roleIds"
-                    options={roles.map(role => ({ 
-                        value: role.id, 
+                    options={roles.map(role => ({
+                        value: role.id,
                         label: role.name,
                         description: role.description || `${role.name} role`
                     }))}

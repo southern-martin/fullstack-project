@@ -1,7 +1,7 @@
+import { RedisCacheService } from "@fullstack-project/shared-infrastructure";
 import { Module } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { RedisCacheService } from "@fullstack-project/shared-infrastructure";
 import { PermissionTypeOrmEntity } from "./database/typeorm/entities/permission.typeorm.entity";
 import { RoleTypeOrmEntity } from "./database/typeorm/entities/role.typeorm.entity";
 import { UserProfileTypeOrmEntity } from "./database/typeorm/entities/user-profile.typeorm.entity";
@@ -40,7 +40,7 @@ import { InMemoryEventBus } from "./events/in-memory-event-bus";
         const redisUrl = redisPassword
           ? `redis://:${redisPassword}@${redisHost}:${redisPort}`
           : `redis://${redisHost}:${redisPort}`;
-        
+
         return new RedisCacheService({
           redisUrl,
           prefix: configService.get("REDIS_KEY_PREFIX", "user:"),

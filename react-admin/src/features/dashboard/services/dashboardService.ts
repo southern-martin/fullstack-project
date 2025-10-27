@@ -43,7 +43,8 @@ class DashboardService {
           ? usersResponse.value
           : { total: 0, data: [] };
       const customersData =
-        customersResponse.status === 'fulfilled' && customersResponse.value?.data
+        customersResponse.status === 'fulfilled' &&
+        customersResponse.value?.data
           ? customersResponse.value.data
           : { total: 0 };
       const carriersData =

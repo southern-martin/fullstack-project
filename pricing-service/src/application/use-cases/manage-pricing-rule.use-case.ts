@@ -207,9 +207,10 @@ export class ManagePricingRuleUseCase {
       };
 
       // 3. Validate update data using domain service
-      const validation = this.pricingDomainService.validatePricingRuleUpdateData(
-        updateDataForValidation
-      );
+      const validation =
+        this.pricingDomainService.validatePricingRuleUpdateData(
+          updateDataForValidation
+        );
       if (!validation.isValid) {
         this.logger.warn("Pricing rule update validation failed", {
           ruleId: id,
@@ -245,7 +246,10 @@ export class ManagePricingRuleUseCase {
       }
 
       // 5. Update rule in repository
-      const updatedRule = await this.pricingRuleRepository.update(id, updateData);
+      const updatedRule = await this.pricingRuleRepository.update(
+        id,
+        updateData
+      );
 
       this.logger.log("Pricing rule updated successfully", {
         ruleId: id,
@@ -285,7 +289,10 @@ export class ManagePricingRuleUseCase {
       const hasBeenUsed = false; // This would come from price calculation repository
 
       if (
-        !this.pricingDomainService.canDeletePricingRule(existingRule, hasBeenUsed)
+        !this.pricingDomainService.canDeletePricingRule(
+          existingRule,
+          hasBeenUsed
+        )
       ) {
         this.logger.warn(
           "Cannot delete pricing rule that has been used in calculations",

@@ -1,9 +1,9 @@
 /**
  * Carrier Module Translation Labels
- * 
+ *
  * This file contains all static UI labels used in the Carrier module.
  * Labels are organized by category for better maintainability.
- * 
+ *
  * Usage with useCarrierLabels hook:
  * const { L } = useCarrierLabels();
  * <h1>{L.page.title}</h1>
@@ -243,7 +243,8 @@ export const carrierLabels: CarrierLabels = {
   validation: {
     nameRequired: 'Name is required',
     codeRequired: 'Code is required',
-    codeFormat: 'Code must contain only uppercase letters, numbers, and hyphens',
+    codeFormat:
+      'Code must contain only uppercase letters, numbers, and hyphens',
     emailInvalid: 'Invalid email format',
     phoneInvalid: 'Invalid phone format',
   },

@@ -45,7 +45,11 @@ export class GetPriceCalculationHistoryUseCase {
       });
 
       const { priceCalculations, total } =
-        await this.priceCalculationRepository.findPaginated(page, limit, search);
+        await this.priceCalculationRepository.findPaginated(
+          page,
+          limit,
+          search
+        );
       const totalPages = Math.ceil(total / limit);
 
       this.logger.debug("Retrieved price calculation history", {

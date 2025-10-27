@@ -1,9 +1,9 @@
 /**
  * Dashboard Module Translation Labels
- * 
+ *
  * This file contains all static UI labels used in the Dashboard module.
  * Labels are organized by category for better maintainability.
- * 
+ *
  * Usage with useDashboardLabels hook:
  * const { L } = useDashboardLabels();
  * <h1>{L.page.title}</h1>
@@ -248,7 +248,8 @@ export const dashboardLabels: DashboardLabels = {
     failedLoadStats: 'Failed to load statistics',
     noStats: 'No statistics available',
     apiConnectivity: 'This might be due to API connectivity issues.',
-    success: '✅ React + TypeScript + Modern Architecture is working perfectly!',
+    success:
+      '✅ React + TypeScript + Modern Architecture is working perfectly!',
   },
 
   ecommerce: {

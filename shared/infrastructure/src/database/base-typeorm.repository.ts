@@ -1,17 +1,17 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { RedisCacheService } from '../cache/redis-cache.service';
-import { PaginationDto } from '../dto/pagination.dto';
+import { Injectable, Logger } from "@nestjs/common";
+import { RedisCacheService } from "../cache/redis-cache.service";
+import { PaginationDto } from "../dto/pagination.dto";
 
 /**
  * Base TypeORM Repository with built-in caching support
  * Eliminates code duplication across all service repositories
- * 
+ *
  * Uses type erasure for repository parameter to avoid TypeORM version conflicts
  * across package boundaries.
- * 
+ *
  * @template TDomain - Domain entity type (Customer, Carrier, etc.)
  * @template TTypeOrm - TypeORM entity type (must have id property)
- * 
+ *
  * @example
  * export class CustomerRepository extends BaseTypeOrmRepository<
  *   Customer,
@@ -25,11 +25,11 @@ import { PaginationDto } from '../dto/pagination.dto';
  *   ) {
  *     super(repository, cacheService, 'customers');
  *   }
- * 
+ *
  *   protected toDomainEntity(entity: CustomerTypeOrmEntity): Customer {
  *     // Mapping logic
  *   }
- * 
+ *
  *   protected toTypeOrmEntity(domain: Customer): Partial<CustomerTypeOrmEntity> {
  *     // Mapping logic
  *   }
@@ -110,7 +110,7 @@ export abstract class BaseTypeOrmRepository<
   /**
    * Find all entities with pagination and optional search
    * Implements caching for list queries
-   * 
+   *
    * @param pagination - Page and limit parameters
    * @param search - Optional search term
    * @returns Paginated result with entities and total count
@@ -122,11 +122,13 @@ export abstract class BaseTypeOrmRepository<
   ): Promise<{ entities: TDomain[]; total: number }> {
     const page = pagination?.page || 1;
     const limit = pagination?.limit || 20;
-    const searchKey = search ? search.trim().toLowerCase() : 'all';
+    const searchKey = search ? search.trim().toLowerCase() : "all";
     const cacheKey = `list:${page}:${limit}:${searchKey}`;
 
     // Try cache first
-    const cached = await this.getCached<{ entities: TDomain[]; total: number }>(cacheKey);
+    const cached = await this.getCached<{ entities: TDomain[]; total: number }>(
+      cacheKey
+    );
     if (cached) {
       this.logger.debug(`Cache HIT: ${this.cacheKeyPrefix}:${cacheKey}`);
       return cached;
@@ -135,8 +137,8 @@ export abstract class BaseTypeOrmRepository<
     this.logger.debug(`Cache MISS: ${this.cacheKeyPrefix}:${cacheKey}`);
 
     // Query database
-    const qb = this.repository.createQueryBuilder('entity');
-    
+    const qb = this.repository.createQueryBuilder("entity");
+
     // Apply search if provided and queryBuilder callback exists
     if (search && queryBuilder) {
       queryBuilder(qb, search);
@@ -147,7 +149,9 @@ export abstract class BaseTypeOrmRepository<
     qb.skip(offset).take(limit);
 
     const [entities, total] = await qb.getManyAndCount();
-    const domainEntities = entities.map((entity) => this.toDomainEntity(entity));
+    const domainEntities = entities.map((entity) =>
+      this.toDomainEntity(entity)
+    );
 
     const result = { entities: domainEntities, total };
 
@@ -175,12 +179,14 @@ export abstract class BaseTypeOrmRepository<
   /**
    * Set value in cache with repository prefix and TTL
    */
-  protected async setCache<T>(key: string, value: T, ttl?: number): Promise<void> {
-    await this.cacheService.set(
-      `${this.cacheKeyPrefix}:${key}`,
-      value,
-      { ttl: ttl || this.cacheTTL }
-    );
+  protected async setCache<T>(
+    key: string,
+    value: T,
+    ttl?: number
+  ): Promise<void> {
+    await this.cacheService.set(`${this.cacheKeyPrefix}:${key}`, value, {
+      ttl: ttl || this.cacheTTL,
+    });
   }
 
   /**
@@ -194,6 +200,8 @@ export abstract class BaseTypeOrmRepository<
    * Invalidate cache by pattern
    */
   protected async invalidateCachePattern(pattern: string): Promise<void> {
-    await this.cacheService.invalidatePattern(`${this.cacheKeyPrefix}:${pattern}`);
+    await this.cacheService.invalidatePattern(
+      `${this.cacheKeyPrefix}:${pattern}`
+    );
   }
 }

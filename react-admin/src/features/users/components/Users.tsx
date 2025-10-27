@@ -258,7 +258,7 @@ const Users: React.FC = () => {
                     const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
                     const displayName = fullName || 'N/A';
                     const initial = user.firstName?.[0]?.toUpperCase() || user.lastName?.[0]?.toUpperCase() || '?';
-                    
+
                     return (
                         <div className="flex items-center">
                             <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">

@@ -1,5 +1,5 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { PaginationDto } from "@fullstack-project/shared-infrastructure";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { RoleRepositoryInterface } from "../../domain/repositories/role.repository.interface";
 import { UserRepositoryInterface } from "../../domain/repositories/user.repository.interface";
 import { ListRolesQueryDto } from "../dto/list-roles-query.dto";
@@ -14,9 +14,9 @@ import { UserResponseDto } from "../dto/user-response.dto";
 @Injectable()
 export class GetRoleUseCase {
   constructor(
-    @Inject('RoleRepositoryInterface')
+    @Inject("RoleRepositoryInterface")
     private readonly roleRepository: RoleRepositoryInterface,
-    @Inject('UserRepositoryInterface')
+    @Inject("UserRepositoryInterface")
     private readonly userRepository: UserRepositoryInterface
   ) {}
 
@@ -33,11 +33,11 @@ export class GetRoleUseCase {
 
     // Get users with this role
     const users = await this.userRepository.findByRole(role.name);
-    
+
     const response = this.mapToResponseDto(role);
     response.usersCount = users.length;
     response.permissionsCount = role.permissions?.length || 0;
-    
+
     return response;
   }
 
@@ -56,7 +56,7 @@ export class GetRoleUseCase {
     const response = this.mapToResponseDto(role);
     response.usersCount = users.length;
     response.permissionsCount = role.permissions?.length || 0;
-    
+
     return response;
   }
 
@@ -65,8 +65,8 @@ export class GetRoleUseCase {
    * @param query - Query parameters
    * @returns Paginated roles
    */
-  async executeAll(query?: ListRolesQueryDto): Promise<{ 
-    data: RoleResponseDto[]; 
+  async executeAll(query?: ListRolesQueryDto): Promise<{
+    data: RoleResponseDto[];
     total: number;
     page: number;
     limit: number;
@@ -86,7 +86,7 @@ export class GetRoleUseCase {
     }
 
     let rolesResult;
-    
+
     if (search) {
       rolesResult = await this.roleRepository.search(search, paginationDto);
     } else {
@@ -94,10 +94,10 @@ export class GetRoleUseCase {
     }
 
     let roles = rolesResult.roles;
-    
+
     // Filter active roles if requested
     if (activeOnly) {
-      roles = roles.filter(role => role.isActive);
+      roles = roles.filter((role) => role.isActive);
     }
 
     const total = rolesResult.total;
@@ -139,7 +139,7 @@ export class GetRoleUseCase {
     const total = await this.roleRepository.count();
     const activeCount = await this.roleRepository.countActive();
     const allRoles = await this.roleRepository.findAll();
-    
+
     const totalPermissions = allRoles.roles.reduce(
       (sum, role) => sum + (role.permissions?.length || 0),
       0
@@ -150,22 +150,25 @@ export class GetRoleUseCase {
       activeRoles: activeCount,
       inactiveRoles: total - activeCount,
       totalPermissions,
-      averagePermissionsPerRole: total > 0 ? Math.round(totalPermissions / total * 10) / 10 : 0,
+      averagePermissionsPerRole:
+        total > 0 ? Math.round((totalPermissions / total) * 10) / 10 : 0,
     };
   }
 
   /**
    * Get users assigned to a role
    */
-  async executeUsersByRole(roleId: number): Promise<Partial<UserResponseDto>[]> {
+  async executeUsersByRole(
+    roleId: number
+  ): Promise<Partial<UserResponseDto>[]> {
     const role = await this.roleRepository.findById(roleId);
     if (!role) {
       throw new NotFoundException("Role not found");
     }
 
     const users = await this.userRepository.findByRole(role.name);
-    
-    return users.map(user => ({
+
+    return users.map((user) => ({
       id: user.id,
       email: user.email,
       firstName: user.firstName,

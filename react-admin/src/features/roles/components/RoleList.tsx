@@ -1,25 +1,25 @@
-import React, { useState } from 'react';
 import {
-  PlusIcon,
-  PencilIcon,
-  TrashIcon,
   EyeIcon,
+  PencilIcon,
+  PlusIcon,
   ShieldCheckIcon,
+  TrashIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
+import { Table, TableColumn } from '../../../shared/components/table';
 import Button from '../../../shared/components/ui/Button';
 import Card from '../../../shared/components/ui/Card';
 import Modal from '../../../shared/components/ui/Modal';
-import { Table, TableColumn } from '../../../shared/components/table';
 import { ServerPagination } from '../../../shared/components/ui/ServerPagination';
 import { ServerSearch } from '../../../shared/components/ui/ServerSearch';
 
-import { useRoles, useDeleteRole } from '../hooks/useRoleQueries';
 import { useRoleLabels } from '../hooks/useRoleLabels';
+import { useDeleteRole, useRoles } from '../hooks/useRoleQueries';
 import { Role } from '../types';
 
 export const RoleList: React.FC = () => {
@@ -109,11 +109,10 @@ export const RoleList: React.FC = () => {
       label: L?.table?.status || 'Status',
       render: (role) => (
         <span
-          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            role.isActive
+          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${role.isActive
               ? 'bg-green-100 text-green-800'
               : 'bg-gray-100 text-gray-800'
-          }`}
+            }`}
         >
           {role.isActive ? (
             <>

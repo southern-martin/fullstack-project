@@ -1,9 +1,9 @@
 /**
  * User Module Translation Labels
- * 
+ *
  * This file contains all static UI labels used in the Users module.
  * Labels are organized by category for better maintainability.
- * 
+ *
  * Usage with useUserLabels hook:
  * const { L } = useUserLabels();
  * <h1>{L.page.title}</h1>
@@ -182,7 +182,8 @@ export const userLabels: UserLabels = {
   },
 
   delete: {
-    confirmMessage: 'Are you sure you want to delete this user? This action cannot be undone.',
+    confirmMessage:
+      'Are you sure you want to delete this user? This action cannot be undone.',
   },
 
   messages: {

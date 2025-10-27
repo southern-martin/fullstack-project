@@ -16,8 +16,8 @@ import { ROUTES } from '../../../config/api';
 import Button from '../../../shared/components/ui/Button';
 import Card from '../../../shared/components/ui/Card';
 import Loading from '../../../shared/components/ui/Loading';
-import { dashboardService, DashboardStats } from '../services/dashboardService';
 import { useDashboardLabels } from '../hooks/useDashboardLabels';
+import { dashboardService, DashboardStats } from '../services/dashboardService';
 import EcommerceDashboard from './EcommerceDashboard';
 
 const Dashboard: React.FC = () => {

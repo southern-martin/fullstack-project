@@ -1,15 +1,15 @@
 import { User } from "@/domain/entities/user.entity";
 import { UserRepositoryInterface } from "@/domain/repositories/user.repository.interface";
+import {
+  BaseTypeOrmRepository,
+  PaginationDto,
+  RedisCacheService,
+} from "@fullstack-project/shared-infrastructure";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { 
-  PaginationDto, 
-  BaseTypeOrmRepository,
-  RedisCacheService 
-} from "@fullstack-project/shared-infrastructure";
 import { Between, Repository } from "typeorm";
-import { UserTypeOrmEntity } from "../entities/user.typeorm.entity";
 import { RoleTypeOrmEntity } from "../entities/role.typeorm.entity";
+import { UserTypeOrmEntity } from "../entities/user.typeorm.entity";
 
 /**
  * UserTypeOrmRepository
@@ -19,16 +19,16 @@ import { RoleTypeOrmEntity } from "../entities/role.typeorm.entity";
  * Extends BaseTypeOrmRepository for common CRUD operations.
  */
 @Injectable()
-export class UserTypeOrmRepository 
+export class UserTypeOrmRepository
   extends BaseTypeOrmRepository<User, UserTypeOrmEntity>
-  implements UserRepositoryInterface 
+  implements UserRepositoryInterface
 {
   constructor(
     @InjectRepository(UserTypeOrmEntity)
     protected readonly repository: Repository<UserTypeOrmEntity>,
     protected readonly cacheService: RedisCacheService
   ) {
-    super(repository, cacheService, 'user', 300); // 5-minute cache TTL
+    super(repository, cacheService, "user", 300); // 5-minute cache TTL
   }
 
   /**
@@ -36,24 +36,24 @@ export class UserTypeOrmRepository
    */
   async findByEmail(email: string): Promise<User | null> {
     const cacheKey = `email:${email.toLowerCase()}`;
-    
+
     // Try cache first
     const cached = await this.cacheService.get<User>(cacheKey);
     if (cached) return cached;
-    
+
     // Fetch from database
     const entity = await this.repository.findOne({
       where: { email: email.toLowerCase() },
       relations: ["roles"],
     });
-    
+
     if (!entity) return null;
-    
+
     const user = this.toDomainEntity(entity);
-    
+
     // Cache the result
     await this.cacheService.set(cacheKey, user, { ttl: 300 });
-    
+
     return user;
   }
 
@@ -138,7 +138,7 @@ export class UserTypeOrmRepository
     if (Object.keys(userData).length > 0) {
       const updates = this.toTypeOrmEntity(userData as User);
       // Only update fields that are actually provided
-      Object.keys(updates).forEach(key => {
+      Object.keys(updates).forEach((key) => {
         if (updates[key] !== undefined) {
           userEntity[key] = updates[key];
         }
@@ -160,7 +160,7 @@ export class UserTypeOrmRepository
 
     // Save the entity (cascade will handle roles)
     const savedEntity = await this.repository.save(userEntity);
-    
+
     // Invalidate cache
     await this.invalidateCaches(id, savedEntity.email);
 
@@ -225,18 +225,18 @@ export class UserTypeOrmRepository
    */
   private async invalidateCaches(id: number, email?: string): Promise<void> {
     const promises: Promise<void>[] = [];
-    
+
     // Invalidate ID-based cache
     promises.push(this.cacheService.del(`${this.cacheKeyPrefix}:${id}`));
-    
+
     // Invalidate email-based cache if provided
     if (email) {
       promises.push(this.cacheService.del(`email:${email.toLowerCase()}`));
     }
-    
+
     // Invalidate list cache
     promises.push(this.invalidateListCache());
-    
+
     await Promise.all(promises);
   }
 

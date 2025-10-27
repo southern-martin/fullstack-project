@@ -3,8 +3,8 @@ import { toast } from 'react-hot-toast';
 
 import Button from '../../../shared/components/ui/Button';
 import { FormField } from '../../../shared/components/ui/FormField';
-import { CreateCustomerRequest, Customer, UpdateCustomerRequest } from '../services/customerApiService';
 import { useCustomerLabels } from '../hooks/useCustomerLabels';
+import { CreateCustomerRequest, Customer, UpdateCustomerRequest } from '../services/customerApiService';
 
 interface CustomerFormProps {
     customer?: Customer;

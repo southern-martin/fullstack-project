@@ -1,9 +1,9 @@
 /**
  * Role Module Translation Labels
- * 
+ *
  * This file contains all static UI labels used in the Role module.
  * Labels are organized by category for better maintainability.
- * 
+ *
  * Usage with useRoleLabels hook:
  * const { L } = useRoleLabels();
  * <h1>{L.page.title}</h1>
@@ -247,7 +247,8 @@ export const roleLabels: RoleLabels = {
     updateSuccess: 'Role updated successfully',
     deleteSuccess: 'Role deleted successfully',
     deleteConfirm: 'Are you sure you want to delete this role?',
-    deleteWarning: 'This role is assigned to users. Deleting it will remove the role from all users.',
+    deleteWarning:
+      'This role is assigned to users. Deleting it will remove the role from all users.',
     noRoles: 'No roles found',
     loading: 'Loading roles...',
     errorLoading: 'Failed to load roles',

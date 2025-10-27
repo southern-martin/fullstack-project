@@ -2,7 +2,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  Index,
   JoinTable,
   ManyToMany,
   PrimaryGeneratedColumn,
@@ -14,7 +13,7 @@ import { PermissionTypeOrmEntity } from "./permission.typeorm.entity";
  * TypeORM Role Entity
  * Infrastructure layer - database representation
  * Maps to domain Role entity
- * 
+ *
  * NOTE: Permissions are now stored relationally via role_permissions join table.
  * The JSON permissions column has been dropped from the database.
  */
@@ -31,18 +30,18 @@ export class RoleTypeOrmEntity {
 
   @ManyToMany(() => PermissionTypeOrmEntity, { eager: false })
   @JoinTable({
-    name: 'role_permissions',
-    joinColumn: { name: 'role_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'permission_id', referencedColumnName: 'id' },
+    name: "role_permissions",
+    joinColumn: { name: "role_id", referencedColumnName: "id" },
+    inverseJoinColumn: { name: "permission_id", referencedColumnName: "id" },
   })
   permissionEntities: PermissionTypeOrmEntity[];
 
-  @Column({ default: true, name: 'is_active' })
+  @Column({ default: true, name: "is_active" })
   isActive: boolean;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: "created_at" })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: "updated_at" })
   updatedAt: Date;
 }

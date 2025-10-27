@@ -1,4 +1,12 @@
-import { IsString, IsOptional, IsBoolean, IsArray, MinLength, MaxLength, IsNumber, ArrayNotEmpty } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from "class-validator";
 
 export class CreateRoleDto {
   @IsString()
@@ -23,11 +31,3 @@ export class CreateRoleDto {
   @IsOptional()
   metadata?: Record<string, any>;
 }
-
-
-
-
-
-
-
-

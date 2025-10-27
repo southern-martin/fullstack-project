@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 
 import { useAuthContext } from '../../../app/providers/AuthProvider';
+import LanguageSwitcher from '../../../shared/components/LanguageSwitcher';
 import Button from '../../../shared/components/ui/Button';
 import Card from '../../../shared/components/ui/Card';
 import Input from '../../../shared/components/ui/Input';
-import LanguageSwitcher from '../../../shared/components/LanguageSwitcher';
-import { LoginCredentials } from '../types';
 import { useAuthLabels } from '../hooks/useAuthTranslation';
+import { LoginCredentials } from '../types';
 
 const LoginForm: React.FC = () => {
     const { login, isLoading, error, clearError, isAuthenticated } = useAuthContext();
@@ -63,7 +63,7 @@ const LoginForm: React.FC = () => {
                 <div className="flex justify-end">
                     <LanguageSwitcher />
                 </div>
-                
+
                 <div>
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100">
                         {L.page.signInTitle}

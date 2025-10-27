@@ -1,8 +1,12 @@
 import { PricingRule } from "@/domain/entities/pricing-rule.entity";
 import { PricingRuleRepositoryInterface } from "@/domain/repositories/pricing-rule.repository.interface";
-import { Injectable, Inject } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { PaginationDto, RedisCacheService, BaseTypeOrmRepository } from "@shared/infrastructure";
+import {
+  BaseTypeOrmRepository,
+  PaginationDto,
+  RedisCacheService,
+} from "@shared/infrastructure";
 import { Repository } from "typeorm";
 import { PricingRuleTypeOrmEntity } from "../entities/pricing-rule.typeorm.entity";
 
@@ -11,9 +15,9 @@ import { PricingRuleTypeOrmEntity } from "../entities/pricing-rule.typeorm.entit
  * Extends BaseTypeOrmRepository for common CRUD and caching operations
  */
 @Injectable()
-export class PricingRuleRepository 
+export class PricingRuleRepository
   extends BaseTypeOrmRepository<PricingRule, PricingRuleTypeOrmEntity>
-  implements PricingRuleRepositoryInterface 
+  implements PricingRuleRepositoryInterface
 {
   constructor(
     @InjectRepository(PricingRuleTypeOrmEntity)
@@ -21,7 +25,7 @@ export class PricingRuleRepository
     @Inject(RedisCacheService)
     cacheService: RedisCacheService
   ) {
-    super(repository, cacheService, 'pricing', 300); // 5 min TTL
+    super(repository, cacheService, "pricing", 300); // 5 min TTL
   }
 
   /**
@@ -32,7 +36,8 @@ export class PricingRuleRepository
     pagination?: PaginationDto,
     search?: string
   ): Promise<{ pricingRules: PricingRule[]; total: number }> {
-    const paginationDto = pagination || Object.assign(new PaginationDto(), { page: 1, limit: 20 });
+    const paginationDto =
+      pagination || Object.assign(new PaginationDto(), { page: 1, limit: 20 });
     const result = await this.findAllWithCache(
       paginationDto,
       search,
@@ -44,7 +49,9 @@ export class PricingRuleRepository
           );
         }
         // Always sort by newest first for consistent pagination
-        queryBuilder.orderBy("pricingRule.createdAt", "DESC").addOrderBy("pricingRule.id", "DESC");
+        queryBuilder
+          .orderBy("pricingRule.createdAt", "DESC")
+          .addOrderBy("pricingRule.id", "DESC");
       }
     );
     return { pricingRules: result.entities, total: result.total };
@@ -176,7 +183,9 @@ export class PricingRuleRepository
   /**
    * Map domain entity to TypeORM entity
    */
-  protected toTypeOrmEntity(pricingRule: PricingRule): Partial<PricingRuleTypeOrmEntity> {
+  protected toTypeOrmEntity(
+    pricingRule: PricingRule
+  ): Partial<PricingRuleTypeOrmEntity> {
     return {
       id: pricingRule.id,
       name: pricingRule.name,

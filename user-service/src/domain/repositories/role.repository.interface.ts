@@ -13,7 +13,11 @@ export interface RoleRepositoryInterface {
     searchTerm: string,
     pagination: PaginationDto
   ): Promise<{ roles: Role[]; total: number }>;
-  update(id: number, role: Partial<Role>, permissionIds?: number[]): Promise<Role>;
+  update(
+    id: number,
+    role: Partial<Role>,
+    permissionIds?: number[]
+  ): Promise<Role>;
   delete(id: number): Promise<void>;
   findActive(): Promise<Role[]>;
   findByPermission(permission: string): Promise<Role[]>;

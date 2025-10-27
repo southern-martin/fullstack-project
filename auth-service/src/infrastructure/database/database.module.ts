@@ -18,13 +18,21 @@ import { UserRepository } from "./typeorm/repositories/user.repository";
         username: configService.get<string>("DB_USERNAME", "root"),
         password: configService.get<string>("DB_PASSWORD", ""),
         database: configService.get<string>("DB_NAME", "auth_service_db"),
-        entities: [UserTypeOrmEntity, RoleTypeOrmEntity, PermissionTypeOrmEntity],
+        entities: [
+          UserTypeOrmEntity,
+          RoleTypeOrmEntity,
+          PermissionTypeOrmEntity,
+        ],
         synchronize: configService.get<string>("NODE_ENV") === "development",
         logging: configService.get<string>("NODE_ENV") === "development",
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([UserTypeOrmEntity, RoleTypeOrmEntity, PermissionTypeOrmEntity]),
+    TypeOrmModule.forFeature([
+      UserTypeOrmEntity,
+      RoleTypeOrmEntity,
+      PermissionTypeOrmEntity,
+    ]),
   ],
   providers: [
     {

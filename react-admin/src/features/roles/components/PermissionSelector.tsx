@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Permission, PermissionCategory, PermissionGroup } from '../types';
 import { useRoleLabels } from '../hooks/useRoleLabels';
+import { Permission, PermissionCategory, PermissionGroup } from '../types';
 
 interface PermissionSelectorProps {
   permissions: Permission[];
@@ -26,7 +26,7 @@ export const PermissionSelector: React.FC<PermissionSelectorProps> = ({
 
     permissions.forEach((permission) => {
       const category = permission.category || PermissionCategory.SYSTEM;
-      
+
       if (!groups[category]) {
         groups[category] = {
           category,
@@ -34,7 +34,7 @@ export const PermissionSelector: React.FC<PermissionSelectorProps> = ({
           permissions: [],
         };
       }
-      
+
       groups[category].permissions.push(permission);
     });
 
@@ -154,9 +154,8 @@ export const PermissionSelector: React.FC<PermissionSelectorProps> = ({
                     disabled={disabled}
                   >
                     <svg
-                      className={`w-5 h-5 text-gray-500 transition-transform ${
-                        isExpanded ? 'transform rotate-90' : ''
-                      }`}
+                      className={`w-5 h-5 text-gray-500 transition-transform ${isExpanded ? 'transform rotate-90' : ''
+                        }`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -207,11 +206,10 @@ export const PermissionSelector: React.FC<PermissionSelectorProps> = ({
                     return (
                       <label
                         key={permission.id}
-                        className={`flex items-start space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                          isSelected
+                        className={`flex items-start space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${isSelected
                             ? 'bg-blue-50 border-blue-200'
                             : 'hover:bg-gray-50'
-                        } ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
+                          } ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
                       >
                         <input
                           type="checkbox"

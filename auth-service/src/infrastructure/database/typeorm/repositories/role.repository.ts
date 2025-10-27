@@ -1,8 +1,8 @@
 import { Role } from "@/domain/entities/role.entity";
 import { RoleRepositoryInterface } from "@/domain/repositories/role.repository.interface";
+import { PaginationDto } from "@fullstack-project/shared-infrastructure";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { PaginationDto } from "@fullstack-project/shared-infrastructure";
 import { Repository } from "typeorm";
 import { RoleTypeOrmEntity } from "../entities/role.typeorm.entity";
 
@@ -14,17 +14,17 @@ export class RoleRepository implements RoleRepositoryInterface {
   ) {}
 
   async findById(id: number): Promise<Role | null> {
-    const entity = await this.repository.findOne({ 
+    const entity = await this.repository.findOne({
       where: { id },
-      relations: ['permissionEntities']
+      relations: ["permissionEntities"],
     });
     return entity ? this.toDomainEntity(entity) : null;
   }
 
   async findByName(name: string): Promise<Role | null> {
-    const entity = await this.repository.findOne({ 
+    const entity = await this.repository.findOne({
       where: { name },
-      relations: ['permissionEntities']
+      relations: ["permissionEntities"],
     });
     return entity ? this.toDomainEntity(entity) : null;
   }
@@ -52,15 +52,15 @@ export class RoleRepository implements RoleRepositoryInterface {
       take: limit,
       skip: offset,
       order: { createdAt: "DESC" },
-      relations: ['permissionEntities']
+      relations: ["permissionEntities"],
     });
     return entities.map((entity) => this.toDomainEntity(entity));
   }
 
   async findByIds(ids: number[]): Promise<Role[]> {
     const entities = await this.repository.find({
-      where: ids.map(id => ({ id })),
-      relations: ['permissionEntities']
+      where: ids.map((id) => ({ id })),
+      relations: ["permissionEntities"],
     });
     return entities.map((entity) => this.toDomainEntity(entity));
   }
@@ -106,9 +106,9 @@ export class RoleRepository implements RoleRepositoryInterface {
   }
 
   async findActive(): Promise<Role[]> {
-    const entities = await this.repository.find({ 
+    const entities = await this.repository.find({
       where: { isActive: true },
-      relations: ['permissionEntities']
+      relations: ["permissionEntities"],
     });
     return entities.map((entity) => this.toDomainEntity(entity));
   }
@@ -158,11 +158,11 @@ export class RoleRepository implements RoleRepositoryInterface {
       name: entity.name,
       description: entity.description,
       isActive: entity.isActive,
-      permissions: (entity.permissionEntities || []).map(p => p.name),
+      permissions: (entity.permissionEntities || []).map((p) => p.name),
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     });
-    
+
     return role;
   }
 

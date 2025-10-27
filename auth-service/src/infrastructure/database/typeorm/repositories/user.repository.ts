@@ -1,12 +1,12 @@
 import { User } from "@/domain/entities/user.entity";
 import { UserRepositoryInterface } from "@/domain/repositories/user.repository.interface";
+import {
+  BaseTypeOrmRepository,
+  PaginationDto,
+  RedisCacheService,
+} from "@fullstack-project/shared-infrastructure";
 import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { 
-  PaginationDto, 
-  RedisCacheService, 
-  BaseTypeOrmRepository 
-} from "@fullstack-project/shared-infrastructure";
 import * as bcrypt from "bcrypt";
 import { Repository } from "typeorm";
 import { UserTypeOrmEntity } from "../entities/user.typeorm.entity";
@@ -16,9 +16,9 @@ import { UserTypeOrmEntity } from "../entities/user.typeorm.entity";
  * Extends BaseTypeOrmRepository for common CRUD and caching operations
  */
 @Injectable()
-export class UserRepository 
+export class UserRepository
   extends BaseTypeOrmRepository<User, UserTypeOrmEntity>
-  implements UserRepositoryInterface 
+  implements UserRepositoryInterface
 {
   constructor(
     @InjectRepository(UserTypeOrmEntity)
@@ -26,9 +26,8 @@ export class UserRepository
     @Inject(RedisCacheService)
     cacheService: RedisCacheService
   ) {
-    super(repository, cacheService, 'users', 300); // 5 min TTL
+    super(repository, cacheService, "users", 300); // 5 min TTL
   }
-
 
   /**
    * Find user by ID with roles and permissions
@@ -95,12 +94,12 @@ export class UserRepository
    */
   async create(user: User): Promise<User> {
     const entity = this.toTypeOrmEntity(user);
-    
+
     // Hash password before saving (CRITICAL SECURITY FIX)
     if (user.password) {
       entity.password = await bcrypt.hash(user.password, 10);
     }
-    
+
     const savedEntity = await this.repository.save(entity);
     await this.invalidateListCache(); // Invalidate cache after creation
     return this.toDomainEntity(savedEntity);
@@ -210,7 +209,9 @@ export class UserRepository
    */
   async incrementFailedLoginAttempts(userId: number): Promise<void> {
     // Simplified - this functionality is not available with current schema
-    console.warn('Failed login attempts tracking not available with current schema');
+    console.warn(
+      "Failed login attempts tracking not available with current schema"
+    );
   }
 
   /**
@@ -218,7 +219,9 @@ export class UserRepository
    */
   async resetFailedLoginAttempts(userId: number): Promise<void> {
     // Simplified - this functionality is not available with current schema
-    console.warn('Failed login attempts reset not available with current schema');
+    console.warn(
+      "Failed login attempts reset not available with current schema"
+    );
   }
 
   /**
