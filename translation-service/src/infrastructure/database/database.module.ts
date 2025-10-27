@@ -18,7 +18,11 @@ import { LanguageRepository } from "./typeorm/repositories/language.repository";
         password: configService.get("DB_PASSWORD", "password"),
         database: configService.get("DB_NAME", "translation_service_db"),
         entities: [LanguageTypeOrmEntity, LanguageValueTypeOrmEntity],
-        synchronize: configService.get("NODE_ENV") === "development",
+        migrations: [
+          "dist/infrastructure/database/typeorm/migrations/*.js",
+        ],
+        migrationsRun: true, // Auto-run migrations on startup
+        synchronize: false, // Disabled - using migrations
         logging: configService.get("NODE_ENV") === "development",
       }),
       inject: [ConfigService],

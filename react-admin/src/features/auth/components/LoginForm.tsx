@@ -10,12 +10,24 @@ import { LoginCredentials } from '../types';
 
 const LoginForm: React.FC = () => {
     const { login, isLoading, error, clearError, isAuthenticated } = useAuthContext();
-    const { L } = useAuthLabels();
+    const { L, isLoading: labelsLoading } = useAuthLabels();
     const [formData, setFormData] = useState<LoginCredentials>({
         email: 'admin@example.com',
         password: 'Admin123!',
     });
     const [validationErrors, setValidationErrors] = useState<Partial<LoginCredentials>>({});
+
+    // Show loading spinner while translations are loading
+    if (labelsLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600 dark:text-gray-400">Loading...</p>
+                </div>
+            </div>
+        );
+    }
 
     // Don't render the form if already authenticated (routing will handle redirect)
     if (isAuthenticated) {
@@ -57,22 +69,31 @@ const LoginForm: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-6">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
-                {/* Language Switcher - positioned at top right */}
-                <div className="flex justify-end">
+                {/* Header with Logo and Language Switcher */}
+                <div className="flex items-center justify-between mb-8">
+                    <div className="flex-1">
+                        {/* Logo placeholder - you can add your logo here */}
+                        <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                            🌐 Admin
+                        </div>
+                    </div>
                     <LanguageSwitcher />
                 </div>
 
-                <div>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100">
+                {/* Title Section */}
+                <div className="text-center">
+                    <h2 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100">
                         {L.page.signInTitle}
                     </h2>
-                    <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                         {L.page.signInSubtitle}
                     </p>
                 </div>
-                <Card className="mt-8 space-y-6">
+
+                {/* Login Card */}
+                <Card className="mt-8 space-y-6 shadow-xl">
                     {error && (
                         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded">
                             {error}

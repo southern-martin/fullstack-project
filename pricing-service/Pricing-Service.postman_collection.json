@@ -1,0 +1,402 @@
+{
+	"info": {
+		"_postman_id": "pricing-service-collection-2025",
+		"name": "Pricing Service API",
+		"description": "Complete API collection for Pricing Service\n\n**Base URL**: http://localhost:3006/api/v1\n\n**Features**:\n- Pricing Rules Management (CRUD)\n- Price Calculation\n- Price Calculation History\n- Health Check\n\n**Created**: October 27, 2025\n**Version**: 1.0.0",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Check if the Pricing Service is healthy and running"
+					},
+					"response": []
+				}
+			],
+			"description": "Health check endpoint to verify service status"
+		},
+		{
+			"name": "Pricing Rules",
+			"item": [
+				{
+					"name": "Create Pricing Rule",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"FedEx Express Domestic\",\n  \"description\": \"Standard pricing for FedEx Express domestic shipments\",\n  \"conditions\": {\n    \"carrierId\": 1,\n    \"serviceType\": \"Express\",\n    \"originCountry\": \"US\",\n    \"destinationCountry\": \"US\"\n  },\n  \"pricing\": {\n    \"baseRate\": 15.99,\n    \"currency\": \"USD\",\n    \"perKgRate\": 2.5,\n    \"minimumCharge\": 12.99,\n    \"maximumCharge\": 500.0,\n    \"surcharges\": [\n      {\n        \"type\": \"Fuel Surcharge\",\n        \"percentage\": 8.5\n      },\n      {\n        \"type\": \"Weekend Delivery\",\n        \"amount\": 5.0\n      }\n    ]\n  },\n  \"priority\": 100\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pricing/rules",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pricing",
+								"rules"
+							]
+						},
+						"description": "Create a new pricing rule with conditions and pricing details"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Pricing Rules",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/pricing/rules?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pricing",
+								"rules"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Items per page (default: 10)"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Search by rule name (optional)",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get paginated list of all pricing rules with optional search"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pricing Rule by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/pricing/rules/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pricing",
+								"rules",
+								"1"
+							]
+						},
+						"description": "Get a specific pricing rule by its ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pricing Rules Count",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/pricing/rules/count",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pricing",
+								"rules",
+								"count"
+							]
+						},
+						"description": "Get total count of pricing rules"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Pricing Rule",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"FedEx Express Domestic - Updated\",\n  \"description\": \"Updated pricing for FedEx Express domestic shipments\",\n  \"isActive\": true,\n  \"pricing\": {\n    \"baseRate\": 16.99,\n    \"currency\": \"USD\",\n    \"perKgRate\": 2.75,\n    \"minimumCharge\": 12.99,\n    \"maximumCharge\": 500.0,\n    \"surcharges\": [\n      {\n        \"type\": \"Fuel Surcharge\",\n        \"percentage\": 9.0\n      }\n    ]\n  },\n  \"priority\": 100\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pricing/rules/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pricing",
+								"rules",
+								"1"
+							]
+						},
+						"description": "Update an existing pricing rule by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Pricing Rule",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/pricing/rules/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pricing",
+								"rules",
+								"1"
+							]
+						},
+						"description": "Delete a pricing rule by ID (returns 204 No Content)"
+					},
+					"response": []
+				}
+			],
+			"description": "CRUD operations for pricing rules management"
+		},
+		{
+			"name": "Price Calculation",
+			"item": [
+				{
+					"name": "Calculate Price - Basic",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"carrierId\": 1,\n  \"serviceType\": \"Express\",\n  \"weight\": 5.5,\n  \"originCountry\": \"US\",\n  \"destinationCountry\": \"US\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pricing/calculate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pricing",
+								"calculate"
+							]
+						},
+						"description": "Calculate price for a basic shipment (domestic, no distance)"
+					},
+					"response": []
+				},
+				{
+					"name": "Calculate Price - With Distance",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"carrierId\": 2,\n  \"serviceType\": \"Ground\",\n  \"weight\": 10.0,\n  \"distance\": 250,\n  \"originCountry\": \"US\",\n  \"destinationCountry\": \"US\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pricing/calculate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pricing",
+								"calculate"
+							]
+						},
+						"description": "Calculate price including distance-based pricing"
+					},
+					"response": []
+				},
+				{
+					"name": "Calculate Price - International",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"carrierId\": 3,\n  \"serviceType\": \"Express\",\n  \"weight\": 8.0,\n  \"originCountry\": \"US\",\n  \"destinationCountry\": \"CA\",\n  \"customerType\": \"Premium\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pricing/calculate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pricing",
+								"calculate"
+							]
+						},
+						"description": "Calculate price for international shipment with customer type"
+					},
+					"response": []
+				},
+				{
+					"name": "Calculate Price - With Customer ID",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"carrierId\": 1,\n  \"serviceType\": \"Express\",\n  \"weight\": 3.5,\n  \"originCountry\": \"US\",\n  \"destinationCountry\": \"US\",\n  \"customerId\": 123,\n  \"customerType\": \"Enterprise\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pricing/calculate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pricing",
+								"calculate"
+							]
+						},
+						"description": "Calculate price with customer-specific pricing (Enterprise customer)"
+					},
+					"response": []
+				}
+			],
+			"description": "Price calculation endpoints with different scenarios"
+		},
+		{
+			"name": "Price Calculation History",
+			"item": [
+				{
+					"name": "Get All Calculations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/pricing/calculations?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pricing",
+								"calculations"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Items per page (default: 10)"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Search by request ID (optional)",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get paginated list of price calculation history"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Calculations Count",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/pricing/calculations/count",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pricing",
+								"calculations",
+								"count"
+							]
+						},
+						"description": "Get total count of price calculations"
+					},
+					"response": []
+				}
+			],
+			"description": "Price calculation history and audit trail"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3006/api/v1",
+			"type": "string"
+		}
+	]
+}

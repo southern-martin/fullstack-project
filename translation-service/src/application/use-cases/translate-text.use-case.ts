@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { WinstonLoggerService } from "@shared/infrastructure/logging/winston-logger.service";
 import { LanguageValueRepositoryInterface } from "../../domain/repositories/language-value.repository.interface";
 import { LanguageRepositoryInterface } from "../../domain/repositories/language.repository.interface";
@@ -20,6 +21,8 @@ import { ManageTranslationUseCase } from "./manage-translation.use-case";
  */
 @Injectable()
 export class TranslateTextUseCase {
+  private readonly maxBatchSize: number;
+
   constructor(
     @Inject("LanguageRepositoryInterface")
     private readonly languageRepository: LanguageRepositoryInterface,
@@ -27,8 +30,16 @@ export class TranslateTextUseCase {
     private readonly languageValueRepository: LanguageValueRepositoryInterface,
     private readonly translationDomainService: TranslationDomainService,
     private readonly manageTranslationUseCase: ManageTranslationUseCase,
-    private readonly logger: WinstonLoggerService
-  ) {}
+    private readonly logger: WinstonLoggerService,
+    private readonly configService: ConfigService
+  ) {
+    // Load max batch size from environment configuration
+    // Default to 200 if not specified
+    this.maxBatchSize = this.configService.get<number>(
+      'MAX_BATCH_TRANSLATION_SIZE',
+      200
+    );
+  }
 
   /**
    * Translates a single text.
@@ -137,9 +148,9 @@ export class TranslateTextUseCase {
       throw new BadRequestException("Texts array cannot be empty");
     }
 
-    if (texts.length > 100) {
+    if (texts.length > this.maxBatchSize) {
       throw new BadRequestException(
-        "Cannot translate more than 100 texts at once"
+        `Cannot translate more than ${this.maxBatchSize} texts at once`
       );
     }
 

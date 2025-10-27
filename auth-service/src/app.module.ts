@@ -41,7 +41,9 @@ import { WinstonLoggerModule } from "@shared/infrastructure/logging";
       password: process.env.DB_PASSWORD || "shared_password_2024",
       database: process.env.DB_NAME || "shared_user_db",
       entities: [UserTypeOrmEntity, RoleTypeOrmEntity, PermissionTypeOrmEntity],
-      synchronize: process.env.DB_SYNCHRONIZE === "true" || false,
+      synchronize: false, // CRITICAL: Disabled - use migrations for schema changes (shared DB with User Service)
+      migrations: ["dist/infrastructure/database/typeorm/migrations/*.js"],
+      migrationsRun: true, // Auto-run pending migrations on startup
       logging: false, // Disable TypeORM default logging, use Winston instead
       maxQueryExecutionTime: 1000, // Log slow queries > 1s
     }),

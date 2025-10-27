@@ -47,7 +47,9 @@ import { WinstonLoggerModule } from "@shared/infrastructure/logging";
         PermissionTypeOrmEntity,
         UserProfileTypeOrmEntity,
       ],
-      synchronize: process.env.DB_SYNCHRONIZE === "true" || false,
+      synchronize: false, // CRITICAL: Disabled - use migrations for schema changes
+      migrations: ["dist/infrastructure/database/typeorm/migrations/*.js"],
+      migrationsRun: true, // Auto-run pending migrations on startup
       logging: false, // Disable SQL logging (use Winston for structured logs)
       maxQueryExecutionTime: 1000, // Log slow queries > 1s
     }),

@@ -3,14 +3,14 @@
   "editor.formatOnSave": false,
   "editor.formatOnPaste": false,
   "editor.formatOnType": false,
-  
+
   // Only format when explicitly requested (Shift+Alt+F or right-click > Format Document)
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  
+
   // Prettier configuration
   "prettier.requireConfig": true,
   "prettier.useEditorConfig": false,
-  
+
   // TypeScript/JavaScript specific
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -36,16 +36,16 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": false
   },
-  
+
   // Git
   "git.enableSmartCommit": false,
   "git.confirmSync": true,
-  
+
   // Files
   "files.eol": "\n",
   "files.insertFinalNewline": true,
   "files.trimTrailingWhitespace": true,
-  
+
   // Postman
   "postman.settings.dotenv-detection-notification-visibility": false
 }

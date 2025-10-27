@@ -41,7 +41,9 @@ import { PricingRuleTypeOrmEntity } from "./infrastructure/database/typeorm/enti
       password: process.env.DB_PASSWORD || "password",
       database: process.env.DB_NAME || "pricing_service_db",
       entities: [PricingRuleTypeOrmEntity, PriceCalculationTypeOrmEntity],
-      synchronize: process.env.NODE_ENV !== "production",
+      migrations: ["dist/infrastructure/database/typeorm/migrations/*.js"],
+      migrationsRun: true, // Auto-run migrations on startup
+      synchronize: false, // Disabled - using migrations for schema management
       logging: process.env.NODE_ENV === "development",
     }),
 

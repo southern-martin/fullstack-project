@@ -61,7 +61,9 @@ export const PRICING_API_CONFIG = {
 } as const;
 
 export const TRANSLATION_API_CONFIG = {
-  BASE_URL: KONG_GATEWAY_URL + '/api/v1/translation',
+  // IMPORTANT: Translation service accessed directly (not through Kong)
+  // Kong routes not configured for translation service yet
+  BASE_URL: process.env.REACT_APP_TRANSLATION_SERVICE_URL || 'http://localhost:3007/api/v1/translation',
   HEADERS: {
     'Content-Type': 'application/json',
     'Accept-Language': 'en',

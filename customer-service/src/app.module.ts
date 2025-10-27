@@ -40,7 +40,9 @@ import { InterfacesModule } from "./interfaces/interfaces.module";
       password: process.env.DB_PASSWORD || "password",
       database: process.env.DB_NAME || "customer_service_db",
       entities: [CustomerTypeOrmEntity],
-      synchronize: process.env.NODE_ENV !== "production",
+      migrations: ["dist/infrastructure/database/typeorm/migrations/*.js"],
+      migrationsRun: true,
+      synchronize: false,
       logging: false, // Disable SQL logging (use Winston for structured logs)
     }),
 
