@@ -23,6 +23,18 @@ interface TranslationPair {
   spanish: string;
 }
 
+interface CreateTranslationRequest {
+  original: string;
+  destination: string;
+  languageCode: string;
+  context?: {
+    category?: string;
+    module?: string;
+    component?: string;
+    field?: string;
+  };
+}
+
 /**
  * Authentication Module Translations
  * Organized by category matching login and authentication flows
@@ -121,14 +133,17 @@ async function seedTranslation(
   languageCode: string
 ): Promise<void> {
   try {
-    const payload = {
+    const payload: CreateTranslationRequest = {
       original: sourceText,
       destination: translatedText,
       languageCode: languageCode,
-      isApproved: true,
+      context: {
+        module: 'auth',
+        category: 'authentication'
+      }
     };
 
-    await axios.post(`${TRANSLATION_API_BASE_URL}`, payload);
+    await axios.post(`${TRANSLATION_API_BASE_URL}/translations`, payload);
     console.log(`✅ [${languageCode.toUpperCase()}] "${sourceText}" → "${translatedText}"`);
   } catch (error: any) {
     if (error.response?.status === 409) {

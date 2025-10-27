@@ -84,7 +84,7 @@ const Carriers: React.FC = () => {
     const [isTranslated, setIsTranslated] = useState(false);
 
     // Label translation hook
-    const { L, isLoading: labelsLoading } = useCarrierLabels();
+    const { L } = useCarrierLabels();
 
     // Get current language to trigger re-translation on language change
     const { currentLanguage } = useLanguage();

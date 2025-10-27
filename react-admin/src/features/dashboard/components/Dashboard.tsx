@@ -9,7 +9,7 @@ import {
     UsersIcon,
     XCircleIcon
 } from '@heroicons/react/24/outline';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../../app/providers/AuthProvider';
 import { ROUTES } from '../../../config/api';
@@ -21,7 +21,7 @@ import { useDashboardLabels } from '../hooks/useDashboardLabels';
 import EcommerceDashboard from './EcommerceDashboard';
 
 const Dashboard: React.FC = () => {
-    const { labels: L } = useDashboardLabels();
+    const { L } = useDashboardLabels();
     const { user } = useAuthContext();
     const navigate = useNavigate();
     const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -29,83 +29,83 @@ const Dashboard: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [dashboardType, setDashboardType] = useState<'admin' | 'ecommerce'>('admin');
 
-    useEffect(() => {
-        loadDashboardStats();
-    }, []);
-
-    const loadDashboardStats = async () => {
+    const loadDashboardStats = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
             const dashboardStats = await dashboardService.getDashboardStats();
             setStats(dashboardStats);
         } catch (err) {
-            setError(L.MESSAGE_FAILED_LOAD);
+            setError(L.messages.failedLoad);
         } finally {
             setLoading(false);
         }
-    };
+    }, [L.messages.failedLoad]);
+
+    useEffect(() => {
+        loadDashboardStats();
+    }, [loadDashboardStats]);
 
     const dashboardCards = [
         {
-            title: L.CARD_USERS_TITLE,
-            description: L.CARD_USERS_DESCRIPTION,
+            title: L.cards.usersTitle,
+            description: L.cards.usersDescription,
             icon: UsersIcon,
             iconColor: 'text-blue-600 dark:text-blue-400',
             bgColor: 'bg-blue-50 dark:bg-blue-900/20',
             borderColor: 'border-blue-200 dark:border-blue-800',
-            buttonText: L.CARD_USERS_BUTTON,
+            buttonText: L.cards.usersButton,
             buttonColor: 'primary' as const,
             onClick: () => navigate(ROUTES.USERS),
             stats: stats?.totalUsers || 0,
         },
         {
-            title: L.CARD_CUSTOMERS_TITLE,
-            description: L.CARD_CUSTOMERS_DESCRIPTION,
+            title: L.cards.customersTitle,
+            description: L.cards.customersDescription,
             icon: UserGroupIcon,
             iconColor: 'text-green-600 dark:text-green-400',
             bgColor: 'bg-green-50 dark:bg-green-900/20',
             borderColor: 'border-green-200 dark:border-green-800',
-            buttonText: L.CARD_CUSTOMERS_BUTTON,
+            buttonText: L.cards.customersButton,
             buttonColor: 'success' as const,
             onClick: () => navigate(ROUTES.CUSTOMERS),
             stats: stats?.totalCustomers || 0,
         },
         {
-            title: L.CARD_CARRIERS_TITLE,
-            description: L.CARD_CARRIERS_DESCRIPTION,
+            title: L.cards.carriersTitle,
+            description: L.cards.carriersDescription,
             icon: TruckIcon,
             iconColor: 'text-purple-600 dark:text-purple-400',
             bgColor: 'bg-purple-50 dark:bg-purple-900/20',
             borderColor: 'border-purple-200 dark:border-purple-800',
-            buttonText: L.CARD_CARRIERS_BUTTON,
+            buttonText: L.cards.carriersButton,
             buttonColor: 'secondary' as const,
             onClick: () => navigate(ROUTES.CARRIERS),
             stats: stats?.totalCarriers || 0,
         },
         {
-            title: L.CARD_ANALYTICS_TITLE,
-            description: L.CARD_ANALYTICS_DESCRIPTION,
+            title: L.cards.analyticsTitle,
+            description: L.cards.analyticsDescription,
             icon: ChartBarIcon,
             iconColor: 'text-orange-600 dark:text-orange-400',
             bgColor: 'bg-orange-50 dark:bg-orange-900/20',
             borderColor: 'border-orange-200 dark:border-orange-800',
-            buttonText: L.CARD_ANALYTICS_BUTTON,
+            buttonText: L.cards.analyticsButton,
             buttonColor: 'primary' as const,
             onClick: () => navigate(ROUTES.ANALYTICS),
-            stats: L.STATS_REPORTS,
+            stats: L.stats.reports,
         },
         {
-            title: L.CARD_SETTINGS_TITLE,
-            description: L.CARD_SETTINGS_DESCRIPTION,
+            title: L.cards.settingsTitle,
+            description: L.cards.settingsDescription,
             icon: CogIcon,
             iconColor: 'text-gray-600 dark:text-gray-400',
             bgColor: 'bg-gray-50 dark:bg-gray-700/50',
             borderColor: 'border-gray-200 dark:border-gray-600',
-            buttonText: L.CARD_SETTINGS_BUTTON,
+            buttonText: L.cards.settingsButton,
             buttonColor: 'secondary' as const,
             onClick: () => navigate(ROUTES.SETTINGS),
-            stats: L.STATS_CONFIG,
+            stats: L.stats.config,
         },
     ];
 
@@ -115,9 +115,9 @@ const Dashboard: React.FC = () => {
             <div className="mb-8">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{L.PAGE_TITLE}</h1>
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{L.page.title}</h1>
                         <p className="text-sm text-gray-600 dark:text-gray-300">
-                            {L.PAGE_WELCOME}, {user?.firstName || 'User'}!
+                            {L.page.welcome}, {user?.firstName || 'User'}!
                         </p>
                     </div>
                     <div className="flex space-x-2">
@@ -126,14 +126,14 @@ const Dashboard: React.FC = () => {
                             onClick={() => setDashboardType('admin')}
                             size="sm"
                         >
-                            {L.BUTTON_ADMIN_DASHBOARD}
+                            {L.buttons.adminDashboard}
                         </Button>
                         <Button
                             variant={dashboardType === 'ecommerce' ? 'primary' : 'secondary'}
                             onClick={() => setDashboardType('ecommerce')}
                             size="sm"
                         >
-                            {L.BUTTON_ECOMMERCE_DASHBOARD}
+                            {L.buttons.ecommerceDashboard}
                         </Button>
                     </div>
                 </div>
@@ -146,10 +146,10 @@ const Dashboard: React.FC = () => {
                 <div>
                     <div className="mb-8">
                         <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                            {L.ADMIN_DASHBOARD_TITLE}
+                            {L.page.adminDashboardTitle}
                         </h2>
                         <p className="text-gray-600 dark:text-gray-300">
-                            {L.PAGE_SUBTITLE}
+                            {L.page.subtitle}
                         </p>
                     </div>
 
@@ -176,7 +176,7 @@ const Dashboard: React.FC = () => {
                                                 <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                                                     {typeof card.stats === 'number' ? card.stats.toLocaleString() : card.stats}
                                                 </div>
-                                                <div className="text-xs text-gray-500 dark:text-gray-400">{L.STATS_TOTAL}</div>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400">{L.stats.total}</div>
                                             </div>
                                         </div>
 
@@ -214,9 +214,9 @@ const Dashboard: React.FC = () => {
                     {/* Stats Section */}
                     <div className="mt-12">
                         <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">{L.SECTION_SYSTEM_OVERVIEW}</h3>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">{L.system.overview}</h3>
                             <div className="text-sm text-gray-500 dark:text-gray-400">
-                                {L.LAST_UPDATED}: {new Date().toLocaleTimeString()}
+                                {L.system.lastUpdated}: {new Date().toLocaleTimeString()}
                             </div>
                         </div>
                         {loading ? (
@@ -232,7 +232,7 @@ const Dashboard: React.FC = () => {
                                 <div className="flex items-center">
                                     <ExclamationTriangleIcon className="h-6 w-6 text-red-600 dark:text-red-400 mr-3" />
                                     <div>
-                                        <p className="text-red-800 dark:text-red-200 font-medium">{L.MESSAGE_FAILED_LOAD_STATS}</p>
+                                        <p className="text-red-800 dark:text-red-200 font-medium">{L.messages.failedLoadStats}</p>
                                         <p className="text-red-600 dark:text-red-300 text-sm">{error}</p>
                                     </div>
                                 </div>
@@ -241,7 +241,7 @@ const Dashboard: React.FC = () => {
                                     onClick={loadDashboardStats}
                                     className="mt-4"
                                 >
-                                    {L.BUTTON_RETRY}
+                                    {L.buttons.retry}
                                 </Button>
                             </div>
                         ) : stats ? (
@@ -253,13 +253,13 @@ const Dashboard: React.FC = () => {
                                                 <UsersIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                                             </div>
                                             <div className="ml-4">
-                                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{L.STATS_TOTAL_USERS}</p>
+                                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{L.stats.totalUsers}</p>
                                                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.totalUsers.toLocaleString()}</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
                                             <div className="text-xs text-green-600 dark:text-green-400 font-medium">+12%</div>
-                                            <div className="text-xs text-gray-500 dark:text-gray-400">{L.STATS_VS_LAST_MONTH}</div>
+                                            <div className="text-xs text-gray-500 dark:text-gray-400">{L.stats.vsLastMonth}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -270,13 +270,13 @@ const Dashboard: React.FC = () => {
                                                 <UserGroupIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
                                             </div>
                                             <div className="ml-4">
-                                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{L.STATS_TOTAL_CUSTOMERS}</p>
+                                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{L.stats.totalCustomers}</p>
                                                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.totalCustomers.toLocaleString()}</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
                                             <div className="text-xs text-green-600 dark:text-green-400 font-medium">+8%</div>
-                                            <div className="text-xs text-gray-500 dark:text-gray-400">{L.STATS_VS_LAST_MONTH}</div>
+                                            <div className="text-xs text-gray-500 dark:text-gray-400">{L.stats.vsLastMonth}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -287,13 +287,13 @@ const Dashboard: React.FC = () => {
                                                 <TruckIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                                             </div>
                                             <div className="ml-4">
-                                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{L.STATS_TOTAL_CARRIERS}</p>
+                                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{L.stats.totalCarriers}</p>
                                                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.totalCarriers.toLocaleString()}</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
                                             <div className="text-xs text-green-600 dark:text-green-400 font-medium">+5%</div>
-                                            <div className="text-xs text-gray-500 dark:text-gray-400">{L.STATS_VS_LAST_MONTH}</div>
+                                            <div className="text-xs text-gray-500 dark:text-gray-400">{L.stats.vsLastMonth}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -312,7 +312,7 @@ const Dashboard: React.FC = () => {
                                                 )}
                                             </div>
                                             <div className="ml-4">
-                                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{L.STATS_SYSTEM_STATUS}</p>
+                                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{L.stats.systemStatus}</p>
                                                 <p className={`text-2xl font-bold capitalize ${stats.systemHealth.status === 'healthy' ? 'text-green-600 dark:text-green-400' :
                                                     stats.systemHealth.status === 'warning' ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'
                                                     }`}>
@@ -321,7 +321,7 @@ const Dashboard: React.FC = () => {
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-xs text-gray-500 dark:text-gray-400">{L.STATS_UPTIME}</div>
+                                            <div className="text-xs text-gray-500 dark:text-gray-400">{L.stats.uptime}</div>
                                             <div className="text-xs font-medium text-gray-900 dark:text-gray-100">99.9%</div>
                                         </div>
                                     </div>
@@ -332,8 +332,8 @@ const Dashboard: React.FC = () => {
                                 <div className="flex items-center">
                                     <ExclamationTriangleIcon className="h-6 w-6 text-yellow-600 dark:text-yellow-400 mr-3" />
                                     <div>
-                                        <p className="text-yellow-800 dark:text-yellow-200 font-medium">{L.MESSAGE_NO_STATS}</p>
-                                        <p className="text-yellow-600 dark:text-yellow-300 text-sm">{L.MESSAGE_API_CONNECTIVITY}</p>
+                                        <p className="text-yellow-800 dark:text-yellow-200 font-medium">{L.messages.noStats}</p>
+                                        <p className="text-yellow-600 dark:text-yellow-300 text-sm">{L.messages.apiConnectivity}</p>
                                     </div>
                                 </div>
                                 <Button
@@ -341,7 +341,7 @@ const Dashboard: React.FC = () => {
                                     onClick={loadDashboardStats}
                                     className="mt-4"
                                 >
-                                    {L.BUTTON_RETRY}
+                                    {L.buttons.retry}
                                 </Button>
                             </div>
                         )}
@@ -350,23 +350,23 @@ const Dashboard: React.FC = () => {
                     {/* Recent Users Section */}
                     {stats && stats.recentUsers.length > 0 && (
                         <div className="mt-8">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4">{L.SECTION_RECENT_USERS}</h3>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">{L.system.recentUsers}</h3>
                             <Card>
                                 <div className="overflow-hidden">
                                     <table className="min-w-full divide-y divide-gray-200">
                                         <thead className="bg-gray-50">
                                             <tr>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    {L.TABLE_HEADER_NAME}
+                                                    {L.table.name}
                                                 </th>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    {L.TABLE_HEADER_EMAIL}
+                                                    {L.table.email}
                                                 </th>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    {L.TABLE_HEADER_STATUS}
+                                                    {L.table.status}
                                                 </th>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    {L.TABLE_HEADER_CREATED}
+                                                    {L.table.created}
                                                 </th>
                                             </tr>
                                         </thead>
@@ -397,7 +397,7 @@ const Dashboard: React.FC = () => {
                                                             ? 'bg-green-100 text-green-800'
                                                             : 'bg-red-100 text-red-800'
                                                             }`}>
-                                                            {user.isActive ? L.STATUS_ACTIVE : L.STATUS_INACTIVE}
+                                                            {user.isActive ? L.status.active : L.status.inactive}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -417,7 +417,7 @@ const Dashboard: React.FC = () => {
                     <div className="mt-8 text-center">
                         <div className="bg-green-50 border border-green-200 rounded-md p-4">
                             <p className="text-green-800">
-                                {L.MESSAGE_SUCCESS}
+                                {L.messages.success}
                             </p>
                         </div>
                     </div>

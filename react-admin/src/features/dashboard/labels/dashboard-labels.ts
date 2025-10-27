@@ -1,164 +1,268 @@
 /**
- * Dashboard Module - Translatable Labels
+ * Dashboard Module Translation Labels
  * 
- * This file contains all user-facing strings for the Dashboard module.
- * Labels are organized into logical categories for easy maintenance.
+ * This file contains all static UI labels used in the Dashboard module.
+ * Labels are organized by category for better maintainability.
  * 
- * Total Labels: 85
- * Categories: 12
- * - Page Titles & Headers
- * - Dashboard Type Buttons
- * - Navigation Cards
- * - Stats & Metrics
- * - Chart Titles
- * - System Status
- * - Table Headers
- * - Status Labels
- * - Time & Performance
- * - Messages & Notifications
- * - Buttons & Actions
- * - Ecommerce Specific
+ * Usage with useDashboardLabels hook:
+ * const { L } = useDashboardLabels();
+ * <h1>{L.page.title}</h1>
  */
 
-export const dashboardLabels = {
-  // ========================================
-  // Page Titles & Headers (6)
-  // ========================================
-  PAGE_TITLE: 'Dashboard',
-  PAGE_WELCOME: 'Welcome back',
-  PAGE_SUBTITLE: 'Manage your application with ease',
-  ECOMMERCE_TITLE: 'Ecommerce Dashboard',
-  ECOMMERCE_SUBTITLE: 'Multi-seller platform analytics and insights',
-  ADMIN_DASHBOARD_TITLE: '🚀 React Admin Dashboard',
+export interface DashboardLabels {
+  // Page Header
+  page: {
+    title: string;
+    welcome: string;
+    subtitle: string;
+    ecommerceTitle: string;
+    ecommerceSubtitle: string;
+    adminDashboardTitle: string;
+  };
 
-  // ========================================
-  // Dashboard Type Buttons (2)
-  // ========================================
-  BUTTON_ADMIN_DASHBOARD: 'Admin Dashboard',
-  BUTTON_ECOMMERCE_DASHBOARD: 'Ecommerce Dashboard',
+  // Buttons & Actions
+  buttons: {
+    adminDashboard: string;
+    ecommerceDashboard: string;
+    retry: string;
+    view: string;
+  };
 
-  // ========================================
-  // Navigation Cards (15)
-  // ========================================
-  CARD_USERS_TITLE: 'Users',
-  CARD_USERS_DESCRIPTION: 'Manage user accounts and permissions',
-  CARD_USERS_BUTTON: 'View Users',
-  
-  CARD_CUSTOMERS_TITLE: 'Customers',
-  CARD_CUSTOMERS_DESCRIPTION: 'Manage customer accounts and information',
-  CARD_CUSTOMERS_BUTTON: 'View Customers',
-  
-  CARD_CARRIERS_TITLE: 'Carriers',
-  CARD_CARRIERS_DESCRIPTION: 'Manage shipping carriers and logistics',
-  CARD_CARRIERS_BUTTON: 'View Carriers',
-  
-  CARD_ANALYTICS_TITLE: 'Analytics',
-  CARD_ANALYTICS_DESCRIPTION: 'View system analytics and reports',
-  CARD_ANALYTICS_BUTTON: 'View Analytics',
-  
-  CARD_SETTINGS_TITLE: 'Settings',
-  CARD_SETTINGS_DESCRIPTION: 'Configure system settings',
-  CARD_SETTINGS_BUTTON: 'View Settings',
+  // Navigation Cards
+  cards: {
+    usersTitle: string;
+    usersDescription: string;
+    usersButton: string;
+    customersTitle: string;
+    customersDescription: string;
+    customersButton: string;
+    carriersTitle: string;
+    carriersDescription: string;
+    carriersButton: string;
+    analyticsTitle: string;
+    analyticsDescription: string;
+    analyticsButton: string;
+    settingsTitle: string;
+    settingsDescription: string;
+    settingsButton: string;
+  };
 
-  // ========================================
-  // Stats & Metrics (14)
-  // ========================================
-  STATS_TOTAL: 'Total',
-  STATS_TOTAL_USERS: 'Total Users',
-  STATS_TOTAL_CUSTOMERS: 'Total Customers',
-  STATS_TOTAL_CARRIERS: 'Total Carriers',
-  STATS_SYSTEM_STATUS: 'System Status',
-  STATS_UPTIME: 'Uptime',
-  STATS_VS_LAST_MONTH: 'vs last month',
-  STATS_REPORTS: 'Reports',
-  STATS_CONFIG: 'Config',
-  STATS_TOTAL_REVENUE: 'Total Revenue',
-  STATS_TOTAL_ORDERS: 'Total Orders',
-  STATS_ACTIVE_SELLERS: 'Active Sellers',
-  STATS_AVG_DELIVERY_TIME: 'Avg. Delivery Time',
-  STATS_CONVERSION_RATE: 'Conversion Rate',
-  STATS_AVG_ORDER_VALUE: 'Avg. Order Value',
+  // Stats & Metrics
+  stats: {
+    total: string;
+    totalUsers: string;
+    totalCustomers: string;
+    totalCarriers: string;
+    systemStatus: string;
+    uptime: string;
+    vsLastMonth: string;
+    reports: string;
+    config: string;
+    totalRevenue: string;
+    totalOrders: string;
+    activeSellers: string;
+    avgDeliveryTime: string;
+    conversionRate: string;
+    avgOrderValue: string;
+  };
 
-  // ========================================
-  // Chart Titles (6)
-  // ========================================
-  CHART_SALES_TREND: 'Sales Trend',
-  CHART_ORDERS_TREND: 'Orders Trend',
-  CHART_TOP_PRODUCTS: 'Top Selling Products',
-  CHART_REVENUE_BY_CATEGORY: 'Revenue by Category',
-  CHART_SELLER_PERFORMANCE: 'Seller Performance',
-  CHART_RECENT_ORDERS: 'Recent Orders',
+  // Charts
+  charts: {
+    salesTrend: string;
+    ordersTrend: string;
+    topProducts: string;
+    revenueByCategory: string;
+    sellerPerformance: string;
+    recentOrders: string;
+    revenue: string;
+    orders: string;
+    totalSellers: string;
+    activeSellers: string;
+    sales: string;
+    product: string;
+  };
 
-  // ========================================
-  // System Status (6)
-  // ========================================
-  SECTION_SYSTEM_OVERVIEW: 'System Overview',
-  SECTION_RECENT_USERS: 'Recent Users',
-  SYSTEM_STATUS_HEALTHY: 'healthy',
-  SYSTEM_STATUS_WARNING: 'warning',
-  SYSTEM_STATUS_CRITICAL: 'critical',
-  LAST_UPDATED: 'Last updated',
+  // System Status
+  system: {
+    overview: string;
+    recentUsers: string;
+    statusHealthy: string;
+    statusWarning: string;
+    statusCritical: string;
+    lastUpdated: string;
+  };
 
-  // ========================================
-  // Table Headers (4)
-  // ========================================
-  TABLE_HEADER_NAME: 'Name',
-  TABLE_HEADER_EMAIL: 'Email',
-  TABLE_HEADER_STATUS: 'Status',
-  TABLE_HEADER_CREATED: 'Created',
+  // Table
+  table: {
+    name: string;
+    email: string;
+    status: string;
+    created: string;
+  };
 
-  // ========================================
-  // Status Labels (6)
-  // ========================================
-  STATUS_ACTIVE: 'Active',
-  STATUS_INACTIVE: 'Inactive',
-  STATUS_COMPLETED: 'completed',
-  STATUS_SHIPPED: 'shipped',
-  STATUS_PROCESSING: 'processing',
-  STATUS_PENDING: 'pending',
+  // Status Values
+  status: {
+    active: string;
+    inactive: string;
+    completed: string;
+    shipped: string;
+    processing: string;
+    pending: string;
+  };
 
-  // ========================================
-  // Time & Performance (3)
-  // ========================================
-  TIME_DAYS: 'days',
-  CHART_LEGEND_REVENUE: 'Revenue',
-  CHART_LEGEND_ORDERS: 'Orders',
+  // Time & Performance
+  time: {
+    days: string;
+  };
 
-  // ========================================
-  // Messages & Notifications (6)
-  // ========================================
-  MESSAGE_LOADING_STATS: 'Loading dashboard statistics...',
-  MESSAGE_FAILED_LOAD: 'Failed to load dashboard statistics',
-  MESSAGE_FAILED_LOAD_STATS: 'Failed to load statistics',
-  MESSAGE_NO_STATS: 'No statistics available',
-  MESSAGE_API_CONNECTIVITY: 'This might be due to API connectivity issues.',
-  MESSAGE_SUCCESS: '✅ React + TypeScript + Modern Architecture is working perfectly!',
+  // Toast Messages
+  messages: {
+    loadingStats: string;
+    failedLoad: string;
+    failedLoadStats: string;
+    noStats: string;
+    apiConnectivity: string;
+    success: string;
+  };
 
-  // ========================================
-  // Buttons & Actions (2)
-  // ========================================
-  BUTTON_RETRY: 'Retry',
-  BUTTON_VIEW: 'View',
+  // Ecommerce Specific
+  ecommerce: {
+    date: string;
+    categoryElectronics: string;
+    categoryClothing: string;
+    categoryHomeGarden: string;
+    categorySports: string;
+    categoryBooks: string;
+    monthJan: string;
+    monthFeb: string;
+    monthMar: string;
+    monthApr: string;
+    monthMay: string;
+    monthJun: string;
+  };
+}
 
-  // ========================================
-  // Ecommerce Specific (15)
-  // ========================================
-  ECOMMERCE_CHART_TOTAL_SELLERS: 'Total Sellers',
-  ECOMMERCE_CHART_ACTIVE_SELLERS: 'Active Sellers',
-  ECOMMERCE_CHART_SALES: 'Sales',
-  ECOMMERCE_CHART_PRODUCT: 'Product',
-  ECOMMERCE_DATE: 'Date',
-  ECOMMERCE_CATEGORY_ELECTRONICS: 'Electronics',
-  ECOMMERCE_CATEGORY_CLOTHING: 'Clothing',
-  ECOMMERCE_CATEGORY_HOME_GARDEN: 'Home & Garden',
-  ECOMMERCE_CATEGORY_SPORTS: 'Sports',
-  ECOMMERCE_CATEGORY_BOOKS: 'Books',
-  ECOMMERCE_MONTH_JAN: 'Jan',
-  ECOMMERCE_MONTH_FEB: 'Feb',
-  ECOMMERCE_MONTH_MAR: 'Mar',
-  ECOMMERCE_MONTH_APR: 'Apr',
-  ECOMMERCE_MONTH_MAY: 'May',
-  ECOMMERCE_MONTH_JUN: 'Jun',
-} as const;
+/**
+ * Default English labels for the Dashboard module
+ */
+export const dashboardLabels: DashboardLabels = {
+  page: {
+    title: 'Dashboard',
+    welcome: 'Welcome back',
+    subtitle: 'Manage your application with ease',
+    ecommerceTitle: 'Ecommerce Dashboard',
+    ecommerceSubtitle: 'Multi-seller platform analytics and insights',
+    adminDashboardTitle: '🚀 React Admin Dashboard',
+  },
 
-export type DashboardLabels = typeof dashboardLabels;
+  buttons: {
+    adminDashboard: 'Admin Dashboard',
+    ecommerceDashboard: 'Ecommerce Dashboard',
+    retry: 'Retry',
+    view: 'View',
+  },
+
+  cards: {
+    usersTitle: 'Users',
+    usersDescription: 'Manage user accounts and permissions',
+    usersButton: 'View Users',
+    customersTitle: 'Customers',
+    customersDescription: 'Manage customer accounts and information',
+    customersButton: 'View Customers',
+    carriersTitle: 'Carriers',
+    carriersDescription: 'Manage shipping carriers and logistics',
+    carriersButton: 'View Carriers',
+    analyticsTitle: 'Analytics',
+    analyticsDescription: 'View system analytics and reports',
+    analyticsButton: 'View Analytics',
+    settingsTitle: 'Settings',
+    settingsDescription: 'Configure system settings',
+    settingsButton: 'View Settings',
+  },
+
+  stats: {
+    total: 'Total',
+    totalUsers: 'Total Users',
+    totalCustomers: 'Total Customers',
+    totalCarriers: 'Total Carriers',
+    systemStatus: 'System Status',
+    uptime: 'Uptime',
+    vsLastMonth: 'vs last month',
+    reports: 'Reports',
+    config: 'Config',
+    totalRevenue: 'Total Revenue',
+    totalOrders: 'Total Orders',
+    activeSellers: 'Active Sellers',
+    avgDeliveryTime: 'Avg. Delivery Time',
+    conversionRate: 'Conversion Rate',
+    avgOrderValue: 'Avg. Order Value',
+  },
+
+  charts: {
+    salesTrend: 'Sales Trend',
+    ordersTrend: 'Orders Trend',
+    topProducts: 'Top Selling Products',
+    revenueByCategory: 'Revenue by Category',
+    sellerPerformance: 'Seller Performance',
+    recentOrders: 'Recent Orders',
+    revenue: 'Revenue',
+    orders: 'Orders',
+    totalSellers: 'Total Sellers',
+    activeSellers: 'Active Sellers',
+    sales: 'Sales',
+    product: 'Product',
+  },
+
+  system: {
+    overview: 'System Overview',
+    recentUsers: 'Recent Users',
+    statusHealthy: 'healthy',
+    statusWarning: 'warning',
+    statusCritical: 'critical',
+    lastUpdated: 'Last updated',
+  },
+
+  table: {
+    name: 'Name',
+    email: 'Email',
+    status: 'Status',
+    created: 'Created',
+  },
+
+  status: {
+    active: 'Active',
+    inactive: 'Inactive',
+    completed: 'completed',
+    shipped: 'shipped',
+    processing: 'processing',
+    pending: 'pending',
+  },
+
+  time: {
+    days: 'days',
+  },
+
+  messages: {
+    loadingStats: 'Loading dashboard statistics...',
+    failedLoad: 'Failed to load dashboard statistics',
+    failedLoadStats: 'Failed to load statistics',
+    noStats: 'No statistics available',
+    apiConnectivity: 'This might be due to API connectivity issues.',
+    success: '✅ React + TypeScript + Modern Architecture is working perfectly!',
+  },
+
+  ecommerce: {
+    date: 'Date',
+    categoryElectronics: 'Electronics',
+    categoryClothing: 'Clothing',
+    categoryHomeGarden: 'Home & Garden',
+    categorySports: 'Sports',
+    categoryBooks: 'Books',
+    monthJan: 'Jan',
+    monthFeb: 'Feb',
+    monthMar: 'Mar',
+    monthApr: 'Apr',
+    monthMay: 'May',
+    monthJun: 'Jun',
+  },
+};

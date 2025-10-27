@@ -1,106 +1,235 @@
 /**
- * Customer Module Labels
- * All translatable strings for the Customer module
+ * Customer Module Translation Labels
+ * 
+ * This file contains all static UI labels used in the Customer module.
+ * Labels are organized by category for better maintainability.
+ * 
+ * Usage with useCustomerLabels hook:
+ * const { L } = useCustomerLabels();
+ * <h1>{L.page.title}</h1>
  */
 
-export const CUSTOMER_LABELS = {
-    // Page Titles & Headers
-    PAGE_TITLE: 'Customers',
-    PAGE_SUBTITLE: 'Manage your customer database',
-    
-    // Buttons
-    ADD_CUSTOMER: 'Add Customer',
-    
-    // Modal Titles
-    MODAL_TITLE_CREATE: 'Create New Customer',
-    MODAL_TITLE_EDIT: 'Edit Customer',
-    MODAL_TITLE_VIEW: 'Customer Details',
-    MODAL_TITLE_DELETE: 'Delete Customer',
-    
-    // Form Labels
-    LABEL_FIRST_NAME: 'First Name',
-    LABEL_LAST_NAME: 'Last Name',
-    LABEL_EMAIL: 'Email',
-    LABEL_PHONE: 'Phone',
-    LABEL_COMPANY: 'Company',
-    LABEL_NAME: 'Name',
-    LABEL_ADDRESS: 'Address',
-    LABEL_CUSTOMER_ID: 'Customer ID',
-    LABEL_STATUS: 'Status',
-    LABEL_CREATED: 'Created',
-    LABEL_LAST_UPDATED: 'Last Updated',
-    
-    // Form Placeholders
-    PLACEHOLDER_FIRST_NAME: 'Enter first name',
-    PLACEHOLDER_LAST_NAME: 'Enter last name',
-    PLACEHOLDER_EMAIL: 'Enter email address',
-    PLACEHOLDER_PHONE: 'Enter phone number',
-    PLACEHOLDER_COMPANY: 'Enter company name',
-    PLACEHOLDER_SEARCH: 'Search customers by name, email, or company...',
-    
-    // Form Validation Messages
-    ERROR_FIRST_NAME_REQUIRED: 'First name is required',
-    ERROR_LAST_NAME_REQUIRED: 'Last name is required',
-    ERROR_EMAIL_REQUIRED: 'Email is required',
-    ERROR_EMAIL_INVALID: 'Please enter a valid email address',
-    
-    // Toast Success Messages
-    SUCCESS_CREATED: 'Customer created successfully',
-    SUCCESS_UPDATED: 'Customer updated successfully',
-    SUCCESS_DELETED: 'Customer deleted successfully',
-    SUCCESS_ACTIVATED: 'Customer activated',
-    SUCCESS_DEACTIVATED: 'Customer deactivated',
-    
-    // Toast Error Messages
-    ERROR_CREATE_FAILED: 'Failed to create customer',
-    ERROR_UPDATE_FAILED: 'Failed to update customer',
-    ERROR_DELETE_FAILED: 'Failed to delete customer',
-    ERROR_TOGGLE_STATUS_FAILED: 'Failed to toggle customer status',
-    ERROR_EXPORT_FAILED: 'Failed to export customers',
-    ERROR_SAVE_FAILED: 'An error occurred while saving the customer',
-    ERROR_UNKNOWN: 'Unknown error',
-    
-    // Table Headers
-    TABLE_HEADER_FIRST_NAME: 'First Name',
-    TABLE_HEADER_LAST_NAME: 'Last Name',
-    TABLE_HEADER_EMAIL: 'Email',
-    TABLE_HEADER_CREATED_DATE: 'Created Date',
-    TABLE_HEADER_ACTIONS: 'Actions',
-    
-    // Table Empty State
-    EMPTY_MESSAGE: 'No customers found',
-    
-    // Delete Confirmation
-    DELETE_CONFIRMATION_MESSAGE: 'Are you sure you want to delete this customer? This action cannot be undone.',
-    
-    // Section Titles
-    SECTION_CONTACT_INFO: 'Contact Information',
-    SECTION_ACCOUNT_INFO: 'Account Information',
-    
-    // Other
-    NOT_PROVIDED: 'Not provided',
-    
-    // Dropdown Actions
-    ACTION_VIEW_DETAILS: 'View Details',
-    ACTION_EDIT: 'Edit',
-    ACTION_ACTIVATE: 'Activate',
-    ACTION_DEACTIVATE: 'Deactivate',
-    ACTION_DELETE: 'Delete',
-    
-    // Common Buttons
-    BUTTON_CANCEL: 'Cancel',
-    BUTTON_DELETE: 'Delete',
-    BUTTON_EXPORT_CSV: 'Export CSV',
-    BUTTON_REFRESH: 'Refresh',
-    BUTTON_SAVE: 'Save',
-    BUTTON_SAVING: 'Saving...',
-    BUTTON_UPDATE_CUSTOMER: 'Update Customer',
-    BUTTON_CREATE_CUSTOMER: 'Create Customer',
-    BUTTON_CLOSE: 'Close',
-    
-    // Status Labels
-    STATUS_ACTIVE: 'Active',
-    STATUS_INACTIVE: 'Inactive',
-} as const;
+export interface CustomerLabels {
+  // Page Header
+  page: {
+    title: string;
+    subtitle: string;
+  };
 
-export type CustomerLabelKey = keyof typeof CUSTOMER_LABELS;
+  // Buttons & Actions
+  buttons: {
+    add: string;
+    cancel: string;
+    delete: string;
+    exportCsv: string;
+    refresh: string;
+    save: string;
+    saving: string;
+    update: string;
+    create: string;
+    close: string;
+  };
+
+  // Toast Messages
+  messages: {
+    createSuccess: string;
+    createError: string;
+    updateSuccess: string;
+    updateError: string;
+    deleteSuccess: string;
+    deleteError: string;
+    activateSuccess: string;
+    deactivateSuccess: string;
+    toggleStatusError: string;
+    exportError: string;
+    saveError: string;
+    unknownError: string;
+  };
+
+  // Table Headers & Display
+  table: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    createdDate: string;
+    actions: string;
+    emptyMessage: string;
+  };
+
+  // Search & Filters
+  search: {
+    placeholder: string;
+  };
+
+  // Status Values
+  status: {
+    active: string;
+    inactive: string;
+  };
+
+  // Dropdown Actions
+  actions: {
+    viewDetails: string;
+    edit: string;
+    activate: string;
+    deactivate: string;
+    delete: string;
+  };
+
+  // Modal Titles
+  modals: {
+    create: string;
+    edit: string;
+    view: string;
+    delete: string;
+    deleteConfirm: string;
+  };
+
+  // Form Fields
+  form: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    company: string;
+    name: string;
+    address: string;
+    customerId: string;
+    status: string;
+    created: string;
+    lastUpdated: string;
+  };
+
+  // Form Placeholders
+  placeholders: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    company: string;
+    search: string;
+    notProvided: string;
+  };
+
+  // Validation Messages
+  validation: {
+    firstNameRequired: string;
+    lastNameRequired: string;
+    emailRequired: string;
+    emailInvalid: string;
+  };
+
+  // Section Titles
+  sections: {
+    contactInfo: string;
+    accountInfo: string;
+  };
+}
+
+/**
+ * Default English labels for the Customer module
+ */
+export const customerLabels: CustomerLabels = {
+  page: {
+    title: 'Customers',
+    subtitle: 'Manage your customer database',
+  },
+
+  buttons: {
+    add: 'Add Customer',
+    cancel: 'Cancel',
+    delete: 'Delete',
+    exportCsv: 'Export CSV',
+    refresh: 'Refresh',
+    save: 'Save',
+    saving: 'Saving...',
+    update: 'Update Customer',
+    create: 'Create Customer',
+    close: 'Close',
+  },
+
+  messages: {
+    createSuccess: 'Customer created successfully',
+    createError: 'Failed to create customer',
+    updateSuccess: 'Customer updated successfully',
+    updateError: 'Failed to update customer',
+    deleteSuccess: 'Customer deleted successfully',
+    deleteError: 'Failed to delete customer',
+    activateSuccess: 'Customer activated',
+    deactivateSuccess: 'Customer deactivated',
+    toggleStatusError: 'Failed to toggle customer status',
+    exportError: 'Failed to export customers',
+    saveError: 'An error occurred while saving the customer',
+    unknownError: 'Unknown error',
+  },
+
+  table: {
+    firstName: 'First Name',
+    lastName: 'Last Name',
+    email: 'Email',
+    createdDate: 'Created Date',
+    actions: 'Actions',
+    emptyMessage: 'No customers found',
+  },
+
+  search: {
+    placeholder: 'Search customers by name, email, or company...',
+  },
+
+  status: {
+    active: 'Active',
+    inactive: 'Inactive',
+  },
+
+  actions: {
+    viewDetails: 'View Details',
+    edit: 'Edit',
+    activate: 'Activate',
+    deactivate: 'Deactivate',
+    delete: 'Delete',
+  },
+
+  modals: {
+    create: 'Create New Customer',
+    edit: 'Edit Customer',
+    view: 'Customer Details',
+    delete: 'Delete Customer',
+    deleteConfirm: 'Are you sure you want to delete this customer? This action cannot be undone.',
+  },
+
+  form: {
+    firstName: 'First Name',
+    lastName: 'Last Name',
+    email: 'Email',
+    phone: 'Phone',
+    company: 'Company',
+    name: 'Name',
+    address: 'Address',
+    customerId: 'Customer ID',
+    status: 'Status',
+    created: 'Created',
+    lastUpdated: 'Last Updated',
+  },
+
+  placeholders: {
+    firstName: 'Enter first name',
+    lastName: 'Enter last name',
+    email: 'Enter email address',
+    phone: 'Enter phone number',
+    company: 'Enter company name',
+    search: 'Search customers by name, email, or company...',
+    notProvided: 'Not provided',
+  },
+
+  validation: {
+    firstNameRequired: 'First name is required',
+    lastNameRequired: 'Last name is required',
+    emailRequired: 'Email is required',
+    emailInvalid: 'Please enter a valid email address',
+  },
+
+  sections: {
+    contactInfo: 'Contact Information',
+    accountInfo: 'Account Information',
+  },
+};

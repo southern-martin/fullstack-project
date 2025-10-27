@@ -1,24 +1,37 @@
-/**
- * Dashboard Labels Translation Hook
- * 
- * Provides translated labels for the Dashboard module using the generic useLabels hook.
- * Supports English, French, and Spanish translations with automatic batching and caching.
- */
-
 import { useLabels } from '../../../shared/hooks/useLabels';
-import { dashboardLabels } from '../labels/dashboard-labels';
+import { DashboardLabels, dashboardLabels } from '../labels/dashboard-labels';
 
 /**
- * Custom hook for Dashboard module translations
+ * Dashboard Module Labels Hook
  * 
- * @returns Translated dashboard labels based on current language
+ * Provides translated labels for the Dashboard module.
+ * Wraps the generic useLabels hook with module-specific types.
+ * 
+ * @returns {Object} Object containing:
+ *   - labels: Full DashboardLabels object with all categories
+ *   - L: Alias for labels (shorthand for cleaner code)
+ *   - isLoading: Boolean indicating if translations are loading
+ *   - error: Error object if translation fetch failed
+ *   - refetch: Function to manually refetch translations
  * 
  * @example
- * ```tsx
- * const L = useDashboardLabels();
- * <h1>{L.PAGE_TITLE}</h1>
- * ```
+ * const { L, isLoading } = useDashboardLabels();
+ * 
+ * if (isLoading) return <Spinner />;
+ * 
+ * return (
+ *   <div>
+ *     <h1>{L.page.title}</h1>
+ *     <button>{L.buttons.retry}</button>
+ *     <p>{L.messages.success}</p>
+ *   </div>
+ * );
  */
 export const useDashboardLabels = () => {
-  return useLabels(dashboardLabels, 'dashboard');
+  const result = useLabels<DashboardLabels>(dashboardLabels, 'dashboard');
+  
+  return {
+    ...result,
+    L: result.labels, // Alias for convenience
+  };
 };

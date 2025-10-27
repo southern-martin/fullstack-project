@@ -24,7 +24,7 @@ import { Role } from '../types';
 
 export const RoleList: React.FC = () => {
   const navigate = useNavigate();
-  const { labels: L, isLoading: labelsLoading } = useRoleLabels();
+  const { L, isLoading: labelsLoading } = useRoleLabels();
 
   // Pagination & Search State
   const [currentPage, setCurrentPage] = useState(1);
@@ -63,7 +63,7 @@ export const RoleList: React.FC = () => {
   const columns: TableColumn<Role>[] = [
     {
       key: 'name',
-      label: L?.TABLE?.NAME || 'Name',
+      label: L?.table?.name || 'Name',
       render: (role) => (
         <div className="flex items-center gap-2">
           <ShieldCheckIcon className="h-5 w-5 text-blue-600" />
@@ -73,7 +73,7 @@ export const RoleList: React.FC = () => {
     },
     {
       key: 'description',
-      label: L?.TABLE?.DESCRIPTION || 'Description',
+      label: L?.table?.description || 'Description',
       render: (role) => (
         <span className="text-gray-600 max-w-md truncate">
           {role.description || '-'}
@@ -82,7 +82,7 @@ export const RoleList: React.FC = () => {
     },
     {
       key: 'permissions',
-      label: L?.TABLE?.PERMISSIONS || 'Permissions',
+      label: L?.table?.permissions || 'Permissions',
       render: (role) => (
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-900">
@@ -96,7 +96,7 @@ export const RoleList: React.FC = () => {
     },
     {
       key: 'userCount',
-      label: L?.TABLE?.USERS || 'Users',
+      label: L?.table?.users || 'Users',
       render: (role) => (
         <div className="flex items-center gap-2">
           <UserGroupIcon className="h-4 w-4 text-gray-400" />
@@ -106,7 +106,7 @@ export const RoleList: React.FC = () => {
     },
     {
       key: 'isActive',
-      label: L?.TABLE?.STATUS || 'Status',
+      label: L?.table?.status || 'Status',
       render: (role) => (
         <span
           className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -118,12 +118,12 @@ export const RoleList: React.FC = () => {
           {role.isActive ? (
             <>
               <CheckIcon className="h-3 w-3" />
-              {L?.STATUS?.ACTIVE || 'Active'}
+              {L?.status?.active || 'Active'}
             </>
           ) : (
             <>
               <XMarkIcon className="h-3 w-3" />
-              {L?.STATUS?.INACTIVE || 'Inactive'}
+              {L?.status?.inactive || 'Inactive'}
             </>
           )}
         </span>
@@ -131,14 +131,14 @@ export const RoleList: React.FC = () => {
     },
     {
       key: 'actions',
-      label: L?.TABLE?.ACTIONS || 'Actions',
+      label: L?.table?.actions || 'Actions',
       render: (role) => (
         <div className="flex items-center gap-2">
           <Button
             variant="secondary"
             size="sm"
             onClick={() => navigate(`/roles/${role.id}`)}
-            title={L?.BUTTONS?.VIEW_DETAILS || 'View'}
+            title={L?.buttons?.viewDetails || 'View'}
           >
             <EyeIcon className="h-4 w-4" />
           </Button>
@@ -146,7 +146,7 @@ export const RoleList: React.FC = () => {
             variant="secondary"
             size="sm"
             onClick={() => navigate(`/roles/${role.id}/edit`)}
-            title={L?.BUTTONS?.EDIT_ROLE || 'Edit'}
+            title={L?.buttons?.editRole || 'Edit'}
           >
             <PencilIcon className="h-4 w-4" />
           </Button>
@@ -154,7 +154,7 @@ export const RoleList: React.FC = () => {
             variant="danger"
             size="sm"
             onClick={() => handleDeleteClick(role)}
-            title={L?.BUTTONS?.DELETE_ROLE || 'Delete'}
+            title={L?.buttons?.deleteRole || 'Delete'}
           >
             <TrashIcon className="h-4 w-4" />
           </Button>
@@ -189,14 +189,14 @@ export const RoleList: React.FC = () => {
     try {
       await deleteMutation.mutateAsync(roleToDelete.id);
       toast.success(
-        L?.MESSAGES?.DELETE_SUCCESS || `Role "${roleToDelete.name}" deleted successfully`
+        L?.messages?.deleteSuccess || `Role "${roleToDelete.name}" deleted successfully`
       );
       setShowDeleteModal(false);
       setRoleToDelete(null);
       refetch();
     } catch (error: any) {
       toast.error(
-        error.message || L?.MESSAGES?.ERROR_DELETING || 'Failed to delete role'
+        error.message || L?.messages?.errorDeleting || 'Failed to delete role'
       );
     }
   };
@@ -214,16 +214,16 @@ export const RoleList: React.FC = () => {
           <div className="text-center py-12">
             <ShieldCheckIcon className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">
-              {L?.EMPTY?.NO_ROLES_TITLE || 'No roles'}
+              {L?.empty?.noRolesTitle || 'No roles'}
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              {L?.EMPTY?.NO_ROLES_MESSAGE ||
+              {L?.empty?.noRolesMessage ||
                 'Get started by creating a new role.'}
             </p>
             <div className="mt-6">
               <Button onClick={() => navigate('/roles/create')}>
                 <PlusIcon className="h-5 w-5 mr-2" />
-                {L?.BUTTONS?.CREATE_ROLE || 'Create Role'}
+                {L?.buttons?.createRole || 'Create Role'}
               </Button>
             </div>
           </div>
@@ -238,15 +238,15 @@ export const RoleList: React.FC = () => {
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            {L?.PAGE_TITLE || 'Roles & Permissions'}
+            {L?.page?.title || 'Roles & Permissions'}
           </h1>
           <p className="mt-1 text-sm text-gray-500">
-            {L?.LIST_TITLE || 'Manage roles and permissions for your application'}
+            {L?.page?.listTitle || 'Manage roles and permissions for your application'}
           </p>
         </div>
         <Button onClick={() => navigate('/roles/create')}>
           <PlusIcon className="h-5 w-5 mr-2" />
-          {L?.BUTTONS?.CREATE_ROLE || 'Create Role'}
+          {L?.buttons?.createRole || 'Create Role'}
         </Button>
       </div>
 
@@ -255,7 +255,7 @@ export const RoleList: React.FC = () => {
         <ServerSearch
           searchTerm={searchTerm}
           onSearchChange={handleSearch}
-          placeholder={L?.SEARCH?.PLACEHOLDER || 'Search roles...'}
+          placeholder={L?.search?.placeholder || 'Search roles...'}
         />
       </div>
 
@@ -264,7 +264,7 @@ export const RoleList: React.FC = () => {
         {error && (
           <div className="p-4 bg-red-50 border-l-4 border-red-400 mb-4">
             <p className="text-sm text-red-700">
-              {L?.MESSAGES?.ERROR_LOADING || 'Failed to load roles. Please try again.'}
+              {L?.messages?.errorLoading || 'Failed to load roles. Please try again.'}
             </p>
           </div>
         )}
@@ -274,8 +274,8 @@ export const RoleList: React.FC = () => {
             columns: columns,
             loading: isLoading,
             emptyMessage: searchTerm
-              ? L?.SEARCH?.NO_RESULTS || 'No roles found matching your search.'
-              : L?.EMPTY?.NO_ROLES_TITLE || 'No roles available.',
+              ? L?.search?.noResults || 'No roles found matching your search.'
+              : L?.empty?.noRolesTitle || 'No roles available.',
           }}
           data={roles}
         />
@@ -303,11 +303,11 @@ export const RoleList: React.FC = () => {
       <Modal
         isOpen={showDeleteModal}
         onClose={handleDeleteCancel}
-        title={L?.MESSAGES?.DELETE_CONFIRM || 'Delete Role'}
+        title={L?.messages?.deleteConfirm || 'Delete Role'}
       >
         <div className="space-y-4">
           <p className="text-sm text-gray-600">
-            {L?.MESSAGES?.DELETE_CONFIRM ||
+            {L?.messages?.deleteConfirm ||
               `Are you sure you want to delete the role "${roleToDelete?.name}"?`}
           </p>
 
@@ -329,7 +329,7 @@ export const RoleList: React.FC = () => {
                 </div>
                 <div className="ml-3">
                   <p className="text-sm text-yellow-700">
-                    {L.MESSAGES.DELETE_WARNING}
+                    {L.messages.deleteConfirm}
                   </p>
                 </div>
               </div>
@@ -338,7 +338,7 @@ export const RoleList: React.FC = () => {
 
           <div className="flex gap-3 justify-end pt-4">
             <Button variant="secondary" onClick={handleDeleteCancel}>
-              {L?.BUTTONS?.CANCEL || 'Cancel'}
+              {L?.buttons?.cancel || 'Cancel'}
             </Button>
             <Button
               variant="danger"
@@ -347,7 +347,7 @@ export const RoleList: React.FC = () => {
             >
               {deleteMutation.isPending
                 ? 'Deleting...'
-                : L?.BUTTONS?.DELETE_ROLE || 'Delete'}
+                : L?.buttons?.deleteRole || 'Delete'}
             </Button>
           </div>
         </div>

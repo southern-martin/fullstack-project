@@ -30,7 +30,7 @@ export const PermissionSelector: React.FC<PermissionSelectorProps> = ({
       if (!groups[category]) {
         groups[category] = {
           category,
-          label: L.PERMISSIONS.CATEGORIES[category.toUpperCase() as keyof typeof L.PERMISSIONS.CATEGORIES] || category,
+          label: L.categories[category as keyof typeof L.categories] || category,
           permissions: [],
         };
       }
@@ -104,7 +104,7 @@ export const PermissionSelector: React.FC<PermissionSelectorProps> = ({
       <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
         <div className="flex items-center space-x-4">
           <span className="text-sm font-medium text-gray-700">
-            {selectedCount} {L.PERMISSIONS.SELECTED_COUNT} / {totalCount}
+            {selectedCount} {L.permissions.selectedCount} / {totalCount}
           </span>
         </div>
         <div className="flex space-x-2">
@@ -114,7 +114,7 @@ export const PermissionSelector: React.FC<PermissionSelectorProps> = ({
             disabled={disabled || selectedCount === totalCount}
             className="px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {L.PERMISSIONS.SELECT_ALL}
+            {L.permissions.selectAll}
           </button>
           <button
             type="button"
@@ -122,7 +122,7 @@ export const PermissionSelector: React.FC<PermissionSelectorProps> = ({
             disabled={disabled || selectedCount === 0}
             className="px-3 py-1 text-sm font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {L.PERMISSIONS.DESELECT_ALL}
+            {L.permissions.deselectAll}
           </button>
         </div>
       </div>
@@ -243,7 +243,7 @@ export const PermissionSelector: React.FC<PermissionSelectorProps> = ({
       {/* No permissions message */}
       {permissions.length === 0 && (
         <div className="text-center py-8 text-gray-500">
-          <p>{L.PERMISSIONS.NO_PERMISSIONS}</p>
+          <p>{L.empty.noPermissionsTitle}</p>
         </div>
       )}
     </div>

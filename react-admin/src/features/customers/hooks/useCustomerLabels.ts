@@ -1,50 +1,37 @@
 import { useLabels } from '../../../shared/hooks/useLabels';
-import { CUSTOMER_LABELS } from '../labels/customer-labels';
+import { CustomerLabels, customerLabels } from '../labels/customer-labels';
 
 /**
- * Hook for accessing translated Customer module labels
+ * Customer Module Labels Hook
  * 
- * This is a convenience wrapper around the generic useLabels hook,
- * pre-configured with Customer module labels.
+ * Provides translated labels for the Customer module.
+ * Wraps the generic useLabels hook with module-specific types.
  * 
- * Features:
- * - Type-safe access to all Customer labels
- * - Automatic translation based on current language
- * - English bypass (no API call for English)
- * - Caching via React Query
- * - Graceful fallback to English
- * 
- * @returns {Object} Translated labels and loading state
+ * @returns {Object} Object containing:
+ *   - labels: Full CustomerLabels object with all categories
+ *   - L: Alias for labels (shorthand for cleaner code)
+ *   - isLoading: Boolean indicating if translations are loading
+ *   - error: Error object if translation fetch failed
+ *   - refetch: Function to manually refetch translations
  * 
  * @example
- * ```typescript
- * const { labels: L, isLoading } = useCustomerLabels();
+ * const { L, isLoading } = useCustomerLabels();
+ * 
+ * if (isLoading) return <Spinner />;
  * 
  * return (
  *   <div>
- *     <h1>{L.PAGE_TITLE}</h1>
- *     <p>{L.PAGE_SUBTITLE}</p>
- *     <button>{L.ADD_CUSTOMER}</button>
+ *     <h1>{L.page.title}</h1>
+ *     <button>{L.buttons.add}</button>
+ *     <p>{L.messages.createSuccess}</p>
  *   </div>
  * );
- * ```
  */
 export const useCustomerLabels = () => {
-  const { labels, isLoading, error, refetch } = useLabels<typeof CUSTOMER_LABELS>(
-    CUSTOMER_LABELS,
-    'customer'
-  );
-
+  const result = useLabels<CustomerLabels>(customerLabels, 'customer');
+  
   return {
-    /** Translated labels */
-    labels,
-    /** Short alias for labels */
-    L: labels,
-    /** Loading state */
-    isLoading,
-    /** Error state */
-    error,
-    /** Refetch labels (useful after language change) */
-    refetch,
+    ...result,
+    L: result.labels, // Alias for convenience
   };
 };

@@ -15,7 +15,7 @@ interface CustomerFormProps {
 
 const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCancel, onFooterReady }) => {
     // Translation hook
-    const { labels: L } = useCustomerLabels();
+    const { L } = useCustomerLabels();
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -59,17 +59,17 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCance
         const currentFormData = formDataRef.current;
 
         if (!currentFormData.firstName.trim()) {
-            newErrors.firstName = L.ERROR_FIRST_NAME_REQUIRED;
+            newErrors.firstName = L.validation.firstNameRequired;
         }
 
         if (!currentFormData.lastName.trim()) {
-            newErrors.lastName = L.ERROR_LAST_NAME_REQUIRED;
+            newErrors.lastName = L.validation.lastNameRequired;
         }
 
         if (!currentFormData.email.trim()) {
-            newErrors.email = L.ERROR_EMAIL_REQUIRED;
+            newErrors.email = L.validation.emailRequired;
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(currentFormData.email)) {
-            newErrors.email = L.ERROR_EMAIL_INVALID;
+            newErrors.email = L.validation.emailInvalid;
         }
 
         setErrors(newErrors);
@@ -103,7 +103,7 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCance
             if (error && typeof error === 'object' && 'validationErrors' in error) {
                 setErrors((error as { validationErrors: Record<string, string> }).validationErrors);
             } else {
-                toast.error(L.ERROR_SAVE_FAILED);
+                toast.error(L.messages.saveError);
             }
         } finally {
             setIsSubmitting(false);
@@ -119,7 +119,7 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCance
                 onClick={onCancel}
                 disabled={isSubmitting}
             >
-                {L.BUTTON_CANCEL}
+                {L.buttons.cancel}
             </Button>
             <Button
                 type="submit"
@@ -128,10 +128,10 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCance
                 onClick={handleSubmit}
             >
                 {isSubmitting
-                    ? L.BUTTON_SAVING
+                    ? L.buttons.saving
                     : customer
-                        ? L.BUTTON_UPDATE_CUSTOMER
-                        : L.BUTTON_CREATE_CUSTOMER
+                        ? L.buttons.update
+                        : L.buttons.create
                 }
             </Button>
         </div>
@@ -150,50 +150,50 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSubmit, onCance
             <div className="space-y-6 p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField
-                        label={L.LABEL_FIRST_NAME}
+                        label={L.form.firstName}
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleInputChange('firstName')}
                         error={errors.firstName}
-                        placeholder={L.PLACEHOLDER_FIRST_NAME}
+                        placeholder={L.placeholders.firstName}
                     />
 
                     <FormField
-                        label={L.LABEL_LAST_NAME}
+                        label={L.form.lastName}
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleInputChange('lastName')}
                         error={errors.lastName}
-                        placeholder={L.PLACEHOLDER_LAST_NAME}
+                        placeholder={L.placeholders.lastName}
                     />
 
                     <FormField
-                        label={L.LABEL_EMAIL}
+                        label={L.form.email}
                         name="email"
                         type="email"
                         value={formData.email}
                         onChange={handleInputChange('email')}
                         error={errors.email}
-                        placeholder={L.PLACEHOLDER_EMAIL}
+                        placeholder={L.placeholders.email}
                     />
 
                     <FormField
-                        label={L.LABEL_PHONE}
+                        label={L.form.phone}
                         name="phone"
                         type="tel"
                         value={formData.phone}
                         onChange={handleInputChange('phone')}
                         error={errors.phone}
-                        placeholder={L.PLACEHOLDER_PHONE}
+                        placeholder={L.placeholders.phone}
                     />
 
                     <FormField
-                        label={L.LABEL_COMPANY}
+                        label={L.form.company}
                         name="company"
                         value={formData.company}
                         onChange={handleInputChange('company')}
                         error={errors.company}
-                        placeholder={L.PLACEHOLDER_COMPANY}
+                        placeholder={L.placeholders.company}
                     />
                 </div>
             </div>

@@ -35,7 +35,7 @@ import CustomerForm from './CustomerForm';
 
 const Customers: React.FC = () => {
     // Translation hooks
-    const { labels: L } = useCustomerLabels();
+    const { L } = useCustomerLabels();
     // Dropdown state
     const DROPDOWN_WIDTH = 192; // w-48 in pixels
     const DROPDOWN_OFFSET = 4; // gap between button and dropdown
@@ -130,22 +130,22 @@ const Customers: React.FC = () => {
 
     // Sort options for the sorting component
     const sortOptions: SortOption[] = useMemo(() => [
-        { key: 'firstName', label: L.TABLE_HEADER_FIRST_NAME, defaultOrder: 'asc' },
-        { key: 'lastName', label: L.TABLE_HEADER_LAST_NAME, defaultOrder: 'asc' },
-        { key: 'email', label: L.TABLE_HEADER_EMAIL, defaultOrder: 'asc' },
-        { key: 'createdAt', label: L.TABLE_HEADER_CREATED_DATE, defaultOrder: 'desc' },
-        { key: 'isActive', label: L.LABEL_STATUS, defaultOrder: 'asc' },
+        { key: 'firstName', label: L.table.firstName, defaultOrder: 'asc' },
+        { key: 'lastName', label: L.table.lastName, defaultOrder: 'asc' },
+        { key: 'email', label: L.table.email, defaultOrder: 'asc' },
+        { key: 'createdAt', label: L.table.createdDate, defaultOrder: 'desc' },
+        { key: 'isActive', label: L.form.status, defaultOrder: 'asc' },
     ], [L]);
 
     // CRUD actions using TanStack Query mutations
     const createCustomer = useCallback(async (customerData: CreateCustomerData) => {
         try {
             await createCustomerMutation.mutateAsync(customerData);
-            toast.success(L.SUCCESS_CREATED);
+            toast.success(L.messages.createSuccess);
             setShowCreateModal(false);
             setModalFooter(null);
         } catch (error) {
-            toast.error(`${L.ERROR_CREATE_FAILED}: ${error instanceof Error ? error.message : L.ERROR_UNKNOWN}`);
+            toast.error(`${L.messages.createError}: ${error instanceof Error ? error.message : L.messages.unknownError}`);
             throw error;
         }
     }, [createCustomerMutation, L]);
@@ -153,11 +153,11 @@ const Customers: React.FC = () => {
     const updateCustomer = useCallback(async (id: number, customerData: UpdateCustomerData) => {
         try {
             await updateCustomerMutation.mutateAsync({ id, data: customerData });
-            toast.success(L.SUCCESS_UPDATED);
+            toast.success(L.messages.updateSuccess);
             setShowEditModal(false);
             setModalFooter(null);
         } catch (error) {
-            toast.error(`${L.ERROR_UPDATE_FAILED}: ${error instanceof Error ? error.message : L.ERROR_UNKNOWN}`);
+            toast.error(`${L.messages.updateError}: ${error instanceof Error ? error.message : L.messages.unknownError}`);
             throw error;
         }
     }, [updateCustomerMutation, L]);
@@ -165,10 +165,10 @@ const Customers: React.FC = () => {
     const deleteCustomer = useCallback(async (id: number) => {
         try {
             await deleteCustomerMutation.mutateAsync(id);
-            toast.success(L.SUCCESS_DELETED);
+            toast.success(L.messages.deleteSuccess);
             setShowDeleteModal(false);
         } catch (error) {
-            toast.error(`${L.ERROR_DELETE_FAILED}: ${error instanceof Error ? error.message : L.ERROR_UNKNOWN}`);
+            toast.error(`${L.messages.deleteError}: ${error instanceof Error ? error.message : L.messages.unknownError}`);
             throw error;
         }
     }, [deleteCustomerMutation, L]);
@@ -176,9 +176,9 @@ const Customers: React.FC = () => {
     const toggleCustomerStatus = useCallback(async (id: number, status: boolean) => {
         try {
             await updateCustomerMutation.mutateAsync({ id, data: { isActive: status } });
-            toast.success(status ? L.SUCCESS_ACTIVATED : L.SUCCESS_DEACTIVATED);
+            toast.success(status ? L.messages.activateSuccess : L.messages.deactivateSuccess);
         } catch (error) {
-            toast.error(`${L.ERROR_TOGGLE_STATUS_FAILED}: ${error instanceof Error ? error.message : L.ERROR_UNKNOWN}`);
+            toast.error(`${L.messages.toggleStatusError}: ${error instanceof Error ? error.message : L.messages.unknownError}`);
             throw error;
         }
     }, [updateCustomerMutation, L]);
@@ -186,7 +186,7 @@ const Customers: React.FC = () => {
     // Dropdown action handlers
     const handleViewCustomer = useCallback((customer: Customer) => {
         setSelectedCustomer(customer);
-        setModalTitle(L.MODAL_TITLE_VIEW);
+        setModalTitle(L.modals.view);
         setShowViewModal(true);
         setOpenDropdownId(null);
         setDropdownPosition(null);
@@ -194,7 +194,7 @@ const Customers: React.FC = () => {
 
     const handleEditCustomer = useCallback((customer: Customer) => {
         setSelectedCustomer(customer);
-        setModalTitle(L.MODAL_TITLE_EDIT);
+        setModalTitle(L.modals.edit);
         setModalFooter(null);
         setShowEditModal(true);
         setOpenDropdownId(null);
@@ -209,7 +209,7 @@ const Customers: React.FC = () => {
 
     const handleDeleteCustomer = useCallback((customer: Customer) => {
         setSelectedCustomer(customer);
-        setModalTitle(L.MODAL_TITLE_DELETE);
+        setModalTitle(L.modals.delete);
         setShowDeleteModal(true);
         setOpenDropdownId(null);
         setDropdownPosition(null);
@@ -246,7 +246,7 @@ const Customers: React.FC = () => {
         columns: [
             {
                 key: 'firstName',
-                label: L.LABEL_NAME,
+                label: L.form.name,
                 sortable: true,
                 render: (firstName: string, customer: Customer) => (
                     <div className="flex items-center">
@@ -264,7 +264,7 @@ const Customers: React.FC = () => {
             },
             {
                 key: 'phone',
-                label: L.LABEL_PHONE,
+                label: L.form.phone,
                 sortable: true,
                 render: (phone: string) => (
                     <span className="text-sm text-gray-900 dark:text-gray-100">{phone || '-'}</span>
@@ -272,7 +272,7 @@ const Customers: React.FC = () => {
             },
             {
                 key: 'preferences',
-                label: L.LABEL_COMPANY,
+                label: L.form.company,
                 sortable: true,
                 render: (preferences: any) => (
                     <span className="text-sm text-gray-900 dark:text-gray-100">{preferences?.company || '-'}</span>
@@ -280,7 +280,7 @@ const Customers: React.FC = () => {
             },
             {
                 key: 'isActive',
-                label: L.LABEL_STATUS,
+                label: L.form.status,
                 sortable: true,
                 render: (isActive: boolean) => (
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isActive
@@ -293,7 +293,7 @@ const Customers: React.FC = () => {
             },
             {
                 key: 'createdAt',
-                label: L.LABEL_CREATED,
+                label: L.form.created,
                 sortable: true,
                 render: (date: string) => (
                     <span className="text-sm text-gray-900 dark:text-gray-100">
@@ -303,7 +303,7 @@ const Customers: React.FC = () => {
             },
             {
                 key: 'actions',
-                label: L.TABLE_HEADER_ACTIONS,
+                label: L.table.actions,
                 sortable: false,
                 render: (_: any, customer: Customer) => {
                     const isOpen = openDropdownId === customer.id;
@@ -345,7 +345,7 @@ const Customers: React.FC = () => {
             enabled: true,
             multiSelect: true,
         },
-        emptyMessage: L.EMPTY_MESSAGE,
+        emptyMessage: L.table.emptyMessage,
     }), [openDropdownId, DROPDOWN_OFFSET, DROPDOWN_WIDTH, L]);
 
     // Note: Filtering is now handled server-side through search and sorting
@@ -360,7 +360,7 @@ const Customers: React.FC = () => {
             });
             toast.success(`Customers exported as ${format.toUpperCase()}`);
         } catch (error) {
-            toast.error(`${L.ERROR_EXPORT_FAILED}: ${error instanceof Error ? error.message : L.ERROR_UNKNOWN}`);
+            toast.error(`${L.messages.exportError}: ${error instanceof Error ? error.message : L.messages.unknownError}`);
         }
     }, [customers, tableConfig.columns, L]);
 
@@ -369,19 +369,19 @@ const Customers: React.FC = () => {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{L.PAGE_TITLE}</h1>
-                    <p className="text-gray-600 dark:text-gray-400">{L.PAGE_SUBTITLE}</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{L.page.title}</h1>
+                    <p className="text-gray-600 dark:text-gray-400">{L.page.subtitle}</p>
                 </div>
                 <Button
                     onClick={() => {
-                        setModalTitle(L.MODAL_TITLE_CREATE);
+                        setModalTitle(L.modals.create);
                         setModalFooter(null);
                         setShowCreateModal(true);
                     }}
                     className="flex items-center space-x-2"
                 >
                     <PlusIcon className="h-4 w-4" />
-                    {L.ADD_CUSTOMER}
+                    {L.buttons.add}
                 </Button>
             </div>
 
@@ -395,7 +395,7 @@ const Customers: React.FC = () => {
                                 searchTerm={searchTerm}
                                 onSearchChange={setSearch}
                                 loading={loading}
-                                placeholder={L.PLACEHOLDER_SEARCH}
+                                placeholder={L.search.placeholder}
                                 className="w-full sm:w-80"
                             />
                             <ServerSorting
@@ -413,7 +413,7 @@ const Customers: React.FC = () => {
                                 size="sm"
                                 disabled={loading}
                             >
-                                {L.BUTTON_EXPORT_CSV}
+                                {L.buttons.exportCsv}
                             </Button>
                             <Button
                                 onClick={handleRefresh}
@@ -421,7 +421,7 @@ const Customers: React.FC = () => {
                                 size="sm"
                                 disabled={loading}
                             >
-                                {L.BUTTON_REFRESH}
+                                {L.buttons.refresh}
                             </Button>
                         </div>
                     </div>
@@ -527,20 +527,20 @@ const Customers: React.FC = () => {
                 >
                     <div className="p-6">
                         <p className="text-gray-600 mb-4">
-                            {L.DELETE_CONFIRMATION_MESSAGE}
+                            {L.modals.deleteConfirm}
                         </p>
                         <div className="flex justify-end space-x-3">
                             <Button
                                 variant="secondary"
                                 onClick={() => setShowDeleteModal(false)}
                             >
-                                {L.BUTTON_CANCEL}
+                                {L.buttons.cancel}
                             </Button>
                             <Button
                                 variant="danger"
                                 onClick={() => deleteCustomer(selectedCustomer.id)}
                             >
-                                {L.BUTTON_DELETE}
+                                {L.buttons.delete}
                             </Button>
                         </div>
                     </div>
@@ -563,14 +563,14 @@ const Customers: React.FC = () => {
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center transition-colors"
                         >
                             <EyeIcon className="h-4 w-4 mr-3" />
-                            {L.ACTION_VIEW_DETAILS}
+                            {L.actions.viewDetails}
                         </button>
                         <button
                             onClick={() => handleEditCustomer(selectedDropdownCustomer)}
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center transition-colors"
                         >
                             <PencilIcon className="h-4 w-4 mr-3" />
-                            {L.ACTION_EDIT}
+                            {L.actions.edit}
                         </button>
                         <button
                             onClick={() => handleToggleCustomerStatus(selectedDropdownCustomer)}
@@ -579,12 +579,12 @@ const Customers: React.FC = () => {
                             {selectedDropdownCustomer.isActive ? (
                                 <>
                                     <XMarkIcon className="h-4 w-4 mr-3" />
-                                    {L.ACTION_DEACTIVATE}
+                                    {L.actions.deactivate}
                                 </>
                             ) : (
                                 <>
                                     <CheckIcon className="h-4 w-4 mr-3" />
-                                    {L.ACTION_ACTIVATE}
+                                    {L.actions.activate}
                                 </>
                             )}
                         </button>
@@ -593,7 +593,7 @@ const Customers: React.FC = () => {
                             className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center transition-colors"
                         >
                             <TrashIcon className="h-4 w-4 mr-3" />
-                            {L.ACTION_DELETE}
+                            {L.actions.delete}
                         </button>
                     </div>
                 </div>,

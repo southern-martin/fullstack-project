@@ -47,23 +47,23 @@ export const RoleForm: React.FC<RoleFormProps> = ({
     switch (name) {
       case 'name':
         if (!value || value.trim().length === 0) {
-          return L.VALIDATION.NAME_REQUIRED;
+          return L.validation.nameRequired;
         }
         if (value.trim().length < 2) {
-          return L.VALIDATION.NAME_MIN_LENGTH;
+          return L.validation.nameMinLength;
         }
         if (value.length > 50) {
-          return L.VALIDATION.NAME_MAX_LENGTH;
+          return L.validation.nameMaxLength;
         }
         break;
       case 'description':
         if (value && value.length > 200) {
-          return L.VALIDATION.DESCRIPTION_MAX_LENGTH;
+          return L.validation.descriptionMaxLength;
         }
         break;
       case 'permissionIds':
         if (!value || value.length === 0) {
-          return L.VALIDATION.AT_LEAST_ONE_PERMISSION;
+          return L.validation.permissionsRequired;
         }
         break;
     }
@@ -144,7 +144,7 @@ export const RoleForm: React.FC<RoleFormProps> = ({
       <div className="bg-white shadow-sm rounded-lg border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">
-            {L.DETAILS.INFORMATION}
+            {L.details.information}
           </h3>
         </div>
 
@@ -155,7 +155,7 @@ export const RoleForm: React.FC<RoleFormProps> = ({
               htmlFor="name"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              {L.FORM.NAME}
+              {L.form.name}
               <span className="text-red-500 ml-1">*</span>
             </label>
             <input
@@ -164,7 +164,7 @@ export const RoleForm: React.FC<RoleFormProps> = ({
               value={formData.name}
               onChange={(e) => handleFieldChange('name', e.target.value)}
               onBlur={() => handleBlur('name')}
-              placeholder={L.FORM.NAME_PLACEHOLDER}
+              placeholder={L.form.namePlaceholder}
               disabled={isSubmitting}
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed ${
                 errors.name && touched.name
@@ -183,14 +183,14 @@ export const RoleForm: React.FC<RoleFormProps> = ({
               htmlFor="description"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              {L.FORM.DESCRIPTION}
+              {L.form.description}
             </label>
             <textarea
               id="description"
               value={formData.description}
               onChange={(e) => handleFieldChange('description', e.target.value)}
               onBlur={() => handleBlur('description')}
-              placeholder={L.FORM.DESCRIPTION_PLACEHOLDER}
+              placeholder={L.form.descriptionPlaceholder}
               disabled={isSubmitting}
               rows={3}
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed ${
@@ -211,10 +211,10 @@ export const RoleForm: React.FC<RoleFormProps> = ({
                 htmlFor="isActive"
                 className="text-sm font-medium text-gray-900"
               >
-                {L.FORM.IS_ACTIVE}
+                {L.form.isActive}
               </label>
               <p className="text-sm text-gray-500 mt-1">
-                {L.FORM.IS_ACTIVE_HELP}
+                {L.form.isActiveHelp}
               </p>
             </div>
             <button
@@ -241,11 +241,11 @@ export const RoleForm: React.FC<RoleFormProps> = ({
       <div className="bg-white shadow-sm rounded-lg border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">
-            {L.FORM.PERMISSIONS}
+            {L.form.permissions}
             <span className="text-red-500 ml-1">*</span>
           </h3>
           <p className="text-sm text-gray-500 mt-1">
-            {L.FORM.SELECT_PERMISSIONS}
+            {L.form.selectPermissions}
           </p>
         </div>
 
@@ -272,7 +272,7 @@ export const RoleForm: React.FC<RoleFormProps> = ({
           disabled={isSubmitting}
           className="px-6 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {L.BUTTONS.CANCEL}
+          {L.buttons.cancel}
         </button>
         <button
           type="submit"
@@ -301,7 +301,7 @@ export const RoleForm: React.FC<RoleFormProps> = ({
               ></path>
             </svg>
           )}
-          <span>{L.BUTTONS.SAVE}</span>
+          <span>{L.buttons.save}</span>
         </button>
       </div>
     </form>
