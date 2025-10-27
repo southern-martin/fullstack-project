@@ -51,6 +51,30 @@ services:
       interval: 10s
       start_period: 30s
 
+  # Consul Config Server (Centralized Configuration Management)
+  consul:
+    image: hashicorp/consul:1.17
+    container_name: consul-server
+    restart: unless-stopped
+    command: agent -server -ui -bootstrap-expect=1 -client=0.0.0.0 -bind=0.0.0.0
+    ports:
+      - "8500:8500"  # HTTP API & UI
+      - "8600:8600/tcp"  # DNS (TCP)
+      - "8600:8600/udp"  # DNS (UDP)
+    volumes:
+      - consul_data:/consul/data
+    networks:
+      - shared-services-network
+    healthcheck:
+      test: ["CMD", "consul", "members"]
+      timeout: 10s
+      retries: 5
+      interval: 10s
+      start_period: 30s
+    environment:
+      CONSUL_BIND_INTERFACE: eth0
+      CONSUL_CLIENT_INTERFACE: eth0
+
   # ===========================================
   # CORE SERVICES (Shared Database)
   # ===========================================
@@ -436,6 +460,8 @@ volumes:
   shared_user_db_data:
     driver: local
   shared_redis_data:
+    driver: local
+  consul_data:
     driver: local
   
   # Business Services Volumes
