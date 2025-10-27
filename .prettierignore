@@ -1,0 +1,60 @@
+# Dependencies
+node_modules
+**/node_modules
+dist
+**/dist
+build
+**/build
+.next
+coverage
+
+# Generated files
+*.min.js
+*.bundle.js
+*.map
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Compiled output
+*.js.map
+*.d.ts.map
+
+# Logs
+*.log
+logs
+*.log.*
+
+# Database
+*.sql
+migrations/*.sql
+
+# Environment files
+.env
+.env.*
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation (preserve formatting)
+*.md
+CHANGELOG.md
+README.md
+
+# Config files that should preserve exact formatting
+docker-compose*.yml
+*.yaml
+*.json
+
+# Scripts that might have specific formatting
+scripts/**/*.sh
+*.sh
