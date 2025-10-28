@@ -223,6 +223,7 @@ class TranslationApiClient {
       method: 'GET',
       headers: {
         ...this.defaultHeaders,
+        'Host': 'translation.health.local', // Kong host-based routing
         ...(token && { Authorization: `Bearer ${token}` }),
       },
     });
