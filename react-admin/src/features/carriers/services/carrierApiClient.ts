@@ -130,7 +130,7 @@ class CarrierApiClient {
   async healthCheck(): Promise<any> {
     return this.request<any>('/health', { 
       method: 'GET',
-      headers: { 'Host': 'carrier.health.local' }
+      headers: { 'X-Service': 'carrier' }
     });
   }
 }

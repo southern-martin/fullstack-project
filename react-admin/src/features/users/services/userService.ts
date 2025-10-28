@@ -51,11 +51,10 @@ class UserService {
   // Add health check method
   async healthCheck(): Promise<boolean> {
     try {
-      // Use Host header for Kong Gateway host-based routing
       const response = await fetch(`${USER_API_CONFIG.BASE_URL}/health`, {
         method: 'GET',
         headers: {
-          'Host': 'user.health.local',
+          'X-Service': 'user',
           'Content-Type': 'application/json'
         }
       });
