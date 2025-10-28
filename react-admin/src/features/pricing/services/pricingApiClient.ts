@@ -150,7 +150,7 @@ class PricingApiClient {
   }
 
   async healthCheck(): Promise<any> {
-    return this.request<any>('/health', { method: 'GET' });
+    return this.request<any>('/pricing/health', { method: 'GET' });
   }
 }
 

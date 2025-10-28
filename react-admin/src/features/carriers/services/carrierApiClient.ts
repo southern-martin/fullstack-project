@@ -128,7 +128,7 @@ class CarrierApiClient {
   }
 
   async healthCheck(): Promise<any> {
-    return this.request<any>('/health', { method: 'GET' });
+    return this.request<any>('/carriers/health', { method: 'GET' });
   }
 }
 
