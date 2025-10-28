@@ -46,6 +46,25 @@ export class UserController {
   ) {}
 
   /**
+   * Health check endpoint
+   * GET /users/health
+   */
+  @Get('health')
+  @ApiOperation({ summary: "Health check for user service via users route" })
+  @ApiResponse({ status: 200, description: "Service is healthy" })
+  async healthCheck(): Promise<{
+    status: string;
+    timestamp: string;
+    service: string;
+  }> {
+    return {
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      service: "user-service",
+    };
+  }
+
+  /**
    * Create user endpoint
    * POST /users
    */

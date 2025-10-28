@@ -1,5 +1,6 @@
 import { userApiClient } from './userApiClient';
 import { userApiService } from './userApiService';
+import { USER_API_CONFIG } from '../../../config/api';
 
 class UserService {
   // Wrap existing userApiService methods
@@ -50,8 +51,14 @@ class UserService {
   // Add health check method
   async healthCheck(): Promise<boolean> {
     try {
-      await userApiClient.get('/health');
-      return true;
+      const response = await fetch(`${USER_API_CONFIG.BASE_URL}/health`, {
+        method: 'GET',
+        headers: {
+          'X-Service': 'user',
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.ok;
     } catch (error) {
       console.error('User service health check failed:', error);
       return false;

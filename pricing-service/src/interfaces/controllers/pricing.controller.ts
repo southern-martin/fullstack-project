@@ -41,6 +41,25 @@ export class PricingController {
     private readonly getPriceCalculationHistoryUseCase: GetPriceCalculationHistoryUseCase
   ) {}
 
+  /**
+   * Health check endpoint
+   * GET /pricing/health
+   */
+  @Get('health')
+  @ApiOperation({ summary: "Health check for pricing service via pricing route" })
+  @ApiResponse({ status: 200, description: "Service is healthy" })
+  async healthCheck(): Promise<{
+    status: string;
+    timestamp: string;
+    service: string;
+  }> {
+    return {
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      service: "pricing-service",
+    };
+  }
+
   // Pricing Rules Management
   /**
    * Create pricing rule endpoint
