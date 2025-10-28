@@ -42,6 +42,25 @@ export class CustomerController {
   ) {}
 
   /**
+   * Health check endpoint
+   * GET /customers/health
+   */
+  @Get('health')
+  @ApiOperation({ summary: "Health check for customer service via customers route" })
+  @ApiResponse({ status: 200, description: "Service is healthy" })
+  async healthCheck(): Promise<{
+    status: string;
+    timestamp: string;
+    service: string;
+  }> {
+    return {
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      service: "customer-service",
+    };
+  }
+
+  /**
    * Create customer endpoint
    * POST /customers
    */
