@@ -12,6 +12,9 @@ import { InterfacesModule } from "./interfaces/interfaces.module";
 // TypeORM Entities
 import { CarrierTypeOrmEntity } from "./infrastructure/database/typeorm/entities/carrier.typeorm.entity";
 
+// Consul Configuration
+import { createTypeOrmConsulConfig } from "./infrastructure/config/typeorm-consul.config";
+
 /**
  * Main Application Module
  * Follows Clean Architecture principles
@@ -28,20 +31,11 @@ import { CarrierTypeOrmEntity } from "./infrastructure/database/typeorm/entities
     // Structured Logging
     WinstonLoggerModule,
 
-    // Database
-    TypeOrmModule.forRoot({
-      type: "mysql",
-      host: process.env.DB_HOST || "localhost",
-      port: parseInt(process.env.DB_PORT) || 3306,
-      username: process.env.DB_USERNAME || "carrier_user",
-      password: process.env.DB_PASSWORD || "carrier_password",
-      database: process.env.DB_NAME || "carrier_service_db",
-      entities: [CarrierTypeOrmEntity],
-      migrations: ["dist/infrastructure/database/typeorm/migrations/*.js"],
-      migrationsRun: true,
-      synchronize: false,
-      logging: process.env.NODE_ENV === "development",
-      charset: "utf8mb4",
+    // Database - Configured from Consul KV Store
+    TypeOrmModule.forRootAsync({
+      useFactory: async () => {
+        return await createTypeOrmConsulConfig();
+      },
     }),
 
     // Clean Architecture Layers
