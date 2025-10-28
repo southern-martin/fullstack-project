@@ -135,6 +135,10 @@ services:
       NODE_ENV: development
       SERVICE_NAME: user-service
       PORT: 3003
+      # Consul Configuration
+      CONSUL_HOST: consul-server
+      CONSUL_PORT: 8500
+      CONSUL_SCHEME: http
       # Shared Database Configuration
       DB_HOST: shared-user-db
       DB_PORT: 3306
@@ -200,6 +204,10 @@ services:
       NODE_ENV: development
       SERVICE_NAME: customer-service
       PORT: 3004
+      # Consul Configuration
+      CONSUL_HOST: consul-server
+      CONSUL_PORT: 8500
+      CONSUL_SCHEME: http
       # Separate Database Configuration
       DB_HOST: customer-service-db
       DB_PORT: 3306
@@ -265,6 +273,10 @@ services:
       NODE_ENV: development
       SERVICE_NAME: carrier-service
       PORT: 3005
+      # Consul Configuration
+      CONSUL_HOST: consul-server
+      CONSUL_PORT: 8500
+      CONSUL_SCHEME: http
       # Separate Database Configuration
       DB_HOST: carrier-service-db
       DB_PORT: 3306
@@ -330,6 +342,10 @@ services:
       NODE_ENV: development
       SERVICE_NAME: pricing-service
       PORT: 3006
+      # Consul Configuration
+      CONSUL_HOST: consul-server
+      CONSUL_PORT: 8500
+      CONSUL_SCHEME: http
       # Separate Database Configuration
       DB_HOST: pricing-service-db
       DB_PORT: 3306
