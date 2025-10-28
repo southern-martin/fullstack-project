@@ -16,6 +16,9 @@ import { UserTypeOrmEntity } from "./infrastructure/database/typeorm/entities/us
 // Logging
 import { WinstonLoggerModule } from "@shared/infrastructure/logging";
 
+// Consul Configuration
+import { createTypeOrmConsulConfig } from "./infrastructure/config/typeorm-consul.config";
+
 /**
  * Main Application Module
  * Follows Clean Architecture principles
@@ -33,25 +36,11 @@ import { WinstonLoggerModule } from "@shared/infrastructure/logging";
     // Structured Logging
     WinstonLoggerModule,
 
-    // Database
-    TypeOrmModule.forRoot({
-      type: "mysql",
-      host: process.env.DB_HOST || "localhost",
-      port: parseInt(process.env.DB_PORT) || 3306,
-      username: process.env.DB_USERNAME || "shared_user",
-      password: process.env.DB_PASSWORD || "shared_password_2024",
-      database: process.env.DB_NAME || "shared_user_db",
-      entities: [
-        UserTypeOrmEntity,
-        RoleTypeOrmEntity,
-        PermissionTypeOrmEntity,
-        UserProfileTypeOrmEntity,
-      ],
-      synchronize: false, // CRITICAL: Disabled - use migrations for schema changes
-      migrations: ["dist/infrastructure/database/typeorm/migrations/*.js"],
-      migrationsRun: true, // Auto-run pending migrations on startup
-      logging: false, // Disable SQL logging (use Winston for structured logs)
-      maxQueryExecutionTime: 1000, // Log slow queries > 1s
+    // Database - Configured from Consul KV Store
+    TypeOrmModule.forRootAsync({
+      useFactory: async () => {
+        return await createTypeOrmConsulConfig();
+      },
     }),
 
     // Clean Architecture Layers
