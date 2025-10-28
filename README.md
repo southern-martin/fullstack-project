@@ -27,6 +27,11 @@
 - **[🤖 AI Instructions](.github/copilot-instructions.md)** - Copilot guidelines
 - **[📊 Swagger Index](swagger-index.html)** - ⭐ **NEW!** Central API documentation hub
 
+### ⚙️ Configuration Management
+- **[📝 Consul Usage Guide](CONSUL-USAGE-GUIDE.md)** - ⭐ **NEW!** Complete Consul configuration guide
+- **[⚡ Consul Quick Reference](CONSUL-QUICK-REFERENCE.md)** - ⭐ **NEW!** Quick reference card
+- **[✅ Week 2 Completion](CONSUL-WEEK2-COMPLETION.md)** - ⭐ **NEW!** Implementation summary
+
 ---
 
 ## 🏗️ Architecture
@@ -47,6 +52,7 @@
 
 - **MySQL 8.0** - 4 database instances (hybrid architecture)
 - **Redis 7** - Shared cache and session store
+- **Consul** - Centralized configuration management
 - **Nginx** - Reverse proxy (VM deployment)
 - **Docker Compose** - Local orchestration
 - **Kubernetes** - GCP deployment (GKE)
@@ -69,6 +75,18 @@ docker-compose -f docker-compose.hybrid.yml up -d
 - **Frontend**: http://localhost:3000
 - **Default Login**: `admin@example.com` / `Admin123!`
 - **API Documentation**: See [API Standards](docs/API-STANDARDS.md)
+- **Consul UI**: http://localhost:8500
+
+### 3. Test Consul Configuration (Optional)
+```bash
+# Test all services load configuration from Consul
+cd customer-service && npx ts-node src/infrastructure/config/__tests__/test-consul.ts
+cd ../carrier-service && npx ts-node src/infrastructure/config/__tests__/test-consul.ts
+cd ../pricing-service && npx ts-node src/infrastructure/config/__tests__/test-consul.ts
+cd ../user-service && npx ts-node src/infrastructure/config/__tests__/test-consul.ts
+```
+
+**→ See [CONSUL-USAGE-GUIDE.md](CONSUL-USAGE-GUIDE.md) for complete documentation**
 
 **→ See [QUICK-START.md](QUICK-START.md) for detailed instructions**
 
@@ -131,6 +149,7 @@ All microservices use consistent responses:
 
 ### ✅ Cloud-Ready Infrastructure
 - **Secrets Management**: YAML-based with environment separation
+- **Consul Config Server**: Centralized configuration management (⭐ **NEW!**)
 - **Terraform**: Complete GCP infrastructure as code
 - **Docker Compose**: Production-ready VM deployment
 - **Auto-scaling**: Kubernetes support for GCP
@@ -176,6 +195,7 @@ All microservices use consistent responses:
 | User Profiles | ✅ Complete | 401 seeded |
 | Multi-language | ✅ Complete | EN/FR/ES |
 | API Standardization | ✅ Complete | 6/6 services |
+| Consul Config Server | ✅ Complete | Week 2 ⭐ **NEW!** |
 | Local Deployment | ✅ Ready | Docker Compose |
 | VM Deployment | ✅ Ready | Ubuntu/Debian/CentOS |
 | GCP Deployment | ✅ Ready | Terraform |
