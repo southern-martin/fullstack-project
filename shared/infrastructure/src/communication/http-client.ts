@@ -1,4 +1,9 @@
-import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from "axios";
+import axios from "axios";
+
+// Using any types to avoid axios version compatibility issues during Docker build
+type AxiosInstance = any;
+type AxiosRequestConfig<T = any> = any;
+type AxiosResponse<T = any> = any;
 
 /**
  * HTTP Client Configuration
