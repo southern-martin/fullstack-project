@@ -88,6 +88,9 @@ import { RedisEventBus } from "../infrastructure/events/redis-event-bus";
 
     // Export event bus for other modules
     "IEventBus",
+
+    // Export Redis cache service for health checks
+    RedisCacheService,
   ],
 })
 export class ApplicationModule {}
