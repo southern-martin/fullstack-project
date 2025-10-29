@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import Button from '../../../shared/components/ui/Button';
 import Modal from '../../../shared/components/ui/Modal';
 import { getLanguageFlag } from '../../../shared/utils/languageFlags';
+import { useTranslationLabels } from '../hooks';
 import { Language, translationService } from '../services/translationService';
 
 interface LanguageManagementProps {
@@ -15,6 +16,9 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
     onClose,
     onLanguageChange,
 }) => {
+    // Translation labels hook
+    const { L } = useTranslationLabels();
+
     const [languages, setLanguages] = useState<Language[]>([]);
     const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -27,11 +31,11 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
             const response = await translationService.getLanguages();
             setLanguages(response);
         } catch (error) {
-            toast.error('Failed to load languages: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(L.messages.loadError);
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [L]);
 
     useEffect(() => {
         loadLanguages();
@@ -40,12 +44,12 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
     const handleCreateLanguage = async (languageData: any) => {
         try {
             await translationService.createLanguage(languageData);
-            toast.success('Language created successfully');
+            toast.success(L.messages.createSuccess);
             loadLanguages();
             onLanguageChange();
             setShowCreateModal(false);
         } catch (error) {
-            toast.error('Failed to create language: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(L.messages.createError);
             throw error;
         }
     };
@@ -53,12 +57,12 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
     const handleUpdateLanguage = async (code: string, languageData: any) => {
         try {
             await translationService.updateLanguage(code, languageData);
-            toast.success('Language updated successfully');
+            toast.success(L.messages.updateSuccess);
             loadLanguages();
             onLanguageChange();
             setShowEditModal(false);
         } catch (error) {
-            toast.error('Failed to update language: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(L.messages.updateError);
             throw error;
         }
     };
@@ -66,11 +70,11 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
     const handleDeleteLanguage = async (code: string) => {
         try {
             await translationService.deleteLanguage(code);
-            toast.success('Language deleted successfully');
+            toast.success(L.messages.deleteSuccess);
             loadLanguages();
             onLanguageChange();
         } catch (error) {
-            toast.error('Failed to delete language: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(L.messages.deleteError);
         }
     };
 
@@ -79,11 +83,11 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
             await translationService.updateLanguage(code, { 
                 status: isActive ? 'active' : 'inactive' 
             });
-            toast.success(isActive ? 'Language activated' : 'Language deactivated');
+            toast.success(isActive ? L.status.active : L.status.inactive);
             loadLanguages();
             onLanguageChange();
         } catch (error) {
-            toast.error('Failed to update language status: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(L.messages.updateError);
         }
     };
 
@@ -104,10 +108,10 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-lg font-medium text-gray-900">
-                            Language Management
+                            {L.languages.title}
                         </h3>
                         <p className="text-sm text-gray-500">
-                            Manage available languages for translations
+                            {L.languages.subtitle}
                         </p>
                     </div>
                     <Button
@@ -115,7 +119,7 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
                         className="flex items-center space-x-2"
                     >
                         <PlusIcon className="h-4 w-4" />
-                        <span>Add Language</span>
+                        <span>{L.buttons.create}</span>
                     </Button>
                 </div>
 
@@ -138,7 +142,7 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
                                         </span>
                                         {(language.code === 'en' || language.isDefault) && (
                                             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400">
-                                                Default
+                                                {L.languages.isDefault}
                                             </span>
                                         )}
                                     </div>
@@ -152,7 +156,7 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
                                     ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400'
                                     : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400'
                                     }`}>
-                                    {(language.isActive || language.status === 'active') ? 'Active' : 'Inactive'}
+                                    {(language.isActive || language.status === 'active') ? L.status.active : L.status.inactive}
                                 </span>
                                 <Button
                                     variant="secondary"
@@ -195,7 +199,7 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
                         variant="secondary"
                         onClick={onClose}
                     >
-                        Close
+                        {L.buttons.cancel}
                     </Button>
                 </div>
             </div>
@@ -205,7 +209,7 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
                 <Modal
                     isOpen={true}
                     onClose={() => setShowCreateModal(false)}
-                    title="Create New Language"
+                    title={L.modals.createTranslation}
                     size="md"
                 >
                     <LanguageForm
@@ -220,7 +224,7 @@ const LanguageManagement: React.FC<LanguageManagementProps> = ({
                 <Modal
                     isOpen={true}
                     onClose={() => setShowEditModal(false)}
-                    title="Edit Language"
+                    title={L.modals.editTranslation}
                     size="md"
                 >
                     <LanguageForm
