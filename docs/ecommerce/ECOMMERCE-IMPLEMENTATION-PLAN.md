@@ -1,22 +1,37 @@
-# 🛒 Ecommerce System - Complete Implementation Plan
+# 🛒 Multi-Seller Marketplace - Complete Implementation Plan
 
 **Created:** October 29, 2025  
+**Updated:** October 29, 2025 (Added Marketplace Architecture)  
 **Status:** Planning Phase  
-**Estimated Duration:** 8-10 weeks (phased approach)
+**Estimated Duration:** 12-14 weeks (phased approach)  
+**System Type:** Multi-Seller Marketplace Platform
 
 ---
 
 ## 📋 Executive Summary
 
-This document outlines a complete implementation plan for building a production-ready ecommerce system integrated with the existing microservices architecture. The system will include product catalog management, order processing, shopping cart functionality, and multi-language content translation.
+This document outlines a complete implementation plan for building a production-ready **multi-seller marketplace** platform integrated with the existing microservices architecture. The system enables multiple independent sellers to list and sell products, with automated commission handling, order splitting, and payout management.
 
 ### Key Objectives
-1. Build **2 new microservices** (Product Service with Categories & Attributes, Order Service)
-2. Create **Admin Dashboard** for ecommerce management
-3. Build **Customer-Facing Website** for shopping
-4. Integrate **Translation Service** for multi-language content
-5. Implement **Shopping Cart** and **Checkout** functionality
-6. Add **Inventory Management** and **Order Tracking**
+1. Build **4 new microservices** (Product, Order, Seller, Payout Services)
+2. Create **Multi-Seller Management** with verification workflow
+3. Build **Admin Dashboard** for marketplace management
+4. Build **Seller Dashboard** for seller operations
+5. Build **Customer Website** for multi-seller shopping
+6. Implement **Commission System** and automated payouts
+7. Integrate **Translation Service** for multi-language content
+8. Add **Order Splitting** by seller and fulfillment tracking
+
+### Marketplace Features
+- ✅ **Multiple Sellers** - Independent vendor accounts
+- ✅ **Seller Verification** - Admin approval workflow
+- ✅ **Product Ownership** - Products belong to sellers
+- ✅ **Order Splitting** - Orders split by seller automatically
+- ✅ **Commission System** - Configurable platform fees
+- ✅ **Automated Payouts** - Weekly/monthly seller payments
+- ✅ **Seller Analytics** - Sales reports and metrics
+- ✅ **Seller Reviews** - Customer ratings for sellers
+- ✅ **Multi-Seller Cart** - Cart can contain items from multiple sellers
 
 ---
 
@@ -34,29 +49,94 @@ This document outlines a complete implementation plan for building a production-
 - ✅ **React Admin** - Administration interface
 
 ### New Services Required
-- 🆕 **Product Service** (3008) - Product catalog, categories, attributes, and images
-- 🆕 **Order Service** (3009) - Order processing and management
+- 🆕 **Product Service** (3008) - Product catalog, categories, attributes, images (owned by sellers)
+- 🆕 **Order Service** (3009) - Order processing with multi-seller order splitting
+- 🆕 **Seller Service** (3010) - Seller registration, verification, and management
+- 🆕 **Payout Service** (3011) - Commission calculation and seller payouts
 
-**Note:** Category management is integrated into Product Service for:
-- Domain cohesion (categories exist to organize products)
-- Database efficiency (single database, no inter-service calls)
-- Simplified operations (single transaction for product + category)
-- Reduced deployment complexity
+**Architecture Decisions:**
+1. **Product + Category Combined** - Categories integrated into Product Service for domain cohesion
+2. **Seller Ownership** - All products are owned by sellers (seller_id foreign key)
+3. **Order Splitting** - Orders automatically split by seller for independent fulfillment
+4. **Platform Commission** - Platform collects payment, calculates commission, pays sellers
+5. **Seller Verification** - Manual admin approval required before sellers can publish products
 
 ### Frontend Applications
-- 🔧 **React Admin** - Extend for ecommerce management
-- 🆕 **Customer Website** - Public ecommerce storefront (new app)
+- 🔧 **React Admin (3000)** - Platform admin dashboard (manage sellers, approve products, process payouts)
+- 🆕 **Seller Dashboard (3200)** - Seller operations (products, orders, analytics, payouts)
+- 🆕 **Customer Website (3100)** - Public marketplace storefront (browse all sellers)
 
 ---
 
 ## 📊 Database Schema Design
 
-### New Tables Required
+### Marketplace Tables (New)
 
-#### Products Table
+#### Sellers Table
+```sql
+CREATE TABLE sellers (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,                    -- Link to User Service
+    business_name VARCHAR(255) NOT NULL,
+    business_type ENUM('individual', 'company', 'enterprise') DEFAULT 'individual',
+    tax_id VARCHAR(100),                     -- VAT/Tax number
+    business_email VARCHAR(255) NOT NULL,
+    business_phone VARCHAR(50),
+    
+    -- Address
+    business_address TEXT,
+    business_city VARCHAR(100),
+    business_state VARCHAR(100),
+    business_country VARCHAR(100),
+    business_postal_code VARCHAR(20),
+    
+    -- Seller Status
+    status ENUM('pending', 'active', 'suspended', 'banned') DEFAULT 'pending',
+    verification_status ENUM('unverified', 'pending', 'verified', 'rejected') DEFAULT 'unverified',
+    
+    -- Ratings
+    rating DECIMAL(3,2) DEFAULT 0.00,        -- Average rating (0.00 - 5.00)
+    total_reviews INT DEFAULT 0,
+    
+    -- Business Metrics
+    total_products INT DEFAULT 0,
+    total_sales INT DEFAULT 0,
+    total_revenue DECIMAL(12,2) DEFAULT 0.00,
+    
+    -- Commission Settings (can be customized per seller)
+    commission_rate DECIMAL(5,2) DEFAULT 15.00,  -- Platform fee %
+    
+    -- Banking Information (for payouts)
+    bank_account_holder VARCHAR(255),
+    bank_account_number VARCHAR(100),        -- Encrypted
+    bank_name VARCHAR(255),
+    bank_routing_number VARCHAR(100),
+    
+    -- Metadata
+    logo_url VARCHAR(500),
+    description TEXT,
+    website_url VARCHAR(500),
+    
+    -- Timestamps
+    approved_at TIMESTAMP NULL,
+    rejected_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user (user_id),
+    INDEX idx_status (status),
+    INDEX idx_verification (verification_status),
+    INDEX idx_rating (rating),
+    INDEX idx_created (created_at)
+);
+```
+
+#### Products Table (Seller-Owned)
 ```sql
 CREATE TABLE products (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    seller_id INT NOT NULL,                  -- NEW: Product belongs to seller
     sku VARCHAR(100) UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
     description TEXT,
@@ -67,22 +147,31 @@ CREATE TABLE products (
     min_stock INT DEFAULT 0,
     max_stock INT,
     weight DECIMAL(10,2),
-    dimensions VARCHAR(100),  -- JSON: {length, width, height, unit}
+    dimensions JSON,                         -- {length, width, height, unit}
     is_active BOOLEAN DEFAULT true,
     is_featured BOOLEAN DEFAULT false,
+    
+    -- Product Status (for marketplace)
+    approval_status ENUM('draft', 'pending', 'approved', 'rejected') DEFAULT 'draft',
+    approved_by_id INT NULL,
+    approved_at TIMESTAMP NULL,
+    
+    -- SEO
     meta_title VARCHAR(255),
     meta_description TEXT,
     meta_keywords TEXT,
-    created_by_id INT,
+    
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
+    FOREIGN KEY (seller_id) REFERENCES sellers(id) ON DELETE CASCADE,
+    INDEX idx_seller (seller_id),
     INDEX idx_sku (sku),
     INDEX idx_name (name),
     INDEX idx_price (price),
     INDEX idx_stock (stock_quantity),
     INDEX idx_active (is_active),
-    INDEX idx_featured (is_featured),
+    INDEX idx_approval (approval_status),
     INDEX idx_created (created_at),
     FULLTEXT idx_search (name, description, short_description)
 );
@@ -246,11 +335,12 @@ CREATE TABLE orders (
 );
 ```
 
-#### Order_Items Table
+#### Order_Items Table (Multi-Seller Support)
 ```sql
 CREATE TABLE order_items (
     id INT PRIMARY KEY AUTO_INCREMENT,
     order_id INT NOT NULL,
+    seller_id INT NOT NULL,              -- NEW: Track which seller owns this item
     product_id INT NOT NULL,
     product_name VARCHAR(255) NOT NULL,  -- Snapshot at order time
     product_sku VARCHAR(100) NOT NULL,   -- Snapshot at order time
@@ -259,46 +349,200 @@ CREATE TABLE order_items (
     total_price DECIMAL(10,2) NOT NULL,
     tax DECIMAL(10,2) DEFAULT 0,
     discount DECIMAL(10,2) DEFAULT 0,
+    
+    -- Seller Commission
+    commission_rate DECIMAL(5,2) NOT NULL,        -- Platform fee % at order time
+    commission_amount DECIMAL(10,2) NOT NULL,     -- Calculated commission
+    seller_payout DECIMAL(10,2) NOT NULL,         -- Amount seller receives
+    
+    -- Fulfillment (per-seller)
+    fulfillment_status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
+    tracking_number VARCHAR(255),
+    carrier_id INT,
+    shipped_at TIMESTAMP NULL,
+    delivered_at TIMESTAMP NULL,
+    
     product_snapshot JSON,  -- Complete product data at order time
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (seller_id) REFERENCES sellers(id) ON DELETE RESTRICT,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT,
+    FOREIGN KEY (carrier_id) REFERENCES carriers(id) ON DELETE SET NULL,
     INDEX idx_order (order_id),
+    INDEX idx_seller (seller_id),
     INDEX idx_product (product_id),
+    INDEX idx_fulfillment (fulfillment_status),
+    INDEX idx_created (created_at)
+);
+```
+
+#### Seller_Payouts Table
+```sql
+CREATE TABLE seller_payouts (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    seller_id INT NOT NULL,
+    
+    -- Payout Period
+    payout_period_start DATE NOT NULL,
+    payout_period_end DATE NOT NULL,
+    
+    -- Financial Details
+    gross_sales DECIMAL(12,2) NOT NULL,          -- Total sales before commission
+    platform_commission DECIMAL(12,2) NOT NULL,  -- Total commission deducted
+    net_payout DECIMAL(12,2) NOT NULL,           -- Amount to pay seller
+    
+    -- Order Statistics
+    total_orders INT NOT NULL,
+    total_items INT NOT NULL,
+    
+    -- Status
+    status ENUM('pending', 'processing', 'paid', 'failed', 'cancelled') DEFAULT 'pending',
+    
+    -- Payment Information
+    payment_method VARCHAR(100),                  -- bank_transfer, paypal, stripe
+    transaction_reference VARCHAR(255),           -- External payment ID
+    transaction_fee DECIMAL(10,2) DEFAULT 0,
+    
+    -- Timestamps
+    paid_at TIMESTAMP NULL,
+    failed_at TIMESTAMP NULL,
+    
+    -- Notes
+    admin_note TEXT,
+    failure_reason TEXT,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (seller_id) REFERENCES sellers(id) ON DELETE CASCADE,
+    INDEX idx_seller (seller_id),
+    INDEX idx_status (status),
+    INDEX idx_period (payout_period_start, payout_period_end),
+    INDEX idx_created (created_at)
+);
+```
+
+#### Seller_Reviews Table
+```sql
+CREATE TABLE seller_reviews (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    seller_id INT NOT NULL,
+    customer_id INT NOT NULL,
+    order_id INT NOT NULL,
+    
+    -- Review Content
+    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    title VARCHAR(255),
+    comment TEXT,
+    
+    -- Review Aspects (optional detailed ratings)
+    communication_rating INT CHECK (communication_rating >= 1 AND communication_rating <= 5),
+    shipping_speed_rating INT CHECK (shipping_speed_rating >= 1 AND shipping_speed_rating <= 5),
+    product_quality_rating INT CHECK (product_quality_rating >= 1 AND product_quality_rating <= 5),
+    
+    -- Status
+    status ENUM('pending', 'approved', 'rejected', 'flagged') DEFAULT 'pending',
+    
+    -- Seller Response
+    seller_response TEXT,
+    seller_responded_at TIMESTAMP NULL,
+    
+    -- Moderation
+    approved_by_id INT,
+    approved_at TIMESTAMP NULL,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (seller_id) REFERENCES sellers(id) ON DELETE CASCADE,
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_review (seller_id, customer_id, order_id),
+    INDEX idx_seller (seller_id),
+    INDEX idx_customer (customer_id),
+    INDEX idx_rating (rating),
+    INDEX idx_status (status),
     INDEX idx_created (created_at)
 );
 ```
 
 ---
 
-## 🎯 Implementation Phases
+## 🎯 Implementation Phases (Marketplace Architecture)
 
-### **PHASE 1: Backend Foundation (Weeks 1-2)**
+### **PHASE 1: Seller & Product Foundation (Weeks 1-2)**
 
-#### 1.1 Product Service Setup (Includes Categories & Attributes)
-**Goal:** Create Product microservice with products, categories, attributes, and images
+#### 1.1 Seller Service Setup
+**Goal:** Create Seller microservice for multi-seller marketplace
+
+**Tasks:**
+- [ ] Create `seller-service` directory structure (NestJS clean architecture)
+- [ ] Setup TypeORM with migrations infrastructure
+- [ ] Implement Seller entity with all marketplace fields
+- [ ] Create SellerRepository with BaseTypeOrmRepository
+- [ ] Implement SellerService (domain layer)
+- [ ] Create Seller DTOs (RegisterSellerDto, UpdateSellerDto, SellerResponseDto)
+- [ ] Build SellerController with REST endpoints
+- [ ] Add seller registration workflow
+- [ ] Implement verification status management
+- [ ] Add seller rating calculation logic
+- [ ] Setup seller database (MySQL on port 3310)
+- [ ] Create initial migrations
+- [ ] Implement Redis caching for seller data
+- [ ] Write unit tests (Jest)
+- [ ] Create Postman collection for Seller API
+- [ ] Add health check endpoint
+
+**Database:**
+- MySQL container: `seller-db` (port 3310)
+- Tables: `sellers`
+- Indexes: Status, verification, rating, user_id
+
+**Seller API Endpoints:**
+- `POST /api/v1/sellers/register` - Seller registration
+- `GET /api/v1/sellers` - List all sellers (admin)
+- `GET /api/v1/sellers/:id` - Get seller by ID
+- `GET /api/v1/sellers/user/:userId` - Get seller by user ID
+- `PATCH /api/v1/sellers/:id` - Update seller profile
+- `PATCH /api/v1/sellers/:id/verify` - Verify seller (admin)
+- `PATCH /api/v1/sellers/:id/status` - Update seller status (admin)
+- `GET /api/v1/sellers/:id/stats` - Get seller statistics
+- `DELETE /api/v1/sellers/:id` - Delete/ban seller (admin)
+
+**Deliverables:**
+- ✅ Seller Service running on port 3010
+- ✅ Seller registration and verification workflow
+- ✅ Admin can approve/reject sellers
+- ✅ Seller profile management
+
+---
+
+#### 1.2 Product Service Setup (Seller-Owned Products)
+**Goal:** Create Product microservice with seller ownership
 
 **Tasks:**
 - [ ] Create `product-service` directory structure (NestJS clean architecture)
 - [ ] Setup TypeORM with migrations infrastructure
-- [ ] Implement Product entity with all fields
+- [ ] Implement Product entity with **seller_id** and **approval_status**
 - [ ] Implement Category entity (self-referencing for hierarchy)
 - [ ] Implement ProductImage entity (one-to-many with Product)
-- [ ] Create ProductRepository with BaseTypeOrmRepository
+- [ ] Create ProductRepository with seller filtering
 - [ ] Create CategoryRepository with tree operations
-- [ ] Implement ProductService (domain layer)
+- [ ] Implement ProductService with seller ownership logic
 - [ ] Implement CategoryService (domain layer)
+- [ ] Add product approval workflow (draft → pending → approved/rejected)
 - [ ] Create Product DTOs (CreateProductDto, UpdateProductDto, ProductResponseDto)
 - [ ] Create Category DTOs (CreateCategoryDto, UpdateCategoryDto, CategoryResponseDto)
-- [ ] Build ProductController with REST endpoints
+- [ ] Build ProductController with seller-based authorization
 - [ ] Build CategoryController with REST endpoints
 - [ ] Add validation (class-validator)
 - [ ] Implement error handling (HttpExceptionFilter)
 - [ ] Add response transformation (TransformInterceptor)
 - [ ] Setup product database (MySQL on port 3308)
 - [ ] Create initial migrations for all tables
-- [ ] Add strategic indexes
+- [ ] Add strategic indexes (seller_id, approval_status)
 - [ ] Implement Redis caching for products and categories
 - [ ] Write unit tests (Jest)
 - [ ] Create Postman collection for Product API
@@ -306,120 +550,425 @@ CREATE TABLE order_items (
 
 **Database:**
 - MySQL container: `product-db` (port 3308)
-- Tables: `products`, `categories`, `product_categories`, `product_images`
-- Indexes: Strategic indexes on all tables
+- Tables: `products` (with seller_id), `categories`, `product_categories`, `product_images`
+- Indexes: seller_id, approval_status, active, price, stock
 
 **Product API Endpoints:**
-- `POST /api/v1/products` - Create product
-- `GET /api/v1/products` - List products (paginated, filtered, sorted)
+- `POST /api/v1/products` - Create product (by seller)
+- `GET /api/v1/products` - List all approved products (public)
+- `GET /api/v1/products/seller/:sellerId` - Get products by seller
+- `GET /api/v1/products/pending` - Get pending products (admin)
 - `GET /api/v1/products/:id` - Get product by ID
-- `PATCH /api/v1/products/:id` - Update product
-- `DELETE /api/v1/products/:id` - Delete product
-- `GET /api/v1/products/sku/:sku` - Get product by SKU
+- `PATCH /api/v1/products/:id` - Update product (seller/admin)
+- `PATCH /api/v1/products/:id/approve` - Approve product (admin)
+- `PATCH /api/v1/products/:id/reject` - Reject product (admin)
+- `DELETE /api/v1/products/:id` - Delete product (seller/admin)
 - `GET /api/v1/products/search` - Search products (fulltext)
-- `PATCH /api/v1/products/:id/stock` - Update stock quantity
-- `GET /api/v1/products/low-stock` - Get low stock products
-- `POST /api/v1/products/:id/images` - Add product image
-- `DELETE /api/v1/products/images/:imageId` - Delete product image
+- `PATCH /api/v1/products/:id/stock` - Update stock (seller)
+- `POST /api/v1/products/:id/images` - Add product image (seller)
 
 **Category API Endpoints:**
-- `POST /api/v1/categories` - Create category
+- `POST /api/v1/categories` - Create category (admin)
 - `GET /api/v1/categories` - List all categories
 - `GET /api/v1/categories/:id` - Get category by ID
-- `PATCH /api/v1/categories/:id` - Update category
-- `DELETE /api/v1/categories/:id` - Delete category
-- `GET /api/v1/categories/slug/:slug` - Get category by slug
+- `PATCH /api/v1/categories/:id` - Update category (admin)
+- `DELETE /api/v1/categories/:id` - Delete category (admin)
 - `GET /api/v1/categories/tree` - Get category tree (hierarchical)
-- `GET /api/v1/categories/:id/children` - Get child categories
-- `GET /api/v1/categories/:id/ancestors` - Get ancestor path
-- `POST /api/v1/categories/:id/move` - Move category to new parent
+- `GET /api/v1/categories/:id/products` - Get products in category
 
 **Deliverables:**
 - ✅ Product Service running on port 3008
-- ✅ Complete CRUD operations for products and categories
-- ✅ Database with migrations
-- ✅ API documentation (Postman)
-- ✅ Unit tests (>80% coverage)
+- ✅ Products owned by sellers (seller_id foreign key)
+- ✅ Product approval workflow
+- ✅ Category management
+- ✅ Admin can approve/reject products
 
 ---
 
-#### 1.2 Order Service Setup
-**Goal:** Create Order microservice with order processing and tracking
+### **PHASE 2: Order Management & Splitting (Weeks 3-4)**
+
+#### 2.1 Order Service Setup (Multi-Seller Orders)
+**Goal:** Create Order microservice with order splitting by seller
 
 **Tasks:**
-
-**Tasks:**
-- [ ] Create `order-service` directory structure
+- [ ] Create `order-service` directory structure (NestJS clean architecture)
 - [ ] Setup TypeORM with migrations infrastructure
-- [ ] Implement Order and OrderItem entities
-- [ ] Create OrderRepository
-- [ ] Implement OrderService with business logic
+- [ ] Implement Order and OrderItem entities (with seller_id in order_items)
+- [ ] Create OrderRepository with seller filtering
+- [ ] Implement OrderService with multi-seller order splitting logic
+- [ ] Add commission calculation logic (per order item)
 - [ ] Create Order DTOs (CreateOrderDto, UpdateOrderDto, OrderResponseDto)
-- [ ] Build OrderController
+- [ ] Build OrderController with REST endpoints
 - [ ] Implement order number generation
 - [ ] Add order status workflow (state machine)
 - [ ] Add payment status tracking
-- [ ] Implement shipping integration (Carrier Service API calls)
-- [ ] Add order total calculation logic
+- [ ] Implement order splitting algorithm (group items by seller)
+- [ ] Add fulfillment tracking per seller
 - [ ] Setup order database (MySQL on port 3309)
 - [ ] Create initial migrations
 - [ ] Implement Redis caching for recent orders
-- [ ] Add email notification triggers (future)
-- [ ] Write unit tests
+- [ ] Write unit tests (Jest)
 - [ ] Create Postman collection
 
 **Database:**
 - MySQL container: `order-db` (port 3309)
-- Tables: `orders`, `order_items`
-- Indexes: 8 strategic indexes
+- Tables: `orders`, `order_items` (with seller_id, commission fields, fulfillment_status)
+- Indexes: order, seller, product, fulfillment, created_at
 
-**API Endpoints:**
-- `POST /api/v1/orders` - Create order
-- `GET /api/v1/orders` - List orders (paginated, filtered)
+**Order API Endpoints:**
+- `POST /api/v1/orders` - Create order (auto-split by seller)
+- `GET /api/v1/orders` - List all orders (admin)
+- `GET /api/v1/orders/seller/:sellerId` - Get seller's orders
+- `GET /api/v1/orders/customer/:customerId` - Get customer's orders
 - `GET /api/v1/orders/:id` - Get order by ID
-- `GET /api/v1/orders/number/:orderNumber` - Get order by order number
-- `PATCH /api/v1/orders/:id` - Update order
+- `GET /api/v1/orders/:id/items/seller/:sellerId` - Get seller's items in order
 - `PATCH /api/v1/orders/:id/status` - Update order status
-- `PATCH /api/v1/orders/:id/payment-status` - Update payment status
-- `GET /api/v1/orders/customer/:customerId` - Get customer orders
+- `PATCH /api/v1/orders/items/:itemId/fulfill` - Update item fulfillment (seller)
+- `PATCH /api/v1/orders/items/:itemId/ship` - Mark item as shipped (seller)
 - `GET /api/v1/orders/stats` - Get order statistics
-- `POST /api/v1/orders/:id/cancel` - Cancel order
-- `POST /api/v1/orders/:id/refund` - Refund order
+- `DELETE /api/v1/orders/:id` - Cancel order
 
 **Deliverables:**
-- ✅ Order Service running on port 3010
-- ✅ Complete order workflow
-- ✅ Database with migrations
-- ✅ API documentation
-- ✅ Unit tests
+- ✅ Order Service running on port 3309
+- ✅ Orders automatically split by seller
+- ✅ Each seller can only see/fulfill their items
+- ✅ Commission calculated per order item
+- ✅ Fulfillment tracking per seller
 
 ---
 
-### **PHASE 2: Product Attributes System (Week 3)**
+### **PHASE 3: Payout System (Week 5)**
 
-#### 2.1 Attribute Management in Product Service
-**Goal:** Add flexible attribute system for products
+#### 3.1 Payout Service Setup
+**Goal:** Create Payout microservice for commission calculation and seller payments
 
 **Tasks:**
-- [ ] Create Attribute entity (attribute types: text, number, boolean, select, multiselect)
-- [ ] Create AttributeValue entity
-- [ ] Create ProductAttributeValue entity (normalized storage)
-- [ ] Implement AttributeRepository
-- [ ] Create Attribute DTOs
-- [ ] Build Attribute CRUD endpoints
-- [ ] Implement attribute value assignment to products
-- [ ] Add attribute validation based on type
-- [ ] Create migration for attribute tables
-- [ ] Add indexes for attribute filtering
-- [ ] Implement faceted search using attributes
-- [ ] Write unit tests for attribute logic
+- [ ] Create `payout-service` directory structure (NestJS clean architecture)
+- [ ] Setup TypeORM with migrations infrastructure
+- [ ] Implement SellerPayout entity
+- [ ] Create PayoutRepository
+- [ ] Implement PayoutService with commission calculation
+- [ ] Add payout period calculation (weekly/monthly)
+- [ ] Create seller payout aggregation logic
+- [ ] Implement payout status workflow
+- [ ] Create Payout DTOs
+- [ ] Build PayoutController
+- [ ] Add scheduled jobs for automatic payout generation (cron)
+- [ ] Implement payout export (CSV/PDF)
+- [ ] Add email notifications for payouts
+- [ ] Setup payout database (MySQL on port 3311)
+- [ ] Create initial migrations
+- [ ] Write unit tests
+- [ ] Create Postman collection
 
-**API Endpoints:**
-- `POST /api/v1/attributes` - Create attribute
-- `GET /api/v1/attributes` - List attributes
-- `GET /api/v1/attributes/:id` - Get attribute
-- `PATCH /api/v1/attributes/:id` - Update attribute
-- `DELETE /api/v1/attributes/:id` - Delete attribute
+**Database:**
+- MySQL container: `payout-db` (port 3311)
+- Tables: `seller_payouts`
+- Indexes: seller, status, period, created_at
+
+**Payout API Endpoints:**
+- `POST /api/v1/payouts/generate` - Generate payouts for period (admin)
+- `GET /api/v1/payouts` - List all payouts (admin)
+- `GET /api/v1/payouts/seller/:sellerId` - Get seller's payouts
+- `GET /api/v1/payouts/:id` - Get payout by ID
+- `PATCH /api/v1/payouts/:id/process` - Mark payout as paid (admin)
+- `PATCH /api/v1/payouts/:id/fail` - Mark payout as failed (admin)
+- `GET /api/v1/payouts/pending` - Get pending payouts
+- `GET /api/v1/payouts/:id/export` - Export payout report (PDF/CSV)
+- `GET /api/v1/payouts/seller/:sellerId/summary` - Get seller payout summary
+
+**Payout Calculation Logic:**
+```typescript
+For each seller in payout period:
+  1. Get all delivered order_items for seller
+  2. Sum: gross_sales = SUM(total_price)
+  3. Sum: platform_commission = SUM(commission_amount)
+  4. Calculate: net_payout = gross_sales - platform_commission
+  5. Create seller_payout record
+```
+
+**Deliverables:**
+- ✅ Payout Service running on port 3311
+- ✅ Automated payout calculation
+- ✅ Admin can process payouts
+- ✅ Sellers can view their payout history
+- ✅ Scheduled payout generation (weekly/monthly)
+
+---
+
+### **PHASE 4: Admin Dashboard Extensions (Week 6)**
+
+#### 4.1 Seller Management UI
+**Goal:** Build seller management interface in React Admin
+
+**Tasks:**
+- [ ] Create seller module in react-admin
+- [ ] Create seller labels (seller-labels.ts)
+- [ ] Create useSellerLabels hook
+- [ ] Build Sellers.tsx component (list view)
+- [ ] Build SellerForm.tsx (create/edit)
+- [ ] Build SellerDetails.tsx with tabs (Profile, Products, Orders, Payouts, Reviews)
+- [ ] Add seller verification workflow UI
+- [ ] Add seller status management (active, suspended, banned)
+- [ ] Implement seller filtering (status, verification, rating)
+- [ ] Add seller statistics dashboard
+- [ ] Create seller seeding script
+- [ ] Add translation support (FR/ES labels)
+
+#### 4.2 Product Approval UI
+**Goal:** Build product approval interface for admin
+
+**Tasks:**
+- [ ] Build PendingProducts.tsx component
+- [ ] Add product approval/rejection actions
+- [ ] Add bulk approval/rejection
+- [ ] Add product review modal with product details
+- [ ] Implement rejection reason form
+- [ ] Add notifications for sellers on approval/rejection
+
+#### 4.3 Payout Management UI
+**Goal:** Build payout processing interface
+
+**Tasks:**
+- [ ] Create payout module in react-admin
+- [ ] Build Payouts.tsx component (list view)
+- [ ] Build PayoutDetails.tsx
+- [ ] Add payout period selector
+- [ ] Add "Generate Payouts" button
+- [ ] Add "Process Payout" action
+- [ ] Add payout export (CSV/PDF)
+- [ ] Display payout statistics
+
+**Deliverables:**
+- ✅ Admin can manage sellers
+- ✅ Admin can approve/reject products
+- ✅ Admin can process payouts
+- ✅ Comprehensive seller analytics
+
+---
+
+### **PHASE 5: Seller Dashboard (Weeks 7-8)**
+
+#### 5.1 Seller Dashboard Application
+**Goal:** Create new React application for sellers
+
+**Tasks:**
+- [ ] Create new React app (seller-dashboard on port 3200)
+- [ ] Setup React Query, Tailwind, TypeScript
+- [ ] Implement seller authentication (JWT from Auth Service)
+- [ ] Create seller layout and navigation
+- [ ] Build Dashboard page with analytics
+- [ ] Create seller labels and translation integration
+
+#### 5.2 Seller Product Management
+**Goal:** Allow sellers to manage their products
+
+**Tasks:**
+- [ ] Build MyProducts.tsx page
+- [ ] Build ProductForm.tsx (create/edit)
+- [ ] Add product image upload
+- [ ] Add category selection
+- [ ] Display product approval status
+- [ ] Add stock management UI
+- [ ] Show product performance metrics
+
+#### 5.3 Seller Order Fulfillment
+**Goal:** Allow sellers to fulfill their orders
+
+**Tasks:**
+- [ ] Build MyOrders.tsx page
+- [ ] Filter orders by fulfillment status
+- [ ] Add "Mark as Shipped" action
+- [ ] Add tracking number input
+- [ ] Display order statistics
+- [ ] Add order notifications
+
+#### 5.4 Seller Payout Tracking
+**Goal:** Show sellers their payout history
+
+**Tasks:**
+- [ ] Build Payouts.tsx page
+- [ ] Display payout history table
+- [ ] Show payout summary (total earnings, pending, paid)
+- [ ] Add payout period filter
+- [ ] Display commission breakdown
+- [ ] Add download payout statement
+
+#### 5.5 Seller Analytics
+**Goal:** Provide sales analytics to sellers
+
+**Tasks:**
+- [ ] Build Analytics.tsx page
+- [ ] Display sales chart (daily/weekly/monthly)
+- [ ] Show top-selling products
+- [ ] Display conversion metrics
+- [ ] Show rating and review summary
+- [ ] Add export reports feature
+
+**Deliverables:**
+- ✅ Seller Dashboard running on port 3200
+- ✅ Sellers can manage their products
+- ✅ Sellers can fulfill orders
+- ✅ Sellers can track payouts
+- ✅ Comprehensive sales analytics
+
+---
+
+### **PHASE 6: Customer Website (Weeks 9-10)**
+
+#### 6.1 Customer Website Setup
+**Goal:** Create public-facing marketplace website
+
+**Tasks:**
+- [ ] Create new React app (customer-website on port 3100)
+- [ ] Setup React Query, Tailwind, TypeScript
+- [ ] Implement authentication (JWT from Auth Service)
+- [ ] Create customer layout and navigation
+- [ ] Integrate Translation Service for multi-language
+- [ ] Create customer labels and hooks
+
+#### 6.2 Multi-Seller Product Catalog
+**Goal:** Display products from all sellers
+
+**Tasks:**
+- [ ] Build HomePage with featured products
+- [ ] Build CategoryPage with product listing
+- [ ] Build ProductDetailPage showing seller info
+- [ ] Add seller profile badge on products
+- [ ] Display seller rating and review count
+- [ ] Add "View Seller" link to seller profile page
+- [ ] Implement product search with seller filter
+- [ ] Add product filtering (price, rating, seller)
+- [ ] Show product from multiple sellers in results
+
+#### 6.3 Multi-Seller Shopping Cart
+**Goal:** Cart that handles products from multiple sellers
+
+**Tasks:**
+- [ ] Create cart context with multi-seller support
+- [ ] Build Cart component showing items grouped by seller
+- [ ] Display separate totals per seller
+- [ ] Show estimated shipping per seller
+- [ ] Add cart icon with item count
+- [ ] Persist cart in localStorage
+- [ ] Handle stock validation per seller
+
+#### 6.4 Multi-Seller Checkout
+**Goal:** Checkout process with order splitting
+
+**Tasks:**
+- [ ] Build multi-step checkout page
+- [ ] Step 1: Review cart (grouped by seller)
+- [ ] Step 2: Shipping information
+- [ ] Step 3: Payment method
+- [ ] Step 4: Order review showing split by seller
+- [ ] Implement order creation (auto-split backend)
+- [ ] Build order confirmation page showing seller breakdown
+- [ ] Add order tracking per seller
+
+#### 6.5 Seller Profile Pages
+**Goal:** Public seller profile pages
+
+**Tasks:**
+- [ ] Build SellerProfile.tsx page
+- [ ] Display seller info (name, logo, description, rating)
+- [ ] Show seller's products
+- [ ] Display seller reviews
+- [ ] Add "Contact Seller" button
+- [ ] Show seller statistics (total sales, products)
+
+#### 6.6 Customer Order Tracking
+**Goal:** Customers can track orders from multiple sellers
+
+**Tasks:**
+- [ ] Build MyOrders.tsx page
+- [ ] Group order items by seller in order details
+- [ ] Show fulfillment status per seller
+- [ ] Display tracking numbers per seller
+- [ ] Add seller contact for each item
+- [ ] Allow reviews for sellers after delivery
+
+**Deliverables:**
+- ✅ Customer Website running on port 3100
+- ✅ Multi-seller product catalog
+- ✅ Multi-seller shopping cart
+- ✅ Order splitting at checkout
+- ✅ Seller profile pages
+- ✅ Order tracking by seller
+
+---
+
+### **PHASE 7: Reviews & Advanced Features (Weeks 11-12)**
+
+#### 7.1 Seller Review System
+**Goal:** Customers can review sellers
+
+**Tasks:**
+- [ ] Add seller review endpoints to Seller Service
+- [ ] Build review form component
+- [ ] Display seller reviews on seller profile
+- [ ] Implement review moderation (admin approval)
+- [ ] Add seller response to reviews
+- [ ] Calculate seller rating automatically
+- [ ] Send email notifications for new reviews
+
+#### 7.2 Product Reviews (Optional)
+**Goal:** Customers can review products
+
+**Tasks:**
+- [ ] Create product_reviews table
+- [ ] Add product review endpoints
+- [ ] Build product review form
+- [ ] Display product reviews on product page
+- [ ] Implement review voting (helpful/not helpful)
+
+#### 7.3 Seller Analytics Dashboard
+**Goal:** Advanced analytics for sellers
+
+**Tasks:**
+- [ ] Add analytics API endpoints
+- [ ] Build comprehensive analytics dashboard
+- [ ] Sales trends chart (daily/weekly/monthly)
+- [ ] Top products by revenue
+- [ ] Customer demographics
+- [ ] Conversion funnel
+- [ ] Export analytics reports
+
+#### 7.4 Admin Marketplace Analytics
+**Goal:** Platform-wide analytics for admin
+
+**Tasks:**
+- [ ] Build marketplace analytics dashboard
+- [ ] Total GMV (Gross Merchandise Value)
+- [ ] Platform commission revenue
+- [ ] Active sellers/customers metrics
+- [ ] Top sellers by revenue
+- [ ] Top categories
+- [ ] Order volume trends
+
+**Deliverables:**
+- ✅ Seller review system
+- ✅ Advanced analytics
+- ✅ Comprehensive reporting
+- ✅ Platform insights
+
+---
+
+## 🏁 Implementation Timeline Summary
+
+| Phase | Duration | Focus | Key Deliverables |
+|-------|----------|-------|------------------|
+| Phase 1 | Weeks 1-2 | Seller & Product Foundation | Seller Service, Product Service (seller-owned) |
+| Phase 2 | Weeks 3-4 | Order Management | Order Service with multi-seller splitting |
+| Phase 3 | Week 5 | Payout System | Payout Service, commission calculation |
+| Phase 4 | Week 6 | Admin Dashboard | Seller management, product approval, payout processing |
+| Phase 5 | Weeks 7-8 | Seller Dashboard | Seller operations, analytics, fulfillment |
+| Phase 6 | Weeks 9-10 | Customer Website | Multi-seller marketplace, seller profiles |
+| Phase 7 | Weeks 11-12 | Advanced Features | Reviews, analytics, reporting |
+
+**Total Duration:** 12 weeks  
+**Total Services:** 10 microservices (6 existing + 4 new)  
+**Total Frontend Apps:** 3 (React Admin, Customer Website, Seller Dashboard)
 - `POST /api/v1/attributes/:id/values` - Add predefined value
 - `GET /api/v1/products/:id/attributes` - Get product attributes
 - `POST /api/v1/products/:id/attributes` - Assign attribute to product
@@ -686,19 +1235,22 @@ CREATE TABLE order_items (
 | Carrier Service | 3005 | 3305 | NestJS + TypeORM | Shipping carriers |
 | Pricing Service | 3006 | 3306 | NestJS + TypeORM | Pricing rules |
 | Translation Service | 3007 | 3307 | NestJS + TypeORM | Multi-language |
-| **Product Service** | **3008** | **3308** | **NestJS + TypeORM** | **Products + Categories + Attributes** |
-| **Order Service** | **3009** | **3309** | **NestJS + TypeORM** | **Order processing** |
+| **Product Service** | **3008** | **3308** | **NestJS + TypeORM** | **Products + Categories (Seller-Owned)** |
+| **Order Service** | **3009** | **3309** | **NestJS + TypeORM** | **Multi-Seller Order Processing** |
+| **Seller Service** | **3010** | **3310** | **NestJS + TypeORM** | **Seller Management & Verification** |
+| **Payout Service** | **3011** | **3311** | **NestJS + TypeORM** | **Commission & Seller Payouts** |
 
 ### Frontend Applications
 | Application | Port | Technology | Purpose |
 |-------------|------|------------|---------|
-| React Admin | 3000 | React + TypeScript + Tailwind | Admin dashboard |
-| **Customer Website** | **3100** | **React + TypeScript + Tailwind** | **Ecommerce storefront** |
+| React Admin | 3000 | React + TypeScript + Tailwind | Platform admin dashboard |
+| **Customer Website** | **3100** | **React + TypeScript + Tailwind** | **Multi-seller marketplace storefront** |
+| **Seller Dashboard** | **3200** | **React + TypeScript + Tailwind** | **Seller operations & analytics** |
 
 ### Shared Infrastructure
 - **Shared MySQL Database** (3306) - Auth + User services
 - **Shared Redis** (6379) - Caching layer for all services
-- **Service Databases** - Independent MySQL per service
+- **Service Databases** - Independent MySQL per service (3308-3311)
 
 ### Key Technologies
 - **NestJS** - Backend framework
@@ -712,6 +1264,17 @@ CREATE TABLE order_items (
 - **Class Validator** - Input validation
 - **JWT** - Authentication
 - **Docker** - Containerization
+- **Cron Jobs** - Scheduled payout generation
+
+### Marketplace-Specific Features
+- **Seller Verification** - Manual admin approval workflow
+- **Product Approval** - Draft → Pending → Approved/Rejected
+- **Order Splitting** - Automatic split by seller
+- **Commission System** - Configurable per-seller rates (default 15%)
+- **Automated Payouts** - Weekly/monthly scheduled generation
+- **Multi-Seller Cart** - Cart can contain items from multiple sellers
+- **Fulfillment Tracking** - Per-seller shipment tracking
+- **Seller Reviews** - Customer ratings and feedback
 
 ---
 
