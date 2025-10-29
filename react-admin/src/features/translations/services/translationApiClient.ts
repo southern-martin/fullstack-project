@@ -74,41 +74,41 @@ class TranslationApiClient {
   }
 
   async getLanguages(): Promise<any> {
-    return this.request<any>('/languages', { method: 'GET' });
+    return this.request<any>('/translation/languages', { method: 'GET' });
   }
 
   async getActiveLanguages(): Promise<any> {
-    return this.request<any>('/languages/active', { method: 'GET' });
+    return this.request<any>('/translation/languages/active', { method: 'GET' });
   }
 
   async getLanguage(code: string): Promise<any> {
-    return this.request<any>(`/languages/${code}`, { method: 'GET' });
+    return this.request<any>(`/translation/languages/${code}`, { method: 'GET' });
   }
 
   async getLanguageByCode(code: string): Promise<any> {
-    return this.request<any>(`/languages/code/${code}`, { method: 'GET' });
+    return this.request<any>(`/translation/languages/code/${code}`, { method: 'GET' });
   }
 
   async createLanguage(data: any): Promise<any> {
-    return this.request<any>('/languages', {
+    return this.request<any>('/translation/languages', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
   async updateLanguage(code: string, data: any): Promise<any> {
-    return this.request<any>(`/languages/${code}`, {
+    return this.request<any>(`/translation/languages/${code}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
 
   async deleteLanguage(code: string): Promise<any> {
-    return this.request<any>(`/languages/${code}`, { method: 'DELETE' });
+    return this.request<any>(`/translation/languages/${code}`, { method: 'DELETE' });
   }
 
   async getLanguageCount(): Promise<any> {
-    return this.request<any>('/languages/count', { method: 'GET' });
+    return this.request<any>('/translation/languages/count', { method: 'GET' });
   }
 
   async getTranslations(params?: {
@@ -121,51 +121,51 @@ class TranslationApiClient {
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.search) queryParams.append('search', params.search);
 
-    const endpoint = `/translations${
+    const endpoint = `/translation/translations${
       queryParams.toString() ? `?${queryParams.toString()}` : ''
     }`;
     return this.request<any>(endpoint, { method: 'GET' });
   }
 
   async getTranslation(id: number): Promise<any> {
-    return this.request<any>(`/translations/${id}`, { method: 'GET' });
+    return this.request<any>(`/translation/translations/${id}`, { method: 'GET' });
   }
 
   async createTranslation(data: any): Promise<any> {
-    return this.request<any>('/translations', {
+    return this.request<any>('/translation/translations', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
   async updateTranslation(id: number, data: any): Promise<any> {
-    return this.request<any>(`/translations/${id}`, {
+    return this.request<any>(`/translation/translations/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
 
   async deleteTranslation(id: number): Promise<any> {
-    return this.request<any>(`/translations/${id}`, { method: 'DELETE' });
+    return this.request<any>(`/translation/translations/${id}`, { method: 'DELETE' });
   }
 
   async getTranslationCount(): Promise<any> {
-    return this.request<any>('/translations/count', { method: 'GET' });
+    return this.request<any>('/translation/translations/count', { method: 'GET' });
   }
 
   async getPendingApprovals(): Promise<any> {
-    return this.request<any>('/translations/pending', { method: 'GET' });
+    return this.request<any>('/translation/translations/pending', { method: 'GET' });
   }
 
   async approveTranslation(id: number, approvedBy: string): Promise<any> {
-    return this.request<any>(`/translations/${id}/approve`, {
+    return this.request<any>(`/translation/translations/${id}/approve`, {
       method: 'POST',
       body: JSON.stringify({ approvedBy }),
     });
   }
 
   async translateText(data: any): Promise<any> {
-    return this.request<any>('/translate', {
+    return this.request<any>('/translation/translate', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -182,7 +182,7 @@ class TranslationApiClient {
     translatedText: string;
     fromCache: boolean;
   }> {
-    const response = await this.request<any>('/translate', {
+    const response = await this.request<any>('/translation/translate', {
       method: 'POST',
       body: JSON.stringify(params),
     });
@@ -203,7 +203,7 @@ class TranslationApiClient {
       fromCache: boolean;
     }[];
   }> {
-    const response = await this.request<any>('/translate/batch', {
+    const response = await this.request<any>('/translation/translate/batch', {
       method: 'POST',
       body: JSON.stringify(params),
     });
@@ -211,7 +211,7 @@ class TranslationApiClient {
   }
 
   async healthCheck(): Promise<any> {
-    return this.request<any>('/health', { 
+    return this.request<any>('/translation/health', { 
       method: 'GET',
       headers: { 'X-Service': 'translation' }
     });
