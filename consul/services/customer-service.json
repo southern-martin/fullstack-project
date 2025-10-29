@@ -1,0 +1,30 @@
+{
+  "ID": "customer-service",
+  "Name": "customer-service",
+  "Tags": [
+    "microservice",
+    "nestjs",
+    "customer-management",
+    "business-logic",
+    "v1"
+  ],
+  "Address": "customer-service",
+  "Port": 3004,
+  "Meta": {
+    "version": "1.0.0",
+    "environment": "development",
+    "framework": "NestJS",
+    "database": "PostgreSQL"
+  },
+  "Check": {
+    "CheckID": "customer-service-health",
+    "Name": "Customer Service Health Check",
+    "HTTP": "http://customer-service:3004/api/v1/health",
+    "Method": "GET",
+    "Interval": "10s",
+    "Timeout": "5s",
+    "DeregisterCriticalServiceAfter": "30s",
+    "SuccessBeforePassing": 2,
+    "FailuresBeforeCritical": 3
+  }
+}

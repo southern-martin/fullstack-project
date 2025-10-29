@@ -1,0 +1,30 @@
+{
+  "ID": "carrier-service",
+  "Name": "carrier-service",
+  "Tags": [
+    "microservice",
+    "nestjs",
+    "carrier-management",
+    "business-logic",
+    "v1"
+  ],
+  "Address": "carrier-service",
+  "Port": 3005,
+  "Meta": {
+    "version": "1.0.0",
+    "environment": "development",
+    "framework": "NestJS",
+    "database": "PostgreSQL"
+  },
+  "Check": {
+    "CheckID": "carrier-service-health",
+    "Name": "Carrier Service Health Check",
+    "HTTP": "http://carrier-service:3005/api/v1/health",
+    "Method": "GET",
+    "Interval": "10s",
+    "Timeout": "5s",
+    "DeregisterCriticalServiceAfter": "30s",
+    "SuccessBeforePassing": 2,
+    "FailuresBeforeCritical": 3
+  }
+}

@@ -10,22 +10,18 @@ import { UserController } from "./controllers/user.controller";
 // Application Layer
 import { ApplicationModule } from "../application/application.module";
 
-// Infrastructure Layer
-import { InfrastructureModule } from "../infrastructure/infrastructure.module";
-
 /**
  * Interfaces Module
  * Configures interface layer dependencies
  * Follows Clean Architecture principles
  * 
- * This module imports Application and Infrastructure modules to get access to:
+ * This module imports Application module which provides:
  * - Use cases from Application layer
- * - Repository implementations from Infrastructure layer
+ * - Infrastructure layer (including repositories, RedisCacheService) via re-export
  */
 @Module({
   imports: [
     ApplicationModule,
-    InfrastructureModule,
   ],
   controllers: [
     UserController, 

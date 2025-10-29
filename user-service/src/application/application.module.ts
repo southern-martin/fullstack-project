@@ -1,4 +1,8 @@
 import { Module } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+
+// Shared Infrastructure
+import { RedisCacheService } from "@shared/infrastructure";
 
 // Use Cases
 import { CreateRoleUseCase } from "./use-cases/create-role.use-case";
@@ -34,8 +38,30 @@ import { InfrastructureModule } from "../infrastructure/infrastructure.module";
  * Note: Repository implementations are provided by the Infrastructure Module
  */
 @Module({
-  imports: [InfrastructureModule],
+  imports: [
+    ConfigModule,
+    InfrastructureModule,
+  ],
   providers: [
+    // Redis Cache Service
+    {
+      provide: RedisCacheService,
+      useFactory: (configService: ConfigService) => {
+        const redisHost = configService.get("REDIS_HOST", "shared-redis");
+        const redisPort = configService.get("REDIS_PORT", 6379);
+        const redisPassword = configService.get("REDIS_PASSWORD", "");
+        const redisUrl = redisPassword
+          ? `redis://:${redisPassword}@${redisHost}:${redisPort}`
+          : `redis://${redisHost}:${redisPort}`;
+
+        return new RedisCacheService({
+          redisUrl,
+          prefix: configService.get("REDIS_KEY_PREFIX", "user:"),
+        });
+      },
+      inject: [ConfigService],
+    },
+
     // Domain Services - provide with token for @Inject consistency
     {
       provide: "UserDomainService",
@@ -67,6 +93,12 @@ import { InfrastructureModule } from "../infrastructure/infrastructure.module";
     DeleteProfileUseCase,
   ],
   exports: [
+    // Re-export infrastructure module (includes repositories, event bus, etc.)
+    InfrastructureModule,
+
+    // Export Redis cache service for health checks
+    RedisCacheService,
+
     // Export user use cases
     CreateUserUseCase,
     GetUserUseCase,
