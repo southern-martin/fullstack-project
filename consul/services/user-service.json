@@ -1,0 +1,30 @@
+{
+  "ID": "user-service",
+  "Name": "user-service",
+  "Tags": [
+    "microservice",
+    "nestjs",
+    "authentication",
+    "user-management",
+    "v1"
+  ],
+  "Address": "user-service",
+  "Port": 3003,
+  "Meta": {
+    "version": "1.0.0",
+    "environment": "development",
+    "framework": "NestJS",
+    "database": "MySQL"
+  },
+  "Check": {
+    "CheckID": "user-service-health",
+    "Name": "User Service Health Check",
+    "HTTP": "http://user-service:3003/api/v1/health",
+    "Method": "GET",
+    "Interval": "10s",
+    "Timeout": "5s",
+    "DeregisterCriticalServiceAfter": "30s",
+    "SuccessBeforePassing": 2,
+    "FailuresBeforeCritical": 3
+  }
+}

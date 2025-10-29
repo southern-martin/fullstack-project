@@ -1,0 +1,30 @@
+{
+  "ID": "pricing-service",
+  "Name": "pricing-service",
+  "Tags": [
+    "microservice",
+    "nestjs",
+    "pricing-management",
+    "business-logic",
+    "v1"
+  ],
+  "Address": "pricing-service",
+  "Port": 3006,
+  "Meta": {
+    "version": "1.0.0",
+    "environment": "development",
+    "framework": "NestJS",
+    "database": "PostgreSQL"
+  },
+  "Check": {
+    "CheckID": "pricing-service-health",
+    "Name": "Pricing Service Health Check",
+    "HTTP": "http://pricing-service:3006/api/v1/health",
+    "Method": "GET",
+    "Interval": "10s",
+    "Timeout": "5s",
+    "DeregisterCriticalServiceAfter": "30s",
+    "SuccessBeforePassing": 2,
+    "FailuresBeforeCritical": 3
+  }
+}
