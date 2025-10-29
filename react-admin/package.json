@@ -43,7 +43,8 @@
     "seed:dashboard-translations": "ts-node scripts/seed-dashboard-translations.ts",
     "seed:role-translations": "ts-node scripts/seed-role-translations.ts",
     "seed:carrier-translations": "ts-node scripts/seed-carrier-translations.ts",
-    "seed:translation-translations": "ts-node scripts/seed-translation-translations.ts"
+    "seed:translation-translations": "ts-node scripts/seed-translation-translations.ts",
+    "seed:navigation-translations": "ts-node scripts/seed-navigation-translations.ts"
   },
   "eslintConfig": {
     "extends": [
