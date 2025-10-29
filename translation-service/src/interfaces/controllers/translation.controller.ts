@@ -38,6 +38,27 @@ export class TranslationController {
     private readonly translateTextUseCase: TranslateTextUseCase
   ) {}
 
+  /**
+   * Health check endpoint for translation service
+   * GET /translation/health
+   * @returns Service health status
+   */
+  @Get("health")
+  @HttpCode(HttpStatus.OK)
+  async healthCheck(): Promise<{
+    status: string;
+    timestamp: string;
+    service: string;
+    version: string;
+  }> {
+    return {
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      service: "translation-service",
+      version: "1.0.0",
+    };
+  }
+
   // Language Management
   /**
    * Creates a new language.
