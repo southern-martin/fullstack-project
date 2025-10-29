@@ -1,6 +1,7 @@
 import React from 'react';
 import Button from '../../../shared/components/ui/Button';
 import { Translation } from '../services/translationService';
+import { useTranslationLabels } from '../hooks';
 
 interface TranslationDetailsProps {
     translation: Translation;
@@ -11,50 +12,54 @@ const TranslationDetails: React.FC<TranslationDetailsProps> = ({
     translation,
     onClose,
 }) => {
+    const { L } = useTranslationLabels();
+
     return (
         <div className="p-6">
             <div className="space-y-6">
                 {/* Header */}
+                {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                            Translation Details
-                        </h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                            {L.details.translationInfo}
+                        </h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                             ID: {translation.id}
                         </p>
                     </div>
-                    <div className="flex items-center space-x-2">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${translation.isApproved
-                            ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400'
-                            : 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400'
-                            }`}>
-                            {translation.isApproved ? 'Approved' : 'Pending'}
+                    <div>
+                        <span
+                            className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                translation.isApproved
+                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                            }`}
+                        >
+                            {translation.isApproved ? L.status.approved : L.status.pending}
                         </span>
                     </div>
-                </div>
-
-                {/* Translation Key */}
+                </div>                {/* Translation Key */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Translation Key (MD5)
+                        {L.form.key}
                     </label>
                     <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
-                        <code className="text-sm text-gray-900 dark:text-gray-100 break-all">{translation.key}</code>
+                        <code className="text-sm text-gray-900 dark:text-gray-100 font-mono">
+                            {translation.key}
+                        </code>
                     </div>
                 </div>
 
                 {/* Language */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Language
+                        {L.form.languageCode}
                     </label>
-                    <div className="flex items-center px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
-                        <span className="text-lg mr-2">
-                            {translation.language?.flag || '🌐'}
-                        </span>
+                    <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md flex items-center space-x-2">
+                        <span className="text-2xl">{translation.languageCode === 'en' ? '🇬🇧' : translation.languageCode === 'fr' ? '🇫🇷' : translation.languageCode === 'es' ? '🇪🇸' : '🌐'}</span>
                         <span className="text-sm text-gray-900 dark:text-gray-100">
-                            {translation.language?.name || translation.languageCode.toUpperCase()}
+                            {translation.languageCode.toUpperCase()}
                         </span>
                     </div>
                 </div>
@@ -62,7 +67,7 @@ const TranslationDetails: React.FC<TranslationDetailsProps> = ({
                 {/* Original Text */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Original Text
+                        {L.form.original}
                     </label>
                     <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
                         <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
@@ -74,10 +79,10 @@ const TranslationDetails: React.FC<TranslationDetailsProps> = ({
                 {/* Translated Text */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Translated Text
+                        {L.form.destination}
                     </label>
                     <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
+                        <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
                             {translation.destination}
                         </p>
                     </div>
@@ -87,7 +92,7 @@ const TranslationDetails: React.FC<TranslationDetailsProps> = ({
                 {translation.context && Object.keys(translation.context).length > 0 && (
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Context
+                            {L.form.context}
                         </label>
                         <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
                             <pre className="text-sm text-gray-900 dark:text-gray-100">
@@ -102,7 +107,7 @@ const TranslationDetails: React.FC<TranslationDetailsProps> = ({
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Usage Count
+                                {L.details.usageCount}
                             </label>
                             <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
                                 <span className="text-sm text-gray-900 dark:text-gray-100">
@@ -113,7 +118,7 @@ const TranslationDetails: React.FC<TranslationDetailsProps> = ({
                         {translation.lastUsedAt && (
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Last Used
+                                    {L.details.lastUsed}
                                 </label>
                                 <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
                                     <span className="text-sm text-gray-900 dark:text-gray-100">
@@ -130,7 +135,7 @@ const TranslationDetails: React.FC<TranslationDetailsProps> = ({
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Created At
+                            {L.details.createdAt}
                         </label>
                         <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
                             <span className="text-sm text-gray-900 dark:text-gray-100">
@@ -140,7 +145,7 @@ const TranslationDetails: React.FC<TranslationDetailsProps> = ({
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Updated At
+                            {L.details.updatedAt}
                         </label>
                         <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
                             <span className="text-sm text-gray-900 dark:text-gray-100">
@@ -158,7 +163,7 @@ const TranslationDetails: React.FC<TranslationDetailsProps> = ({
                     variant="secondary"
                     onClick={onClose}
                 >
-                    Close
+                    {L.buttons.cancel}
                 </Button>
             </div>
         </div>
