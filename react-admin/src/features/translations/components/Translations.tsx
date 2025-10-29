@@ -30,6 +30,7 @@ import {
     useTranslations,
     useUpdateTranslation
 } from '../hooks/useTranslationQueries';
+import { useTranslationLabels } from '../hooks';
 import { Translation } from '../services/translationService';
 
 import LanguageManagement from './LanguageManagement';
@@ -37,6 +38,9 @@ import TranslationDetails from './TranslationDetails';
 import TranslationForm from './TranslationForm';
 
 const Translations: React.FC = () => {
+    // Translation labels hook
+    const { L, isLoading: labelsLoading } = useTranslationLabels();
+
     // Local state for server-side controls
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
@@ -172,30 +176,30 @@ const Translations: React.FC = () => {
     const toggleTranslationStatus = useCallback(async (id: number) => {
         try {
             // TODO: Implement toggleTranslationStatus in translationService and add to TanStack Query hooks
-            toast.success('Translation status toggled successfully');
+            toast.success(L.messages.updateSuccess);
             refetch();
         } catch (error) {
-            toast.error('Failed to toggle translation status: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(L.messages.updateError);
         }
-    }, [refetch]);
+    }, [L, refetch]);
 
     // Dropdown action handlers
     const handleViewTranslation = useCallback((translation: Translation) => {
         setSelectedTranslation(translation);
-        setModalTitle('Translation Details');
+        setModalTitle(L.modals.viewTranslation);
         setShowViewModal(true);
         setOpenDropdownId(null);
         setDropdownPosition(null);
-    }, []);
+    }, [L]);
 
     const handleEditTranslation = useCallback((translation: Translation) => {
         setSelectedTranslation(translation);
-        setModalTitle('Edit Translation');
+        setModalTitle(L.modals.editTranslation);
         setModalFooter(null);
         setShowEditModal(true);
         setOpenDropdownId(null);
         setDropdownPosition(null);
-    }, []);
+    }, [L]);
 
     const handleToggleTranslationStatus = useCallback((translation: Translation) => {
         toggleTranslationStatus(translation.id);
@@ -205,11 +209,11 @@ const Translations: React.FC = () => {
 
     const handleDeleteTranslation = useCallback((translation: Translation) => {
         setSelectedTranslation(translation);
-        setModalTitle('Delete Translation');
+        setModalTitle(L.modals.deleteTranslation);
         setShowDeleteModal(true);
         setOpenDropdownId(null);
         setDropdownPosition(null);
-    }, []);
+    }, [L]);
 
     // Sort options for server-side sorting
     const sortOptions = [
@@ -224,37 +228,37 @@ const Translations: React.FC = () => {
     const createTranslation = useCallback(async (translationData: any) => {
         try {
             await createTranslationMutation.mutateAsync(translationData);
-            toast.success('Translation created successfully');
+            toast.success(L.messages.createSuccess);
             setShowCreateModal(false);
             setModalFooter(null);
         } catch (error) {
-            toast.error('Failed to create translation: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(L.messages.createError);
             throw error;
         }
-    }, [createTranslationMutation]);
+    }, [L, createTranslationMutation]);
 
     const updateTranslation = useCallback(async (id: number, translationData: any) => {
         try {
             await updateTranslationMutation.mutateAsync({ id, data: translationData });
-            toast.success('Translation updated successfully');
+            toast.success(L.messages.updateSuccess);
             setShowEditModal(false);
             setModalFooter(null);
         } catch (error) {
-            toast.error('Failed to update translation: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(L.messages.updateError);
             throw error;
         }
-    }, [updateTranslationMutation]);
+    }, [L, updateTranslationMutation]);
 
     const deleteTranslation = useCallback(async (id: number) => {
         try {
             await deleteTranslationMutation.mutateAsync(id);
-            toast.success('Translation deleted successfully');
+            toast.success(L.messages.deleteSuccess);
             setShowDeleteModal(false);
         } catch (error) {
-            toast.error('Failed to delete translation: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(L.messages.deleteError);
             throw error;
         }
-    }, [deleteTranslationMutation]);
+    }, [L, deleteTranslationMutation]);
 
     const approveTranslation = useCallback(async (id: number) => {
         try {
@@ -272,7 +276,7 @@ const Translations: React.FC = () => {
         columns: [
             {
                 key: 'key',
-                label: 'Key',
+                label: L.table.key,
                 sortable: true,
                 render: (key: string) => (
                     <span className="text-sm font-mono text-gray-600 dark:text-gray-400">{key.substring(0, 12)}...</span>
@@ -280,7 +284,7 @@ const Translations: React.FC = () => {
             },
             {
                 key: 'original',
-                label: 'Original Text',
+                label: L.table.original,
                 sortable: true,
                 render: (text: string) => (
                     <span className="text-sm text-gray-900 dark:text-gray-100 max-w-xs truncate block" title={text}>
@@ -290,7 +294,7 @@ const Translations: React.FC = () => {
             },
             {
                 key: 'destination',
-                label: 'Translated Text',
+                label: L.table.destination,
                 sortable: true,
                 render: (text: string) => (
                     <span className="text-sm font-medium text-gray-900 dark:text-gray-100 max-w-xs truncate block" title={text}>
@@ -300,7 +304,7 @@ const Translations: React.FC = () => {
             },
             {
                 key: 'languageCode',
-                label: 'Language',
+                label: L.table.language,
                 sortable: true,
                 render: (languageCode: string, translation: Translation) => {
                     // Find the language from our languages array
@@ -317,20 +321,20 @@ const Translations: React.FC = () => {
             },
             {
                 key: 'isApproved',
-                label: 'Status',
+                label: L.table.status,
                 sortable: true,
                 render: (isApproved: boolean) => (
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isApproved
                         ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400'
                         : 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400'
                         }`}>
-                        {isApproved ? 'Approved' : 'Pending'}
+                        {isApproved ? L.status.approved : L.status.pending}
                     </span>
                 ),
             },
             {
                 key: 'createdAt',
-                label: 'Created',
+                label: L.table.createdAt,
                 sortable: true,
                 render: (date: string) => (
                     <span className="text-sm text-gray-900 dark:text-gray-100">
@@ -383,8 +387,8 @@ const Translations: React.FC = () => {
             enabled: true,
             multiSelect: true,
         },
-        emptyMessage: 'No translations found',
-    }), [handleViewTranslation, handleEditTranslation, handleToggleTranslationStatus, handleDeleteTranslation, openDropdownId, languages]);
+        emptyMessage: L.table.emptyMessage,
+    }), [L, openDropdownId, languages]);
 
 
     // Export function
@@ -395,42 +399,42 @@ const Translations: React.FC = () => {
                 filename: `translations-export.${format}`,
                 includeHeaders: true,
             });
-            toast.success(`Translations exported as ${format.toUpperCase()}`);
+            toast.success(L.messages.exportSuccess);
         } catch (error) {
-            toast.error('Failed to export translations: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            toast.error(L.messages.exportError);
         }
-    }, [translations, tableConfig.columns]);
+    }, [L, translations, tableConfig.columns]);
 
     return (
         <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Translations</h1>
-                    <p className="text-gray-600 dark:text-gray-400">Manage translations and languages</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{L.page.title}</h1>
+                    <p className="text-gray-600 dark:text-gray-400">{L.page.subtitle}</p>
                 </div>
                 <div className="flex space-x-3">
                     <Button
                         onClick={() => {
-                            setModalTitle('Manage Languages');
+                            setModalTitle(L.modals.manageLanguages);
                             setShowLanguageModal(true);
                         }}
                         variant="secondary"
                         className="flex items-center space-x-2"
                     >
                         <GlobeAltIcon className="h-4 w-4" />
-                        <span>Languages</span>
+                        <span>{L.buttons.manageLanguages}</span>
                     </Button>
                     <Button
                         onClick={() => {
-                            setModalTitle('Create New Translation');
+                            setModalTitle(L.modals.createTranslation);
                             setModalFooter(null);
                             setShowCreateModal(true);
                         }}
                         className="flex items-center space-x-2"
                     >
                         <PlusIcon className="h-4 w-4" />
-                        <span>Add Translation</span>
+                        <span>{L.buttons.createTranslation}</span>
                     </Button>
                 </div>
             </div>
@@ -445,7 +449,7 @@ const Translations: React.FC = () => {
                                 searchTerm={searchTerm}
                                 onSearchChange={setSearch}
                                 loading={loading}
-                                placeholder="Search translations by key, value, or language..."
+                                placeholder={L.search.placeholder}
                                 className="w-full sm:w-80"
                             />
                             <ServerSorting
@@ -463,7 +467,7 @@ const Translations: React.FC = () => {
                                 size="sm"
                                 disabled={loading}
                             >
-                                Export CSV
+                                {L.buttons.export} CSV
                             </Button>
                             <Button
                                 onClick={handleRefresh}
@@ -471,7 +475,7 @@ const Translations: React.FC = () => {
                                 size="sm"
                                 disabled={loading}
                             >
-                                Refresh
+                                {L.buttons.refresh}
                             </Button>
                         </div>
                     </div>
@@ -539,7 +543,7 @@ const Translations: React.FC = () => {
                         setShowEditModal(false);
                         setModalFooter(null);
                     }}
-                    title={modalTitle}
+                    title={L.modals.editTranslation}
                     size="lg"
                     footer={modalFooter}
                 >
@@ -560,7 +564,7 @@ const Translations: React.FC = () => {
                 <Modal
                     isOpen={true}
                     onClose={() => setShowViewModal(false)}
-                    title={modalTitle}
+                    title={L.modals.viewTranslation}
                     size="lg"
                 >
                     <TranslationDetails
@@ -574,7 +578,7 @@ const Translations: React.FC = () => {
                 <Modal
                     isOpen={true}
                     onClose={() => setShowDeleteModal(false)}
-                    title={modalTitle}
+                    title={L.modals.deleteTranslation}
                     size="md"
                 >
                     <div className="p-6">
@@ -586,13 +590,13 @@ const Translations: React.FC = () => {
                                 variant="secondary"
                                 onClick={() => setShowDeleteModal(false)}
                             >
-                                Cancel
+                                {L.buttons.cancel}
                             </Button>
                             <Button
                                 variant="danger"
                                 onClick={() => deleteTranslation(selectedTranslation.id)}
                             >
-                                Delete
+                                {L.buttons.delete}
                             </Button>
                         </div>
                     </div>
@@ -636,7 +640,7 @@ const Translations: React.FC = () => {
                                 className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                             >
                                 <EyeIcon className="h-4 w-4 mr-3" />
-                                View Details
+                                {L.actions.view}
                             </button>
                             <button
                                 onClick={(e) => {
@@ -649,7 +653,7 @@ const Translations: React.FC = () => {
                                 className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                             >
                                 <PencilIcon className="h-4 w-4 mr-3" />
-                                Edit
+                                {L.actions.edit}
                             </button>
                             <button
                                 onClick={(e) => {
@@ -684,7 +688,7 @@ const Translations: React.FC = () => {
                                 className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                             >
                                 <TrashIcon className="h-4 w-4 mr-3" />
-                                Delete
+                                {L.actions.delete}
                             </button>
                         </div>
                     </div>,
