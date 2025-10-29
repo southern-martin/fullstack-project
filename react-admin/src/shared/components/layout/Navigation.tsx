@@ -22,6 +22,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuthContext } from '../../../app/providers/AuthProvider';
 import { useTheme } from '../../../app/providers/ThemeProvider';
 import { ROUTES } from '../../../config/api';
+import { useNavigationLabels } from '../../hooks/useNavigationLabels';
 import ThemeToggle from '../ThemeToggle';
 
 interface NavigationProps {
@@ -34,64 +35,65 @@ const Navigation: React.FC<NavigationProps> = ({ isOpen, onToggle }) => {
     const { user, logout } = useAuthContext();
     const { theme, toggleTheme } = useTheme();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const { L } = useNavigationLabels();
 
     const navigationItems = [
         {
-            name: 'Dashboard',
+            name: L.menuItems.dashboard,
             href: ROUTES.DASHBOARD,
             icon: HomeIcon,
             current: location.pathname === ROUTES.DASHBOARD,
         },
         {
-            name: 'Microservices',
+            name: L.menuItems.microservices,
             href: '/microservices',
             icon: ServerIcon,
             current: location.pathname === '/microservices',
         },
         {
-            name: 'Users',
+            name: L.menuItems.users,
             href: ROUTES.USERS,
             icon: UsersIcon,
             current: location.pathname === ROUTES.USERS,
         },
         {
-            name: 'Roles',
+            name: L.menuItems.roles,
             href: '/roles',
             icon: ShieldCheckIcon,
             current: location.pathname.startsWith('/roles'),
         },
         {
-            name: 'Customers',
+            name: L.menuItems.customers,
             href: ROUTES.CUSTOMERS,
             icon: UserGroupIcon,
             current: location.pathname === ROUTES.CUSTOMERS,
         },
         {
-            name: 'Carriers',
+            name: L.menuItems.carriers,
             href: ROUTES.CARRIERS,
             icon: TruckIcon,
             current: location.pathname === ROUTES.CARRIERS,
         },
         {
-            name: 'Pricing',
+            name: L.menuItems.pricing,
             href: ROUTES.PRICING,
             icon: CalculatorIcon,
             current: location.pathname === ROUTES.PRICING,
         },
         {
-            name: 'Translations',
+            name: L.menuItems.translations,
             href: ROUTES.TRANSLATIONS,
             icon: GlobeAltIcon,
             current: location.pathname === ROUTES.TRANSLATIONS,
         },
         {
-            name: 'Analytics',
+            name: L.menuItems.analytics,
             href: ROUTES.ANALYTICS,
             icon: ChartBarIcon,
             current: location.pathname === ROUTES.ANALYTICS,
         },
         {
-            name: 'Settings',
+            name: L.menuItems.settings,
             href: ROUTES.SETTINGS,
             icon: CogIcon,
             current: location.pathname === ROUTES.SETTINGS,
@@ -111,7 +113,7 @@ const Navigation: React.FC<NavigationProps> = ({ isOpen, onToggle }) => {
                     className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
                     onClick={onToggle}
                 >
-                    <span className="sr-only">Open main menu</span>
+                    <span className="sr-only">{L.mobile.openMenu}</span>
                     {isOpen ? (
                         <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
                     ) : (
@@ -137,7 +139,7 @@ const Navigation: React.FC<NavigationProps> = ({ isOpen, onToggle }) => {
                                         </div>
                                     </div>
                                     <div className="ml-3">
-                                        <h1 className="text-xl font-bold professional-text-gradient">React Admin</h1>
+                                        <h1 className="text-xl font-bold professional-text-gradient">{L.branding.appName}</h1>
                                     </div>
                                 </div>
                             </div>
@@ -216,7 +218,7 @@ const Navigation: React.FC<NavigationProps> = ({ isOpen, onToggle }) => {
                                                     className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                                                 >
                                                     <ArrowRightOnRectangleIcon className="h-4 w-4 mr-2" />
-                                                    Sign out
+                                                    {L.profile.logout}
                                                 </button>
                                             </div>
                                         )}
@@ -240,7 +242,7 @@ const Navigation: React.FC<NavigationProps> = ({ isOpen, onToggle }) => {
                                     className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
                                     onClick={onToggle}
                                 >
-                                    <span className="sr-only">Close sidebar</span>
+                                    <span className="sr-only">{L.mobile.closeMenu}</span>
                                     <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
                                 </button>
                             </div>
@@ -250,7 +252,7 @@ const Navigation: React.FC<NavigationProps> = ({ isOpen, onToggle }) => {
                                     <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center">
                                         <span className="text-white font-bold text-sm">RA</span>
                                     </div>
-                                    <h1 className="ml-3 text-lg font-semibold text-gray-900">React Admin</h1>
+                                    <h1 className="ml-3 text-lg font-semibold text-gray-900">{L.branding.appName}</h1>
                                 </div>
 
                                 <nav className="mt-5 px-2 space-y-1">
