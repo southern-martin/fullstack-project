@@ -42,7 +42,8 @@
     "seed:customer-translations": "ts-node scripts/seed-customer-translations.ts",
     "seed:dashboard-translations": "ts-node scripts/seed-dashboard-translations.ts",
     "seed:role-translations": "ts-node scripts/seed-role-translations.ts",
-    "seed:carrier-translations": "ts-node scripts/seed-carrier-translations.ts"
+    "seed:carrier-translations": "ts-node scripts/seed-carrier-translations.ts",
+    "seed:translation-translations": "ts-node scripts/seed-translation-translations.ts"
   },
   "eslintConfig": {
     "extends": [
