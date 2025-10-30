@@ -117,6 +117,33 @@ scrape_configs:
             level: level
             msg: message
 
+  - job_name: seller-service
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+        filters:
+          - name: name
+            values: ['seller-service']
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        target_label: 'container'
+      - replacement: 'seller-service'
+        target_label: 'service'
+    pipeline_stages:
+      - json:
+          expressions:
+            level: level
+            message: message
+            timestamp: timestamp
+            context: context
+            correlationId: correlationId
+      - labels:
+          level:
+          context:
+      - timestamp:
+          source: timestamp
+          format: "2006-01-02 15:04:05.000"
+
   - job_name: databases
     docker_sd_configs:
       - host: unix:///var/run/docker.sock
