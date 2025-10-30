@@ -1,0 +1,444 @@
+{
+  "info": {
+    "name": "Seller Service API",
+    "description": "Multi-seller marketplace - Seller Service API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "seller-service-v1"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3010/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sellerId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3010/api/v1/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3010",
+          "path": ["api", "v1", "health"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Seller Registration",
+      "item": [
+        {
+          "name": "Register Seller",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.collectionVariables.set('sellerId', responseData.data.id);",
+                  "    pm.environment.set('sellerId', responseData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessName\": \"Tech Solutions LLC\",\n  \"businessType\": \"llc\",\n  \"businessEmail\": \"contact@techsolutions.com\",\n  \"businessPhone\": \"+1234567890\",\n  \"taxId\": \"12-3456789\",\n  \"businessAddress\": \"123 Main St\",\n  \"businessCity\": \"San Francisco\",\n  \"businessState\": \"CA\",\n  \"businessCountry\": \"US\",\n  \"businessPostalCode\": \"94102\",\n  \"description\": \"Leading technology solutions provider\",\n  \"website\": \"https://techsolutions.com\",\n  \"logoUrl\": \"https://techsolutions.com/logo.png\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sellers",
+              "host": ["{{baseUrl}}"],
+              "path": ["sellers"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Seller Queries",
+      "item": [
+        {
+          "name": "Get My Seller Account",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sellers/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["sellers", "me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Seller by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sellers/{{sellerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sellers", "{{sellerId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Seller by User ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sellers/user/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sellers", "user", "{{userId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Sellers (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sellers?status=active&limit=10&offset=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["sellers"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active"
+                },
+                {
+                  "key": "verificationStatus",
+                  "value": "verified",
+                  "disabled": true
+                },
+                {
+                  "key": "minRating",
+                  "value": "4",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "tech",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "DESC",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Pending Verification (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sellers/pending-verification",
+              "host": ["{{baseUrl}}"],
+              "path": ["sellers", "pending-verification"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Seller Updates",
+      "item": [
+        {
+          "name": "Update Seller Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"logoUrl\": \"https://techsolutions.com/new-logo.png\",\n  \"description\": \"Updated description - Leading technology solutions provider with 10+ years experience\",\n  \"website\": \"https://www.techsolutions.com\",\n  \"businessEmail\": \"support@techsolutions.com\",\n  \"businessPhone\": \"+1234567891\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sellers/{{sellerId}}/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["sellers", "{{sellerId}}", "profile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Banking Info",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bankName\": \"Chase Bank\",\n  \"bankAccountHolder\": \"Tech Solutions LLC\",\n  \"bankAccountNumber\": \"123456789012\",\n  \"bankRoutingNumber\": \"021000021\",\n  \"paymentMethod\": \"bank_transfer\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sellers/{{sellerId}}/banking",
+              "host": ["{{baseUrl}}"],
+              "path": ["sellers", "{{sellerId}}", "banking"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Update Seller",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"commissionRate\": 12.5,\n  \"description\": \"Premium seller - reduced commission rate\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sellers/{{sellerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sellers", "{{sellerId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Verification Workflow",
+      "item": [
+        {
+          "name": "Submit for Verification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sellers/{{sellerId}}/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["sellers", "{{sellerId}}", "verify"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Seller (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sellers/{{sellerId}}/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["sellers", "{{sellerId}}", "approve"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reject Seller (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Incomplete business documentation. Please provide valid business license and tax ID verification.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sellers/{{sellerId}}/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["sellers", "{{sellerId}}", "reject"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin Actions",
+      "item": [
+        {
+          "name": "Suspend Seller",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Multiple customer complaints about product quality and shipping delays.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sellers/{{sellerId}}/suspend",
+              "host": ["{{baseUrl}}"],
+              "path": ["sellers", "{{sellerId}}", "suspend"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reactivate Seller",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sellers/{{sellerId}}/reactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["sellers", "{{sellerId}}", "reactivate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Seller",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sellers/{{sellerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sellers", "{{sellerId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

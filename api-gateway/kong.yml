@@ -50,6 +50,14 @@ services:
     tags:
       - microservice
       - translation
+  
+  # Seller Service
+  - name: seller-service
+    url: http://seller-service:3010
+    tags:
+      - microservice
+      - seller
+      - marketplace
 
 # ============================================
 # ROUTES (Public API Endpoints)
@@ -221,6 +229,129 @@ routes:
       - name: jwt
         config:
           key_claim_name: sub
+  
+  # Seller Service Routes
+  # Public seller endpoints (read-only)
+  - name: sellers-public
+    service: seller-service
+    paths:
+      - /api/v1/sellers$
+      - /api/v1/sellers/[0-9]+$
+    methods:
+      - GET
+    strip_path: false
+    plugins:
+      - name: jwt
+        config:
+          key_claim_name: sub
+  
+  # Seller registration (authenticated users)
+  - name: sellers-register
+    service: seller-service
+    paths:
+      - /api/v1/sellers$
+    methods:
+      - POST
+    strip_path: false
+    plugins:
+      - name: jwt
+        config:
+          key_claim_name: sub
+  
+  # Seller "me" endpoint (current user's seller account)
+  - name: sellers-me
+    service: seller-service
+    paths:
+      - /api/v1/sellers/me
+    methods:
+      - GET
+    strip_path: false
+    plugins:
+      - name: jwt
+        config:
+          key_claim_name: sub
+  
+  # Seller by user ID
+  - name: sellers-by-user
+    service: seller-service
+    paths:
+      - /api/v1/sellers/user/[0-9]+
+    methods:
+      - GET
+    strip_path: false
+    plugins:
+      - name: jwt
+        config:
+          key_claim_name: sub
+  
+  # Seller profile updates (owner only)
+  - name: sellers-profile-update
+    service: seller-service
+    paths:
+      - /api/v1/sellers/[0-9]+/profile
+      - /api/v1/sellers/[0-9]+/banking
+      - /api/v1/sellers/[0-9]+$
+    methods:
+      - PATCH
+    strip_path: false
+    plugins:
+      - name: jwt
+        config:
+          key_claim_name: sub
+  
+  # Seller verification submission
+  - name: sellers-verify
+    service: seller-service
+    paths:
+      - /api/v1/sellers/[0-9]+/verify
+    methods:
+      - POST
+    strip_path: false
+    plugins:
+      - name: jwt
+        config:
+          key_claim_name: sub
+  
+  # Admin-only seller routes
+  - name: sellers-admin
+    service: seller-service
+    paths:
+      - /api/v1/sellers/pending-verification
+      - /api/v1/sellers/[0-9]+/approve
+      - /api/v1/sellers/[0-9]+/reject
+      - /api/v1/sellers/[0-9]+/suspend
+      - /api/v1/sellers/[0-9]+/reactivate
+    methods:
+      - GET
+      - POST
+    strip_path: false
+    plugins:
+      - name: jwt
+        config:
+          key_claim_name: sub
+      - name: acl
+        config:
+          whitelist:
+            - admin
+            - super_admin
+  
+  # Seller deletion (admin only)
+  - name: sellers-delete
+    service: seller-service
+    paths:
+      - /api/v1/sellers/[0-9]+$
+    methods:
+      - DELETE
+    strip_path: false
+    plugins:
+      - name: jwt
+        config:
+          key_claim_name: sub
+      - name: acl
+        config:
+          whitelist:
+            - admin
+            - super_admin
 
 # ============================================
 # GLOBAL PLUGINS

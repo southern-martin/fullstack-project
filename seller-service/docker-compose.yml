@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  seller-db:
+    image: mysql:8.0
+    container_name: seller-db
+    restart: unless-stopped
+    ports:
+      - '3313:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: seller_db
+      MYSQL_USER: seller_user
+      MYSQL_PASSWORD: seller_password
+    volumes:
+      - seller-db-data:/var/lib/mysql
+    networks:
+      - fullstack-network
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'seller_user', '-pseller_password']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  seller-redis:
+    image: redis:7-alpine
+    container_name: seller-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    command: redis-server --appendonly yes --requirepass ""
+    volumes:
+      - seller-redis-data:/data
+    networks:
+      - fullstack-network
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  seller-db-data:
+    driver: local
+  seller-redis-data:
+    driver: local
+
+networks:
+  fullstack-network:
+    external: true
