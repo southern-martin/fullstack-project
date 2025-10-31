@@ -1,0 +1,231 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "bf1tgok7srym8f"
+      },
+      "description": "Enter a CorrelationID to trace across all services",
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "dedupStrategy": "exact",
+        "enableLogDetails": true,
+        "prettifyLogMessage": true,
+        "showCommonLabels": true,
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Ascending",
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "bf1tgok7srym8f"
+          },
+          "editorMode": "code",
+          "expr": "{container=~\".+\"} | json | correlationId=~\"$correlationId\"",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Trace Logs by Correlation ID",
+      "type": "logs"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "bf1tgok7srym8f"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 12
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "pieType": "pie",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "bf1tgok7srym8f"
+          },
+          "editorMode": "code",
+          "expr": "sum by (service) (count_over_time({container=~\".+\"} | json | correlationId=~\"$correlationId\" [24h]))",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Services Involved in Trace",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "bf1tgok7srym8f"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "error"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "warn"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 12
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "pieType": "pie",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "bf1tgok7srym8f"
+          },
+          "editorMode": "code",
+          "expr": "sum by (level) (count_over_time({container=~\".+\"} | json | correlationId=~\"$correlationId\" [24h]))",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Log Levels in Trace",
+      "type": "piechart"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["tracing", "correlation", "debugging"],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "description": "Enter the Correlation ID to trace",
+        "hide": 0,
+        "label": "Correlation ID",
+        "name": "correlationId",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Correlation ID Tracing",
+  "uid": "correlation-id-tracing",
+  "version": 0,
+  "weekStart": ""
+}

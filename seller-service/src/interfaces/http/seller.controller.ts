@@ -7,11 +7,13 @@ import {
   Body,
   Param,
   Query,
-  UseGuards,
   HttpCode,
   HttpStatus,
   ParseIntPipe,
+  Req,
+  Headers,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { SellerService } from '../../domain/services/seller.service';
 import { CreateSellerDto } from '../../application/dto/create-seller.dto';
 import {
@@ -21,28 +23,31 @@ import {
 } from '../../application/dto/update-seller.dto';
 import { SellerFilterDto } from '../../application/dto/seller-filter.dto';
 import { AnalyticsQueryDto } from '../../application/dto/seller-analytics.dto';
-import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
-import { RolesGuard } from '../../shared/guards/roles.guard';
-import { SellerOwnerGuard } from '../../shared/guards/seller-owner.guard';
-import { Roles } from '../../shared/decorators/roles.decorator';
-import { CurrentUser } from '../../shared/decorators/current-user.decorator';
+import { JwtDecoder } from '../../infrastructure/auth/jwt-decoder.service';
 
 @Controller('sellers')
-@UseGuards(JwtAuthGuard)
 export class SellerController {
-  constructor(private readonly sellerService: SellerService) {}
+  constructor(
+    private readonly sellerService: SellerService,
+    private readonly jwtDecoder: JwtDecoder,
+  ) {}
 
   /**
    * Register new seller
    * POST /api/v1/sellers
-   * Auth: Required (any authenticated user)
+   * Auth: Required (Kong Gateway validates JWT)
+   * Extracts user ID from JWT token
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async registerSeller(
-    @CurrentUser('id') userId: number,
+    @Req() request: Request,
     @Body() createSellerDto: CreateSellerDto,
   ) {
+    // Extract userId from JWT token (Kong validated, we decode to get claims)
+    const authHeader = request.headers.authorization;
+    const userId = this.jwtDecoder.getUserId(authHeader);
+    
     // Override userId from token (security - users can only create seller for themselves)
     return await this.sellerService.registerSeller(userId, {
       ...createSellerDto,
@@ -53,11 +58,9 @@ export class SellerController {
   /**
    * Get all sellers (with filters)
    * GET /api/v1/sellers?status=active&limit=10&offset=0
-   * Auth: Admin only
+   * Auth: Kong Gateway validates JWT and role
    */
   @Get()
-  @UseGuards(RolesGuard)
-  @Roles('admin')
   async getAllSellers(@Query() filters: SellerFilterDto) {
     return await this.sellerService.getAllSellers(filters);
   }
@@ -65,11 +68,9 @@ export class SellerController {
   /**
    * Get sellers pending verification
    * GET /api/v1/sellers/pending-verification
-   * Auth: Admin only
+   * Auth: Kong Gateway validates JWT and admin role
    */
   @Get('pending-verification')
-  @UseGuards(RolesGuard)
-  @Roles('admin')
   async getPendingVerification() {
     return await this.sellerService.getPendingVerification();
   }
@@ -77,25 +78,33 @@ export class SellerController {
   /**
    * Get current user's seller account
    * GET /api/v1/sellers/me
-   * Auth: Required
+   * Auth: Kong Gateway validates JWT
    */
   @Get('me')
-  async getMySellerAccount(@CurrentUser('id') userId: number) {
+  async getMySellerAccount(@Req() request: Request) {
+    const authHeader = request.headers.authorization;
+    const userId = this.jwtDecoder.getUserId(authHeader);
     return await this.sellerService.getSellerByUserId(userId);
   }
 
   /**
    * Get seller by user ID
    * GET /api/v1/sellers/user/:userId
-   * Auth: Admin or owner
+   * Auth: Kong Gateway validates JWT
+   * Note: Authorization logic moved to service layer
    */
   @Get('user/:userId')
   async getSellerByUserId(
+    @Req() request: Request,
     @Param('userId', ParseIntPipe) userId: number,
-    @CurrentUser() currentUser: any,
   ) {
+    // Get current user ID and roles from JWT
+    const authHeader = request.headers.authorization;
+    const currentUserId = this.jwtDecoder.getUserId(authHeader);
+    const userRoles = this.jwtDecoder.getUserRoles(authHeader);
+    
     // Check if requesting own data or is admin
-    if (currentUser.id !== userId && !currentUser.roles?.includes('admin')) {
+    if (currentUserId !== userId && !userRoles.includes('admin')) {
       throw new Error('Forbidden');
     }
     return await this.sellerService.getSellerByUserId(userId);
@@ -104,10 +113,9 @@ export class SellerController {
   /**
    * Get seller by ID
    * GET /api/v1/sellers/:id
-   * Auth: Admin or owner
+   * Auth: Kong Gateway validates JWT
    */
   @Get(':id')
-  @UseGuards(SellerOwnerGuard)
   async getSellerById(@Param('id', ParseIntPipe) id: number) {
     return await this.sellerService.getSellerById(id);
   }
@@ -115,10 +123,9 @@ export class SellerController {
   /**
    * Update seller profile (owner)
    * PATCH /api/v1/sellers/:id/profile
-   * Auth: Owner only
+   * Auth: Kong Gateway validates JWT
    */
   @Patch(':id/profile')
-  @UseGuards(SellerOwnerGuard)
   async updateProfile(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDto: UpdateSellerProfileDto,
@@ -129,10 +136,9 @@ export class SellerController {
   /**
    * Update seller banking info (owner)
    * PATCH /api/v1/sellers/:id/banking
-   * Auth: Owner only
+   * Auth: Kong Gateway validates JWT
    */
   @Patch(':id/banking')
-  @UseGuards(SellerOwnerGuard)
   async updateBankingInfo(
     @Param('id', ParseIntPipe) id: number,
     @Body() bankingDto: UpdateBankingInfoDto,
@@ -143,11 +149,9 @@ export class SellerController {
   /**
    * Update seller (admin - full update including commission)
    * PATCH /api/v1/sellers/:id
-   * Auth: Admin only
+   * Auth: Kong Gateway validates JWT and admin role
    */
   @Patch(':id')
-  @UseGuards(RolesGuard)
-  @Roles('admin')
   async adminUpdateSeller(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDto: UpdateSellerDto,
@@ -158,10 +162,9 @@ export class SellerController {
   /**
    * Submit seller for verification
    * POST /api/v1/sellers/:id/verify
-   * Auth: Owner only
+   * Auth: Kong Gateway validates JWT
    */
   @Post(':id/verify')
-  @UseGuards(SellerOwnerGuard)
   @HttpCode(HttpStatus.OK)
   async submitForVerification(@Param('id', ParseIntPipe) id: number) {
     return await this.sellerService.submitForVerification(id);
@@ -170,24 +173,22 @@ export class SellerController {
   /**
    * Approve seller verification
    * POST /api/v1/sellers/:id/approve
-   * Auth: Admin only
+   * Auth: Kong Gateway validates JWT and admin role
    */
   @Post(':id/approve')
-  @UseGuards(RolesGuard)
-  @Roles('admin')
   @HttpCode(HttpStatus.OK)
-  async approveSeller(@Param('id', ParseIntPipe) id: number, @CurrentUser('id') adminId: number) {
+  async approveSeller(@Req() request: Request, @Param('id', ParseIntPipe) id: number) {
+    const authHeader = request.headers.authorization;
+    const adminId = this.jwtDecoder.getUserId(authHeader);
     return await this.sellerService.approveSeller(id, adminId);
   }
 
   /**
    * Reject seller verification
    * POST /api/v1/sellers/:id/reject
-   * Auth: Admin only
+   * Auth: Kong Gateway validates JWT and admin role
    */
   @Post(':id/reject')
-  @UseGuards(RolesGuard)
-  @Roles('admin')
   @HttpCode(HttpStatus.OK)
   async rejectSeller(@Param('id', ParseIntPipe) id: number, @Body('reason') reason: string) {
     return await this.sellerService.rejectSeller(id, reason);
@@ -196,11 +197,9 @@ export class SellerController {
   /**
    * Suspend seller
    * POST /api/v1/sellers/:id/suspend
-   * Auth: Admin only
+   * Auth: Kong Gateway validates JWT and admin role
    */
   @Post(':id/suspend')
-  @UseGuards(RolesGuard)
-  @Roles('admin')
   @HttpCode(HttpStatus.OK)
   async suspendSeller(@Param('id', ParseIntPipe) id: number, @Body('reason') reason: string) {
     return await this.sellerService.suspendSeller(id, reason);
@@ -209,11 +208,9 @@ export class SellerController {
   /**
    * Reactivate suspended seller
    * POST /api/v1/sellers/:id/reactivate
-   * Auth: Admin only
+   * Auth: Kong Gateway validates JWT and admin role
    */
   @Post(':id/reactivate')
-  @UseGuards(RolesGuard)
-  @Roles('admin')
   @HttpCode(HttpStatus.OK)
   async reactivateSeller(@Param('id', ParseIntPipe) id: number) {
     return await this.sellerService.reactivateSeller(id);
@@ -222,11 +219,9 @@ export class SellerController {
   /**
    * Delete seller
    * DELETE /api/v1/sellers/:id
-   * Auth: Admin only
+   * Auth: Kong Gateway validates JWT and admin role
    */
   @Delete(':id')
-  @UseGuards(RolesGuard)
-  @Roles('admin')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteSeller(@Param('id', ParseIntPipe) id: number) {
     await this.sellerService.deleteSeller(id);
@@ -235,11 +230,10 @@ export class SellerController {
   /**
    * Get seller analytics overview
    * GET /api/v1/sellers/:id/analytics/overview
-   * Auth: Owner or Admin
+   * Auth: Kong Gateway validates JWT
    * Query params: period (day|week|month|year|all_time), startDate, endDate
    */
   @Get(':id/analytics/overview')
-  @UseGuards(SellerOwnerGuard)
   @HttpCode(HttpStatus.OK)
   async getAnalyticsOverview(
     @Param('id', ParseIntPipe) id: number,
@@ -257,11 +251,10 @@ export class SellerController {
   /**
    * Get seller sales trend
    * GET /api/v1/sellers/:id/analytics/sales-trend
-   * Auth: Owner or Admin
+   * Auth: Kong Gateway validates JWT
    * Query params: period (day|week|month|year), startDate, endDate
    */
   @Get(':id/analytics/sales-trend')
-  @UseGuards(SellerOwnerGuard)
   @HttpCode(HttpStatus.OK)
   async getSalesTrend(
     @Param('id', ParseIntPipe) id: number,
@@ -279,10 +272,9 @@ export class SellerController {
   /**
    * Get product performance analytics
    * GET /api/v1/sellers/:id/analytics/products
-   * Auth: Owner or Admin
+   * Auth: Kong Gateway validates JWT
    */
   @Get(':id/analytics/products')
-  @UseGuards(SellerOwnerGuard)
   @HttpCode(HttpStatus.OK)
   async getProductPerformance(@Param('id', ParseIntPipe) id: number) {
     return await this.sellerService.getProductPerformance(id);
@@ -291,11 +283,10 @@ export class SellerController {
   /**
    * Get revenue breakdown
    * GET /api/v1/sellers/:id/analytics/revenue
-   * Auth: Owner or Admin
+   * Auth: Kong Gateway validates JWT
    * Query params: period (day|week|month|year)
    */
   @Get(':id/analytics/revenue')
-  @UseGuards(SellerOwnerGuard)
   @HttpCode(HttpStatus.OK)
   async getRevenueBreakdown(
     @Param('id', ParseIntPipe) id: number,

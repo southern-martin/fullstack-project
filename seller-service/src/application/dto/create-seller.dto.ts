@@ -12,8 +12,9 @@ import {
 import { BusinessType } from '../../infrastructure/database/typeorm/entities/seller.entity';
 
 export class CreateSellerDto {
-  @IsNotEmpty()
-  userId: number;
+  // userId is extracted from JWT token in the controller, not from request body
+  @IsOptional()
+  userId?: number;
 
   @IsString()
   @IsNotEmpty()
