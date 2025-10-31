@@ -108,6 +108,8 @@ services:
       KONG_ADMIN_URL: http://kong-gateway:8001
       KONG_ADMIN_TOKEN: ""
       KONG_SYNC_ENABLED: "true"
+      # Frontend Configuration
+      FRONTEND_URL: http://localhost:3000
     ports:
       - "3001:3001"
     depends_on:
@@ -150,6 +152,8 @@ services:
       REDIS_PORT: 6379
       REDIS_PASSWORD: shared_redis_password_2024
       REDIS_KEY_PREFIX: user
+      # Frontend Configuration
+      FRONTEND_URL: http://localhost:3000
     ports:
       - "3003:3003"
     depends_on:
@@ -221,6 +225,8 @@ services:
       REDIS_KEY_PREFIX: customer
       # Cross-Service Communication
       USER_SERVICE_URL: http://user-service:3003
+      # Frontend Configuration
+      FRONTEND_URL: http://localhost:3000
     ports:
       - "3004:3004"
     depends_on:
@@ -290,6 +296,8 @@ services:
       REDIS_KEY_PREFIX: carrier
       # Cross-Service Communication
       USER_SERVICE_URL: http://user-service:3003
+      # Frontend Configuration
+      FRONTEND_URL: http://localhost:3000
     ports:
       - "3005:3005"
     depends_on:
@@ -360,6 +368,8 @@ services:
       # Cross-Service Communication
       CUSTOMER_SERVICE_URL: http://customer-service:3004
       CARRIER_SERVICE_URL: http://carrier-service:3005
+      # Frontend Configuration
+      FRONTEND_URL: http://localhost:3000
     ports:
       - "3006:3006"
     depends_on:
@@ -425,6 +435,8 @@ services:
       REDIS_PORT: 6379
       REDIS_PASSWORD: shared_redis_password_2024
       REDIS_KEY_PREFIX: translation
+      # Frontend Configuration
+      FRONTEND_URL: http://localhost:3000
     ports:
       - "3007:3007"
     depends_on:
@@ -500,6 +512,8 @@ services:
       CACHE_ENABLED: true
       CACHE_USER_TTL: 300
       CACHE_SELLER_TTL: 300
+      # CORS Configuration
+      CORS_ORIGIN: http://localhost:3000
     ports:
       - "3010:3010"
     depends_on:
