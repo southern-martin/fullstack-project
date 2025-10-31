@@ -15,6 +15,11 @@ async function bootstrap() {
   // Set service name for Winston
   process.env.SERVICE_NAME = 'seller-service';
 
+  // Validate required environment variables
+  if (!process.env.CORS_ORIGIN) {
+    throw new Error('CORS_ORIGIN environment variable is required');
+  }
+
   // Enable validation
   app.useGlobalPipes(
     new ValidationPipe({
@@ -26,7 +31,7 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000'],
+    origin: process.env.CORS_ORIGIN.split(','),
     credentials: true,
   });
 
