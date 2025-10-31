@@ -9,6 +9,7 @@ import Carriers from '../../features/carriers/components/Carriers';
 import Customers from '../../features/customers/components/Customers';
 import Dashboard from '../../features/dashboard/components/Dashboard';
 import { Roles, RoleDetails, RoleCreate, RoleEdit } from '../../features/roles';
+import { Sellers } from '../../features/sellers';
 import Settings from '../../features/settings/components/Settings';
 import Translations from '../../features/translations/components/Translations';
 import Users from '../../features/users/components/Users';
@@ -45,6 +46,7 @@ const AppRoutes: React.FC = () => {
                 <Route path="roles/:id/edit" element={<RoleEdit />} />
                 <Route path="customers" element={<Customers />} />
                 <Route path="carriers" element={<Carriers />} />
+                <Route path="sellers" element={<Sellers />} />
                 <Route path="microservices" element={<MicroservicesDashboard />} />
                 <Route path="pricing" element={<PriceCalculator />} />
                 <Route path="translations" element={<Translations />} />

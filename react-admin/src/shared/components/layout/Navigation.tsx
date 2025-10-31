@@ -1,6 +1,7 @@
 import {
     ArrowRightOnRectangleIcon,
     Bars3Icon,
+    BuildingStorefrontIcon,
     CalculatorIcon,
     ChartBarIcon,
     CogIcon,
@@ -73,6 +74,12 @@ const Navigation: React.FC<NavigationProps> = ({ isOpen, onToggle }) => {
             href: ROUTES.CARRIERS,
             icon: TruckIcon,
             current: location.pathname === ROUTES.CARRIERS,
+        },
+        {
+            name: L.menuItems.sellers,
+            href: ROUTES.SELLERS,
+            icon: BuildingStorefrontIcon,
+            current: location.pathname === ROUTES.SELLERS,
         },
         {
             name: L.menuItems.pricing,

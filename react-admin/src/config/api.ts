@@ -70,6 +70,15 @@ export const TRANSLATION_API_CONFIG = {
   TIMEOUT: 10000, // 10 seconds
 } as const;
 
+export const SELLER_API_CONFIG = {
+  BASE_URL: KONG_GATEWAY_URL + '/api/v1',
+  HEADERS: {
+    'Content-Type': 'application/json',
+    'Accept-Language': 'en',
+  },
+  TIMEOUT: 10000, // 10 seconds
+} as const;
+
 // Default API config (for backward compatibility)
 // IMPORTANT: Auth requests should go to AUTH_API_CONFIG, not USER_API_CONFIG
 export const SHARED_API_CONFIG = AUTH_API_CONFIG;
@@ -82,6 +91,7 @@ export const ROUTES = {
   CUSTOMERS: '/customers',
   CARRIERS: '/carriers',
   PRICING: '/pricing',
+  SELLERS: '/sellers',
   TRANSLATIONS: '/translations',
   ANALYTICS: '/analytics',
   SETTINGS: '/settings',

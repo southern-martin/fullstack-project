@@ -18,6 +18,7 @@ export interface NavigationLabels {
     roles: string;
     customers: string;
     carriers: string;
+    sellers: string;
     pricing: string;
     translations: string;
     analytics: string;
@@ -54,6 +55,7 @@ export const navigationLabels: NavigationLabels = {
     roles: 'Roles',
     customers: 'Customers',
     carriers: 'Carriers',
+    sellers: 'Sellers',
     pricing: 'Pricing',
     translations: 'Translations',
     analytics: 'Analytics',
