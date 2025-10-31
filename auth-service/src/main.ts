@@ -78,8 +78,11 @@ async function bootstrap() {
 }
 
 bootstrap().catch((err) => {
-  console.error("========== BOOTSTRAP ERROR ==========");
-  console.error(err);
-  console.error("=====================================");
+  // Use Winston logger for bootstrap errors instead of console.error
+  const errorLogger = new WinstonLoggerService();
+  errorLogger.setContext("Bootstrap");
+  errorLogger.error("========== BOOTSTRAP ERROR ==========");
+  errorLogger.error(err.stack || err.message || err);
+  errorLogger.error("=====================================");
   process.exit(1);
 });

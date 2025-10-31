@@ -1,5 +1,6 @@
-import { Injectable } from "@nestjs/common";
-import { IEventBus } from "../../domain/events/event-bus.interface";
+import { Injectable } from '@nestjs/common';
+import { WinstonLoggerService } from '@shared/infrastructure/logging';
+import { IEventBus } from '../../domain/events/event-bus.interface';
 
 /**
  * In-Memory Event Bus Implementation
@@ -8,8 +9,13 @@ import { IEventBus } from "../../domain/events/event-bus.interface";
  */
 @Injectable()
 export class InMemoryEventBus implements IEventBus {
-  private handlers: Map<string, Array<(event: any) => Promise<void>>> =
-    new Map();
+  private handlers: Map<string, Array<(event: any) => Promise<void>>> = new Map();
+  private logger: WinstonLoggerService;
+
+  constructor() {
+    this.logger = new WinstonLoggerService();
+    this.logger.setContext('EventBus');
+  }
 
   /**
    * Publish a domain event
@@ -19,7 +25,7 @@ export class InMemoryEventBus implements IEventBus {
     const eventName = event.constructor.name;
     const handlers = this.handlers.get(eventName) || [];
 
-    console.log(`[EventBus] Publishing event: ${eventName}`, {
+    this.logger.log(`Publishing event: ${eventName}`, {
       timestamp: new Date().toISOString(),
       eventData: event,
     });
@@ -29,9 +35,9 @@ export class InMemoryEventBus implements IEventBus {
       try {
         await handler(event);
       } catch (error) {
-        console.error(
-          `[EventBus] Error handling event ${eventName}:`,
-          error
+        this.logger.error(
+          `Error handling event ${eventName}`,
+          error instanceof Error ? error.stack : String(error),
         );
         // Don't throw - continue processing other handlers
       }
@@ -53,10 +59,7 @@ export class InMemoryEventBus implements IEventBus {
    * @param eventName - The name of the event to subscribe to
    * @param handler - The handler function to execute
    */
-  subscribe(
-    eventName: string,
-    handler: (event: any) => Promise<void>
-  ): void {
+  subscribe(eventName: string, handler: (event: any) => Promise<void>): void {
     if (!this.handlers.has(eventName)) {
       this.handlers.set(eventName, []);
     }

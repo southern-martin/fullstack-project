@@ -1,15 +1,16 @@
-import { User } from "@/domain/entities/user.entity";
-import { UserRepositoryInterface } from "@/domain/repositories/user.repository.interface";
+import { User } from '@/domain/entities/user.entity';
+import { UserRepositoryInterface } from '@/domain/repositories/user.repository.interface';
 import {
   BaseTypeOrmRepository,
   PaginationDto,
   RedisCacheService,
-} from "@fullstack-project/shared-infrastructure";
-import { Inject, Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import * as bcrypt from "bcrypt";
-import { Repository } from "typeorm";
-import { UserTypeOrmEntity } from "../entities/user.typeorm.entity";
+  WinstonLoggerService,
+} from '@fullstack-project/shared-infrastructure';
+import { Inject, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
+import { Repository } from 'typeorm';
+import { UserTypeOrmEntity } from '../entities/user.typeorm.entity';
 
 /**
  * User Repository Implementation
@@ -20,13 +21,17 @@ export class UserRepository
   extends BaseTypeOrmRepository<User, UserTypeOrmEntity>
   implements UserRepositoryInterface
 {
+  private readonly winstonLogger: WinstonLoggerService;
+
   constructor(
     @InjectRepository(UserTypeOrmEntity)
     repository: Repository<UserTypeOrmEntity>,
     @Inject(RedisCacheService)
-    cacheService: RedisCacheService
+    cacheService: RedisCacheService,
   ) {
-    super(repository, cacheService, "users", 300); // 5 min TTL
+    super(repository, cacheService, 'users', 300); // 5 min TTL
+    this.winstonLogger = new WinstonLoggerService();
+    this.winstonLogger.setContext('UserRepository');
   }
 
   /**
@@ -35,7 +40,7 @@ export class UserRepository
   async findById(id: number): Promise<User | null> {
     const entity = await this.repository.findOne({
       where: { id },
-      relations: ["roles", "roles.permissionEntities"],
+      relations: ['roles', 'roles.permissionEntities'],
     });
     return entity ? this.toDomainEntity(entity) : null;
   }
@@ -46,7 +51,7 @@ export class UserRepository
   async findByEmail(email: string): Promise<User | null> {
     const entity = await this.repository.findOne({
       where: { email },
-      relations: ["roles", "roles.permissionEntities"],
+      relations: ['roles', 'roles.permissionEntities'],
     });
     return entity ? this.toDomainEntity(entity) : null;
   }
@@ -76,8 +81,8 @@ export class UserRepository
     const entities = await this.repository.find({
       take: limit,
       skip: offset,
-      relations: ["roles", "roles.permissionEntities"],
-      order: { createdAt: "DESC" },
+      relations: ['roles', 'roles.permissionEntities'],
+      order: { createdAt: 'DESC' },
     });
     return entities.map((entity) => this.toDomainEntity(entity));
   }
@@ -110,24 +115,22 @@ export class UserRepository
    */
   async findAll(
     pagination?: PaginationDto,
-    search?: string
+    search?: string,
   ): Promise<{ users: User[]; total: number }> {
     const queryBuilder = this.repository
-      .createQueryBuilder("user")
-      .leftJoinAndSelect("user.roles", "roles")
-      .leftJoinAndSelect("roles.permissionEntities", "permissions");
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.roles', 'roles')
+      .leftJoinAndSelect('roles.permissionEntities', 'permissions');
 
     if (search) {
       queryBuilder.where(
-        "user.firstName ILIKE :search OR user.lastName ILIKE :search OR user.email ILIKE :search",
-        { search: `%${search}%` }
+        'user.firstName ILIKE :search OR user.lastName ILIKE :search OR user.email ILIKE :search',
+        { search: `%${search}%` },
       );
     }
 
     if (pagination) {
-      queryBuilder
-        .skip((pagination.page - 1) * pagination.limit)
-        .take(pagination.limit);
+      queryBuilder.skip((pagination.page - 1) * pagination.limit).take(pagination.limit);
     }
 
     const [entities, total] = await queryBuilder.getManyAndCount();
@@ -140,7 +143,7 @@ export class UserRepository
    */
   async search(
     searchTerm: string,
-    pagination: PaginationDto
+    pagination: PaginationDto,
   ): Promise<{ users: User[]; total: number }> {
     return this.findAll(pagination, searchTerm);
   }
@@ -151,7 +154,7 @@ export class UserRepository
   async findActive(): Promise<User[]> {
     const entities = await this.repository.find({
       where: { isActive: true },
-      relations: ["roles", "roles.permissionEntities"],
+      relations: ['roles', 'roles.permissionEntities'],
     });
     return entities.map((entity) => this.toDomainEntity(entity));
   }
@@ -169,17 +172,17 @@ export class UserRepository
   async findPaginated(
     page: number,
     limit: number,
-    search?: string
+    search?: string,
   ): Promise<{ users: User[]; total: number }> {
     const queryBuilder = this.repository
-      .createQueryBuilder("user")
-      .leftJoinAndSelect("user.roles", "roles")
-      .leftJoinAndSelect("roles.permissionEntities", "permissions");
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.roles', 'roles')
+      .leftJoinAndSelect('roles.permissionEntities', 'permissions');
 
     if (search) {
       queryBuilder.where(
-        "user.firstName ILIKE :search OR user.lastName ILIKE :search OR user.email ILIKE :search",
-        { search: `%${search}%` }
+        'user.firstName ILIKE :search OR user.lastName ILIKE :search OR user.email ILIKE :search',
+        { search: `%${search}%` },
       );
     }
 
@@ -209,9 +212,9 @@ export class UserRepository
    */
   async incrementFailedLoginAttempts(userId: number): Promise<void> {
     // Simplified - this functionality is not available with current schema
-    console.warn(
-      "Failed login attempts tracking not available with current schema"
-    );
+    this.winstonLogger.warn('Failed login attempts tracking not available with current schema', {
+      userId,
+    });
   }
 
   /**
@@ -219,9 +222,9 @@ export class UserRepository
    */
   async resetFailedLoginAttempts(userId: number): Promise<void> {
     // Simplified - this functionality is not available with current schema
-    console.warn(
-      "Failed login attempts reset not available with current schema"
-    );
+    this.winstonLogger.warn('Failed login attempts reset not available with current schema', {
+      userId,
+    });
   }
 
   /**

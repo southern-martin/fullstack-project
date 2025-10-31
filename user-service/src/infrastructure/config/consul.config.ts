@@ -1,11 +1,11 @@
 /**
  * Consul Configuration Module
- * 
+ *
  * This module provides centralized configuration management using HashiCorp Consul.
  * It replaces environment variable reads with Consul KV store lookups.
- * 
+ *
  * Week 2 Implementation: Service Integration
- * 
+ *
  * Usage:
  *   import { ConsulConfigService } from './consul.config';
  *   const configService = ConsulConfigService.getInstance();
@@ -14,6 +14,7 @@
  */
 
 import axios from 'axios';
+import { WinstonLoggerService } from '@shared/infrastructure/logging';
 
 type AxiosInstance = ReturnType<typeof axios.create>;
 
@@ -31,7 +32,7 @@ export interface ConfigValue {
 
 /**
  * Consul Configuration Service
- * 
+ *
  * Singleton service for managing configuration from Consul KV store.
  * Provides caching and error handling for configuration reads.
  */
@@ -42,6 +43,7 @@ export class ConsulConfigService {
   private servicePrefix: string = 'config/user-service';
   private sharedPrefix: string = 'config/shared';
   private initialized: boolean = false;
+  private logger: WinstonLoggerService;
 
   private constructor(config?: ConsulConfig) {
     const consulHost = config?.host || process.env.CONSUL_HOST || 'localhost';
@@ -55,6 +57,9 @@ export class ConsulConfigService {
         'Content-Type': 'application/json',
       },
     });
+
+    this.logger = new WinstonLoggerService();
+    this.logger.setContext('ConsulConfig');
   }
 
   /**
@@ -73,23 +78,26 @@ export class ConsulConfigService {
    */
   public async initialize(): Promise<void> {
     if (this.initialized) {
-      console.log('[Consul] Already initialized');
+      this.logger.log('Already initialized');
       return;
     }
 
     try {
-      console.log('[Consul] Initializing configuration service...');
-      
+      this.logger.log('Initializing configuration service...');
+
       // Preload critical service-specific configs
       await this.preloadServiceConfigs();
-      
+
       // Preload shared infrastructure configs
       await this.preloadSharedConfigs();
-      
+
       this.initialized = true;
-      console.log(`[Consul] Initialized successfully with ${this.configCache.size} cached configs`);
+      this.logger.log(`Initialized successfully with ${this.configCache.size} cached configs`);
     } catch (error) {
-      console.error('[Consul] Initialization failed:', error);
+      this.logger.error(
+        'Initialization failed',
+        error instanceof Error ? error.stack : String(error),
+      );
       throw new Error('Failed to initialize Consul configuration service');
     }
   }
@@ -98,17 +106,13 @@ export class ConsulConfigService {
    * Preload service-specific configurations
    */
   private async preloadServiceConfigs(): Promise<void> {
-    const serviceKeys = [
-      'port',
-      'service_name',
-      'redis_key_prefix',
-    ];
+    const serviceKeys = ['port', 'service_name', 'redis_key_prefix'];
 
     for (const key of serviceKeys) {
       try {
         await this.get(key);
       } catch (error) {
-        console.warn(`[Consul] Failed to preload service config: ${key}`, error);
+        this.logger.warn(`Failed to preload service config: ${key}`, { error });
       }
     }
   }
@@ -139,7 +143,7 @@ export class ConsulConfigService {
 
   /**
    * Get a service-specific configuration value from Consul
-   * 
+   *
    * @param key - Configuration key (e.g., 'port', 'database/host')
    * @param defaultValue - Optional default value if key not found
    * @returns Configuration value as string
@@ -151,7 +155,7 @@ export class ConsulConfigService {
 
   /**
    * Get a shared infrastructure configuration value from Consul
-   * 
+   *
    * @param key - Configuration key (e.g., 'redis/host', 'database/shared_user_db/host')
    * @param defaultValue - Optional default value if key not found
    * @returns Configuration value as string
@@ -173,33 +177,33 @@ export class ConsulConfigService {
 
     try {
       const response = await this.consulClient.get(`/${fullKey}`);
-      
+
       if (response.data && Array.isArray(response.data) && response.data.length > 0) {
         const consulData = response.data[0] as any;
         const value = Buffer.from(consulData.Value, 'base64').toString('utf-8');
-        
+
         // Cache the value
         this.configCache.set(fullKey, {
           key: fullKey,
           value,
           timestamp: new Date(),
         });
-        
+
         return value;
       }
-      
+
       if (defaultValue !== undefined) {
         console.warn(`[Consul] Key not found: ${fullKey}, using default: ${defaultValue}`);
         return defaultValue;
       }
-      
+
       throw new Error(`Configuration key not found: ${fullKey}`);
     } catch (error) {
       if (defaultValue !== undefined) {
         console.warn(`[Consul] Error fetching ${fullKey}, using default:`, defaultValue);
         return defaultValue;
       }
-      
+
       console.error(`[Consul] Error fetching configuration for ${fullKey}:`, error);
       throw error;
     }
@@ -211,14 +215,14 @@ export class ConsulConfigService {
   public async getNumber(key: string, defaultValue?: number): Promise<number> {
     const value = await this.get(key, defaultValue?.toString());
     const parsed = parseInt(value, 10);
-    
+
     if (isNaN(parsed)) {
       if (defaultValue !== undefined) {
         return defaultValue;
       }
       throw new Error(`Configuration value is not a valid number: ${key} = ${value}`);
     }
-    
+
     return parsed;
   }
 
@@ -228,14 +232,14 @@ export class ConsulConfigService {
   public async getSharedNumber(key: string, defaultValue?: number): Promise<number> {
     const value = await this.getShared(key, defaultValue?.toString());
     const parsed = parseInt(value, 10);
-    
+
     if (isNaN(parsed)) {
       if (defaultValue !== undefined) {
         return defaultValue;
       }
       throw new Error(`Shared configuration value is not a valid number: ${key} = ${value}`);
     }
-    
+
     return parsed;
   }
 
@@ -287,7 +291,7 @@ export class ConsulConfigService {
     try {
       const response = await axios.get(
         this.consulClient.defaults.baseURL!.replace('/v1/kv', '/v1/status/leader'),
-        { timeout: 2000 }
+        { timeout: 2000 },
       );
       return response.status === 200;
     } catch (error) {
@@ -310,7 +314,7 @@ export function getConsulConfig(): ConsulConfigService {
  */
 export async function initializeConsulConfig(): Promise<ConsulConfigService> {
   const configService = ConsulConfigService.getInstance();
-  
+
   try {
     await configService.initialize();
     console.log('[Consul] Configuration service initialized successfully');
