@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SellerTypeOrmEntity } from './typeorm/entities/seller.entity';
+import { SellerRepository } from './typeorm/repositories/seller.repository';
 
 @Module({
   imports: [
@@ -22,6 +23,15 @@ import { SellerTypeOrmEntity } from './typeorm/entities/seller.entity';
       }),
       inject: [ConfigService],
     }),
+    TypeOrmModule.forFeature([SellerTypeOrmEntity]),
   ],
+  providers: [
+    {
+      provide: SellerRepository,
+      useFactory: (repository) => new SellerRepository(repository),
+      inject: [getRepositoryToken(SellerTypeOrmEntity)],
+    },
+  ],
+  exports: [SellerRepository, TypeOrmModule],
 })
 export class DatabaseModule {}

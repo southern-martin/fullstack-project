@@ -1,4 +1,5 @@
 import { Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
 import { SellerTypeOrmEntity, SellerStatus, VerificationStatus } from '../entities/seller.entity';
 
 export interface ISellerRepository {
@@ -22,6 +23,7 @@ export interface SellerFilters {
   offset?: number;
 }
 
+@Injectable()
 export class SellerRepository implements ISellerRepository {
   constructor(private readonly repository: Repository<SellerTypeOrmEntity>) {}
 
