@@ -213,11 +213,27 @@ routes:
           key_claim_name: sub
           
   # Translation Service Routes
-  - name: translations-routes
+  # Public translation endpoints (no auth required for language switcher)
+  - name: translations-public-read
     service: translation-service
     paths:
-      - /api/v1/translations
-      - /api/v1/translations/.*
+      - /api/v1/translation/languages/active
+      - /api/v1/translation/translate/batch
+      - /api/v1/translation/translate
+    methods:
+      - GET
+      - POST
+    strip_path: false
+    # No JWT plugin - publicly accessible
+  
+  # Protected translation management routes (languages CRUD, translations CRUD)
+  - name: translations-protected
+    service: translation-service
+    paths:
+      - /api/v1/translation/languages$
+      - /api/v1/translation/languages/[0-9a-z-]+$
+      - /api/v1/translation/translations
+      - /api/v1/translation/translations/.*
     methods:
       - GET
       - POST
