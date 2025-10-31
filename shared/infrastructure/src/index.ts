@@ -41,6 +41,9 @@ export * from "./communication/service-communicator";
 export * from "./validation/custom-validators";
 export * from "./validation/validation-utils";
 
+// Authentication
+export * from "./auth/jwt-decoder.service";
+
 // Logging - New Winston-based structured logging
 export * from "./logging/logging.interceptor";
 export * from "./logging/typeorm-logger";
