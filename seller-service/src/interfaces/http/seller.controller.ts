@@ -23,7 +23,7 @@ import {
 } from '../../application/dto/update-seller.dto';
 import { SellerFilterDto } from '../../application/dto/seller-filter.dto';
 import { AnalyticsQueryDto } from '../../application/dto/seller-analytics.dto';
-import { JwtDecoder } from '@fullstack-project/shared-infrastructure';
+import { JwtDecoder } from '../../infrastructure/auth/jwt-decoder.service';
 
 @Controller('sellers')
 export class SellerController {

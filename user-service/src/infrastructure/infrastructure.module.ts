@@ -2,7 +2,7 @@ import { RedisCacheService } from "@fullstack-project/shared-infrastructure";
 import { Module } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { JwtDecoder } from "@fullstack-project/shared-infrastructure";
+import { JwtDecoder } from "./auth/jwt-decoder.service";
 import { PermissionTypeOrmEntity } from "./database/typeorm/entities/permission.typeorm.entity";
 import { RoleTypeOrmEntity } from "./database/typeorm/entities/role.typeorm.entity";
 import { UserProfileTypeOrmEntity } from "./database/typeorm/entities/user-profile.typeorm.entity";

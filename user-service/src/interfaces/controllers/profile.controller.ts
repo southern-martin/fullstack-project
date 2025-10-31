@@ -17,7 +17,7 @@ import {
   Req,
 } from "@nestjs/common";
 import { Request } from "express";
-import { JwtDecoder } from "@fullstack-project/shared-infrastructure";
+import { JwtDecoder } from "../../infrastructure/auth/jwt-decoder.service";
 import { CreateProfileDto } from "../dtos/create-profile.dto";
 import { UpdateProfileDto } from "../dtos/update-profile.dto";
 
