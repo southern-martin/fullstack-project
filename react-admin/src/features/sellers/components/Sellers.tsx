@@ -31,11 +31,15 @@ const Sellers: React.FC = () => {
         page: currentPage,
         limit: pageSize,
       });
-      setSellers(response.items);
-      setTotal(response.total);
+      
+      // Backend returns { sellers, total } not { items, total }
+      setSellers(response.sellers || []);
+      setTotal(response.total || 0);
     } catch (error) {
       console.error('Failed to load sellers:', error);
       toast.error('Failed to load sellers');
+      setSellers([]); // Set empty array on error
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -159,10 +163,10 @@ const Sellers: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      ⭐ {seller.rating.toFixed(1)}
+                      ⭐ {seller.rating != null ? Number(seller.rating).toFixed(1) : '0.0'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {seller.totalSales.toLocaleString()}
+                      {seller.totalSales != null ? Number(seller.totalSales).toLocaleString() : '0'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <Button

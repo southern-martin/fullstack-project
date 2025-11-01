@@ -1,12 +1,12 @@
-import { TRANSLATION_API_CONFIG } from '../../../config/api';
+import { SHARED_API_CONFIG } from '../../../config/api';
 
 class TranslationApiClient {
   private baseURL: string;
   private defaultHeaders: Record<string, string>;
 
   constructor() {
-    this.baseURL = TRANSLATION_API_CONFIG.BASE_URL;
-    this.defaultHeaders = TRANSLATION_API_CONFIG.HEADERS;
+    this.baseURL = SHARED_API_CONFIG.BASE_URL;
+    this.defaultHeaders = SHARED_API_CONFIG.HEADERS;
   }
 
   private async request<T>(

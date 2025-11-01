@@ -1,4 +1,5 @@
-import { SELLER_API_CONFIG } from '../../../config/api';
+import { SHARED_API_CONFIG } from '../../../config/api';
+import { SELLER_API_CONFIG } from '../config/sellerApi';
 import type {
   Seller,
   CreateSellerRequest,
@@ -15,8 +16,8 @@ class SellerApiClient {
   private defaultHeaders: Record<string, string>;
 
   constructor() {
-    this.baseURL = SELLER_API_CONFIG.BASE_URL;
-    this.defaultHeaders = SELLER_API_CONFIG.HEADERS;
+    this.baseURL = SHARED_API_CONFIG.BASE_URL;
+    this.defaultHeaders = SHARED_API_CONFIG.HEADERS;
   }
 
   private async request<T>(
@@ -92,7 +93,7 @@ class SellerApiClient {
     search?: string;
     status?: string;
     verificationStatus?: string;
-  }): Promise<{ items: Seller[]; total: number; page: number; limit: number; totalPages: number }> {
+  }): Promise<{ sellers: Seller[]; total: number }> {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
@@ -100,98 +101,98 @@ class SellerApiClient {
     if (params?.status) queryParams.append('status', params.status);
     if (params?.verificationStatus) queryParams.append('verificationStatus', params.verificationStatus);
 
-    return this.request<{ items: Seller[]; total: number; page: number; limit: number; totalPages: number }>(
-      `/sellers?${queryParams.toString()}`
+    return this.request<{ sellers: Seller[]; total: number }>(
+      `${SELLER_API_CONFIG.ENDPOINTS.LIST}?${queryParams.toString()}`
     );
   }
 
   async getSeller(id: number): Promise<Seller> {
-    return this.request<Seller>(`/sellers/${id}`);
+    return this.request<Seller>(SELLER_API_CONFIG.ENDPOINTS.BY_ID(id));
   }
 
   async getSellerByUserId(userId: number): Promise<Seller> {
-    return this.request<Seller>(`/sellers/user/${userId}`);
+    return this.request<Seller>(SELLER_API_CONFIG.ENDPOINTS.BY_USER(userId));
   }
 
   async getPendingVerificationSellers(): Promise<Seller[]> {
-    return this.request<Seller[]>('/sellers/pending-verification');
+    return this.request<Seller[]>(SELLER_API_CONFIG.ENDPOINTS.PENDING_VERIFICATION);
   }
 
   async getMySellerProfile(): Promise<Seller> {
-    return this.request<Seller>('/sellers/me');
+    return this.request<Seller>(SELLER_API_CONFIG.ENDPOINTS.MY_PROFILE);
   }
 
   async createSeller(data: CreateSellerRequest): Promise<Seller> {
-    return this.request<Seller>('/sellers', {
+    return this.request<Seller>(SELLER_API_CONFIG.ENDPOINTS.CREATE, {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
   async updateSellerProfile(id: number, data: UpdateSellerProfileRequest): Promise<Seller> {
-    return this.request<Seller>(`/sellers/${id}/profile`, {
+    return this.request<Seller>(SELLER_API_CONFIG.ENDPOINTS.UPDATE_PROFILE(id), {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
 
   async updateSellerBanking(id: number, data: UpdateSellerBankingRequest): Promise<Seller> {
-    return this.request<Seller>(`/sellers/${id}/banking`, {
+    return this.request<Seller>(SELLER_API_CONFIG.ENDPOINTS.UPDATE_BANKING(id), {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
 
   async updateSeller(id: number, data: Partial<Seller>): Promise<Seller> {
-    return this.request<Seller>(`/sellers/${id}`, {
+    return this.request<Seller>(SELLER_API_CONFIG.ENDPOINTS.UPDATE(id), {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
 
   async deleteSeller(id: number): Promise<void> {
-    return this.request<void>(`/sellers/${id}`, {
+    return this.request<void>(SELLER_API_CONFIG.ENDPOINTS.DELETE(id), {
       method: 'DELETE',
     });
   }
 
   // Verification & Status Management
   async verifySeller(id: number): Promise<Seller> {
-    return this.request<Seller>(`/sellers/${id}/verify`, {
+    return this.request<Seller>(SELLER_API_CONFIG.ENDPOINTS.VERIFY(id), {
       method: 'POST',
     });
   }
 
   async approveSeller(id: number, notes?: string): Promise<Seller> {
-    return this.request<Seller>(`/sellers/${id}/approve`, {
+    return this.request<Seller>(SELLER_API_CONFIG.ENDPOINTS.APPROVE(id), {
       method: 'POST',
       body: JSON.stringify({ notes }),
     });
   }
 
   async rejectSeller(id: number, reason: string): Promise<Seller> {
-    return this.request<Seller>(`/sellers/${id}/reject`, {
+    return this.request<Seller>(SELLER_API_CONFIG.ENDPOINTS.REJECT(id), {
       method: 'POST',
       body: JSON.stringify({ reason }),
     });
   }
 
   async suspendSeller(id: number, reason: string): Promise<Seller> {
-    return this.request<Seller>(`/sellers/${id}/suspend`, {
+    return this.request<Seller>(SELLER_API_CONFIG.ENDPOINTS.SUSPEND(id), {
       method: 'POST',
       body: JSON.stringify({ reason }),
     });
   }
 
   async reactivateSeller(id: number): Promise<Seller> {
-    return this.request<Seller>(`/sellers/${id}/reactivate`, {
+    return this.request<Seller>(SELLER_API_CONFIG.ENDPOINTS.REACTIVATE(id), {
       method: 'POST',
     });
   }
 
   // Analytics
   async getSellerAnalyticsOverview(id: number): Promise<SellerAnalyticsOverview> {
-    return this.request<SellerAnalyticsOverview>(`/sellers/${id}/analytics/overview`);
+    return this.request<SellerAnalyticsOverview>(SELLER_API_CONFIG.ENDPOINTS.ANALYTICS_OVERVIEW(id));
   }
 
   async getSellerSalesTrend(
@@ -204,13 +205,13 @@ class SellerApiClient {
     if (params?.interval) queryParams.append('interval', params.interval);
 
     return this.request<SellerSalesTrend[]>(
-      `/sellers/${id}/analytics/sales-trend?${queryParams.toString()}`
+      `${SELLER_API_CONFIG.ENDPOINTS.ANALYTICS_SALES_TREND(id)}?${queryParams.toString()}`
     );
   }
 
   async getSellerProductAnalytics(id: number, limit: number = 10): Promise<SellerProductAnalytics[]> {
     return this.request<SellerProductAnalytics[]>(
-      `/sellers/${id}/analytics/products?limit=${limit}`
+      `${SELLER_API_CONFIG.ENDPOINTS.ANALYTICS_PRODUCTS(id)}?limit=${limit}`
     );
   }
 
@@ -224,7 +225,7 @@ class SellerApiClient {
     if (params?.period) queryParams.append('period', params.period);
 
     return this.request<SellerRevenueAnalytics[]>(
-      `/sellers/${id}/analytics/revenue?${queryParams.toString()}`
+      `${SELLER_API_CONFIG.ENDPOINTS.ANALYTICS_REVENUE(id)}?${queryParams.toString()}`
     );
   }
 }

@@ -1,12 +1,12 @@
-import { CUSTOMER_API_CONFIG } from '../../../config/api';
+import { SHARED_API_CONFIG } from '../../../config/api';
 
 class CustomerApiClient {
   private baseURL: string;
   private defaultHeaders: Record<string, string>;
 
   constructor() {
-    this.baseURL = CUSTOMER_API_CONFIG.BASE_URL;
-    this.defaultHeaders = CUSTOMER_API_CONFIG.HEADERS;
+    this.baseURL = SHARED_API_CONFIG.BASE_URL;
+    this.defaultHeaders = SHARED_API_CONFIG.HEADERS;
   }
 
   private async request<T>(

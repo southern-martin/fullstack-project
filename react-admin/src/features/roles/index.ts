@@ -4,8 +4,9 @@ export { RoleDetails } from './components/RoleDetails';
 export { RoleForm } from './components/RoleForm';
 export { PermissionSelector } from './components/PermissionSelector';
 
-// Export pages
-export { RoleCreate, RoleEdit } from './pages';
+// Export pages (moved to components/)
+export { RoleCreate } from './components/RoleCreate';
+export { RoleEdit } from './components/RoleEdit';
 
 // Export types
 export * from './types';
