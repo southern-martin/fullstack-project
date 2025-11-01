@@ -1,6 +1,6 @@
 import { userApiClient } from './userApiClient';
 import { userApiService } from './userApiService';
-import { USER_API_CONFIG } from '../../../config/api';
+import { SHARED_API_CONFIG } from '../../../config/api';
 
 class UserService {
   // Wrap existing userApiService methods
@@ -51,7 +51,7 @@ class UserService {
   // Add health check method
   async healthCheck(): Promise<boolean> {
     try {
-      const response = await fetch(`${USER_API_CONFIG.BASE_URL}/health`, {
+      const response = await fetch(`${SHARED_API_CONFIG.BASE_URL}/health`, {
         method: 'GET',
         headers: {
           'X-Service': 'user',

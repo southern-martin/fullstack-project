@@ -1,12 +1,12 @@
-import { CARRIER_API_CONFIG } from '../../../config/api';
+import { SHARED_API_CONFIG } from '../../../config/api';
 
 class CarrierApiClient {
   private baseURL: string;
   private defaultHeaders: Record<string, string>;
 
   constructor() {
-    this.baseURL = CARRIER_API_CONFIG.BASE_URL;
-    this.defaultHeaders = CARRIER_API_CONFIG.HEADERS;
+    this.baseURL = SHARED_API_CONFIG.BASE_URL;
+    this.defaultHeaders = SHARED_API_CONFIG.HEADERS;
   }
 
   private async request<T>(
