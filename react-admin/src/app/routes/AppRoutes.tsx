@@ -2,14 +2,14 @@ import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import MicroservicesDashboard from '../../components/MicroservicesDashboard';
-import PriceCalculator from '../../components/PriceCalculator';
 import Analytics from '../../features/analytics/components/Analytics';
 import LoginForm from '../../features/auth/components/LoginForm';
 import Carriers from '../../features/carriers/components/Carriers';
 import Customers from '../../features/customers/components/Customers';
 import Dashboard from '../../features/dashboard/components/Dashboard';
+import Pricing from '../../features/pricing/components/Pricing';
 import { Roles, RoleDetails, RoleCreate, RoleEdit } from '../../features/roles';
-import { Sellers } from '../../features/sellers';
+import Sellers from '../../features/sellers/components/Sellers';
 import Settings from '../../features/settings/components/Settings';
 import Translations from '../../features/translations/components/Translations';
 import Users from '../../features/users/components/Users';
@@ -48,7 +48,7 @@ const AppRoutes: React.FC = () => {
                 <Route path="carriers" element={<Carriers />} />
                 <Route path="sellers" element={<Sellers />} />
                 <Route path="microservices" element={<MicroservicesDashboard />} />
-                <Route path="pricing" element={<PriceCalculator />} />
+                <Route path="pricing" element={<Pricing />} />
                 <Route path="translations" element={<Translations />} />
                 <Route path="analytics" element={<Analytics />} />
                 <Route path="settings" element={<Settings />} />
