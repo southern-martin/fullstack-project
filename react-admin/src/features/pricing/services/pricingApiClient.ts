@@ -1,12 +1,13 @@
-import { PRICING_API_CONFIG } from '../../../config/api';
+import { SHARED_API_CONFIG } from '../../../config/api';
+import { PRICING_API_CONFIG } from '../config/pricingApi';
 
 class PricingApiClient {
   private baseURL: string;
   private defaultHeaders: Record<string, string>;
 
   constructor() {
-    this.baseURL = PRICING_API_CONFIG.BASE_URL;
-    this.defaultHeaders = PRICING_API_CONFIG.HEADERS;
+    this.baseURL = SHARED_API_CONFIG.BASE_URL;
+    this.defaultHeaders = SHARED_API_CONFIG.HEADERS;
   }
 
   private async request<T>(
