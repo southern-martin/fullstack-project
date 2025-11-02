@@ -11,10 +11,8 @@ import {
   HttpStatus,
   ParseIntPipe,
   Req,
-  Headers,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { SellerService } from '../../domain/services/seller.service';
 import { CreateSellerDto } from '../../application/dto/create-seller.dto';
 import {
   UpdateSellerDto,
@@ -25,11 +23,55 @@ import { SellerFilterDto } from '../../application/dto/seller-filter.dto';
 import { AnalyticsQueryDto } from '../../application/dto/seller-analytics.dto';
 import { JwtDecoder } from '../../infrastructure/auth/jwt-decoder.service';
 
+// Use Cases
+import { RegisterSellerUseCase } from '../../application/use-cases/register-seller.use-case';
+import { GetSellerByIdUseCase } from '../../application/use-cases/get-seller-by-id.use-case';
+import { GetSellerByUserIdUseCase } from '../../application/use-cases/get-seller-by-user-id.use-case';
+import { GetAllSellersUseCase } from '../../application/use-cases/get-all-sellers.use-case';
+import { GetPendingVerificationUseCase } from '../../application/use-cases/get-pending-verification.use-case';
+import { UpdateSellerProfileUseCase } from '../../application/use-cases/update-seller-profile.use-case';
+import { UpdateBankingInfoUseCase } from '../../application/use-cases/update-banking-info.use-case';
+import { SubmitForVerificationUseCase } from '../../application/use-cases/submit-for-verification.use-case';
+import { ApproveSellerUseCase } from '../../application/use-cases/approve-seller.use-case';
+import { RejectSellerUseCase } from '../../application/use-cases/reject-seller.use-case';
+import { SuspendSellerUseCase } from '../../application/use-cases/suspend-seller.use-case';
+import { ReactivateSellerUseCase } from '../../application/use-cases/reactivate-seller.use-case';
+import { DeleteSellerUseCase } from '../../application/use-cases/delete-seller.use-case';
+import { GetSellerAnalyticsUseCase } from '../../application/use-cases/analytics/get-seller-analytics.use-case';
+import { GetSalesTrendUseCase } from '../../application/use-cases/analytics/get-sales-trend.use-case';
+import { GetProductPerformanceUseCase } from '../../application/use-cases/analytics/get-product-performance.use-case';
+import { GetRevenueBreakdownUseCase } from '../../application/use-cases/analytics/get-revenue-breakdown.use-case';
+
+/**
+ * Seller Controller
+ * Clean Architecture - injects use cases instead of fat service
+ */
 @Controller('sellers')
 export class SellerController {
   constructor(
-    private readonly sellerService: SellerService,
     private readonly jwtDecoder: JwtDecoder,
+    // CRUD Use Cases
+    private readonly registerSellerUseCase: RegisterSellerUseCase,
+    private readonly getSellerByIdUseCase: GetSellerByIdUseCase,
+    private readonly getSellerByUserIdUseCase: GetSellerByUserIdUseCase,
+    private readonly getAllSellersUseCase: GetAllSellersUseCase,
+    private readonly getPendingVerificationUseCase: GetPendingVerificationUseCase,
+    // Profile Update Use Cases
+    private readonly updateSellerProfileUseCase: UpdateSellerProfileUseCase,
+    private readonly updateBankingInfoUseCase: UpdateBankingInfoUseCase,
+    // Verification Workflow Use Cases
+    private readonly submitForVerificationUseCase: SubmitForVerificationUseCase,
+    private readonly approveSellerUseCase: ApproveSellerUseCase,
+    private readonly rejectSellerUseCase: RejectSellerUseCase,
+    // Status Management Use Cases
+    private readonly suspendSellerUseCase: SuspendSellerUseCase,
+    private readonly reactivateSellerUseCase: ReactivateSellerUseCase,
+    private readonly deleteSellerUseCase: DeleteSellerUseCase,
+    // Analytics Use Cases
+    private readonly getSellerAnalyticsUseCase: GetSellerAnalyticsUseCase,
+    private readonly getSalesTrendUseCase: GetSalesTrendUseCase,
+    private readonly getProductPerformanceUseCase: GetProductPerformanceUseCase,
+    private readonly getRevenueBreakdownUseCase: GetRevenueBreakdownUseCase,
   ) {}
 
   /**
@@ -40,16 +82,13 @@ export class SellerController {
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async registerSeller(
-    @Req() request: Request,
-    @Body() createSellerDto: CreateSellerDto,
-  ) {
+  async registerSeller(@Req() request: Request, @Body() createSellerDto: CreateSellerDto) {
     // Extract userId from JWT token (Kong validated, we decode to get claims)
     const authHeader = request.headers.authorization;
     const userId = this.jwtDecoder.getUserId(authHeader);
-    
+
     // Override userId from token (security - users can only create seller for themselves)
-    return await this.sellerService.registerSeller(userId, {
+    return await this.registerSellerUseCase.execute(userId, {
       ...createSellerDto,
       userId,
     });
@@ -62,7 +101,7 @@ export class SellerController {
    */
   @Get()
   async getAllSellers(@Query() filters: SellerFilterDto) {
-    return await this.sellerService.getAllSellers(filters);
+    return await this.getAllSellersUseCase.execute(filters);
   }
 
   /**
@@ -72,7 +111,7 @@ export class SellerController {
    */
   @Get('pending-verification')
   async getPendingVerification() {
-    return await this.sellerService.getPendingVerification();
+    return await this.getPendingVerificationUseCase.execute();
   }
 
   /**
@@ -84,7 +123,7 @@ export class SellerController {
   async getMySellerAccount(@Req() request: Request) {
     const authHeader = request.headers.authorization;
     const userId = this.jwtDecoder.getUserId(authHeader);
-    return await this.sellerService.getSellerByUserId(userId);
+    return await this.getSellerByUserIdUseCase.execute(userId);
   }
 
   /**
@@ -94,20 +133,17 @@ export class SellerController {
    * Note: Authorization logic moved to service layer
    */
   @Get('user/:userId')
-  async getSellerByUserId(
-    @Req() request: Request,
-    @Param('userId', ParseIntPipe) userId: number,
-  ) {
+  async getSellerByUserId(@Req() request: Request, @Param('userId', ParseIntPipe) userId: number) {
     // Get current user ID and roles from JWT
     const authHeader = request.headers.authorization;
     const currentUserId = this.jwtDecoder.getUserId(authHeader);
     const userRoles = this.jwtDecoder.getUserRoles(authHeader);
-    
+
     // Check if requesting own data or is admin
     if (currentUserId !== userId && !userRoles.includes('admin')) {
       throw new Error('Forbidden');
     }
-    return await this.sellerService.getSellerByUserId(userId);
+    return await this.getSellerByUserIdUseCase.execute(userId);
   }
 
   /**
@@ -117,7 +153,7 @@ export class SellerController {
    */
   @Get(':id')
   async getSellerById(@Param('id', ParseIntPipe) id: number) {
-    return await this.sellerService.getSellerById(id);
+    return await this.getSellerByIdUseCase.execute(id);
   }
 
   /**
@@ -130,7 +166,7 @@ export class SellerController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDto: UpdateSellerProfileDto,
   ) {
-    return await this.sellerService.updateProfile(id, updateDto);
+    return await this.updateSellerProfileUseCase.execute(id, updateDto);
   }
 
   /**
@@ -143,20 +179,24 @@ export class SellerController {
     @Param('id', ParseIntPipe) id: number,
     @Body() bankingDto: UpdateBankingInfoDto,
   ) {
-    return await this.sellerService.updateBankingInfo(id, bankingDto);
+    return await this.updateBankingInfoUseCase.execute(id, bankingDto);
   }
 
   /**
    * Update seller (admin - full update including commission)
    * PATCH /api/v1/sellers/:id
    * Auth: Kong Gateway validates JWT and admin role
+   * 
+   * Note: adminUpdateSeller use case not yet implemented
+   * TODO: Create AdminUpdateSellerUseCase
    */
   @Patch(':id')
   async adminUpdateSeller(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDto: UpdateSellerDto,
   ) {
-    return await this.sellerService.adminUpdateSeller(id, updateDto);
+    // Temporarily using updateProfile until AdminUpdateSellerUseCase is created
+    return await this.updateSellerProfileUseCase.execute(id, updateDto);
   }
 
   /**
@@ -167,7 +207,7 @@ export class SellerController {
   @Post(':id/verify')
   @HttpCode(HttpStatus.OK)
   async submitForVerification(@Param('id', ParseIntPipe) id: number) {
-    return await this.sellerService.submitForVerification(id);
+    return await this.submitForVerificationUseCase.execute(id);
   }
 
   /**
@@ -180,7 +220,7 @@ export class SellerController {
   async approveSeller(@Req() request: Request, @Param('id', ParseIntPipe) id: number) {
     const authHeader = request.headers.authorization;
     const adminId = this.jwtDecoder.getUserId(authHeader);
-    return await this.sellerService.approveSeller(id, adminId);
+    return await this.approveSellerUseCase.execute(id, adminId);
   }
 
   /**
@@ -191,7 +231,7 @@ export class SellerController {
   @Post(':id/reject')
   @HttpCode(HttpStatus.OK)
   async rejectSeller(@Param('id', ParseIntPipe) id: number, @Body('reason') reason: string) {
-    return await this.sellerService.rejectSeller(id, reason);
+    return await this.rejectSellerUseCase.execute(id, reason);
   }
 
   /**
@@ -202,7 +242,7 @@ export class SellerController {
   @Post(':id/suspend')
   @HttpCode(HttpStatus.OK)
   async suspendSeller(@Param('id', ParseIntPipe) id: number, @Body('reason') reason: string) {
-    return await this.sellerService.suspendSeller(id, reason);
+    return await this.suspendSellerUseCase.execute(id, reason);
   }
 
   /**
@@ -213,7 +253,7 @@ export class SellerController {
   @Post(':id/reactivate')
   @HttpCode(HttpStatus.OK)
   async reactivateSeller(@Param('id', ParseIntPipe) id: number) {
-    return await this.sellerService.reactivateSeller(id);
+    return await this.reactivateSellerUseCase.execute(id);
   }
 
   /**
@@ -224,7 +264,7 @@ export class SellerController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteSeller(@Param('id', ParseIntPipe) id: number) {
-    await this.sellerService.deleteSeller(id);
+    await this.deleteSellerUseCase.execute(id);
   }
 
   /**
@@ -240,7 +280,7 @@ export class SellerController {
     @Query() query: AnalyticsQueryDto,
   ) {
     const { period = 'all_time', startDate, endDate } = query;
-    return await this.sellerService.getSellerAnalytics(
+    return await this.getSellerAnalyticsUseCase.execute(
       id,
       period,
       startDate ? new Date(startDate) : undefined,
@@ -256,12 +296,9 @@ export class SellerController {
    */
   @Get(':id/analytics/sales-trend')
   @HttpCode(HttpStatus.OK)
-  async getSalesTrend(
-    @Param('id', ParseIntPipe) id: number,
-    @Query() query: AnalyticsQueryDto,
-  ) {
+  async getSalesTrend(@Param('id', ParseIntPipe) id: number, @Query() query: AnalyticsQueryDto) {
     const { period = 'month', startDate, endDate } = query;
-    return await this.sellerService.getSalesTrend(
+    return await this.getSalesTrendUseCase.execute(
       id,
       period as 'day' | 'week' | 'month' | 'year',
       startDate ? new Date(startDate) : undefined,
@@ -277,7 +314,7 @@ export class SellerController {
   @Get(':id/analytics/products')
   @HttpCode(HttpStatus.OK)
   async getProductPerformance(@Param('id', ParseIntPipe) id: number) {
-    return await this.sellerService.getProductPerformance(id);
+    return await this.getProductPerformanceUseCase.execute(id);
   }
 
   /**
@@ -292,6 +329,6 @@ export class SellerController {
     @Param('id', ParseIntPipe) id: number,
     @Query('period') period: string = 'month',
   ) {
-    return await this.sellerService.getRevenueBreakdown(id, period);
+    return await this.getRevenueBreakdownUseCase.execute(id, period);
   }
 }
