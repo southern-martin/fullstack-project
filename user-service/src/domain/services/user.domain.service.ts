@@ -1,5 +1,5 @@
-import { Role } from "../entities/role.entity";
-import { User } from "../entities/user.entity";
+import { Role } from '../entities/role.entity';
+import { User } from '../entities/user.entity';
 
 /**
  * Domain service for user business logic
@@ -25,73 +25,74 @@ export class UserDomainService {
 
     // Email validation
     if (!userData.email) {
-      const error = "Email is required";
+      const error = 'Email is required';
       errors.push(error);
       fieldErrors.email = [error];
     } else if (!this.isValidEmail(userData.email)) {
-      const error = "Please enter a valid email address";
+      const error = 'Please enter a valid email address';
       errors.push(error);
       fieldErrors.email = [error];
     }
 
     // Password validation
     if (!userData.password) {
-      const error = "Password is required";
+      const error = 'Password is required';
       errors.push(error);
       fieldErrors.password = [error];
     } else if (!this.isValidPassword(userData.password)) {
-      const error = "Password must be at least 8 characters with uppercase, lowercase, number, and special character";
+      const error =
+        'Password must be at least 8 characters with uppercase, lowercase, number, and special character';
       errors.push(error);
       fieldErrors.password = [error];
     }
 
     // First name validation
     if (!userData.firstName) {
-      const error = "First name is required";
+      const error = 'First name is required';
       errors.push(error);
       fieldErrors.firstName = [error];
     } else if (userData.firstName.trim().length < 2) {
-      const error = "First name must be at least 2 characters";
+      const error = 'First name must be at least 2 characters';
       errors.push(error);
       fieldErrors.firstName = [error];
     } else if (userData.firstName.length > 50) {
-      const error = "First name must not exceed 50 characters";
+      const error = 'First name must not exceed 50 characters';
       errors.push(error);
       fieldErrors.firstName = [error];
     }
 
     // Last name validation
     if (!userData.lastName) {
-      const error = "Last name is required";
+      const error = 'Last name is required';
       errors.push(error);
       fieldErrors.lastName = [error];
     } else if (userData.lastName.trim().length < 2) {
-      const error = "Last name must be at least 2 characters";
+      const error = 'Last name must be at least 2 characters';
       errors.push(error);
       fieldErrors.lastName = [error];
     } else if (userData.lastName.length > 50) {
-      const error = "Last name must not exceed 50 characters";
+      const error = 'Last name must not exceed 50 characters';
       errors.push(error);
       fieldErrors.lastName = [error];
     }
 
     // Phone validation (optional)
     if (userData.phone && !this.isValidPhone(userData.phone)) {
-      const error = "Please enter a valid phone number";
+      const error = 'Please enter a valid phone number';
       errors.push(error);
       fieldErrors.phone = [error];
     }
 
     // Date of birth validation (optional)
     if (userData.dateOfBirth && !this.isValidDateOfBirth(userData.dateOfBirth)) {
-      const error = "Date of birth must be a valid date and user must be at least 13 years old";
+      const error = 'Date of birth must be a valid date and user must be at least 13 years old';
       errors.push(error);
       fieldErrors.dateOfBirth = [error];
     }
 
     // Address validation (optional)
     if (userData.address && !this.isValidAddress(userData.address)) {
-      const error = "Please provide a valid address with street, city, and country";
+      const error = 'Please provide a valid address with street, city, and country';
       errors.push(error);
       fieldErrors.address = [error];
     }
@@ -118,11 +119,11 @@ export class UserDomainService {
     // Email validation
     if (updateData.email !== undefined) {
       if (!updateData.email) {
-        const error = "Email is required";
+        const error = 'Email is required';
         errors.push(error);
         fieldErrors.email = [error];
       } else if (!this.isValidEmail(updateData.email)) {
-        const error = "Please enter a valid email address";
+        const error = 'Please enter a valid email address';
         errors.push(error);
         fieldErrors.email = [error];
       }
@@ -131,7 +132,8 @@ export class UserDomainService {
     // Password validation
     if (updateData.password !== undefined && updateData.password) {
       if (!this.isValidPassword(updateData.password)) {
-        const error = "Password must be at least 8 characters with uppercase, lowercase, number, and special character";
+        const error =
+          'Password must be at least 8 characters with uppercase, lowercase, number, and special character';
         errors.push(error);
         fieldErrors.password = [error];
       }
@@ -140,11 +142,11 @@ export class UserDomainService {
     // First name validation
     if (updateData.firstName !== undefined) {
       if (!updateData.firstName || updateData.firstName.trim().length < 2) {
-        const error = "First name must be at least 2 characters";
+        const error = 'First name must be at least 2 characters';
         errors.push(error);
         fieldErrors.firstName = [error];
       } else if (updateData.firstName.length > 50) {
-        const error = "First name must not exceed 50 characters";
+        const error = 'First name must not exceed 50 characters';
         errors.push(error);
         fieldErrors.firstName = [error];
       }
@@ -153,33 +155,37 @@ export class UserDomainService {
     // Last name validation
     if (updateData.lastName !== undefined) {
       if (!updateData.lastName || updateData.lastName.trim().length < 2) {
-        const error = "Last name must be at least 2 characters";
+        const error = 'Last name must be at least 2 characters';
         errors.push(error);
         fieldErrors.lastName = [error];
       } else if (updateData.lastName.length > 50) {
-        const error = "Last name must not exceed 50 characters";
+        const error = 'Last name must not exceed 50 characters';
         errors.push(error);
         fieldErrors.lastName = [error];
       }
     }
 
     // Phone validation
-    if (updateData.phone !== undefined && updateData.phone && !this.isValidPhone(updateData.phone)) {
-      const error = "Please enter a valid phone number";
+    if (
+      updateData.phone !== undefined &&
+      updateData.phone &&
+      !this.isValidPhone(updateData.phone)
+    ) {
+      const error = 'Please enter a valid phone number';
       errors.push(error);
       fieldErrors.phone = [error];
     }
 
     // Date of birth validation
     if (updateData.dateOfBirth && !this.isValidDateOfBirth(updateData.dateOfBirth.toString())) {
-      const error = "Date of birth must be a valid date and user must be at least 13 years old";
+      const error = 'Date of birth must be a valid date and user must be at least 13 years old';
       errors.push(error);
       fieldErrors.dateOfBirth = [error];
     }
 
     // Address validation
     if (updateData.address && !this.isValidAddress(updateData.address)) {
-      const error = "Please provide a valid address with street, city, and country";
+      const error = 'Please provide a valid address with street, city, and country';
       errors.push(error);
       fieldErrors.address = [error];
     }
@@ -227,10 +233,7 @@ export class UserDomainService {
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
 
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
       age--;
     }
 
@@ -265,10 +268,10 @@ export class UserDomainService {
     try {
       const preferencesString = JSON.stringify(preferences);
       if (preferencesString.length > 2000) {
-        errors.push("Preferences must not exceed 2000 characters");
+        errors.push('Preferences must not exceed 2000 characters');
       }
     } catch (error) {
-      errors.push("Preferences must be valid JSON");
+      errors.push('Preferences must be valid JSON');
     }
 
     return {
@@ -297,27 +300,24 @@ export class UserDomainService {
    * Validates role assignment
    * Business rule: User can only have valid roles
    */
-  validateRoleAssignment(
-    user: User,
-    roles: Role[]
-  ): { isValid: boolean; errors: string[] } {
+  validateRoleAssignment(user: User, roles: Role[]): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
     if (!roles || roles.length === 0) {
-      errors.push("At least one role must be assigned");
+      errors.push('At least one role must be assigned');
     }
 
     // Check for duplicate roles
     const roleIds = roles.map((role) => role.id);
     const uniqueRoleIds = [...new Set(roleIds)];
     if (roleIds.length !== uniqueRoleIds.length) {
-      errors.push("Duplicate roles are not allowed");
+      errors.push('Duplicate roles are not allowed');
     }
 
     // Check for inactive roles
     const inactiveRoles = roles.filter((role) => !role.isActive);
     if (inactiveRoles.length > 0) {
-      errors.push("Cannot assign inactive roles");
+      errors.push('Cannot assign inactive roles');
     }
 
     return {
@@ -359,14 +359,13 @@ export class UserDomainService {
 
   private isValidPassword(password: string): boolean {
     // Password must be at least 8 characters with uppercase, lowercase, number, and special character
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return passwordRegex.test(password);
   }
 
   private isValidPhone(phone: string): boolean {
     const phoneRegex = /^\+?[\d\s\-\(\)]+$/;
-    return phoneRegex.test(phone) && phone.replace(/\D/g, "").length >= 10;
+    return phoneRegex.test(phone) && phone.replace(/\D/g, '').length >= 10;
   }
 
   private isValidDateOfBirth(dateOfBirth: string): boolean {
@@ -389,17 +388,15 @@ export class UserDomainService {
   }
 
   private isValidAddress(address: any): boolean {
-    if (!address || typeof address !== "object") {
+    if (!address || typeof address !== 'object') {
       return false;
     }
 
     // Basic address validation
-    const requiredFields = ["street", "city", "country"];
+    const requiredFields = ['street', 'city', 'country'];
     return requiredFields.every(
       (field) =>
-        address[field] &&
-        typeof address[field] === "string" &&
-        address[field].trim().length > 0
+        address[field] && typeof address[field] === 'string' && address[field].trim().length > 0,
     );
   }
 }
