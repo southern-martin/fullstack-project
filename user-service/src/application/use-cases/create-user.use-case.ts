@@ -15,6 +15,7 @@ import { UserCreationData, UserDisplayData } from '../../domain/interfaces/mappe
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UserResponseDto } from '../dto/user-response.dto';
 import { PasswordService } from '../services/password.service';
+import { WinstonLoggerService } from '@fullstack-project/shared-infrastructure';
 
 /**
  * Create User Use Case
@@ -44,6 +45,8 @@ export class CreateUserUseCase {
     private readonly passwordService: PasswordService,
     @Inject('IEventBus')
     private readonly eventBus: IEventBus,
+    @Inject('WinstonLoggerService')
+    private readonly logger: WinstonLoggerService,
   ) {}
 
   /**
@@ -52,7 +55,11 @@ export class CreateUserUseCase {
    * @returns Created user response
    */
   async execute(createUserDto: CreateUserDto): Promise<UserResponseDto> {
+    this.logger.setContext(CreateUserUseCase.name);
+    this.logger.debug(`Starting user creation for email: ${createUserDto.email}`);
+
     // 1. Validate input using validation service
+    this.logger.debug('Validating user creation data');
     const validation = this.userValidationService.validateUserCreationData({
       email: createUserDto.email,
       password: createUserDto.password,
@@ -110,7 +117,6 @@ export class CreateUserUseCase {
       address: createUserDto.address,
       preferences: createUserDto.preferences,
       roleIds: createUserDto.roleIds,
-      roles,
     };
 
     const user = this.userFactoryService.createFromCreationData(userCreationData);
@@ -232,8 +238,6 @@ export class CreateUserUseCase {
       preferences: user.preferences,
       lastLoginAt: user.lastLoginAt,
       passwordChangedAt: user.passwordChangedAt,
-      emailVerifiedAt: user.emailVerifiedAt,
-      metadata: user.metadata,
       roles:
         user.roles?.map((role) => ({
           id: role.id,
@@ -248,11 +252,6 @@ export class CreateUserUseCase {
       updatedAt: user.updatedAt,
       // Computed properties
       fullName: displayData.fullName,
-      displayName: displayData.displayName,
-      initials: displayData.initials,
-      avatar: displayData.avatar,
-      status: displayData.status,
-      profileCompletion: displayData.profileCompletion,
     };
   }
 
