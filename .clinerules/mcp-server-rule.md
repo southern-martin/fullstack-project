@@ -1,0 +1,9 @@
+- **Analysis First**: Before any task, perform a thorough overview and analysis of the existing codebase, requirements, and API contracts.
+- **Sequential Thinking**: Always approach tasks using the **Sequence Thinking MCP** for planning, creating TODO lists, and coding.
+- **Tool-Assisted Development**:
+  - For API documentation, use the **Swagger/OpenAPI** integration.
+  - For database interactions, use appropriate ORMs (TypeORM, Prisma) with proper type safety.
+  - For testing, use NestJS testing utilities and Jest.
+  - For external library documentation, use the **Context7 MCP** to get further knowledge.
+- **Knowledge Persistence**: **ALWAYS use the AllPepper Memory Bank MCP** (`memory_bank_write` and `memory_bank_update` tools) to remember key facts, decisions, and completed tasks across sessions.
+- **Use MCP web search** for searching latest information from internet.
