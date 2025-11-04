@@ -84,26 +84,6 @@ export const USER_CONSTANTS = {
     },
   },
 
-  // Error messages
-  ERRORS: {
-    NETWORK: 'Network error. Please check your connection.',
-    GENERIC: 'An error occurred. Please try again.',
-    VALIDATION: 'Please check your input and try again.',
-    PERMISSION: 'You do not have permission to perform this action.',
-    NOT_FOUND: 'The requested user was not found.',
-    SERVER_ERROR: 'Server error. Please try again later.',
-  },
-
-  // Success messages
-  SUCCESS: {
-    CREATED: 'User created successfully',
-    UPDATED: 'User updated successfully',
-    DELETED: 'User deleted successfully',
-    ACTIVATED: 'User activated successfully',
-    DEACTIVATED: 'User deactivated successfully',
-    ROLES_ASSIGNED: 'Roles assigned successfully',
-  },
-
   // Animation constants
   ANIMATION: {
     FADE_IN: 'animate-fade-in',
@@ -126,6 +106,4 @@ export type CacheConstants = typeof USER_CONSTANTS.CACHE;
 export type UIConstants = typeof USER_CONSTANTS.UI;
 export type BusinessConstants = typeof USER_CONSTANTS.BUSINESS;
 export type APIConstants = typeof USER_CONSTANTS.API;
-export type ErrorConstants = typeof USER_CONSTANTS.ERRORS;
-export type SuccessConstants = typeof USER_CONSTANTS.SUCCESS;
 export type AnimationConstants = typeof USER_CONSTANTS.ANIMATION;

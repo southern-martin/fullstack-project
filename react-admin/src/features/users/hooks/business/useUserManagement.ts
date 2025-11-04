@@ -4,6 +4,7 @@ import { userKeys } from '../../../../shared/query/queryKeys';
 import { User, CreateUserData, UpdateUserData } from '../../../../shared/types';
 import { userService } from '../../services/userService';
 import { USER_CONSTANTS } from '../../constants/userConstants';
+import { useUserLabels } from '../useUserLabels';
 import { toast } from 'react-hot-toast';
 
 /**
@@ -35,6 +36,7 @@ import { toast } from 'react-hot-toast';
  */
 export const useUserManagement = () => {
   const queryClient = useQueryClient();
+  const { L } = useUserLabels();
 
   // TanStack Query mutations
   const createUser = useMutation({
@@ -42,7 +44,7 @@ export const useUserManagement = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
       queryClient.invalidateQueries({ queryKey: userKeys.count() });
-      toast.success(USER_CONSTANTS.SUCCESS.CREATED);
+      toast.success(L.success.created);
     },
     onError: (error: any) => {
       handleError(error, 'create');
@@ -67,7 +69,7 @@ export const useUserManagement = () => {
           };
         }
       );
-      toast.success(USER_CONSTANTS.SUCCESS.UPDATED);
+      toast.success(L.success.updated);
     },
     onError: (error: any) => {
       handleError(error, 'update');
@@ -91,7 +93,7 @@ export const useUserManagement = () => {
           };
         }
       );
-      toast.success(USER_CONSTANTS.SUCCESS.DELETED);
+      toast.success(L.success.deleted);
     },
     onError: (error: any) => {
       handleError(error, 'delete');
@@ -126,25 +128,25 @@ export const useUserManagement = () => {
 
     // Handle network errors
     if (error?.code === 'NETWORK_ERROR' || error?.message?.includes('Network')) {
-      toast.error(USER_CONSTANTS.ERRORS.NETWORK);
+      toast.error(L.errors.network);
       return;
     }
 
     // Handle permission errors
     if (error?.response?.status === USER_CONSTANTS.API.STATUS_CODES.FORBIDDEN) {
-      toast.error(USER_CONSTANTS.ERRORS.PERMISSION);
+      toast.error(L.errors.permission);
       return;
     }
 
     // Handle not found errors
     if (error?.response?.status === USER_CONSTANTS.API.STATUS_CODES.NOT_FOUND) {
-      toast.error(USER_CONSTANTS.ERRORS.NOT_FOUND);
+      toast.error(L.errors.notFound);
       return;
     }
 
     // Handle server errors
     if (error?.response?.status === USER_CONSTANTS.API.STATUS_CODES.INTERNAL_ERROR) {
-      toast.error(USER_CONSTANTS.ERRORS.SERVER_ERROR);
+      toast.error(L.errors.serverError);
       return;
     }
 
@@ -152,9 +154,9 @@ export const useUserManagement = () => {
     if (error?.message) {
       toast.error(error.message);
     } else {
-      toast.error(USER_CONSTANTS.ERRORS.GENERIC);
+      toast.error(L.errors.generic);
     }
-  }, []);
+  }, [L]);
 
   /**
    * Centralized user action handler
@@ -189,8 +191,8 @@ export const useUserManagement = () => {
           });
           toast.success(
             user.isActive
-              ? USER_CONSTANTS.SUCCESS.DEACTIVATED
-              : USER_CONSTANTS.SUCCESS.ACTIVATED
+              ? L.success.deactivated
+              : L.success.activated
           );
           break;
 
@@ -200,7 +202,7 @@ export const useUserManagement = () => {
             id: user.id,
             data: { roles: data.roleIds }
           });
-          toast.success(USER_CONSTANTS.SUCCESS.ROLES_ASSIGNED);
+          toast.success(L.success.rolesAssigned);
           break;
 
         default:
@@ -213,7 +215,7 @@ export const useUserManagement = () => {
       }
       throw error;
     }
-  }, [createUser, updateUser, deleteUser, handleError]);
+  }, [createUser, updateUser, deleteUser, handleError, L]);
 
   /**
    * Batch operations for bulk actions

@@ -1,36 +1,50 @@
 import { useLabels } from '../../../shared/hooks/useLabels';
-import { UserLabels, userLabels } from '../labels/user-labels';
+import { USER_LABELS, UserLabels } from '../constants/userLabels';
 
 /**
- * User Module Labels Hook
- * 
- * This hook provides translated labels for the Users module.
- * It wraps the generic useLabels hook with user-specific types.
- * 
- * @returns {Object} Object containing:
- *   - labels: Full UserLabels object with all categories
- *   - L: Alias for labels (shorthand for cleaner code)
- *   - isLoading: Boolean indicating if translations are loading
- *   - error: Error object if translation fetch failed
- *   - refetch: Function to manually refetch translations
- * 
+ * Hook for accessing translated User Management module labels
+ *
+ * This is a convenience wrapper around the generic useLabels hook,
+ * pre-configured with User Management module labels.
+ *
+ * Features:
+ * - Type-safe access to all User Management labels
+ * - Automatic translation based on current language
+ * - English bypass (no API call for English)
+ * - Caching via React Query
+ * - Graceful fallback to English
+ *
+ * @returns {Object} Translated labels and loading state
+ *
  * @example
- * const { L, isLoading } = useUserLabels();
- * 
- * if (isLoading) return <Spinner />;
- * 
+ * ```typescript
+ * const { labels: L, isLoading } = useUserLabels();
+ *
  * return (
  *   <div>
- *     <h1>{L.page.title}</h1>
- *     <button>{L.buttons.createUser}</button>
+ *     <h3>{L.success.created}</h3>
+ *     <span>{L.errors.network}</span>
+ *     <button>{L.actions.save}</button>
  *   </div>
  * );
+ * ```
  */
 export const useUserLabels = () => {
-  const result = useLabels<UserLabels>(userLabels, 'user');
-  
+  const { labels, isLoading, error, refetch } = useLabels<UserLabels>(
+    USER_LABELS,
+    'user'
+  );
+
   return {
-    ...result,
-    L: result.labels, // Alias for convenience
+    /** Translated labels - access via L.success.created, L.errors.network, etc. */
+    labels,
+    /** Short alias for labels (L.errors.network instead of labels.errors.network) */
+    L: labels,
+    /** Loading state */
+    isLoading,
+    /** Error state */
+    error,
+    /** Refetch labels (useful after language change) */
+    refetch,
   };
 };
