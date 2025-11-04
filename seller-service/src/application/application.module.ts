@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { WinstonLoggerService } from '@fullstack-project/shared-infrastructure';
 import { InfrastructureModule } from '../infrastructure/infrastructure.module';
+import { SellerRepository } from '../infrastructure/database/typeorm/repositories/seller.repository';
+import { UserServiceClient } from '../infrastructure/external/user-service.client';
 
 // Shared Application Services
 import { SellerCacheService } from './services/seller-cache.service';
@@ -42,11 +46,11 @@ import { GetRevenueBreakdownUseCase } from './use-cases/analytics/get-revenue-br
 /**
  * Application Module
  * Clean Architecture application layer
- * 
+ *
  * Orchestrates:
  * - Shared application services (cache, validation, analytics)
  * - Use cases (one per business operation)
- * 
+ *
  * Benefits:
  * - Single Responsibility Principle (each use case = 1 operation)
  * - High testability (each use case independently testable)
@@ -54,8 +58,22 @@ import { GetRevenueBreakdownUseCase } from './use-cases/analytics/get-revenue-br
  * - Easy to maintain (separate files, no merge conflicts)
  */
 @Module({
-  imports: [InfrastructureModule],
+  imports: [ConfigModule, InfrastructureModule],
   providers: [
+    // Token-based dependency injection for consistency with user-service
+    {
+      provide: 'SellerRepositoryInterface',
+      useClass: SellerRepository,
+    },
+    {
+      provide: 'UserServiceClientInterface',
+      useClass: UserServiceClient,
+    },
+    {
+      provide: 'WinstonLoggerService',
+      useClass: WinstonLoggerService,
+    },
+
     // Shared Application Services
     SellerCacheService,
     SellerValidationService,

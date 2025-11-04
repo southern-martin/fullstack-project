@@ -1,4 +1,5 @@
-import { Injectable, BadRequestException, ConflictException, Inject } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
+import { ValidationException } from '@fullstack-project/shared-infrastructure';
 import { WinstonLoggerService } from '@fullstack-project/shared-infrastructure';
 import { CreateSellerDto } from '../dto/create-seller.dto';
 import { SellerTypeOrmEntity, SellerStatus, VerificationStatus } from '../../infrastructure/database/typeorm/entities/seller.entity';
@@ -9,7 +10,7 @@ import { SellerCacheService } from '../services/seller-cache.service';
 /**
  * Register Seller Use Case
  * Handles new seller registration with validation and caching
- * 
+ *
  * Business Rules:
  * - User must exist and be active
  * - User can only have one seller account
@@ -19,9 +20,12 @@ import { SellerCacheService } from '../services/seller-cache.service';
 @Injectable()
 export class RegisterSellerUseCase {
   constructor(
+    @Inject('SellerRepositoryInterface')
     private readonly sellerRepository: SellerRepository,
+    @Inject('UserServiceClientInterface')
     private readonly userServiceClient: UserServiceClient,
     private readonly sellerCacheService: SellerCacheService,
+    @Inject('WinstonLoggerService')
     private readonly logger: WinstonLoggerService,
   ) {
     this.logger.setContext(RegisterSellerUseCase.name);
@@ -34,14 +38,14 @@ export class RegisterSellerUseCase {
 
     if (!isValidUser) {
       this.logger.warn(`Seller registration failed - User ${userId} not found or inactive`);
-      throw new BadRequestException('User not found or inactive. Cannot create seller account.');
+      throw ValidationException.fromFieldError('user', 'User not found or inactive. Cannot create seller account.');
     }
 
     // 2. Check if user already has a seller account
     const existingSeller = await this.sellerRepository.findByUserId(userId);
     if (existingSeller) {
       this.logger.warn(`Seller registration failed - User ${userId} already has seller account`);
-      throw new ConflictException('User already has a seller account');
+      throw ValidationException.fromFieldError('userId', 'User already has a seller account');
     }
 
     // 3. Create seller with default status and metrics

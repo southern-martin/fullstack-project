@@ -10,9 +10,16 @@ import { ValidateTokenUseCase } from "./use-cases/auth/validate-token.use-case";
 // Domain Services
 import { AuthDomainService } from "../domain/services/auth.domain.service";
 import { UserDomainService } from "../domain/services/user.domain.service";
+import { AuthValidationService } from "../domain/services/auth-validation.service";
+import { AuthBusinessRulesService } from "../domain/services/auth-business-rules.service";
+import { TokenService } from "../domain/services/token.service";
+import { SecurityService } from "../domain/services/security.service";
 
 // Infrastructure Module
 import { InfrastructureModule } from "../infrastructure/infrastructure.module";
+
+// Domain Module
+import { DomainModule } from "../domain/domain.module";
 
 // JWT Strategy
 import { JwtStrategy } from "../infrastructure/auth/jwt.strategy";
@@ -31,6 +38,8 @@ import { JwtStrategy } from "../infrastructure/auth/jwt.strategy";
     }),
     // Import infrastructure module for repository implementations
     InfrastructureModule,
+    // Import domain module for new services
+    DomainModule,
   ],
   providers: [
     // JWT Strategy
@@ -39,6 +48,12 @@ import { JwtStrategy } from "../infrastructure/auth/jwt.strategy";
     // Domain Services
     AuthDomainService,
     UserDomainService,
+
+    // New Granular Services
+    AuthValidationService,
+    AuthBusinessRulesService,
+    TokenService,
+    SecurityService,
 
     // Use Cases
     LoginUseCase,
@@ -54,6 +69,12 @@ import { JwtStrategy } from "../infrastructure/auth/jwt.strategy";
     // Export domain services
     AuthDomainService,
     UserDomainService,
+
+    // Export new granular services
+    AuthValidationService,
+    AuthBusinessRulesService,
+    TokenService,
+    SecurityService,
   ],
 })
 export class ApplicationModule {}

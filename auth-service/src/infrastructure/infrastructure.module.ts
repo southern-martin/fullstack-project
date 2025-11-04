@@ -18,6 +18,9 @@ import { InMemoryEventBus } from "./events/in-memory-event-bus";
 // External Services
 import { KongService } from "./external-services/kong.service";
 
+// Custom Exceptions
+import { ValidationException } from "./exceptions/validation.exception";
+
 // Repository Interfaces
 
 /**
@@ -75,6 +78,8 @@ import { KongService } from "./external-services/kong.service";
     },
     // External Services
     KongService,
+    // Custom Exceptions
+    ValidationException,
   ],
   exports: [
     // Export repository implementations
@@ -84,6 +89,8 @@ import { KongService } from "./external-services/kong.service";
     "IEventBus",
     // Export external services
     KongService,
+    // Export custom exceptions
+    ValidationException,
   ],
 })
 export class InfrastructureModule {}
