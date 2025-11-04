@@ -22,9 +22,9 @@ export const SellerForm: React.FC<SellerFormProps> = ({
 }) => {
   const { L } = useSellerLabels();
   const [formData, setFormData] = useState<CreateSellerRequest>({
-    companyName: '',
-    businessType: BusinessType.INDIVIDUAL,
-    contactEmail: '',
+    businessName: '',
+    businessType: individual,
+    businessEmail: '',
     phone: '',
     address: '',
     taxId: '',
@@ -35,9 +35,9 @@ export const SellerForm: React.FC<SellerFormProps> = ({
   useEffect(() => {
     if (seller) {
       setFormData({
-        companyName: seller.companyName || '',
-        businessType: seller.businessType || BusinessType.INDIVIDUAL,
-        contactEmail: seller.contactEmail || '',
+        businessName: seller.businessName || '',
+        businessType: seller.businessType || individual,
+        businessEmail: seller.businessEmail || '',
         phone: seller.phone || '',
         address: seller.address || '',
         taxId: seller.taxId || '',
@@ -62,10 +62,10 @@ export const SellerForm: React.FC<SellerFormProps> = ({
   }, [onSubmit, formData]);
 
   const businessTypeOptions = useMemo(() => [
-    { value: BusinessType.INDIVIDUAL, label: L.form.individual },
-    { value: BusinessType.COMPANY, label: L.form.company },
-    { value: BusinessType.PARTNERSHIP, label: L.form.partnership },
-    { value: BusinessType.CORPORATION, label: L.form.corporation }
+    { value: individual, label: L.businessType.individual },
+    { value: corporation, label: L.businessType.corporation },
+    { value: partnership, label: L.businessType.partnership },
+    { value: corporation, label: L.businessType.corporation }
   ], [L]);
 
   return (
@@ -77,11 +77,11 @@ export const SellerForm: React.FC<SellerFormProps> = ({
       )}
 
       <FormField
-        label={L.form.companyName}
-        name="companyName"
-        value={formData.companyName}
+        label={L.form.businessName}
+        name="businessName"
+        value={formData.businessName}
         onChange={handleChange}
-        error={errors.companyName}
+        error={errors.businessName}
         required
         disabled={loading}
       />
@@ -98,12 +98,12 @@ export const SellerForm: React.FC<SellerFormProps> = ({
       />
 
       <FormField
-        label={L.form.contactEmail}
-        name="contactEmail"
+        label={L.form.businessEmail}
+        name="businessEmail"
         type="email"
-        value={formData.contactEmail}
+        value={formData.businessEmail}
         onChange={handleChange}
-        error={errors.contactEmail}
+        error={errors.businessEmail}
         required
         disabled={loading}
       />
@@ -152,14 +152,14 @@ export const SellerForm: React.FC<SellerFormProps> = ({
           onClick={onCancel}
           disabled={loading}
         >
-          {L.form.cancel}
+          {L.buttons.cancel}
         </Button>
         <Button
           type="submit"
           variant="primary"
           disabled={loading}
         >
-          {loading ? L.form.saving : L.form.save}
+          {loading ? L.buttons.save : L.buttons.save}
         </Button>
       </div>
     </form>

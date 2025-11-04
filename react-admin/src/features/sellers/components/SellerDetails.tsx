@@ -14,7 +14,7 @@ export const SellerDetails: React.FC<SellerDetailsProps> = ({ seller, onClose })
     <div className="p-6">
       <div className="flex justify-between items-start mb-6">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-          {L.details.title}
+          {L.modals.sellerDetails}
         </h2>
         <button
           onClick={onClose}
@@ -26,8 +26,8 @@ export const SellerDetails: React.FC<SellerDetailsProps> = ({ seller, onClose })
 
       <div className="space-y-4">
         <div>
-          <strong className="text-gray-900 dark:text-gray-100">{L.details.companyName}:</strong>
-          <span className="ml-2 text-gray-700 dark:text-gray-300">{seller.companyName}</span>
+          <strong className="text-gray-900 dark:text-gray-100">{L.details.businessName}:</strong>
+          <span className="ml-2 text-gray-700 dark:text-gray-300">{seller.businessName}</span>
         </div>
         
         <div>
@@ -36,8 +36,8 @@ export const SellerDetails: React.FC<SellerDetailsProps> = ({ seller, onClose })
         </div>
         
         <div>
-          <strong className="text-gray-900 dark:text-gray-100">{L.details.contactEmail}:</strong>
-          <span className="ml-2 text-gray-700 dark:text-gray-300">{seller.contactEmail}</span>
+          <strong className="text-gray-900 dark:text-gray-100">{L.details.businessEmail}:</strong>
+          <span className="ml-2 text-gray-700 dark:text-gray-300">{seller.businessEmail}</span>
         </div>
         
         <div>
@@ -57,7 +57,7 @@ export const SellerDetails: React.FC<SellerDetailsProps> = ({ seller, onClose })
               ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
               : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
           }`}>
-            {seller.isActive ? L.details.active : L.details.inactive}
+            {seller.isActive ? L.status.active : L.status.suspended}
           </span>
         </div>
       </div>
