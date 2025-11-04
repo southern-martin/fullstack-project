@@ -8,6 +8,10 @@ interface CheckboxGroupProps {
   onChange: (selectedValues: string[]) => void;
   error?: string;
   className?: string;
+  columns?: number;
+  selectAllLabel?: string;
+  deselectAllLabel?: string;
+  disabled?: boolean;
 }
 
 export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
@@ -18,42 +22,76 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
   onChange,
   error,
   className = '',
-}) => {
-  const handleCheckboxChange = (value: string, checked: boolean) => {
-    if (checked) {
-      onChange([...selectedValues, value]);
-    } else {
+  columns = 1,
+  selectAllLabel,
+  deselectAllLabel,
+  disabled = false,
+}: CheckboxGroupProps) => {
+  const handleSelectAll = () => {
+    onChange(options.map(option => option.value));
+  };
+
+  const handleDeselectAll = () => {
+    onChange([]);
+  };
+
+  const handleCheckboxChange = (value: string) => {
+    if (selectedValues.includes(value)) {
       onChange(selectedValues.filter(v => v !== value));
+    } else {
+      onChange([...selectedValues, value]);
     }
   };
 
   return (
-    <div className={className}>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        {label}
-      </label>
-      <div className="space-y-2">
-        {options.map((option) => (
-          <div key={option.value} className="flex items-center">
+    <div className={`space-y-2 ${className}`}>
+      {label && (
+        <label className="block text-sm font-medium text-gray-700">
+          {label}
+        </label>
+      )}
+      
+      <div className={`grid gap-2`} style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
+        {options.map(option => (
+          <label key={option.value} className="flex items-center space-x-2 cursor-pointer">
             <input
-              id={`${name}-${option.value}`}
-              name={name}
               type="checkbox"
+              name={name}
               value={option.value}
               checked={selectedValues.includes(option.value)}
-              onChange={(e) => handleCheckboxChange(option.value, e.target.checked)}
-              className="h-4 w-4 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
+              onChange={() => handleCheckboxChange(option.value)}
+              disabled={disabled}
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
-            <label
-              htmlFor={`${name}-${option.value}`}
-              className="ml-2 block text-sm text-gray-900 dark:text-gray-100"
-            >
-              {option.label}
-            </label>
-          </div>
+            <span className="text-sm text-gray-700">{option.label}</span>
+          </label>
         ))}
       </div>
-      {error && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>}
+
+      {selectAllLabel && deselectAllLabel && (
+        <div className="flex space-x-4 mt-2">
+          <button
+            type="button"
+            onClick={handleSelectAll}
+            disabled={disabled}
+            className="text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
+          >
+            {selectAllLabel}
+          </button>
+          <button
+            type="button"
+            onClick={handleDeselectAll}
+            disabled={disabled}
+            className="text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
+          >
+            {deselectAllLabel}
+          </button>
+        </div>
+      )}
+
+      {error && (
+        <p className="text-sm text-red-600">{error}</p>
+      )}
     </div>
   );
 };
