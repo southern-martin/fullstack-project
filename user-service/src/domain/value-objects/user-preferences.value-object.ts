@@ -254,22 +254,22 @@ export class UserPreferences implements ValueObject {
     }
 
     const type = typeof value;
-    const serializableTypes = ['string', 'number', 'boolean', 'object', 'array'];
+    const serializableTypes = ['string', 'number', 'boolean', 'object'];
 
     if (!serializableTypes.includes(type)) {
+      if (Array.isArray(value)) {
+        // Arrays are serializable
+        try {
+          JSON.stringify(value);
+          return true;
+        } catch {
+          return false;
+        }
+      }
       return false;
     }
 
     if (type === 'object') {
-      try {
-        JSON.stringify(value);
-        return true;
-      } catch {
-        return false;
-      }
-    }
-
-    if (type === 'array') {
       try {
         JSON.stringify(value);
         return true;

@@ -47,7 +47,7 @@ export class UserDisplayService {
       return baseName;
     }
 
-    const displayName = preferences.get('displayName', 'firstNameLastName');
+    const displayName = preferences.get<'firstNameLastName' | 'lastNameFirstName' | 'firstName' | 'lastName' | 'email' | 'initials'>('displayName', 'firstNameLastName');
 
     switch (displayName) {
       case 'firstNameLastName':
@@ -291,7 +291,7 @@ export class UserDisplayService {
       return 'Not provided';
     }
 
-    const dateFormat = preferences?.get('dateFormat', 'MM/DD/YYYY');
+    const dateFormat = preferences?.get<'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY-MM-DD'>('dateFormat', 'MM/DD/YYYY');
     const date = new Date(user.dateOfBirth);
 
     switch (dateFormat) {

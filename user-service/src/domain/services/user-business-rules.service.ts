@@ -77,7 +77,7 @@ export class UserBusinessRulesService {
     }
 
     // Additional business rules
-    if (!user.emailVerified) {
+    if (!user.emailVerifiedAt) {
       return false;
     }
 
@@ -95,7 +95,7 @@ export class UserBusinessRulesService {
    * @returns Whether email verification is required
    */
   needsEmailVerification(user: User): boolean {
-    if (user.emailVerified) {
+    if (user.emailVerifiedAt) {
       return false;
     }
 
@@ -193,7 +193,7 @@ export class UserBusinessRulesService {
     let score = 50; // Base score
 
     // Email verification (+20)
-    if (user.emailVerified) {
+    if (user.emailVerifiedAt) {
       score += 20;
     }
 
@@ -229,7 +229,7 @@ export class UserBusinessRulesService {
     let riskScore = 0;
 
     // Unverified email (+20)
-    if (!user.emailVerified) {
+    if (!user.emailVerifiedAt) {
       riskScore += 20;
     }
 
