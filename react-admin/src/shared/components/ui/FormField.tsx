@@ -95,7 +95,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({
                     }`}
             >
                 {options.map((option) => (
-                    <option key={option.value} value={option.value}>
+                    <option key={option.value} value={String(option.value)}>
                         {option.label}
                     </option>
                 ))}
