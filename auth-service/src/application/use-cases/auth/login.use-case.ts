@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Inject,
   Injectable,
   UnauthorizedException,
@@ -12,7 +11,12 @@ import { UserLoggedInEvent } from "../../../domain/events/user-logged-in.event";
 import { UserRepositoryInterface } from "../../../domain/repositories/user.repository.interface";
 import { AuthDomainService } from "../../../domain/services/auth.domain.service";
 import { UserDomainService } from "../../../domain/services/user.domain.service";
+import { AuthValidationService } from "../../../domain/services/auth-validation.service";
+import { AuthBusinessRulesService } from "../../../domain/services/auth-business-rules.service";
+import { TokenService } from "../../../domain/services/token.service";
+import { SecurityService } from "../../../domain/services/security.service";
 import { KongService } from "../../../infrastructure/external-services/kong.service";
+import { ValidationException } from "../../../infrastructure/exceptions/validation.exception";
 import { AuthResponseDto } from "../../dto/auth/auth-response.dto";
 import { LoginRequestDto } from "../../dto/auth/login-request.dto";
 import { UserResponseDto } from "../../dto/auth/user-response.dto";
@@ -143,11 +147,11 @@ export class LoginUseCase {
    */
   private validateLoginInput(loginDto: LoginRequestDto): void {
     if (!loginDto.email || !loginDto.password) {
-      throw new BadRequestException("Email and password are required");
+      throw ValidationException.fromSingleError("Email and password are required");
     }
 
     if (!this.authDomainService.isValidEmail(loginDto.email)) {
-      throw new BadRequestException("Invalid email format");
+      throw ValidationException.fromSingleError("Invalid email format");
     }
   }
 
