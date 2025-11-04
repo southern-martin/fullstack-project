@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSellerLabels } from '../hooks/useSellerLabels';
 import Button from '../../../shared/components/ui/Button';
 import { FormField, SelectField } from '../../../shared/components/ui/FormField';
-import type { Seller, CreateSellerRequest } from '../config/seller.types';
-import { BusinessType } from '../config/seller.types';
+import type { Seller, CreateSellerRequest } from '../config';
+import { BusinessType } from '../config';
 
 interface SellerFormProps {
   seller?: Seller | null;
@@ -23,7 +23,7 @@ export const SellerForm: React.FC<SellerFormProps> = ({
   const { L } = useSellerLabels();
   const [formData, setFormData] = useState<CreateSellerRequest>({
     businessName: '',
-    businessType: individual,
+    businessType: BusinessType.INDIVIDUAL,
     businessEmail: '',
     phone: '',
     address: '',
@@ -36,7 +36,7 @@ export const SellerForm: React.FC<SellerFormProps> = ({
     if (seller) {
       setFormData({
         businessName: seller.businessName || '',
-        businessType: seller.businessType || individual,
+        businessType: seller.businessType || BusinessType.INDIVIDUAL,
         businessEmail: seller.businessEmail || '',
         phone: seller.phone || '',
         address: seller.address || '',
@@ -62,10 +62,10 @@ export const SellerForm: React.FC<SellerFormProps> = ({
   }, [onSubmit, formData]);
 
   const businessTypeOptions = useMemo(() => [
-    { value: individual, label: L.businessType.individual },
-    { value: corporation, label: L.businessType.corporation },
-    { value: partnership, label: L.businessType.partnership },
-    { value: corporation, label: L.businessType.corporation }
+    { value: BusinessType.INDIVIDUAL, label: L.businessType.BusinessType.INDIVIDUAL },
+    { value: BusinessType.CORPORATION, label: L.businessType.BusinessType.CORPORATION },
+    { value: BusinessType.PARTNERSHIP, label: L.businessType.BusinessType.PARTNERSHIP },
+    { value: BusinessType.CORPORATION, label: L.businessType.BusinessType.CORPORATION }
   ], [L]);
 
   return (

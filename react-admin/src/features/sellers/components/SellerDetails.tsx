@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSellerLabels } from '../hooks/useSellerLabels';
-import type { Seller } from '../config/seller.types';
+import type { Seller } from '../config';
 
 interface SellerDetailsProps {
   seller: Seller;
