@@ -8,6 +8,9 @@ interface CheckboxGroupProps {
   onChange: (selectedValues: string[]) => void;
   error?: string;
     disabled?: boolean;
+    columns?: number;
+    selectAllLabel?: string;
+    deselectAllLabel?: string;
   className?: string;
 }
 
