@@ -122,8 +122,8 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
         }
     };
 
-    const handleRoleChange = (selectedRoleIds: number[]) => {
-        setFormData(prev => ({ ...prev, roleIds: selectedRoleIds }));
+    const handleRoleChange = (selectedRoleIds: string[]) => {
+        setFormData(prev => ({ ...prev, roleIds: selectedRoleIds.map(Number) }));
 
         // Clear role error when user selects roles
         if (errors.roleIds) {
@@ -314,11 +314,11 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, onFooterR
                     label={L.form.roles}
                     name="roleIds"
                     options={roles.map(role => ({
-                        value: role.id,
+                        value: String(role.id),
                         label: role.name,
                         description: role.description || `${role.name} role`
                     }))}
-                    selectedValues={formData.roleIds}
+                    selectedValues={formData.roleIds ? formData.roleIds.map(String) : []}
                     onChange={handleRoleChange}
                     error={errors.roleIds}
                     disabled={loadingRoles}
