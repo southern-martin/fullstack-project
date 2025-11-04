@@ -7,6 +7,7 @@ interface CheckboxGroupProps {
   selectedValues: string[];
   onChange: (selectedValues: string[]) => void;
   error?: string;
+    disabled?: boolean;
   className?: string;
 }
 
