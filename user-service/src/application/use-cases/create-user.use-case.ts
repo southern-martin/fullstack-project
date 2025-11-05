@@ -15,7 +15,6 @@ import { UserCreationData, UserDisplayData } from '../../domain/interfaces/mappe
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UserResponseDto } from '../dto/user-response.dto';
 import { PasswordService } from '../services/password.service';
-import { WinstonLoggerService } from '@fullstack-project/shared-infrastructure';
 
 /**
  * Create User Use Case
@@ -45,8 +44,6 @@ export class CreateUserUseCase {
     private readonly passwordService: PasswordService,
     @Inject('IEventBus')
     private readonly eventBus: IEventBus,
-    @Inject('WinstonLoggerService')
-    private readonly logger: WinstonLoggerService,
   ) {}
 
   /**
@@ -55,11 +52,7 @@ export class CreateUserUseCase {
    * @returns Created user response
    */
   async execute(createUserDto: CreateUserDto): Promise<UserResponseDto> {
-    this.logger.setContext(CreateUserUseCase.name);
-    this.logger.debug(`Starting user creation for email: ${createUserDto.email}`);
-
     // 1. Validate input using validation service
-    this.logger.debug('Validating user creation data');
     const validation = this.userValidationService.validateUserCreationData({
       email: createUserDto.email,
       password: createUserDto.password,

@@ -12,8 +12,8 @@ export class InMemoryEventBus implements IEventBus {
   private handlers: Map<string, Array<(event: any) => Promise<void>>> = new Map();
   private logger: WinstonLoggerService;
 
-  constructor() {
-    this.logger = new WinstonLoggerService();
+  constructor(logger: WinstonLoggerService) {
+    this.logger = logger;
     this.logger.setContext('EventBus');
   }
 

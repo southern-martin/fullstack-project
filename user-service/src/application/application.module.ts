@@ -1,41 +1,46 @@
-import { Module } from "@nestjs/common";
-import { ConfigModule, ConfigService } from "@nestjs/config";
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 // Shared Infrastructure
-import { RedisCacheService } from "@shared/infrastructure";
+import { RedisCacheService } from '@shared/infrastructure';
 
 // Use Cases
-import { CreateRoleUseCase } from "./use-cases/create-role.use-case";
-import { CreateUserUseCase } from "./use-cases/create-user.use-case";
-import { DeleteRoleUseCase } from "./use-cases/delete-role.use-case";
-import { DeleteUserUseCase } from "./use-cases/delete-user.use-case";
-import { GetRoleUseCase } from "./use-cases/get-role.use-case";
-import { GetUserUseCase } from "./use-cases/get-user.use-case";
-import { GetPermissionsUseCase } from "./use-cases/get-permissions.use-case";
-import { UpdateRoleUseCase } from "./use-cases/update-role.use-case";
-import { UpdateUserUseCase } from "./use-cases/update-user.use-case";
+import { CreateUserUseCase } from './use-cases/create-user.use-case';
+import { CreateRoleUseCase } from './use-cases/create-role.use-case';
+import { DeleteRoleUseCase } from './use-cases/delete-role.use-case';
+import { DeleteUserUseCase } from './use-cases/delete-user.use-case';
+import { GetRoleUseCase } from './use-cases/get-role.use-case';
+import { GetUserUseCase } from './use-cases/get-user.use-case';
+import { GetPermissionsUseCase } from './use-cases/get-permissions.use-case';
+import { UpdateRoleUseCase } from './use-cases/update-role.use-case';
+import { UpdateUserUseCase } from './use-cases/update-user.use-case';
 
 // Profile Use Cases
-import { CreateProfileUseCase } from "./use-cases/profile/create-profile.use-case";
-import { DeleteProfileUseCase } from "./use-cases/profile/delete-profile.use-case";
-import { GetProfileUseCase } from "./use-cases/profile/get-profile.use-case";
-import { UpdateProfileUseCase } from "./use-cases/profile/update-profile.use-case";
+import { CreateProfileUseCase } from './use-cases/profile/create-profile.use-case';
+import { DeleteProfileUseCase } from './use-cases/profile/delete-profile.use-case';
+import { GetProfileUseCase } from './use-cases/profile/get-profile.use-case';
+import { UpdateProfileUseCase } from './use-cases/profile/update-profile.use-case';
 
 // Domain Services
-import { UserDomainService } from "../domain/services/user.domain.service";
+import { UserDomainService } from '../domain/services/user.domain.service';
+import { UserValidationService } from '../domain/services/user-validation.service';
+import { UserBusinessRulesService } from '../domain/services/user-business-rules.service';
+import { UserFactoryService } from '../domain/services/user-factory.service';
+import { UserPermissionService } from '../domain/services/user-permission.service';
+import { UserDisplayService } from '../domain/services/user-display.service';
 
 // Application Services
-import { PasswordService } from "./services/password.service";
+import { PasswordService } from './services/password.service';
 
 // Infrastructure
-import { InfrastructureModule } from "../infrastructure/infrastructure.module";
+import { InfrastructureModule } from '../infrastructure/infrastructure.module';
 
 /**
  * Application Module
  * Configures application layer dependencies
  * Follows Clean Architecture principles
  *
- * Note: Repository implementations are provided by the Infrastructure Module
+ * Note: Repository implementations are provided by by Infrastructure Module
  */
 @Module({
   imports: [
@@ -47,16 +52,16 @@ import { InfrastructureModule } from "../infrastructure/infrastructure.module";
     {
       provide: RedisCacheService,
       useFactory: (configService: ConfigService) => {
-        const redisHost = configService.get("REDIS_HOST", "shared-redis");
-        const redisPort = configService.get("REDIS_PORT", 6379);
-        const redisPassword = configService.get("REDIS_PASSWORD", "");
+        const redisHost = configService.get('REDIS_HOST', 'shared-redis');
+        const redisPort = configService.get('REDIS_PORT', 6379);
+        const redisPassword = configService.get('REDIS_PASSWORD', '');
         const redisUrl = redisPassword
           ? `redis://:${redisPassword}@${redisHost}:${redisPort}`
           : `redis://${redisHost}:${redisPort}`;
 
         return new RedisCacheService({
           redisUrl,
-          prefix: configService.get("REDIS_KEY_PREFIX", "user:"),
+          prefix: configService.get('REDIS_KEY_PREFIX', 'user:'),
         });
       },
       inject: [ConfigService],
@@ -64,9 +69,24 @@ import { InfrastructureModule } from "../infrastructure/infrastructure.module";
 
     // Domain Services - provide with token for @Inject consistency
     {
-      provide: "UserDomainService",
+      provide: 'UserDomainService',
       useClass: UserDomainService,
     },
+
+    // Validation Service
+    UserValidationService,
+
+    // Business Rules Service
+    UserBusinessRulesService,
+
+    // Factory Service
+    UserFactoryService,
+
+    // Permission Service
+    UserPermissionService,
+
+    // Display Service
+    UserDisplayService,
 
     // Application Services
     PasswordService,
@@ -121,7 +141,12 @@ import { InfrastructureModule } from "../infrastructure/infrastructure.module";
     DeleteProfileUseCase,
 
     // Export domain services
-    "UserDomainService",
+    'UserDomainService',
+    UserValidationService,
+    UserBusinessRulesService,
+    UserFactoryService,
+    UserPermissionService,
+    UserDisplayService,
 
     // Export application services
     PasswordService,
